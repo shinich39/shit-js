@@ -1,0 +1,1 @@
+var t=function(n,r){return n+r},e=function(n,r){return n-r},u=function(n,r){return n*r},o=function(n,r){return n/r},m=function(n){return new Promise(function(r){return setTimeout(r,n)})};export{t as add,o as div,u as mul,e as sub,m as wait};

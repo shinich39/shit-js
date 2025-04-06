@@ -1,0 +1,124 @@
+export function generateUuid(seed?: number) {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+/**
+ * change full-width characters to half-width characters
+ */
+export function normalizeString(str: string) {
+  return str
+    .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+    .replace(/[^\S\r\n]/g, " ");
+}
+/**
+ * https://www.w3schools.com/xml/xml_syntax.asp
+ */
+export function escapeXML(str: string, whitespace = false) {
+  str = str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    // does not work in IE
+    // .replace(/'/g,"&apos;")
+    .replace(/'/g, "&#39;");
+
+  if (whitespace) {
+    str = str.replace(/ /g, "&nbsp;");
+  }
+
+  return str;
+}
+/**
+ * @param str "/abc/gi"
+ */
+export function toRegExp(str: string) {
+  const parts = str.split("/");
+  if (parts.length < 3) {
+    throw new Error(`Invalid argument: ${str}`);
+  }
+  const flags = parts.pop();
+  const pattern = parts.slice(1).join("/");
+  return new RegExp(pattern, flags);
+}
+/**
+ * https://www.w3schools.com/xml/xml_syntax.asp
+ */
+export function unescapeXML(str: string) {
+  return str
+    .replace(/&nbsp;|&#32;|&#160;/g, " ")
+    .replace(/&lt;|&#60;/g, "<")
+    .replace(/&gt;|&#62;/g, ">")
+    .replace(/&quot;|&#34;/g, '"')
+    .replace(/&apos;|&#39;/g, "'")
+    .replace(/&amp;|&#38;/g, "&");
+}
+/**
+ * analyze diff between two strings
+ *
+ * - \-1: Number of deleted characters
+ * - 0: Number of matched characters
+ * - 1: Number of inserted characters
+ */
+export function compareString(from: string, to: string) {
+  // create a dynamic programming table
+  const dp: number[][] = [];
+  for (let i = 0; i < from.length + 1; i++) {
+    dp.push([]);
+    for (let j = 0; j < from.length + 1; j++) {
+      dp[i][j] = 0;
+    }
+  }
+
+  // match a to b
+  for (let i = 1; i <= from.length; i++) {
+    for (let j = 1; j <= to.length; j++) {
+      // 1 more characters in dp
+      if (from[i - 1] === to[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // write diffs
+  const result: [-1 | 0 | 1, string][] = [];
+
+  let i = from.length,
+    j = to.length;
+
+  while (i > 0 || j > 0) {
+    const prev = result[result.length - 1];
+    const a = from[i - 1];
+    const b = to[j - 1];
+    if (i > 0 && j > 0 && a === b) {
+      if (prev && prev[0] === 0) {
+        prev[1] = a + prev[1];
+      } else {
+        result.push([0, a]);
+      }
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      if (prev && prev[0] === 1) {
+        prev[1] = b + prev[1];
+      } else {
+        result.push([1, b]);
+      }
+      j--;
+    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+      if (prev && prev[0] === -1) {
+        prev[1] = a + prev[1];
+      } else {
+        result.push([-1, a]);
+      }
+      i--;
+    }
+  }
+
+  return result.reverse();
+}
