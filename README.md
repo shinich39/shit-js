@@ -6,22 +6,10 @@ God breathe on me
 
 ### Installation
 
-- win
-
-```console
-git clone https://github.com/shinich39/create-ts-module.git new-ts-module && cd new-ts-module && rm -r -Force .git && npm install && cd ..
-```
-
-- mac
-
-```console
-git clone https://github.com/shinich39/create-ts-module.git new-ts-module && cd new-ts-module && rm -rf .git && npm install && cd ..
-```
-
 - npm
 
 ```console
-npm install github:shinich39/create-ts-module
+npm install github:shinich39/shit-js
 ```
 
 ### Usage
@@ -29,7 +17,7 @@ npm install github:shinich39/create-ts-module
 - node
 
 ```js
-import * as ts from "create-ts-module";
+import * as shit from "shit-js";
 ```
 
 - browser
@@ -37,7 +25,7 @@ import * as ts from "create-ts-module";
 ```html
 <script src="./dist/index.js"></script>
 <script>
-  const { add, sub, mul, div, wait } = window.$;
+  const { add, sub, mul, div, wait } = window.shit;
 </script>
 ```
 

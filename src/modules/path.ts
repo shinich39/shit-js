@@ -34,13 +34,17 @@ export function getRelativePath(from: string, to: string) {
 
     if (str.charAt(0) === "/") {
       throw new Error(`Invalid argument: ${str}`);
-    } else if (str === ".") {
-      return str;
-    } else if (str.charAt(0) === "." && str.charAt(1) === "/") {
-      return str;
-    } else {
-      return "./" + str;
     }
+    
+    if (str === ".") {
+      return str;
+    }
+
+    if (str.charAt(0) === "." && str.charAt(1) === "/") {
+      return str;
+    }
+
+    return "./" + str;
   };
 
   // normalize paths

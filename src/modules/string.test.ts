@@ -3,10 +3,33 @@ import assert from "node:assert";
 import {
   compareString,
   escapeXML,
+  getFloats,
+  getInts,
+  getRandomCharacter,
+  getRandomString,
   normalizeString,
   toRegExp,
   unescapeXML,
 } from "./string";
+
+test("getRandomCharacter", () => {
+  eq(/[abc]/.test(getRandomCharacter("abc")), true);
+});
+
+test("getRandomString", () => {
+  eq(/^[abc]+$/.test(getRandomString("abc", 100)), true);
+});
+
+test("getInts", () => {
+  eq(getInts("ftp://192.168.0.1"), [192, 168, 0, 1]);
+});
+
+test("getFloats", () => {
+  eq(getFloats("ftp://192.168.0.1"), [192.168, 0.1]);
+  eq(getFloats("abc 39.39 miku"), [39.39]);
+  eq(getFloats("abc 39 miku 39"), [39, 39]);
+  eq(getFloats("abc 39 39.39 miku"), [39, 39.39]);
+});
 
 test("normalizeString", () => {
   eq(normalizeString("Ｈｅｌｌｏ，　ｗｏｒｌｄ！"), "Hello, world!");

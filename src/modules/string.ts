@@ -1,9 +1,25 @@
-export function generateUuid(seed?: number) {
+export function getUUID(seed?: number) {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+export function getRandomCharacter(charset: string) {
+  return charset.charAt(Math.floor(Math.random() * charset.length));
+}
+export function getRandomString(charset: string, size: number) {
+  let result = "";
+  for (let i = 0; i < size; i++) {
+    result += getRandomCharacter(charset);
+  }
+  return result;
+}
+export function getInts(str: string) {
+  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+}
+export function getFloats(str: string) {
+  return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
 /**
  * change full-width characters to half-width characters
@@ -12,25 +28,6 @@ export function normalizeString(str: string) {
   return str
     .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
     .replace(/[^\S\r\n]/g, " ");
-}
-/**
- * https://www.w3schools.com/xml/xml_syntax.asp
- */
-export function escapeXML(str: string, whitespace = false) {
-  str = str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    // does not work in IE
-    // .replace(/'/g,"&apos;")
-    .replace(/'/g, "&#39;");
-
-  if (whitespace) {
-    str = str.replace(/ /g, "&nbsp;");
-  }
-
-  return str;
 }
 /**
  * @param str "/abc/gi"
@@ -47,6 +44,23 @@ export function toRegExp(str: string) {
 /**
  * https://www.w3schools.com/xml/xml_syntax.asp
  */
+export function escapeXML(str: string, whitespace = false) {
+  str = str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    // does not work in IE
+    // .replace(/'/g,"&apos;")
+    .replace(/'/g, "&#39;");
+
+  return whitespace 
+    ? str.replace(/ /g, "&nbsp;")
+    : str;
+}
+/**
+ * https://www.w3schools.com/xml/xml_syntax.asp
+ */
 export function unescapeXML(str: string) {
   return str
     .replace(/&nbsp;|&#32;|&#160;/g, " ")
@@ -59,9 +73,11 @@ export function unescapeXML(str: string) {
 /**
  * analyze diff between two strings
  *
- * - \-1: Number of deleted characters
- * - 0: Number of matched characters
- * - 1: Number of inserted characters
+ * \-1: Number of deleted characters
+ * 
+ * 0: Number of matched characters
+ * 
+ * 1: Number of inserted characters
  */
 export function compareString(from: string, to: string) {
   // create a dynamic programming table
