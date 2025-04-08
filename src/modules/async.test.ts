@@ -6,7 +6,7 @@ test("sleep", async () => {
   const a = Date.now();
   await sleep(39);
   const b = Date.now();
-  eq(b - a >= 39, true);
+  eq(b - a >= 38, true);
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

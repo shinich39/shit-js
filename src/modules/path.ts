@@ -35,7 +35,7 @@ export function getRelativePath(from: string, to: string) {
     if (str.charAt(0) === "/") {
       throw new Error(`Invalid argument: ${str}`);
     }
-    
+
     if (str === ".") {
       return str;
     }

@@ -1,44 +1,54 @@
-type Text = {
-  id: number,
-  depth: number,
-  type: "text",
-  content: string,
-  attributes: Record<string, any>,
-  parents: number[],
-  children: number[],
-}
+import { escapeXML, unescapeXML } from "./string";
 
-type Tag = {
-  id: number,
-  depth: number,
-  type: "tag",
-  tag: string,
-  closer?: string,
-  attributes: Record<string, any>,
-  parents: number[],
-  children: number[],
-}
+export type ShitText = {
+  parent?: ShitNode;
+  depth: number;
+  type: "text";
+  content: string;
+  tag?: undefined | null;
+  closer?: undefined | null;
+  attributes: Record<string, any>;
+  children: ShitNode[];
+  [key: string]: any;
+};
 
-type Comment = {
-  id: number,
-  depth: number,
-  type: "comment",
-  content: string,
-  attributes: Record<string, any>,
-  parents: number[],
-  children: number[],
-}
+export type ShitTag = {
+  parent?: ShitNode;
+  depth: number;
+  type: "tag";
+  content?: undefined | null;
+  tag: string;
+  closer?: string;
+  attributes: Record<string, any>;
+  children: ShitNode[];
+  [key: string]: any;
+};
+
+export type ShitComment = {
+  parent?: ShitNode;
+  depth: number;
+  type: "comment";
+  content: string;
+  tag?: undefined | null;
+  closer?: undefined | null;
+  attributes: Record<string, any>;
+  children: ShitNode[];
+  [key: string]: any;
+};
+
+export type ShitNode = ShitText | ShitTag | ShitComment;
+
+type UnclosedShitText = ShitText & { isClosed: true };
+type UnclosedShitTag = ShitTag & { isClosed?: boolean };
+type UnclosedShitComment = ShitComment & { isClosed: true };
+type UnclosedShitNode = ShitNode & { isClosed?: boolean };
 
 export function parseDOM(str: string) {
+  const stacks: UnclosedShitNode[] = [];
 
-  const stacks: (
-    (Tag|Text|Comment) & 
-    { isClosed?: boolean }
-  )[] = [];
-
-  const getIndex = function(src: string, target: string, i: number) {
+  const getIndex = function (src: string, target: string, i: number) {
     let quote = null;
-    while(i < src.length) {
+    while (i < src.length) {
       const ch = src[i];
       if (!quote) {
         if (ch === target) {
@@ -55,38 +65,39 @@ export function parseDOM(str: string) {
       i++;
     }
     return -1;
-  }
+  };
   /**
-   * @param src without angle brackets <>
-   * 
+   * @param src without angle brackets \<\>
+   *
    * div style="" onChange="" controls hidden
    */
-  const parseTag = function(src: string) {
+  const parseTag = function (src: string) {
     // normalize
-    src = src.trim();
+    src = unescapeXML(src.trim());
 
     let isClosing = false;
     let closer = undefined;
-
     if (src[0] === "/") {
       isClosing = true;
       src = src.substring(1);
-    } else if (
-      src[src.length - 1] === "/" ||
+    } else {
+      // <img />
+      // <?xml version="1.0" encoding="UTF-8"?>
       // https://www.w3schools.com/xml/xml_syntax.asp
-      src[src.length - 1] === "?"
-    ) {
-      // self-closing tag
-      closer = src[src.length - 1];
-      src = src.substring(0, src.length - 1);
+      const match = src.match(/\s*[/?]$/);
+      if (match) {
+        // self-closing tag
+        closer = match[0];
+        src = src.substring(0, src.length - match[0].length);
+      }
     }
-    
+
     // 'div' 'style=""' 'onChange=""' 'controls' 'hidden'
     const parts: string[] = [];
 
-    let offset = 0, 
-        i = getIndex(src, " ", offset);
-    while(i > -1) {
+    let offset = 0,
+      i = getIndex(src, " ", offset);
+    while (i > -1) {
       // skip multiple whitespace
       if (offset !== i) {
         parts.push(src.substring(offset, i));
@@ -100,7 +111,7 @@ export function parseDOM(str: string) {
     }
 
     // if attribute value is empty, set value to true
-    const attrs: Record<string, string|boolean> = {};
+    const attrs: Record<string, string | boolean> = {};
 
     // parts[0] is tag
     for (let i = 1; i < parts.length; i++) {
@@ -110,7 +121,10 @@ export function parseDOM(str: string) {
         attrs[part] = true;
       } else {
         // remove quotes
-        attrs[part.substring(0, sepIndex)] = part.substring(sepIndex+2, part.length - 1);
+        attrs[part.substring(0, sepIndex)] = part.substring(
+          sepIndex + 2,
+          part.length - 1
+        );
       }
     }
 
@@ -120,11 +134,10 @@ export function parseDOM(str: string) {
       tag: parts[0],
       attributes: attrs,
     };
-  }
+  };
 
   let i = 0;
-  while(i < str.length) {
-
+  while (i < str.length) {
     let j = getIndex(str, "<", i);
 
     // text
@@ -133,11 +146,9 @@ export function parseDOM(str: string) {
       stacks.push({
         isClosed: true,
         depth: 0,
-        id: stacks.length,
         type: "text",
         content: text,
         attributes: {},
-        parents: [],
         children: [],
       });
     }
@@ -156,13 +167,11 @@ export function parseDOM(str: string) {
       stacks.push({
         isClosed: true,
         depth: 0,
-        id: stacks.length,
         type: "comment",
         content: str.substring(j + 4, k),
         attributes: {},
-        parents: [],
         children: [],
-      });
+      } as UnclosedShitComment);
 
       i = k + 3;
 
@@ -181,25 +190,28 @@ export function parseDOM(str: string) {
         throw new Error(`Invalid argument: could not find "</script>"`);
       }
 
-      stacks.push({
+      const newTag: UnclosedShitTag = {
         isClosed: true,
         depth: 0,
-        id: stacks.length,
         type: "tag",
         tag: "script",
         attributes: parseTag(str.substring(j + 1, k)).attributes,
-        parents: [],
-        children: [stacks.length + 1],
-      }, {
+        children: [],
+      };
+
+      const newText: UnclosedShitText = {
         isClosed: true,
         depth: 1,
-        id: stacks.length + 1,
         type: "text",
         content: str.substring(k + 1, l),
         attributes: {},
-        parents: [stacks.length],
+        parent: newTag,
         children: [],
-      });
+      };
+
+      newTag.children.push(newText);
+
+      stacks.push(newTag, newText);
 
       i = l + 9;
 
@@ -218,25 +230,28 @@ export function parseDOM(str: string) {
         throw new Error(`Invalid argument: could not find "</style>"`);
       }
 
-      stacks.push({
+      const newTag: UnclosedShitTag = {
         isClosed: true,
         depth: 0,
-        id: stacks.length,
         type: "tag",
         tag: "style",
         attributes: parseTag(str.substring(j + 1, k)).attributes,
-        parents: [],
-        children: [stacks.length + 1],
-      }, {
+        children: [],
+      };
+
+      const newText: UnclosedShitText = {
         isClosed: true,
         depth: 1,
-        id: stacks.length + 1,
         type: "text",
         content: str.substring(k + 1, l),
         attributes: {},
-        parents: [stacks.length],
+        parent: newTag,
         children: [],
-      });
+      };
+
+      newTag.children.push(newText);
+
+      stacks.push(newTag, newText);
 
       i = l + 8;
 
@@ -246,61 +261,119 @@ export function parseDOM(str: string) {
     // normal tag
     i = j;
     j = getIndex(str, ">", i);
-    
+
     if (j === -1) {
-      throw new Error(`Invalid argument: \>(closing bracket) not found`);
+      throw new Error(`Invalid argument: >(closing bracket) not found`);
     }
 
-    const { isClosing, closer, tag, attributes } = parseTag(str.substring(i + 1, j));
-    
+    const { isClosing, closer, tag, attributes } = parseTag(
+      str.substring(i + 1, j)
+    );
+
     if (isClosing) {
       // find unclosed opening tag
-      const children: (Tag|Text|Comment)[] = [];
+      const children: UnclosedShitNode[] = [];
       for (let l = stacks.length - 1; l >= 0; l--) {
-        const elem = stacks[l];
+        const node = stacks[l];
 
         // found opening tag
         if (
-          elem.isClosed === false && 
-          elem.type === "tag" &&
-          elem.tag === tag
+          node.isClosed === false &&
+          node.type === "tag" &&
+          node.tag === tag
         ) {
           for (const child of children) {
-            elem.children.push(child.id);
-            child.parents.unshift(elem.id);
+            node.children = [child, ...node.children];
+            child.parent = node;
           }
-          elem.isClosed = true;
+          node.isClosed = true;
           break;
         }
 
-        if (elem.depth === 0) {
-          children.push(elem);
+        if (node.depth === 0) {
+          children.push(node);
         }
 
-        elem.isClosed = true;
-        elem.depth++;
+        node.isClosed = true;
+        node.depth++;
       }
     } // opening tag
     else {
       stacks.push({
         isClosed: !!closer,
         depth: 0,
-        id: stacks.length,
         type: "tag",
         tag,
-        closer,
+        ...(closer ? { closer } : {}),
         attributes,
-        parents: [],
-        children: [stacks.length + 1],
-      });
+        children: [],
+      } as UnclosedShitTag);
     }
 
     i = j + 1;
   }
 
-  for (const elem of stacks) {
-    delete elem.isClosed;
+  for (const node of stacks) {
+    // if node is not closed, set empty closer
+    if (node.type === "tag" && !node.isClosed) {
+      node.closer = "";
+    }
+    delete node.isClosed;
   }
 
-  return stacks as (Tag|Text|Comment)[];
+  return stacks as ShitNode[];
+}
+
+export function stringifyDOM(nodes: ShitNode[]) {
+  const stringifyAttributes = function (attrs: Record<string, any>) {
+    let acc = "";
+    for (const [k, v] of Object.entries(attrs)) {
+      if (typeof v === "string") {
+        acc += ` ${k}="${v}"`;
+      } else if (typeof v === "boolean") {
+        if (v) {
+          acc += ` ${k}`;
+        }
+        // skip false
+      } else if (typeof v.toString === "function") {
+        acc += ` ${k}="${v.toString()}"`;
+      }
+    }
+    return acc;
+  };
+
+  const stringifyNode = function (node: ShitNode): string {
+    let acc = "";
+    if (node.type === "text") {
+      const parentTag = node.parent?.tag;
+      // prevent escaping of <script> and <style>
+      if (parentTag === "script" || parentTag === "style") {
+        acc += node.content;
+      } else {
+        acc += escapeXML(node.content);
+      }
+    } else if (node.type === "comment") {
+      acc += `<!--${node.content}-->`;
+    } else {
+      acc += `<${node.tag}${stringifyAttributes(node.attributes)}`;
+      if (typeof node.closer === "string") {
+        acc += `${node.closer}>`;
+      } else {
+        acc += `>`;
+        for (const child of node.children) {
+          acc += stringifyNode(child);
+        }
+        acc += `</${node.tag}>`;
+      }
+    }
+    return acc;
+  };
+
+  let result = "";
+  const rootNodes = nodes.filter((node) => node.depth === 0);
+  for (const node of rootNodes) {
+    result += stringifyNode(node);
+  }
+
+  return result;
 }

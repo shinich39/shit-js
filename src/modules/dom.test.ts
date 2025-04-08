@@ -1,12 +1,12 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { parseDOM } from "./dom";
-
-
+import fs from "node:fs";
+import { parseDOM, stringifyDOM } from "./dom";
 
 test("parseDOM", () => {
   const html = `
-<!doctype html>
+<!DOCTYPE html>
+<?xml version="1.0" encoding="utf-8"?>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -20,12 +20,12 @@ test("parseDOM", () => {
       <div id="div2" class="abc 'test'" hidden>
         <img class="unclosed" alt="image" />
         I split images!
-        <img class="closed" alt="image" />
+        <img class="closed" alt="im'a'ge" />
       </div>
     </div>
     <script src="../dist/index.js"></script>
     <script>
-      // scripts
+      // JS Comment
       document.getElementById("result").innerHTML = '<ol>' +
         Object.keys(window.utils).map((item) => {
           return \`<li>\$\{item\}</li>\`;
@@ -33,10 +33,11 @@ test("parseDOM", () => {
     </script>
   </body>
 </html>
-`.trim();
+  `.trim();
 
-  console.log(parseDOM(html));
+  const arr = parseDOM(html);
 
+  eq(html, stringifyDOM(arr));
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

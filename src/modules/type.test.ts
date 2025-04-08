@@ -1,6 +1,18 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { isNumeric, toNumber } from "./type";
+import { getType, isNumeric, toNumber } from "./type";
+
+test("getType", () => {
+  eq(getType(undefined), "undefined");
+  eq(getType(null), "null");
+  eq(getType(true), "boolean");
+  eq(getType(1), "number");
+  eq(getType("1"), "string");
+  eq(getType({}), "object");
+  eq(getType([]), "array");
+  eq(getType(new Date()), "date");
+  eq(getType(/abc/), "regexp");
+});
 
 test("isNumeric", () => {
   eq(isNumeric("1"), true);

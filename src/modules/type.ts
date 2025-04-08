@@ -1,3 +1,27 @@
+export function getType(e: any) {
+  if (e === undefined) {
+    return "undefined";
+  }
+
+  if (e === null) {
+    return "null";
+  }
+
+  if (Array.isArray(e)) {
+    return "array";
+  }
+
+  if (e instanceof Date) {
+    return "date";
+  }
+
+  if (e instanceof RegExp) {
+    return "regexp";
+  }
+
+  return typeof e;
+}
+
 export function isNumeric(e: any): e is string {
   return (
     typeof e === "string" &&

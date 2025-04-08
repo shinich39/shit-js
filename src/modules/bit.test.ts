@@ -2,10 +2,10 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import { bitwise } from "./bit";
 
-test("bitwise.eq", () => {
-  eq(bitwise(0b1100).equal(0b1000), true);
-  eq(bitwise(0b1100).equal(0b0100), true);
-  eq(bitwise(0b1100).equal(0b1100), true);
+test("bitwise.eqauls", () => {
+  eq(bitwise(0b1100).equals(0b1000), true);
+  eq(bitwise(0b1100).equals(0b0100), true);
+  eq(bitwise(0b1100).equals(0b1100), true);
 });
 
 test("bitwise.set", () => {

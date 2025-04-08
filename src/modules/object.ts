@@ -1,6 +1,6 @@
 /**
- * @param key use dot natation. 
- * 
+ * @param key use dot natation.
+ *
  * e.g. "a.b.c"
  */
 export function getObjectValue(obj: Record<string, any>, key: string): any {
@@ -14,15 +14,11 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
   return cur;
 }
 /**
- * includes: Array, object, Set, Map 
- * 
+ * includes: Array, object, Set, Map
+ *
  * equals: undefined, null, boolean, number, string, Date,
  */
-export function compareObject(
-  a: any,
-  b: any,
-  seen = new WeakMap()
-) {
+export function compareObject(a: any, b: any, seen = new WeakMap()) {
   // same address
   if (Object.is(a, b)) {
     return true;
