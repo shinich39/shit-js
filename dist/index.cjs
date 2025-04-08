@@ -20,27 +20,762 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/index.ts
 var index_exports = {};
 __export(index_exports, {
-  add: () => add,
-  div: () => div,
-  mul: () => mul,
-  sub: () => sub,
-  wait: () => wait
+  bitwise: () => bitwise,
+  calcStringSize: () => calcStringSize,
+  clone: () => clone,
+  compareObject: () => compareObject,
+  compareString: () => compareString,
+  convertFileSize: () => convertFileSize,
+  escapeXML: () => escapeXML,
+  getClampedNumber: () => getClampedNumber,
+  getContainedSize: () => getContainedSize,
+  getCoveredSize: () => getCoveredSize,
+  getFloats: () => getFloats,
+  getInts: () => getInts,
+  getLoopedNumber: () => getLoopedNumber,
+  getObjectValue: () => getObjectValue,
+  getRandomCharacter: () => getRandomCharacter,
+  getRandomNumber: () => getRandomNumber,
+  getRandomString: () => getRandomString,
+  getRelativePath: () => getRelativePath,
+  getType: () => getType,
+  getUUID: () => getUUID,
+  groupBy: () => groupBy,
+  humanizeFileSize: () => humanizeFileSize,
+  isNumeric: () => isNumeric,
+  normalizeString: () => normalizeString,
+  parseDOM: () => parseDOM,
+  parseNumbers: () => parseNumbers,
+  parsePath: () => parsePath,
+  plotBy: () => plotBy,
+  shuffleArray: () => shuffleArray,
+  sleep: () => sleep,
+  stringifyDOM: () => stringifyDOM,
+  toNumber: () => toNumber,
+  toRegExp: () => toRegExp,
+  unescapeXML: () => unescapeXML,
+  xor: () => xor
 });
 module.exports = __toCommonJS(index_exports);
-var add = function(a, b) {
-  return a + b;
-};
-var sub = function(a, b) {
-  return a - b;
-};
-var mul = function(a, b) {
-  return a * b;
-};
-var div = function(a, b) {
-  return a / b;
-};
-var wait = function(delay) {
-  return new Promise(function(resolve) {
-    return setTimeout(resolve, delay);
+
+// src/modules/array.ts
+function parseNumbers(arr) {
+  if (arr.length === 0) {
+    throw new Error(`Invalid argument: arr.length === 0`);
+  }
+  let max = Number.MIN_SAFE_INTEGER, min = Number.MAX_SAFE_INTEGER, mode = 0, modeCount = 0, sum = 0, seen = {};
+  for (const num of arr) {
+    if (max < num) {
+      max = num;
+    }
+    if (min > num) {
+      min = num;
+    }
+    if (!seen[num]) {
+      seen[num] = 1;
+    } else {
+      seen[num] += 1;
+    }
+    if (modeCount < seen[num]) {
+      modeCount = seen[num];
+      mode = num;
+    }
+    sum += num;
+  }
+  return {
+    max,
+    min,
+    sum,
+    mean: sum / arr.length,
+    // average, arithmetic mean
+    mode,
+    modeCount
+  };
+}
+function shuffleArray(arr) {
+  let i = arr.length;
+  while (i > 0) {
+    const j = Math.floor(Math.random() * i);
+    i--;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function plotBy(...args) {
+  if (args.length === 0) {
+    return [];
+  }
+  for (const arg in args) {
+    if (arg.length === 0) {
+      throw new Error(`Invalid argument: argument cannot be empty`);
+    }
+  }
+  const indexes = Array(args.length).fill(0);
+  const result = [args.map((arg, idx) => indexes[idx])];
+  let i = args.length - 1;
+  while (true) {
+    if (indexes[i] < args[i].length - 1) {
+      indexes[i] += 1;
+      result.push(args.map((arg, idx) => indexes[idx]));
+      i = args.length - 1;
+    } else {
+      indexes[i] = 0;
+      i--;
+      if (i < 0) {
+        return result;
+      }
+    }
+  }
+}
+function groupBy(arr, func) {
+  const group = {};
+  for (const obj of arr) {
+    const key = func(obj);
+    if (!group[key]) {
+      group[key] = [obj];
+    } else {
+      group[key].push(obj);
+    }
+  }
+  return group;
+}
+
+// src/modules/async.ts
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// src/modules/bit.ts
+function bitwise(a) {
+  return {
+    equals: (b) => !!(a & b),
+    set: (b) => a |= b,
+    unset: (b) => a &= ~b,
+    invert: (b) => a ^= b
+  };
+}
+
+// src/modules/clone.ts
+function clone(obj) {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+  if (obj instanceof RegExp) {
+    return new RegExp(obj.source, obj.flags);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => clone(item));
+  }
+  return Object.entries(obj).reduce((acc, cur) => {
+    acc[cur[0]] = clone(cur[1]);
+    return acc;
+  }, {});
+}
+
+// src/modules/string.ts
+function getUUID(seed) {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === "x" ? r : r & 3 | 8;
+    return v.toString(16);
   });
-};
+}
+function getRandomCharacter(charset) {
+  return charset.charAt(Math.floor(Math.random() * charset.length));
+}
+function getRandomString(charset, size) {
+  let result = "";
+  for (let i = 0; i < size; i++) {
+    result += getRandomCharacter(charset);
+  }
+  return result;
+}
+function getInts(str) {
+  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+}
+function getFloats(str) {
+  return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
+}
+function normalizeString(str) {
+  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+}
+function toRegExp(str) {
+  const parts = str.split("/");
+  if (parts.length < 3) {
+    throw new Error(`Invalid argument: ${str}`);
+  }
+  const flags = parts.pop();
+  const pattern = parts.slice(1).join("/");
+  return new RegExp(pattern, flags);
+}
+function escapeXML(str, whitespace = false) {
+  str = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  return whitespace ? str.replace(/ /g, "&nbsp;") : str;
+}
+function unescapeXML(str) {
+  return str.replace(/&nbsp;|&#32;|&#160;/g, " ").replace(/&lt;|&#60;/g, "<").replace(/&gt;|&#62;/g, ">").replace(/&quot;|&#34;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&amp;|&#38;/g, "&");
+}
+function compareString(from, to) {
+  const dp = [];
+  for (let i2 = 0; i2 < from.length + 1; i2++) {
+    dp.push([]);
+    for (let j2 = 0; j2 < from.length + 1; j2++) {
+      dp[i2][j2] = 0;
+    }
+  }
+  for (let i2 = 1; i2 <= from.length; i2++) {
+    for (let j2 = 1; j2 <= to.length; j2++) {
+      if (from[i2 - 1] === to[j2 - 1]) {
+        dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
+      } else {
+        dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
+      }
+    }
+  }
+  const result = [];
+  let i = from.length, j = to.length;
+  while (i > 0 || j > 0) {
+    const prev = result[result.length - 1];
+    const a = from[i - 1];
+    const b = to[j - 1];
+    if (i > 0 && j > 0 && a === b) {
+      if (prev && prev[0] === 0) {
+        prev[1] = a + prev[1];
+      } else {
+        result.push([0, a]);
+      }
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      if (prev && prev[0] === 1) {
+        prev[1] = b + prev[1];
+      } else {
+        result.push([1, b]);
+      }
+      j--;
+    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+      if (prev && prev[0] === -1) {
+        prev[1] = a + prev[1];
+      } else {
+        result.push([-1, a]);
+      }
+      i--;
+    }
+  }
+  return result.reverse();
+}
+
+// src/modules/dom.ts
+function parseDOM(str) {
+  const stacks = [];
+  const getIndex = function(src, target, i2) {
+    let quote = null;
+    while (i2 < src.length) {
+      const ch = src[i2];
+      if (!quote) {
+        if (ch === target) {
+          return i2;
+        }
+        if (ch === `"` || ch === `'`) {
+          quote = ch;
+        }
+      } else if (ch === "\\") {
+        i2++;
+      } else if (ch === quote) {
+        quote = null;
+      }
+      i2++;
+    }
+    return -1;
+  };
+  const parseTag = function(src) {
+    src = unescapeXML(src.trim());
+    let isClosing = false;
+    let closer = void 0;
+    if (src[0] === "/") {
+      isClosing = true;
+      src = src.substring(1);
+    } else {
+      const match = src.match(/\s*[/?]$/);
+      if (match) {
+        closer = match[0];
+        src = src.substring(0, src.length - match[0].length);
+      }
+    }
+    const parts = [];
+    let offset = 0, i2 = getIndex(src, " ", offset);
+    while (i2 > -1) {
+      if (offset !== i2) {
+        parts.push(src.substring(offset, i2));
+      }
+      offset = i2 + 1;
+      i2 = getIndex(src, " ", offset);
+    }
+    if (offset !== src.length) {
+      parts.push(src.substring(offset, src.length));
+    }
+    const attrs = {};
+    for (let i3 = 1; i3 < parts.length; i3++) {
+      const part = parts[i3];
+      const sepIndex = part.indexOf("=");
+      if (sepIndex === -1) {
+        attrs[part] = true;
+      } else {
+        attrs[part.substring(0, sepIndex)] = part.substring(
+          sepIndex + 2,
+          part.length - 1
+        );
+      }
+    }
+    return {
+      isClosing,
+      closer,
+      tag: parts[0],
+      attributes: attrs
+    };
+  };
+  let i = 0;
+  while (i < str.length) {
+    let j = getIndex(str, "<", i);
+    const text = str.substring(i, j > -1 ? j : void 0);
+    if (text.length > 0) {
+      stacks.push({
+        isClosed: true,
+        depth: 0,
+        type: "text",
+        content: text,
+        attributes: {},
+        children: []
+      });
+    }
+    if (j === -1) {
+      break;
+    }
+    if (str.substring(j, j + 4) === "<!--") {
+      const k = str.indexOf("-->", j + 4);
+      if (k === -1) {
+        throw new Error(`Invalid argument: could not find "-->`);
+      }
+      stacks.push({
+        isClosed: true,
+        depth: 0,
+        type: "comment",
+        content: str.substring(j + 4, k),
+        attributes: {},
+        children: []
+      });
+      i = k + 3;
+      continue;
+    }
+    if (str.substring(j, j + 7) === "<script") {
+      const k = getIndex(str, ">", j + 7);
+      if (k === -1) {
+        throw new Error(`Invalid argument: could not find ">"`);
+      }
+      const l = str.indexOf("<\/script>", k + 1);
+      if (l === -1) {
+        throw new Error(`Invalid argument: could not find "<\/script>"`);
+      }
+      const newTag = {
+        isClosed: true,
+        depth: 0,
+        type: "tag",
+        tag: "script",
+        attributes: parseTag(str.substring(j + 1, k)).attributes,
+        children: []
+      };
+      const newText = {
+        isClosed: true,
+        depth: 1,
+        type: "text",
+        content: str.substring(k + 1, l),
+        attributes: {},
+        parent: newTag,
+        children: []
+      };
+      newTag.children.push(newText);
+      stacks.push(newTag, newText);
+      i = l + 9;
+      continue;
+    }
+    if (str.substring(i, i + 6) === "<style") {
+      const k = getIndex(str, ">", j + 6);
+      if (k === -1) {
+        throw new Error(`Invalid argument: could not find ">"`);
+      }
+      const l = str.indexOf("</style>", k + 1);
+      if (l === -1) {
+        throw new Error(`Invalid argument: could not find "</style>"`);
+      }
+      const newTag = {
+        isClosed: true,
+        depth: 0,
+        type: "tag",
+        tag: "style",
+        attributes: parseTag(str.substring(j + 1, k)).attributes,
+        children: []
+      };
+      const newText = {
+        isClosed: true,
+        depth: 1,
+        type: "text",
+        content: str.substring(k + 1, l),
+        attributes: {},
+        parent: newTag,
+        children: []
+      };
+      newTag.children.push(newText);
+      stacks.push(newTag, newText);
+      i = l + 8;
+      continue;
+    }
+    i = j;
+    j = getIndex(str, ">", i);
+    if (j === -1) {
+      throw new Error(`Invalid argument: >(closing bracket) not found`);
+    }
+    const { isClosing, closer, tag, attributes } = parseTag(
+      str.substring(i + 1, j)
+    );
+    if (isClosing) {
+      const children = [];
+      for (let l = stacks.length - 1; l >= 0; l--) {
+        const node = stacks[l];
+        if (node.isClosed === false && node.type === "tag" && node.tag === tag) {
+          for (const child of children) {
+            node.children = [child, ...node.children];
+            child.parent = node;
+          }
+          node.isClosed = true;
+          break;
+        }
+        if (node.depth === 0) {
+          children.push(node);
+        }
+        node.isClosed = true;
+        node.depth++;
+      }
+    } else {
+      stacks.push({
+        isClosed: !!closer,
+        depth: 0,
+        type: "tag",
+        tag,
+        ...closer ? { closer } : {},
+        attributes,
+        children: []
+      });
+    }
+    i = j + 1;
+  }
+  for (const node of stacks) {
+    if (node.type === "tag" && !node.isClosed) {
+      node.closer = "";
+    }
+    delete node.isClosed;
+  }
+  return stacks;
+}
+function stringifyDOM(nodes) {
+  const stringifyAttributes = function(attrs) {
+    let acc = "";
+    for (const [k, v] of Object.entries(attrs)) {
+      if (typeof v === "string") {
+        acc += ` ${k}="${v}"`;
+      } else if (typeof v === "boolean") {
+        if (v) {
+          acc += ` ${k}`;
+        }
+      } else if (typeof v.toString === "function") {
+        acc += ` ${k}="${v.toString()}"`;
+      }
+    }
+    return acc;
+  };
+  const stringifyNode = function(node) {
+    let acc = "";
+    if (node.type === "text") {
+      const parentTag = node.parent?.tag;
+      if (parentTag === "script" || parentTag === "style") {
+        acc += node.content;
+      } else {
+        acc += escapeXML(node.content);
+      }
+    } else if (node.type === "comment") {
+      acc += `<!--${node.content}-->`;
+    } else {
+      acc += `<${node.tag}${stringifyAttributes(node.attributes)}`;
+      if (typeof node.closer === "string") {
+        acc += `${node.closer}>`;
+      } else {
+        acc += `>`;
+        for (const child of node.children) {
+          acc += stringifyNode(child);
+        }
+        acc += `</${node.tag}>`;
+      }
+    }
+    return acc;
+  };
+  let result = "";
+  const rootNodes = nodes.filter((node) => node.depth === 0);
+  for (const node of rootNodes) {
+    result += stringifyNode(node);
+  }
+  return result;
+}
+
+// src/modules/encrypt.ts
+function xor(str, salt) {
+  const l = salt.length;
+  if (l === 0) {
+    throw new Error(`Invalid argument: salt.length === 0`);
+  }
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+  }
+  return result;
+}
+
+// src/modules/file.ts
+function calcStringSize(str) {
+  let result = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code <= 127) {
+      result += 1;
+    } else if (code <= 2047) {
+      result += 2;
+    } else if (code <= 65535) {
+      result += 3;
+    } else {
+      result += 4;
+    }
+  }
+  return result;
+}
+function convertFileSize(num, from, to) {
+  const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const i = units.indexOf(from);
+  if (i === -1) {
+    throw new Error(`Invalid source unit: ${from}`);
+  }
+  const j = units.indexOf(to);
+  if (j === -1) {
+    throw new Error(`Invalid destination unit: ${to}`);
+  }
+  return num * Math.pow(1024, i - j);
+}
+function humanizeFileSize(num, format) {
+  const bytes = convertFileSize(num, format, "Bytes");
+  if (bytes === 0) {
+    return "0 Bytes";
+  }
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = (bytes / Math.pow(1024, i)).toFixed(2);
+  return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
+}
+
+// src/modules/number.ts
+function getRandomNumber(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function getClampedNumber(num, min, max) {
+  return Math.min(max, Math.max(num, min));
+}
+function getLoopedNumber(num, min, max) {
+  num -= min;
+  max -= min;
+  if (num < 0) {
+    num = num % max + max;
+  }
+  if (num >= max) {
+    num = num % max;
+  }
+  return num + min;
+}
+
+// src/modules/object.ts
+function getObjectValue(obj, key) {
+  let cur = obj;
+  for (const k of key.split(".")) {
+    if (typeof cur !== "object" || cur === null) {
+      break;
+    }
+    cur = cur[k];
+  }
+  return cur;
+}
+function compareObject(a, b, seen = /* @__PURE__ */ new WeakMap()) {
+  if (Object.is(a, b)) {
+    return true;
+  }
+  if (typeof a !== typeof b) {
+    return false;
+  }
+  if (typeof b !== "object") {
+    return a === b;
+  }
+  if (b === null) {
+    return a === null;
+  }
+  if (seen.has(b)) {
+    return seen.get(b) === a;
+  }
+  seen.set(b, a);
+  if (Array.isArray(b)) {
+    if (!Array.isArray(a) || a.length < b.length) {
+      return false;
+    }
+    for (const j of b) {
+      let isExists = false;
+      for (const i of a) {
+        if (compareObject(i, j, seen)) {
+          isExists = true;
+          break;
+        }
+      }
+      if (!isExists) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (b instanceof Date) {
+    if (!(a instanceof Date)) {
+      return false;
+    }
+    return a.valueOf() === b.valueOf();
+  }
+  if (b instanceof Set) {
+    if (!(a instanceof Set) || a.size < b.size) {
+      return false;
+    }
+    return compareObject(Array.from(a), Array.from(b), seen);
+  }
+  if (b instanceof Map) {
+    if (!(a instanceof Map) || a.size < b.size) {
+      return false;
+    }
+    for (const [key, value] of b) {
+      if (!a.has(key) || !compareObject(a.get(key), value, seen)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
+    return false;
+  }
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length < keysB.length) {
+    return false;
+  }
+  for (const key of keysB) {
+    if (keysA.indexOf(key) === -1 || !compareObject(a[key], b[key], seen)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// src/modules/path.ts
+function parsePath(...args) {
+  const parts = [];
+  for (const arg of args) {
+    for (const str of arg.split(/[\\/]/)) {
+      if (str !== "") {
+        parts.push(str);
+      }
+    }
+  }
+  const basename = parts[parts.length - 1] || "";
+  const dotIndex = basename.lastIndexOf(".");
+  const extname = dotIndex > -1 ? basename.substring(dotIndex) : "";
+  const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
+  const dirname = parts.length > 0 ? parts.slice(0, parts.length - 1).join("/") : "";
+  return {
+    parts,
+    basename,
+    extname,
+    filename,
+    dirname
+  };
+}
+function getRelativePath(from, to) {
+  const normalize = (str) => {
+    str = str.replace(/[\\]/g, "/").replace(/\/$/, "");
+    if (str.charAt(0) === "/") {
+      throw new Error(`Invalid argument: ${str}`);
+    }
+    if (str === ".") {
+      return str;
+    }
+    if (str.charAt(0) === "." && str.charAt(1) === "/") {
+      return str;
+    }
+    return "./" + str;
+  };
+  let a = normalize(from).split("/").filter(Boolean);
+  let b = normalize(to).split("/").filter(Boolean);
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) {
+    i++;
+  }
+  const up = Array(a.length - i).fill("..").join("/");
+  const down = b.slice(i).join("/");
+  return up + (up && down ? "/" : "") + down;
+}
+
+// src/modules/size.ts
+function getContainedSize(sw, sh, dw, dh) {
+  const ar = sw / sh;
+  return ar < dw / dh ? [dh * ar, dh] : [dw, dw / ar];
+}
+function getCoveredSize(sw, sh, dw, dh) {
+  const ar = sw / sh;
+  return ar < dw / dh ? [dw, dw / ar] : [dh * ar, dh];
+}
+
+// src/modules/type.ts
+function getType(e) {
+  if (e === void 0) {
+    return "undefined";
+  }
+  if (e === null) {
+    return "null";
+  }
+  if (Array.isArray(e)) {
+    return "array";
+  }
+  if (e instanceof Date) {
+    return "date";
+  }
+  if (e instanceof RegExp) {
+    return "regexp";
+  }
+  return typeof e;
+}
+function isNumeric(e) {
+  return typeof e === "string" && !Number.isNaN(parseFloat(e)) && Number.isFinite(parseFloat(e));
+}
+function toNumber(e) {
+  if (isNumeric(e)) {
+    return parseFloat(e);
+  }
+  if (typeof e === "number") {
+    return e;
+  }
+  if (typeof e === "boolean") {
+    return e ? 1 : 0;
+  }
+  if (!e) {
+    return 0;
+  }
+  throw new Error(`Invalid argument type: ${typeof e}`);
+}

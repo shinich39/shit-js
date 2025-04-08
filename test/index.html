@@ -10,8 +10,9 @@
     <div id="result"></div>
     <script src="../dist/index.js"></script>
     <script>
-      const { add } = window.$;
-      document.getElementById("result").innerHTML = `1 + 2 = ${add(1, 2)}`;
+      for (const key of Object.keys(window.shit)) {
+        document.getElementById("result").innerHTML += key + "<br>";
+      }
     </script>
   </body>
 </html>
