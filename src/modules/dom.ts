@@ -1,49 +1,43 @@
 import { escapeXML, unescapeXML } from "./string";
 
-export type ShitText = {
-  parent?: ShitNode;
-  depth: number;
-  type: "text";
-  content: string;
-  tag?: undefined | null;
-  closer?: undefined | null;
-  attributes: Record<string, any>;
-  children: ShitNode[];
-  [key: string]: any;
-};
+export type ShitNode =
+  | {
+      parent?: ShitNode;
+      depth: number;
+      type: "text";
+      content: string;
+      tag?: undefined | null;
+      closer?: undefined | null;
+      attributes: Record<string, any>;
+      children: ShitNode[];
+      [key: string]: any;
+    }
+  | {
+      parent?: ShitNode;
+      depth: number;
+      type: "tag";
+      content?: undefined | null;
+      tag: string;
+      closer?: string;
+      attributes: Record<string, any>;
+      children: ShitNode[];
+      [key: string]: any;
+    }
+  | {
+      parent?: ShitNode;
+      depth: number;
+      type: "comment";
+      content: string;
+      tag?: undefined | null;
+      closer?: undefined | null;
+      attributes: Record<string, any>;
+      children: ShitNode[];
+      [key: string]: any;
+    };
 
-export type ShitTag = {
-  parent?: ShitNode;
-  depth: number;
-  type: "tag";
-  content?: undefined | null;
-  tag: string;
-  closer?: string;
-  attributes: Record<string, any>;
-  children: ShitNode[];
-  [key: string]: any;
-};
+type UnclosedShitNode = ShitNode & { isClosed: boolean };
 
-export type ShitComment = {
-  parent?: ShitNode;
-  depth: number;
-  type: "comment";
-  content: string;
-  tag?: undefined | null;
-  closer?: undefined | null;
-  attributes: Record<string, any>;
-  children: ShitNode[];
-  [key: string]: any;
-};
-
-export type ShitNode = ShitText | ShitTag | ShitComment;
-
-type UnclosedShitText = ShitText & { isClosed: true };
-type UnclosedShitTag = ShitTag & { isClosed?: boolean };
-type UnclosedShitComment = ShitComment & { isClosed: true };
-type UnclosedShitNode = ShitNode & { isClosed?: boolean };
-
-export function parseDOM(str: string) {
+export function parseDOM(str: string): ShitNode[] {
   const stacks: UnclosedShitNode[] = [];
 
   const getIndex = function (src: string, target: string, i: number) {
@@ -171,7 +165,7 @@ export function parseDOM(str: string) {
         content: str.substring(j + 4, k),
         attributes: {},
         children: [],
-      } as UnclosedShitComment);
+      });
 
       i = k + 3;
 
@@ -190,7 +184,7 @@ export function parseDOM(str: string) {
         throw new Error(`Invalid argument: could not find "</script>"`);
       }
 
-      const newTag: UnclosedShitTag = {
+      const newTag: UnclosedShitNode = {
         isClosed: true,
         depth: 0,
         type: "tag",
@@ -199,7 +193,7 @@ export function parseDOM(str: string) {
         children: [],
       };
 
-      const newText: UnclosedShitText = {
+      const newText: UnclosedShitNode = {
         isClosed: true,
         depth: 1,
         type: "text",
@@ -230,7 +224,7 @@ export function parseDOM(str: string) {
         throw new Error(`Invalid argument: could not find "</style>"`);
       }
 
-      const newTag: UnclosedShitTag = {
+      const newTag: UnclosedShitNode = {
         isClosed: true,
         depth: 0,
         type: "tag",
@@ -239,7 +233,7 @@ export function parseDOM(str: string) {
         children: [],
       };
 
-      const newText: UnclosedShitText = {
+      const newText: UnclosedShitNode = {
         isClosed: true,
         depth: 1,
         type: "text",
@@ -307,7 +301,7 @@ export function parseDOM(str: string) {
         ...(closer ? { closer } : {}),
         attributes,
         children: [],
-      } as UnclosedShitTag);
+      });
     }
 
     i = j + 1;
@@ -318,10 +312,12 @@ export function parseDOM(str: string) {
     if (node.type === "tag" && !node.isClosed) {
       node.closer = "";
     }
-    delete node.isClosed;
+
+    // remove "isClosed" property
+    delete (node as ShitNode).isClosed;
   }
 
-  return stacks as ShitNode[];
+  return stacks;
 }
 
 export function stringifyDOM(nodes: ShitNode[]) {

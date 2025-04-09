@@ -1,4 +1,4 @@
-export type ShitText = {
+export type ShitNode = {
     parent?: ShitNode;
     depth: number;
     type: "text";
@@ -8,8 +8,7 @@ export type ShitText = {
     attributes: Record<string, any>;
     children: ShitNode[];
     [key: string]: any;
-};
-export type ShitTag = {
+} | {
     parent?: ShitNode;
     depth: number;
     type: "tag";
@@ -19,8 +18,7 @@ export type ShitTag = {
     attributes: Record<string, any>;
     children: ShitNode[];
     [key: string]: any;
-};
-export type ShitComment = {
+} | {
     parent?: ShitNode;
     depth: number;
     type: "comment";
@@ -31,7 +29,6 @@ export type ShitComment = {
     children: ShitNode[];
     [key: string]: any;
 };
-export type ShitNode = ShitText | ShitTag | ShitComment;
 export declare function parseDOM(str: string): ShitNode[];
 export declare function stringifyDOM(nodes: ShitNode[]): string;
 //# sourceMappingURL=dom.d.ts.map
