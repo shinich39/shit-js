@@ -1,5 +1,3 @@
-type FileSize = "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB";
-
 /**
  * @returns bytes
  */
@@ -24,7 +22,11 @@ export function calcStringSize(str: string) {
   return result;
 }
 
-export function convertFileSize(num: number, from: FileSize, to: FileSize) {
+export function convertFileSize(
+  num: number, 
+  from: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB", 
+  to: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+) {
   const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
   const i = units.indexOf(from);
@@ -40,7 +42,10 @@ export function convertFileSize(num: number, from: FileSize, to: FileSize) {
   return num * Math.pow(1024, i - j);
 }
 
-export function humanizeFileSize(num: number, format: FileSize) {
+export function humanizeFileSize(
+  num: number, 
+  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+) {
   const bytes = convertFileSize(num, format, "Bytes");
   if (bytes === 0) {
     return "0 Bytes";
