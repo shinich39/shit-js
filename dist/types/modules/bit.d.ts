@@ -3,8 +3,6 @@
  * - set: or
  * - unset: a and (not b)
  * - invert: xor
- * @param a
- * @returns
  */
 export declare function bitwise(a: number): {
     equals: (b: number) => boolean;

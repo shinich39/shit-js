@@ -23,8 +23,8 @@ export function calcStringSize(str: string) {
 }
 
 export function convertFileSize(
-  num: number, 
-  from: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB", 
+  num: number,
+  from: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
   to: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
 ) {
   const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -43,7 +43,7 @@ export function convertFileSize(
 }
 
 export function humanizeFileSize(
-  num: number, 
+  num: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
 ) {
   const bytes = convertFileSize(num, format, "Bytes");
