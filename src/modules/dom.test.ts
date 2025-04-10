@@ -37,7 +37,7 @@ test("parseDOM", () => {
 
   const arr = parseDOM(html);
 
-  eq(html, stringifyDOM(arr));
+  eq(stringifyDOM(arr), html);
 });
 
 function eq(a: any, b: any, msg?: string | Error) {
