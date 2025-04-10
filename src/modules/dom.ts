@@ -155,7 +155,9 @@ export function parseDOM(str: string): ShitNode[] {
     if (str.substring(j, j + 4) === "<!--") {
       const k = str.indexOf("-->", j + 4);
       if (k === -1) {
-        throw new Error(`Invalid argument: could not find "-->`);
+        throw new Error(
+          `Invalid argument: could not find closing bracket "-->`
+        );
       }
 
       stacks.push({
@@ -176,12 +178,14 @@ export function parseDOM(str: string): ShitNode[] {
     if (str.substring(j, j + 7) === "<script") {
       const k = getIndex(str, ">", j + 7);
       if (k === -1) {
-        throw new Error(`Invalid argument: could not find ">"`);
+        throw new Error(`Invalid argument: could not find closing bracket ">"`);
       }
 
       const l = str.indexOf("</script>", k + 1);
       if (l === -1) {
-        throw new Error(`Invalid argument: could not find "</script>"`);
+        throw new Error(
+          `Invalid argument: could not find closing tag "</script>"`
+        );
       }
 
       const newTag: UnclosedShitNode = {
@@ -199,8 +203,8 @@ export function parseDOM(str: string): ShitNode[] {
         type: "text",
         content: str.substring(k + 1, l),
         attributes: {},
-        parent: newTag,
         children: [],
+        parent: newTag,
       };
 
       newTag.children.push(newText);
@@ -216,12 +220,14 @@ export function parseDOM(str: string): ShitNode[] {
     if (str.substring(i, i + 6) === "<style") {
       const k = getIndex(str, ">", j + 6);
       if (k === -1) {
-        throw new Error(`Invalid argument: could not find ">"`);
+        throw new Error(`Invalid argument: could not find closing bracket ">"`);
       }
 
       const l = str.indexOf("</style>", k + 1);
       if (l === -1) {
-        throw new Error(`Invalid argument: could not find "</style>"`);
+        throw new Error(
+          `Invalid argument: could not find closing tag "</style>"`
+        );
       }
 
       const newTag: UnclosedShitNode = {
@@ -239,8 +245,8 @@ export function parseDOM(str: string): ShitNode[] {
         type: "text",
         content: str.substring(k + 1, l),
         attributes: {},
-        parent: newTag,
         children: [],
+        parent: newTag,
       };
 
       newTag.children.push(newText);
@@ -257,7 +263,7 @@ export function parseDOM(str: string): ShitNode[] {
     j = getIndex(str, ">", i);
 
     if (j === -1) {
-      throw new Error(`Invalid argument: >(closing bracket) not found`);
+      throw new Error(`Invalid argument: could not find closing bracket ">"`);
     }
 
     const { isClosing, closer, tag, attributes } = parseTag(
@@ -327,10 +333,10 @@ export function stringifyDOM(nodes: ShitNode[]) {
       if (typeof v === "string") {
         acc += ` ${k}="${v}"`;
       } else if (typeof v === "boolean") {
+        // skip false
         if (v) {
           acc += ` ${k}`;
         }
-        // skip false
       } else if (typeof v.toString === "function") {
         acc += ` ${k}="${v.toString()}"`;
       }

@@ -297,7 +297,9 @@ function parseDOM(str) {
     if (str.substring(j, j + 4) === "<!--") {
       const k = str.indexOf("-->", j + 4);
       if (k === -1) {
-        throw new Error(`Invalid argument: could not find "-->`);
+        throw new Error(
+          `Invalid argument: could not find closing bracket "-->`
+        );
       }
       stacks.push({
         isClosed: true,
@@ -313,11 +315,13 @@ function parseDOM(str) {
     if (str.substring(j, j + 7) === "<script") {
       const k = getIndex(str, ">", j + 7);
       if (k === -1) {
-        throw new Error(`Invalid argument: could not find ">"`);
+        throw new Error(`Invalid argument: could not find closing bracket ">"`);
       }
       const l = str.indexOf("<\/script>", k + 1);
       if (l === -1) {
-        throw new Error(`Invalid argument: could not find "<\/script>"`);
+        throw new Error(
+          `Invalid argument: could not find closing tag "<\/script>"`
+        );
       }
       const newTag = {
         isClosed: true,
@@ -333,8 +337,8 @@ function parseDOM(str) {
         type: "text",
         content: str.substring(k + 1, l),
         attributes: {},
-        parent: newTag,
-        children: []
+        children: [],
+        parent: newTag
       };
       newTag.children.push(newText);
       stacks.push(newTag, newText);
@@ -344,11 +348,13 @@ function parseDOM(str) {
     if (str.substring(i, i + 6) === "<style") {
       const k = getIndex(str, ">", j + 6);
       if (k === -1) {
-        throw new Error(`Invalid argument: could not find ">"`);
+        throw new Error(`Invalid argument: could not find closing bracket ">"`);
       }
       const l = str.indexOf("</style>", k + 1);
       if (l === -1) {
-        throw new Error(`Invalid argument: could not find "</style>"`);
+        throw new Error(
+          `Invalid argument: could not find closing tag "</style>"`
+        );
       }
       const newTag = {
         isClosed: true,
@@ -364,8 +370,8 @@ function parseDOM(str) {
         type: "text",
         content: str.substring(k + 1, l),
         attributes: {},
-        parent: newTag,
-        children: []
+        children: [],
+        parent: newTag
       };
       newTag.children.push(newText);
       stacks.push(newTag, newText);
@@ -375,7 +381,7 @@ function parseDOM(str) {
     i = j;
     j = getIndex(str, ">", i);
     if (j === -1) {
-      throw new Error(`Invalid argument: >(closing bracket) not found`);
+      throw new Error(`Invalid argument: could not find closing bracket ">"`);
     }
     const { isClosing, closer, tag, attributes } = parseTag(
       str.substring(i + 1, j)
