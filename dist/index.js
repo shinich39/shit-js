@@ -495,7 +495,7 @@ var shit = (() => {
           if (v) {
             acc += ` ${k}`;
           }
-        } else if (typeof v.toString === "function") {
+        } else if (typeof v === "object" && typeof v.toString === "function") {
           acc += ` ${k}="${v.toString()}"`;
         }
       }
