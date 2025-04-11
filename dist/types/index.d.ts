@@ -2,7 +2,7 @@ export * from "./modules/array";
 export * from "./modules/async";
 export * from "./modules/bit";
 export * from "./modules/clone";
-export * from "./modules/dom";
+export * from "./modules/tree";
 export * from "./modules/encrypt";
 export * from "./modules/file";
 export * from "./modules/number";

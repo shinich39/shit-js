@@ -208,271 +208,326 @@ function compareString(from, to) {
   return result.reverse();
 }
 
-// src/modules/dom.ts
-function parseDOM(str) {
-  const stacks = [];
-  const getIndex = function(src, target, i2) {
-    let quote = null;
-    while (i2 < src.length) {
-      const ch = src[i2];
-      if (!quote) {
-        if (ch === target) {
-          return i2;
-        }
-        if (ch === `"` || ch === `'`) {
-          quote = ch;
-        }
-      } else if (ch === "\\") {
-        i2++;
-      } else if (ch === quote) {
-        quote = null;
-      }
-      i2++;
-    }
-    return -1;
-  };
-  const parseTag = function(src) {
-    src = unescapeXML(src.trim());
-    let isClosing = false;
-    let closer = void 0;
-    if (src[0] === "/") {
-      isClosing = true;
-      src = src.substring(1);
-    } else {
-      const match = src.match(/\s*[/?]$/);
-      if (match) {
-        closer = match[0];
-        src = src.substring(0, src.length - match[0].length);
-      }
-    }
-    const parts = [];
-    let offset = 0, i2 = getIndex(src, " ", offset);
-    while (i2 > -1) {
-      if (offset !== i2) {
-        parts.push(src.substring(offset, i2));
-      }
-      offset = i2 + 1;
-      i2 = getIndex(src, " ", offset);
-    }
-    if (offset !== src.length) {
-      parts.push(src.substring(offset, src.length));
-    }
-    const attrs = {};
-    for (let i3 = 1; i3 < parts.length; i3++) {
-      const part = parts[i3];
-      const sepIndex = part.indexOf("=");
-      if (sepIndex === -1) {
-        attrs[part] = true;
-      } else {
-        attrs[part.substring(0, sepIndex)] = part.substring(
-          sepIndex + 2,
-          part.length - 1
-        );
-      }
-    }
-    return {
-      isClosing,
-      closer,
-      tag: parts[0],
-      attributes: attrs
-    };
-  };
-  let i = 0;
-  while (i < str.length) {
-    let j = getIndex(str, "<", i);
-    const text = str.substring(i, j > -1 ? j : void 0);
-    if (text.length > 0) {
-      stacks.push({
-        isClosed: true,
-        depth: 0,
-        type: "text",
-        content: text,
-        attributes: {},
-        children: []
-      });
-    }
-    if (j === -1) {
-      break;
-    }
-    if (str.substring(j, j + 4) === "<!--") {
-      const k = str.indexOf("-->", j + 4);
-      if (k === -1) {
-        throw new Error(
-          `Invalid argument: could not find closing bracket "-->`
-        );
-      }
-      stacks.push({
-        isClosed: true,
-        depth: 0,
-        type: "comment",
-        content: str.substring(j + 4, k),
-        attributes: {},
-        children: []
-      });
-      i = k + 3;
-      continue;
-    }
-    if (str.substring(j, j + 7) === "<script") {
-      const k = getIndex(str, ">", j + 7);
-      if (k === -1) {
-        throw new Error(`Invalid argument: could not find closing bracket ">"`);
-      }
-      const l = str.indexOf("<\/script>", k + 1);
-      if (l === -1) {
-        throw new Error(
-          `Invalid argument: could not find closing tag "<\/script>"`
-        );
-      }
-      const newTag = {
-        isClosed: true,
-        depth: 0,
-        type: "tag",
-        tag: "script",
-        attributes: parseTag(str.substring(j + 1, k)).attributes,
-        children: []
-      };
-      const newText = {
-        isClosed: true,
-        depth: 1,
-        type: "text",
-        content: str.substring(k + 1, l),
-        attributes: {},
-        children: [],
-        parent: newTag
-      };
-      newTag.children.push(newText);
-      stacks.push(newTag, newText);
-      i = l + 9;
-      continue;
-    }
-    if (str.substring(i, i + 6) === "<style") {
-      const k = getIndex(str, ">", j + 6);
-      if (k === -1) {
-        throw new Error(`Invalid argument: could not find closing bracket ">"`);
-      }
-      const l = str.indexOf("</style>", k + 1);
-      if (l === -1) {
-        throw new Error(
-          `Invalid argument: could not find closing tag "</style>"`
-        );
-      }
-      const newTag = {
-        isClosed: true,
-        depth: 0,
-        type: "tag",
-        tag: "style",
-        attributes: parseTag(str.substring(j + 1, k)).attributes,
-        children: []
-      };
-      const newText = {
-        isClosed: true,
-        depth: 1,
-        type: "text",
-        content: str.substring(k + 1, l),
-        attributes: {},
-        children: [],
-        parent: newTag
-      };
-      newTag.children.push(newText);
-      stacks.push(newTag, newText);
-      i = l + 8;
-      continue;
-    }
-    i = j;
-    j = getIndex(str, ">", i);
-    if (j === -1) {
-      throw new Error(`Invalid argument: could not find closing bracket ">"`);
-    }
-    const { isClosing, closer, tag, attributes } = parseTag(
-      str.substring(i + 1, j)
-    );
-    if (isClosing) {
-      const children = [];
-      for (let l = stacks.length - 1; l >= 0; l--) {
-        const node = stacks[l];
-        if (node.isClosed === false && node.type === "tag" && node.tag === tag) {
-          for (const child of children) {
-            node.children = [child, ...node.children];
-            child.parent = node;
-          }
-          node.isClosed = true;
-          break;
-        }
-        if (node.depth === 0) {
-          children.push(node);
-        }
-        node.isClosed = true;
-        node.depth++;
-      }
-    } else {
-      stacks.push({
-        isClosed: !!closer,
-        depth: 0,
-        type: "tag",
-        tag,
-        ...closer ? { closer } : {},
-        attributes,
-        children: []
-      });
-    }
-    i = j + 1;
+// src/modules/tree.ts
+var Tree = class _Tree {
+  constructor(str) {
+    this.map = /* @__PURE__ */ new WeakSet();
+    this.nodes = _Tree.parse(str);
   }
-  for (const node of stacks) {
-    if (node.type === "tag" && !node.isClosed) {
-      node.closer = "";
-    }
-    delete node.isClosed;
-  }
-  return stacks;
-}
-function stringifyDOM(nodes) {
-  const stringifyAttributes = function(attrs) {
-    let acc = "";
-    for (const [k, v] of Object.entries(attrs)) {
-      if (typeof v === "string") {
-        acc += ` ${k}="${v}"`;
-      } else if (typeof v === "boolean") {
-        if (v) {
-          acc += ` ${k}`;
-        }
-      } else if (typeof v === "object" && typeof v.toString === "function") {
-        acc += ` ${k}="${v.toString()}"`;
+  set(targetNode, ...newNodes) {
+    for (const nn of newNodes) {
+      if (this.map.has(nn)) {
+        throw new Error("Node already exists");
       }
     }
-    return acc;
-  };
-  const stringifyNode = function(node) {
-    let acc = "";
-    if (node.type === "text") {
-      const parentTag = node.parent?.tag;
-      if (parentTag === "script" || parentTag === "style") {
-        acc += node.content;
-      } else {
-        acc += escapeXML(node.content);
-      }
-    } else if (node.type === "comment") {
-      acc += `<!--${node.content}-->`;
-    } else {
-      acc += `<${node.tag}${stringifyAttributes(node.attributes)}`;
-      if (typeof node.closer === "string") {
-        acc += `${node.closer}>`;
-      } else {
-        acc += `>`;
+    for (const node of this.nodes) {
+      if (node == targetNode) {
         for (const child of node.children) {
-          acc += stringifyNode(child);
+          this.remove(child);
         }
-        acc += `</${node.tag}>`;
+        for (const nn of newNodes) {
+          node.children.push(nn);
+          this.nodes.push(nn);
+          nn.depth = node.depth + 1;
+          nn.parent = node;
+        }
+        return true;
       }
     }
-    return acc;
-  };
-  let result = "";
-  const rootNodes = nodes.filter((node) => node.depth === 0);
-  for (const node of rootNodes) {
-    result += stringifyNode(node);
+    return false;
   }
-  return result;
-}
+  add(targetNode, ...newNodes) {
+    for (const nn of newNodes) {
+      if (this.map.has(nn)) {
+        throw new Error("Node already exists");
+      }
+    }
+    for (const node of this.nodes) {
+      if (node == targetNode) {
+        for (const nn of newNodes) {
+          node.children.push(nn);
+          this.nodes.push(nn);
+          nn.depth = node.depth + 1;
+          nn.parent = node;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+  remove(targetNode) {
+    for (let i = 0; i < this.nodes.length; i++) {
+      if (this.nodes[i] == targetNode) {
+        this.nodes.splice(i, 1);
+        this.map.delete(targetNode);
+        delete targetNode.parent;
+        targetNode.depth = 0;
+        return true;
+      }
+    }
+    return false;
+  }
+  toString() {
+    return _Tree.stringify(this.nodes);
+  }
+  static parse(str) {
+    const parseTag = function(src, i2) {
+      let m = i2 + 1, n = i2 + 1, parts = [], quote = null;
+      while (n < src.length) {
+        const c = src[n];
+        if (!quote) {
+          if (c === ">") {
+            parts.push(src.substring(m, n));
+            n++;
+            break;
+          }
+          if (c === " ") {
+            parts.push(src.substring(m, n));
+            m = n;
+          } else if (c === `"` || c === `'`) {
+            quote = c;
+          }
+        } else if (c === "\\") {
+          n++;
+        } else if (c === quote) {
+          quote = null;
+          parts.push(src.substring(m, n + 1));
+          m = n + 1;
+        }
+        n++;
+      }
+      parts = parts.filter(Boolean);
+      let tag = parts.shift();
+      if (!tag) {
+        throw new Error(`Invalid argument: Tag name not found`);
+      }
+      const attrs = {};
+      let closer;
+      if (parts.length > 0 && /^\s*[/?]$/.test(parts[parts.length - 1])) {
+        closer = parts.pop();
+      }
+      for (const part of parts) {
+        const trimmedPart = part.trim();
+        const sepIndex = trimmedPart.indexOf("=");
+        if (sepIndex === -1) {
+          attrs[trimmedPart] = true;
+        } else {
+          attrs[trimmedPart.substring(0, sepIndex)] = trimmedPart.substring(
+            sepIndex + 2,
+            trimmedPart.length - 1
+          );
+        }
+      }
+      return {
+        startIndex: i2,
+        endIndex: n,
+        closer,
+        tag,
+        attrs
+      };
+    };
+    const getNodes = function(src, i2) {
+      if (i2 >= src.length) {
+        return [];
+      }
+      const j = src.indexOf("<", i2);
+      if (j === -1) {
+        return [
+          {
+            startIndex: i2,
+            endIndex: src.length,
+            type: "text",
+            content: src.substring(i2)
+          }
+        ];
+      }
+      if (src.substring(j, j + 4) === "<!--") {
+        const k = src.indexOf("-->", j + 4);
+        if (k === -1) {
+          throw new Error(
+            `Invalid argument: could not find closing bracket "-->"`
+          );
+        }
+        return [
+          {
+            startIndex: i2,
+            endIndex: j,
+            type: "text",
+            content: src.substring(i2, j)
+          },
+          {
+            startIndex: j,
+            endIndex: k + 3,
+            type: "comment",
+            content: src.substring(j + 4, k)
+          }
+        ];
+      }
+      for (const [opening, closing] of [
+        ["<style", "</style>"],
+        ["<script", "<\/script>"]
+      ]) {
+        if (src.substring(j, j + opening.length) === opening) {
+          const k = src.indexOf(closing, j + opening.length);
+          if (k === -1) {
+            throw new Error(
+              `Invalid argument: could not find closing tag "${closing}"`
+            );
+          }
+          const { endIndex: endIndex2, tag: tag2, attrs: attrs2 } = parseTag(src, j);
+          return [
+            {
+              startIndex: i2,
+              endIndex: j,
+              type: "text",
+              content: src.substring(i2, j)
+            },
+            {
+              startIndex: j,
+              endIndex: endIndex2,
+              type: "tag",
+              tag: tag2,
+              attrs: attrs2
+            },
+            {
+              startIndex: endIndex2,
+              endIndex: k,
+              type: "text",
+              content: src.substring(endIndex2, k)
+            },
+            {
+              startIndex: k,
+              endIndex: k + closing.length,
+              type: "tag",
+              tag: "/" + tag2
+            }
+          ];
+        }
+      }
+      const { startIndex, endIndex, tag, closer, attrs } = parseTag(src, j);
+      return [
+        {
+          startIndex: i2,
+          endIndex: j,
+          type: "text",
+          content: src.substring(i2, j)
+        },
+        {
+          startIndex,
+          endIndex,
+          type: "tag",
+          closer,
+          tag,
+          attrs
+        }
+      ];
+    };
+    str = unescapeXML(str);
+    const nodes = [];
+    let i = 0, stacks = getNodes(str, i);
+    while (stacks.length > 0) {
+      for (const stack of stacks) {
+        if (stack.type === "text") {
+          nodes.push({
+            depth: 0,
+            type: "text",
+            content: stack.content
+          });
+        } else if (stack.type === "comment") {
+          nodes.push({
+            depth: 0,
+            type: "comment",
+            content: stack.content
+          });
+        } else if (stack.tag[0] !== "/") {
+          nodes.push({
+            isOpened: !stack.closer,
+            depth: 0,
+            type: "tag",
+            tag: stack.tag,
+            ...stack.closer ? { closer: stack.closer } : {},
+            attrs: stack.attrs || {},
+            children: []
+          });
+        } else {
+          const children = [];
+          const tag = stack.tag.substring(1);
+          for (let j = nodes.length - 1; j >= 0; j--) {
+            const node = nodes[j];
+            if (node.isOpened && node.type === "tag" && node.tag === tag) {
+              for (const child of children) {
+                node.children = [child, ...node.children];
+                child.parent = node;
+              }
+              delete node.isOpened;
+              break;
+            }
+            if (node.depth === 0) {
+              children.push(node);
+            }
+            node.depth++;
+          }
+        }
+      }
+      stacks = getNodes(str, stacks[stacks.length - 1].endIndex);
+    }
+    for (const node of nodes) {
+      if (node.type === "tag" && node.isOpened) {
+        node.closer = "";
+      }
+      delete node.isOpened;
+    }
+    return nodes;
+  }
+  static stringify(nodes) {
+    const stringifyAttributes = function(attrs) {
+      let acc = "";
+      for (const [k, v] of Object.entries(attrs)) {
+        if (typeof v === "string") {
+          acc += ` ${k}="${v}"`;
+        } else if (typeof v === "boolean") {
+          if (v) {
+            acc += ` ${k}`;
+          }
+        } else if (typeof v === "object" && typeof v.toString === "function") {
+          acc += ` ${k}="${v.toString()}"`;
+        }
+      }
+      return acc;
+    };
+    const stringifyNode = function(node) {
+      let acc = "";
+      if (node.type === "text") {
+        const parent = node.parent;
+        if (parent && parent.type === "tag" && (parent.tag === "script" || parent.tag === "style")) {
+          acc += node.content;
+        } else {
+          acc += escapeXML(node.content);
+        }
+      } else if (node.type === "comment") {
+        acc += `<!--${node.content}-->`;
+      } else {
+        acc += `<${node.tag}${stringifyAttributes(node.attrs)}`;
+        if (typeof node.closer === "string") {
+          acc += `${node.closer}>`;
+        } else {
+          acc += `>`;
+          for (const child of node.children) {
+            acc += stringifyNode(child);
+          }
+          acc += `</${node.tag}>`;
+        }
+      }
+      return acc;
+    };
+    let result = "";
+    const rootNodes = nodes.filter((node) => node.depth === 0);
+    for (const node of rootNodes) {
+      result += stringifyNode(node);
+    }
+    return result;
+  }
+};
 
 // src/modules/encrypt.ts
 function xor(str, salt) {
@@ -726,6 +781,7 @@ function toNumber(e) {
   throw new Error(`Invalid argument type: ${typeof e}`);
 }
 export {
+  Tree,
   bitwise,
   calcStringSize,
   clone,
@@ -750,13 +806,11 @@ export {
   humanizeFileSize,
   isNumeric,
   normalizeString,
-  parseDOM,
   parseNumbers,
   parsePath,
   plotBy,
   shuffleArray,
   sleep,
-  stringifyDOM,
   toNumber,
   toRegExp,
   unescapeXML,
