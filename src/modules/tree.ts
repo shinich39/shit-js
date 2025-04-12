@@ -345,10 +345,10 @@ function parseDOM(str: string): TreeNode[] {
   }
 
   // create root node
-  const root: OpenedTreeRoot = {
+  const root: TreeRoot = {
     type: "root",
     depth: 0,
-    children: (result as TreeChild[]).filter((node) => node.depth === 1),
+    children: result.filter((node) => node.depth === 1) as TreeChild[],
   };
 
   // set parent to root children
@@ -357,7 +357,7 @@ function parseDOM(str: string): TreeNode[] {
   }
 
   // add root to front of the result
-  (result as OpenedTreeNode[]).unshift(root);
+  (result as TreeNode[]).unshift(root);
 
   return result as TreeNode[];
 }
