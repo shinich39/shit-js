@@ -431,13 +431,11 @@ function _parse(str) {
         nodes.push({
           isOpened: false,
           type: "text",
-          depth: 1,
           content: stack.content
         });
       } else if (stack.type === "comment") {
         nodes.push({
           isOpened: false,
-          depth: 1,
           type: "comment",
           content: stack.content
         });
@@ -445,7 +443,6 @@ function _parse(str) {
         nodes.push({
           isOpened: !stack.closer,
           type: "tag",
-          depth: 1,
           tag: stack.tag,
           ...stack.closer ? { closer: stack.closer } : {},
           attrs: stack.attrs || {},
@@ -464,10 +461,9 @@ function _parse(str) {
             delete node.isOpened;
             break;
           }
-          if (node.depth === 1) {
+          if (!node.parent) {
             children.push(node);
           }
-          node.depth++;
         }
       }
     }
@@ -481,8 +477,8 @@ function _parse(str) {
   }
   const root = {
     type: "root",
-    depth: 0,
-    children: nodes.filter((node) => node.depth === 1)
+    // find nodes without parent nodes
+    children: nodes.filter((node) => !node.parent)
   };
   for (const child of root.children) {
     child.parent = root;

@@ -31,14 +31,12 @@ export type TreeChild = TreeTag | TreeText | TreeComment;
 
 export interface TreeRoot {
   type: "root";
-  depth: number;
   children: TreeChild[];
 }
 
 export interface TreeTag {
   type: "tag";
   parent: TreeParent;
-  depth: number;
   tag: string;
   closer?: string;
   attrs: Record<string, boolean | string>;
@@ -48,22 +46,15 @@ export interface TreeTag {
 export interface TreeText {
   type: "text";
   parent: TreeParent;
-  depth: number;
   content: string;
 }
 
 export interface TreeComment {
   type: "comment";
   parent: TreeParent;
-  depth: number;
   content: string;
 }
 
-type OpenedTreeNode =
-  | OpenedTreeRoot
-  | OpenedTreeTag
-  | OpenedTreeText
-  | OpenedTreeComment;
 type OpenedTreeParent = OpenedTreeRoot | OpenedTreeTag;
 type OpenedTreeChild = OpenedTreeTag | OpenedTreeText | OpenedTreeComment;
 
@@ -71,7 +62,6 @@ interface OpenedTreeRoot {
   isOpened?: boolean;
   parent?: OpenedTreeParent;
   type: "root";
-  depth: number;
   children: OpenedTreeChild[];
 }
 
@@ -79,7 +69,6 @@ interface OpenedTreeTag {
   isOpened?: boolean;
   parent?: OpenedTreeParent;
   type: "tag";
-  depth: number;
   tag: string;
   closer?: string;
   attrs: Record<string, boolean | string>;
@@ -90,7 +79,6 @@ interface OpenedTreeText {
   isOpened?: boolean;
   parent?: OpenedTreeParent;
   type: "text";
-  depth: number;
   content: string;
 }
 
@@ -98,7 +86,6 @@ interface OpenedTreeComment {
   isOpened?: boolean;
   parent?: OpenedTreeParent;
   type: "comment";
-  depth: number;
   content: string;
 }
 
@@ -287,13 +274,11 @@ function _parse(str: string): TreeRoot {
         nodes.push({
           isOpened: false,
           type: "text",
-          depth: 1,
           content: stack.content,
         });
       } else if (stack.type === "comment") {
         nodes.push({
           isOpened: false,
-          depth: 1,
           type: "comment",
           content: stack.content,
         });
@@ -302,17 +287,18 @@ function _parse(str: string): TreeRoot {
         nodes.push({
           isOpened: !stack.closer,
           type: "tag",
-          depth: 1,
           tag: stack.tag,
           ...(stack.closer ? { closer: stack.closer } : {}),
           attrs: stack.attrs || {},
           children: [],
         });
-      } else {
+      } // closing tag
+      else {
         const children: OpenedTreeChild[] = [];
         const tag = stack.tag.substring(1);
         for (let j = nodes.length - 1; j >= 0; j--) {
           const node = nodes[j];
+
           if (node.isOpened && node.type === "tag" && node.tag === tag) {
             for (const child of children) {
               node.children = [child, ...node.children];
@@ -322,11 +308,9 @@ function _parse(str: string): TreeRoot {
             break;
           }
 
-          if (node.depth === 1) {
+          if (!node.parent) {
             children.push(node);
           }
-
-          node.depth++;
         }
       }
     }
@@ -340,15 +324,15 @@ function _parse(str: string): TreeRoot {
       node.closer = "";
     }
 
-    // remove "isOpened" property
+    // remove unused properties
     delete node.isOpened;
   }
 
   // create root node
   const root: TreeRoot = {
     type: "root",
-    depth: 0,
-    children: nodes.filter((node) => node.depth === 1) as TreeChild[],
+    // find nodes without parent nodes
+    children: nodes.filter((node) => !node.parent) as TreeChild[],
   };
 
   // set parent to root children

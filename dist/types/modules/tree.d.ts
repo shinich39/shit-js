@@ -3,13 +3,11 @@ export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
 export interface TreeRoot {
     type: "root";
-    depth: number;
     children: TreeChild[];
 }
 export interface TreeTag {
     type: "tag";
     parent: TreeParent;
-    depth: number;
     tag: string;
     closer?: string;
     attrs: Record<string, boolean | string>;
@@ -18,13 +16,11 @@ export interface TreeTag {
 export interface TreeText {
     type: "text";
     parent: TreeParent;
-    depth: number;
     content: string;
 }
 export interface TreeComment {
     type: "comment";
     parent: TreeParent;
-    depth: number;
     content: string;
 }
 declare function _parse(str: string): TreeRoot;
