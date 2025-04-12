@@ -102,7 +102,7 @@ interface OpenedTreeComment {
   content: string;
 }
 
-function parseDOM(str: string): TreeNode[] {
+function _parse(str: string): TreeRoot {
   const parseTag = function (src: string, i: number) {
     let m = i + 1,
       n = i + 1,
@@ -278,20 +278,20 @@ function parseDOM(str: string): TreeNode[] {
   // normalize
   str = unescapeXML(str);
 
-  const result: OpenedTreeChild[] = [];
+  const nodes: OpenedTreeChild[] = [];
   let i = 0,
     stacks = getNodes(str, i);
   while (stacks) {
     for (const stack of stacks) {
       if (stack.type === "text") {
-        result.push({
+        nodes.push({
           isOpened: false,
           type: "text",
           depth: 1,
           content: stack.content,
         });
       } else if (stack.type === "comment") {
-        result.push({
+        nodes.push({
           isOpened: false,
           depth: 1,
           type: "comment",
@@ -299,7 +299,7 @@ function parseDOM(str: string): TreeNode[] {
         });
       } // opening tag
       else if (stack.tag[0] !== "/") {
-        result.push({
+        nodes.push({
           isOpened: !stack.closer,
           type: "tag",
           depth: 1,
@@ -311,8 +311,8 @@ function parseDOM(str: string): TreeNode[] {
       } else {
         const children: OpenedTreeChild[] = [];
         const tag = stack.tag.substring(1);
-        for (let j = result.length - 1; j >= 0; j--) {
-          const node = result[j];
+        for (let j = nodes.length - 1; j >= 0; j--) {
+          const node = nodes[j];
           if (node.isOpened && node.type === "tag" && node.tag === tag) {
             for (const child of children) {
               node.children = [child, ...node.children];
@@ -334,7 +334,7 @@ function parseDOM(str: string): TreeNode[] {
     stacks = getNodes(str, stacks[stacks.length - 1].endIndex);
   }
 
-  for (const node of result) {
+  for (const node of nodes) {
     // if node is opened, set empty closer
     if (node.type === "tag" && node.isOpened) {
       node.closer = "";
@@ -348,7 +348,7 @@ function parseDOM(str: string): TreeNode[] {
   const root: TreeRoot = {
     type: "root",
     depth: 0,
-    children: result.filter((node) => node.depth === 1) as TreeChild[],
+    children: nodes.filter((node) => node.depth === 1) as TreeChild[],
   };
 
   // set parent to root children
@@ -356,13 +356,75 @@ function parseDOM(str: string): TreeNode[] {
     child.parent = root;
   }
 
-  // add root to front of the result
-  (result as TreeNode[]).unshift(root);
-
-  return result as TreeNode[];
+  return root;
 }
 
-function stringifyDOM(root: TreeRoot) {
+function _map(
+  root: TreeRoot,
+  callback: (node: TreeNode, index: number, root: TreeRoot) => void
+) {
+  let index = 0;
+
+  const func = function (parent: TreeParent) {
+    callback(parent, index++, root);
+    for (const child of parent.children) {
+      if (child.type === "tag") {
+        func(child);
+      }
+    }
+  };
+
+  func(root);
+}
+
+function _find(
+  root: TreeRoot,
+  callback: (node: TreeNode, index: number, root: TreeRoot) => any
+) {
+  let index = 0;
+
+  const func = function (parent: TreeParent): TreeNode | undefined {
+    if (callback(parent, index++, root)) {
+      return parent;
+    }
+    for (const child of parent.children) {
+      if (child.type === "tag") {
+        const grandchild = func(child);
+        if (grandchild) {
+          return grandchild;
+        }
+      }
+    }
+  };
+
+  return func(root);
+}
+
+function _filter(
+  root: TreeRoot,
+  callback: (node: TreeNode, index: number, root: TreeRoot) => any
+) {
+  const result: TreeNode[] = [];
+
+  let index = 0;
+
+  const func = function (parent: TreeParent) {
+    if (callback(parent, index++, root)) {
+      result.push(parent);
+    }
+    for (const child of parent.children) {
+      if (child.type === "tag") {
+        func(child);
+      }
+    }
+  };
+
+  func(root);
+
+  return result;
+}
+
+function _stringify(root: TreeRoot): string {
   const stringifyAttributes = function (attrs: Record<string, any>) {
     let acc = "";
     for (const [k, v] of Object.entries(attrs)) {
@@ -420,6 +482,34 @@ function stringifyDOM(root: TreeRoot) {
 }
 
 export class Tree {
-  static parse = parseDOM;
-  static stringify = stringifyDOM;
+  root: TreeRoot;
+
+  constructor(arg: string | TreeRoot) {
+    if (typeof arg === "string") {
+      this.root = _parse(arg);
+    } else if (arg.type === "root") {
+      this.root = arg;
+    } else {
+      throw new Error(`Invalid argument: argument must be string or TreeRoot`);
+    }
+  }
+
+  map(callback: (node: TreeNode, index: number, root: TreeRoot) => void) {
+    return _map(this.root, callback);
+  }
+  find(callback: (node: TreeNode, index: number, root: TreeRoot) => any) {
+    return _find(this.root, callback);
+  }
+  filter(callback: (node: TreeNode, index: number, root: TreeRoot) => any) {
+    return _filter(this.root, callback);
+  }
+  toString() {
+    return _stringify(this.root);
+  }
+
+  static parse = _parse;
+  static map = _map;
+  static find = _find;
+  static filter = _filter;
+  static stringify = _stringify;
 }

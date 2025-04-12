@@ -209,7 +209,7 @@ function compareString(from, to) {
 }
 
 // src/modules/tree.ts
-function parseDOM(str) {
+function _parse(str) {
   const parseTag = function(src, i2) {
     let m = i2 + 1, n = i2 + 1, parts = [], quote = null;
     while (n < src.length) {
@@ -364,26 +364,26 @@ function parseDOM(str) {
     ];
   };
   str = unescapeXML(str);
-  const result = [];
+  const nodes = [];
   let i = 0, stacks = getNodes(str, i);
   while (stacks) {
     for (const stack of stacks) {
       if (stack.type === "text") {
-        result.push({
+        nodes.push({
           isOpened: false,
           type: "text",
           depth: 1,
           content: stack.content
         });
       } else if (stack.type === "comment") {
-        result.push({
+        nodes.push({
           isOpened: false,
           depth: 1,
           type: "comment",
           content: stack.content
         });
       } else if (stack.tag[0] !== "/") {
-        result.push({
+        nodes.push({
           isOpened: !stack.closer,
           type: "tag",
           depth: 1,
@@ -395,8 +395,8 @@ function parseDOM(str) {
       } else {
         const children = [];
         const tag = stack.tag.substring(1);
-        for (let j = result.length - 1; j >= 0; j--) {
-          const node = result[j];
+        for (let j = nodes.length - 1; j >= 0; j--) {
+          const node = nodes[j];
           if (node.isOpened && node.type === "tag" && node.tag === tag) {
             for (const child of children) {
               node.children = [child, ...node.children];
@@ -414,7 +414,7 @@ function parseDOM(str) {
     }
     stacks = getNodes(str, stacks[stacks.length - 1].endIndex);
   }
-  for (const node of result) {
+  for (const node of nodes) {
     if (node.type === "tag" && node.isOpened) {
       node.closer = "";
     }
@@ -423,15 +423,59 @@ function parseDOM(str) {
   const root = {
     type: "root",
     depth: 0,
-    children: result.filter((node) => node.depth === 1)
+    children: nodes.filter((node) => node.depth === 1)
   };
   for (const child of root.children) {
     child.parent = root;
   }
-  result.unshift(root);
+  return root;
+}
+function _map(root, callback) {
+  let index = 0;
+  const func = function(parent) {
+    callback(parent, index++, root);
+    for (const child of parent.children) {
+      if (child.type === "tag") {
+        func(child);
+      }
+    }
+  };
+  func(root);
+}
+function _find(root, callback) {
+  let index = 0;
+  const func = function(parent) {
+    if (callback(parent, index++, root)) {
+      return parent;
+    }
+    for (const child of parent.children) {
+      if (child.type === "tag") {
+        const grandchild = func(child);
+        if (grandchild) {
+          return grandchild;
+        }
+      }
+    }
+  };
+  return func(root);
+}
+function _filter(root, callback) {
+  const result = [];
+  let index = 0;
+  const func = function(parent) {
+    if (callback(parent, index++, root)) {
+      result.push(parent);
+    }
+    for (const child of parent.children) {
+      if (child.type === "tag") {
+        func(child);
+      }
+    }
+  };
+  func(root);
   return result;
 }
-function stringifyDOM(root) {
+function _stringify(root) {
   const stringifyAttributes = function(attrs) {
     let acc = "";
     for (const [k, v] of Object.entries(attrs)) {
@@ -479,11 +523,41 @@ function stringifyDOM(root) {
   return stringifyNode(root);
 }
 var Tree = class {
-  static {
-    this.parse = parseDOM;
+  constructor(arg) {
+    if (typeof arg === "string") {
+      this.root = _parse(arg);
+    } else if (arg.type === "root") {
+      this.root = arg;
+    } else {
+      throw new Error(`Invalid argument: argument must be string or TreeRoot`);
+    }
+  }
+  map(callback) {
+    return _map(this.root, callback);
+  }
+  find(callback) {
+    return _find(this.root, callback);
+  }
+  filter(callback) {
+    return _filter(this.root, callback);
+  }
+  toString() {
+    return _stringify(this.root);
   }
   static {
-    this.stringify = stringifyDOM;
+    this.parse = _parse;
+  }
+  static {
+    this.map = _map;
+  }
+  static {
+    this.find = _find;
+  }
+  static {
+    this.filter = _filter;
+  }
+  static {
+    this.stringify = _stringify;
   }
 };
 
