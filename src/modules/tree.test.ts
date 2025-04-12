@@ -49,51 +49,17 @@ test("Tree.parse()", () => {
 
   console.log(Date.now() - now + "ms", count);
 
-  const arr = Tree.parse(html);
+  const nodes = Tree.parse(html);
+  const root = nodes.find((node) => node.type === "root");
 
-  eq(Tree.stringify(arr), html);
-});
+  if (!root) {
+    throw new Error("Root node not found");
+  }
 
-test("new Tree()", () => {
-  const html = `
-<!DOCTYPE html>
-<?xml version="1.0" encoding="utf-8"?>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>index.html</title>
-  </head>
+  // console.log(nodes);
+  // console.log(Tree.stringify(root));
 
-  <body>
-    <!-- Test Comment -->
-    <div id="div1">
-      <div id="div2" class="abc 'test'" hidden>
-        <img class="unclosed" alt="image" />
-        I split images!
-        <img class="closed" alt="im'a'ge" />
-      </div>
-    </div>
-    <!-- Test Preformatted -->
-
-    <pre><code>
-      Hello, world!
-    </code></pre>
-    <script src="../dist/index.js"></script>
-    <script>
-      // JS Comment
-      document.getElementById("result").innerHTML = '<ol>' +
-        Object.keys(window.utils).map((item) => {
-          return \`<li>\$\{item\}</li>\`;
-        }).join("") + '</ol>';
-    </script>
-  </body>
-</html>
-  `.trim();
-
-  const tree = new Tree(html);
-
-  eq(tree.toString(), html);
+  eq(Tree.stringify(root), html);
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

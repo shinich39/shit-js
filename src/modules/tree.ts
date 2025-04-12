@@ -1,219 +1,230 @@
 import { escapeXML, unescapeXML } from "./string";
 
-export type TTree = {
-  map: WeakSet<TNode>;
-  nodes: TNode[];
-};
+type Stack = StackText | StackComment | StackTag;
 
-export type TNode = TText | TComment | TTag;
+interface StackText {
+  startIndex: number;
+  endIndex: number;
+  type: "text";
+  content: string;
+}
 
-export type TTag = {
-  parent?: TTag;
-  depth: number;
+interface StackComment {
+  startIndex: number;
+  endIndex: number;
+  type: "comment";
+  content: string;
+}
+
+interface StackTag {
+  startIndex: number;
+  endIndex: number;
   type: "tag";
+  closer?: string;
+  tag: string;
+  attrs?: Record<string, boolean | string>;
+}
+
+export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
+export type TreeParent = TreeRoot | TreeTag;
+export type TreeChild = TreeTag | TreeText | TreeComment;
+
+export interface TreeRoot {
+  type: "root";
+  depth: number;
+  children: TreeChild[];
+}
+
+export interface TreeTag {
+  type: "tag";
+  parent: TreeParent;
+  depth: number;
   tag: string;
   closer?: string;
   attrs: Record<string, boolean | string>;
-  children: TNode[];
-};
+  children: TreeChild[];
+}
 
-export type TText = {
-  parent?: TTag;
-  depth: number;
+export interface TreeText {
   type: "text";
-  content: string;
-};
-
-export type TComment = {
-  parent?: TTag;
+  parent: TreeParent;
   depth: number;
-  type: "comment";
   content: string;
-};
+}
 
-type Stack =
-  | {
-      startIndex: number;
-      endIndex: number;
-      type: "text";
-      content: string;
-    }
-  | {
-      startIndex: number;
-      endIndex: number;
-      type: "comment";
-      content: string;
-    }
-  | {
-      startIndex: number;
-      endIndex: number;
-      type: "tag";
-      closer?: string;
-      tag: string;
-      attrs?: Record<string, boolean | string>;
-    };
+export interface TreeComment {
+  type: "comment";
+  parent: TreeParent;
+  depth: number;
+  content: string;
+}
 
-export class Tree implements TTree {
-  map: WeakSet<TNode>;
-  nodes: TNode[];
+type OpenedTreeNode =
+  | OpenedTreeRoot
+  | OpenedTreeTag
+  | OpenedTreeText
+  | OpenedTreeComment;
+type OpenedTreeParent = OpenedTreeRoot | OpenedTreeTag;
+type OpenedTreeChild = OpenedTreeTag | OpenedTreeText | OpenedTreeComment;
 
-  constructor(str: string) {
-    this.map = new WeakSet();
-    this.nodes = Tree.parse(str);
-  }
+interface OpenedTreeRoot {
+  isOpened?: boolean;
+  parent?: OpenedTreeParent;
+  type: "root";
+  depth: number;
+  children: OpenedTreeChild[];
+}
 
-  set(targetNode: TTag, ...newNodes: TNode[]) {
-    for (const nn of newNodes) {
-      if (this.map.has(nn)) {
-        throw new Error("Node already exists");
-      }
-    }
-    for (const node of this.nodes) {
-      if (node == targetNode) {
-        for (const child of node.children) {
-          this.remove(child);
-        }
-        for (const nn of newNodes) {
-          node.children.push(nn);
-          this.nodes.push(nn);
-          nn.depth = node.depth + 1;
-          nn.parent = node;
-        }
-        return true;
-      }
-    }
-    return false;
-  }
+interface OpenedTreeTag {
+  isOpened?: boolean;
+  parent?: OpenedTreeParent;
+  type: "tag";
+  depth: number;
+  tag: string;
+  closer?: string;
+  attrs: Record<string, boolean | string>;
+  children: OpenedTreeChild[];
+}
 
-  add(targetNode: TTag, ...newNodes: TNode[]) {
-    for (const nn of newNodes) {
-      if (this.map.has(nn)) {
-        throw new Error("Node already exists");
-      }
-    }
-    for (const node of this.nodes) {
-      if (node == targetNode) {
-        for (const nn of newNodes) {
-          node.children.push(nn);
-          this.nodes.push(nn);
-          nn.depth = node.depth + 1;
-          nn.parent = node;
-        }
-        return true;
-      }
-    }
-    return false;
-  }
+interface OpenedTreeText {
+  isOpened?: boolean;
+  parent?: OpenedTreeParent;
+  type: "text";
+  depth: number;
+  content: string;
+}
 
-  remove(targetNode: TNode) {
-    for (let i = 0; i < this.nodes.length; i++) {
-      if (this.nodes[i] == targetNode) {
-        this.nodes.splice(i, 1);
-        this.map.delete(targetNode);
-        delete targetNode.parent;
-        targetNode.depth = 0;
-        return true;
-      }
-    }
-    return false;
-  }
+interface OpenedTreeComment {
+  isOpened?: boolean;
+  parent?: OpenedTreeParent;
+  type: "comment";
+  depth: number;
+  content: string;
+}
 
-  toString() {
-    return Tree.stringify(this.nodes);
-  }
+function parseDOM(str: string): TreeNode[] {
+  const parseTag = function (src: string, i: number) {
+    let m = i + 1,
+      n = i + 1,
+      parts: string[] = [],
+      quote = null;
 
-  static parse(str: string): TNode[] {
-    const parseTag = function (src: string, i: number) {
-      let m = i + 1,
-        n = i + 1,
-        parts: string[] = [],
-        quote = null;
-
-      while (n < src.length) {
-        const c = src[n];
-        if (!quote) {
-          if (c === ">") {
-            parts.push(src.substring(m, n));
-            n++;
-            break;
-          }
-          if (c === " ") {
-            parts.push(src.substring(m, n));
-            m = n; // without whitespace: +1
-          } else if (c === `"` || c === `'`) {
-            quote = c;
-          }
-        } else if (c === "\\") {
+    while (n < src.length) {
+      const c = src[n];
+      if (!quote) {
+        if (c === ">") {
+          parts.push(src.substring(m, n));
           n++;
-        } else if (c === quote) {
-          quote = null;
-          parts.push(src.substring(m, n + 1));
-          m = n + 1;
+          break;
         }
+        if (c === " ") {
+          parts.push(src.substring(m, n));
+          m = n; // without whitespace: +1
+        } else if (c === `"` || c === `'`) {
+          quote = c;
+        }
+      } else if (c === "\\") {
         n++;
+      } else if (c === quote) {
+        quote = null;
+        parts.push(src.substring(m, n + 1));
+        m = n + 1;
+      }
+      n++;
+    }
+
+    const tag = parts.shift();
+    if (!tag) {
+      throw new Error(`Invalid argument: Tag name not found`);
+    }
+
+    const attrs: Record<string, string | boolean> = {};
+    let closer;
+    if (parts.length > 0 && /^\s*[/?]$/.test(parts[parts.length - 1])) {
+      closer = parts.pop();
+    }
+
+    for (const part of parts) {
+      const trimmedPart = part.trim();
+      if (trimmedPart === "") {
+        continue;
       }
 
-      // remove empty strings
-      parts = parts.filter(Boolean);
-
-      let tag = parts.shift();
-      if (!tag) {
-        throw new Error(`Invalid argument: Tag name not found`);
+      const sepIndex = trimmedPart.indexOf("=");
+      if (sepIndex === -1) {
+        attrs[trimmedPart] = true;
+      } else {
+        // remove quotes
+        attrs[trimmedPart.substring(0, sepIndex)] = trimmedPart.substring(
+          sepIndex + 2,
+          trimmedPart.length - 1
+        );
       }
+    }
 
-      const attrs: Record<string, string | boolean> = {};
-      let closer;
-      if (parts.length > 0 && /^\s*[/?]$/.test(parts[parts.length - 1])) {
-        closer = parts.pop();
-      }
-
-      for (const part of parts) {
-        const trimmedPart = part.trim();
-        const sepIndex = trimmedPart.indexOf("=");
-        if (sepIndex === -1) {
-          attrs[trimmedPart] = true;
-        } else {
-          // remove quotes
-          attrs[trimmedPart.substring(0, sepIndex)] = trimmedPart.substring(
-            sepIndex + 2,
-            trimmedPart.length - 1
-          );
-        }
-      }
-
-      return {
-        startIndex: i,
-        endIndex: n,
-        closer,
-        tag,
-        attrs,
-      };
+    return {
+      startIndex: i,
+      endIndex: n,
+      closer,
+      tag,
+      attrs,
     };
+  };
 
-    const getNodes = function (src: string, i: number): Stack[] {
-      if (i >= src.length) {
-        return [];
+  const getNodes = function (src: string, i: number): Stack[] | undefined {
+    if (i >= src.length) {
+      return;
+    }
+
+    const j = src.indexOf("<", i);
+    if (j === -1) {
+      return [
+        {
+          startIndex: i,
+          endIndex: src.length,
+          type: "text",
+          content: src.substring(i),
+        },
+      ];
+    }
+
+    if (src.substring(j, j + 4) === "<!--") {
+      const k = src.indexOf("-->", j + 4);
+      if (k === -1) {
+        throw new Error(
+          `Invalid argument: could not find closing bracket "-->"`
+        );
       }
+      return [
+        {
+          startIndex: i,
+          endIndex: j,
+          type: "text",
+          content: src.substring(i, j),
+        },
+        {
+          startIndex: j,
+          endIndex: k + 3,
+          type: "comment",
+          content: src.substring(j + 4, k),
+        },
+      ];
+    }
 
-      const j = src.indexOf("<", i);
-      if (j === -1) {
-        return [
-          {
-            startIndex: i,
-            endIndex: src.length,
-            type: "text",
-            content: src.substring(i),
-          },
-        ];
-      }
-
-      if (src.substring(j, j + 4) === "<!--") {
-        const k = src.indexOf("-->", j + 4);
+    for (const [opening, closing] of [
+      ["<style", "</style>"],
+      ["<script", "</script>"],
+    ]) {
+      if (src.substring(j, j + opening.length) === opening) {
+        const k = src.indexOf(closing, j + opening.length);
         if (k === -1) {
           throw new Error(
-            `Invalid argument: could not find closing bracket "-->"`
+            `Invalid argument: could not find closing tag "${closing}"`
           );
         }
+
+        const { endIndex, tag, attrs } = parseTag(src, j);
+
         return [
           {
             startIndex: i,
@@ -223,202 +234,192 @@ export class Tree implements TTree {
           },
           {
             startIndex: j,
-            endIndex: k + 3,
-            type: "comment",
-            content: src.substring(j + 4, k),
+            endIndex: endIndex,
+            type: "tag",
+            tag,
+            attrs,
+          },
+          {
+            startIndex: endIndex,
+            endIndex: k,
+            type: "text",
+            content: src.substring(endIndex, k),
+          },
+          {
+            startIndex: k,
+            endIndex: k + closing.length,
+            type: "tag",
+            tag: "/" + tag,
           },
         ];
       }
+    }
 
-      for (const [opening, closing] of [
-        ["<style", "</style>"],
-        ["<script", "</script>"],
-      ]) {
-        if (src.substring(j, j + opening.length) === opening) {
-          const k = src.indexOf(closing, j + opening.length);
-          if (k === -1) {
-            throw new Error(
-              `Invalid argument: could not find closing tag "${closing}"`
-            );
-          }
+    const { startIndex, endIndex, tag, closer, attrs } = parseTag(src, j);
 
-          const { endIndex, tag, attrs } = parseTag(src, j);
+    return [
+      {
+        startIndex: i,
+        endIndex: j,
+        type: "text",
+        content: src.substring(i, j),
+      },
+      {
+        startIndex,
+        endIndex,
+        type: "tag",
+        closer,
+        tag,
+        attrs,
+      },
+    ];
+  };
 
-          return [
-            {
-              startIndex: i,
-              endIndex: j,
-              type: "text",
-              content: src.substring(i, j),
-            },
-            {
-              startIndex: j,
-              endIndex: endIndex,
-              type: "tag",
-              tag,
-              attrs,
-            },
-            {
-              startIndex: endIndex,
-              endIndex: k,
-              type: "text",
-              content: src.substring(endIndex, k),
-            },
-            {
-              startIndex: k,
-              endIndex: k + closing.length,
-              type: "tag",
-              tag: "/" + tag,
-            },
-          ];
-        }
-      }
+  // normalize
+  str = unescapeXML(str);
 
-      const { startIndex, endIndex, tag, closer, attrs } = parseTag(src, j);
-
-      return [
-        {
-          startIndex: i,
-          endIndex: j,
+  const result: OpenedTreeChild[] = [];
+  let i = 0,
+    stacks = getNodes(str, i);
+  while (stacks) {
+    for (const stack of stacks) {
+      if (stack.type === "text") {
+        result.push({
+          isOpened: false,
           type: "text",
-          content: src.substring(i, j),
-        },
-        {
-          startIndex,
-          endIndex,
+          depth: 1,
+          content: stack.content,
+        });
+      } else if (stack.type === "comment") {
+        result.push({
+          isOpened: false,
+          depth: 1,
+          type: "comment",
+          content: stack.content,
+        });
+      } // opening tag
+      else if (stack.tag[0] !== "/") {
+        result.push({
+          isOpened: !stack.closer,
           type: "tag",
-          closer,
-          tag,
-          attrs,
-        },
-      ];
-    };
-
-    // normalize
-    str = unescapeXML(str);
-
-    const nodes: (TNode & { isOpened?: boolean })[] = [];
-    let i = 0,
-      stacks = getNodes(str, i);
-    while (stacks.length > 0) {
-      for (const stack of stacks) {
-        if (stack.type === "text") {
-          nodes.push({
-            depth: 0,
-            type: "text",
-            content: stack.content,
-          });
-        } else if (stack.type === "comment") {
-          nodes.push({
-            depth: 0,
-            type: "comment",
-            content: stack.content,
-          });
-        } // opening tag
-        else if (stack.tag[0] !== "/") {
-          nodes.push({
-            isOpened: !stack.closer,
-            depth: 0,
-            type: "tag",
-            tag: stack.tag,
-            ...(stack.closer ? { closer: stack.closer } : {}),
-            attrs: stack.attrs || {},
-            children: [],
-          });
-        } else {
-          const children: (TNode & { isOpened?: boolean })[] = [];
-          const tag = stack.tag.substring(1);
-          for (let j = nodes.length - 1; j >= 0; j--) {
-            const node = nodes[j];
-            if (node.isOpened && node.type === "tag" && node.tag === tag) {
-              for (const child of children) {
-                node.children = [child, ...node.children];
-                child.parent = node;
-              }
-              delete node.isOpened;
-              break;
-            }
-
-            if (node.depth === 0) {
-              children.push(node);
-            }
-
-            node.depth++;
-          }
-        }
-      }
-
-      stacks = getNodes(str, stacks[stacks.length - 1].endIndex);
-    }
-
-    for (const node of nodes) {
-      // if node is opened, set empty closer
-      if (node.type === "tag" && node.isOpened) {
-        node.closer = "";
-      }
-
-      // remove "isOpened" property
-      delete node.isOpened;
-    }
-
-    return nodes;
-  }
-
-  static stringify(nodes: TNode[]) {
-    const stringifyAttributes = function (attrs: Record<string, any>) {
-      let acc = "";
-      for (const [k, v] of Object.entries(attrs)) {
-        if (typeof v === "string") {
-          acc += ` ${k}="${v}"`;
-        } else if (typeof v === "boolean") {
-          // skip false
-          if (v) {
-            acc += ` ${k}`;
-          }
-        } else if (typeof v === "object" && typeof v.toString === "function") {
-          acc += ` ${k}="${v.toString()}"`;
-        }
-      }
-      return acc;
-    };
-
-    const stringifyNode = function (node: TNode): string {
-      let acc = "";
-      if (node.type === "text") {
-        // prevent escaping of <script> and <style>
-        const parent = node.parent;
-        if (
-          parent &&
-          parent.type === "tag" &&
-          (parent.tag === "script" || parent.tag === "style")
-        ) {
-          acc += node.content;
-        } else {
-          acc += escapeXML(node.content);
-        }
-      } else if (node.type === "comment") {
-        acc += `<!--${node.content}-->`;
+          depth: 1,
+          tag: stack.tag,
+          ...(stack.closer ? { closer: stack.closer } : {}),
+          attrs: stack.attrs || {},
+          children: [],
+        });
       } else {
-        acc += `<${node.tag}${stringifyAttributes(node.attrs)}`;
-        if (typeof node.closer === "string") {
-          acc += `${node.closer}>`;
-        } else {
-          acc += `>`;
-          for (const child of node.children) {
-            acc += stringifyNode(child);
+        const children: OpenedTreeChild[] = [];
+        const tag = stack.tag.substring(1);
+        for (let j = result.length - 1; j >= 0; j--) {
+          const node = result[j];
+          if (node.isOpened && node.type === "tag" && node.tag === tag) {
+            for (const child of children) {
+              node.children = [child, ...node.children];
+              child.parent = node;
+            }
+            delete node.isOpened;
+            break;
           }
-          acc += `</${node.tag}>`;
+
+          if (node.depth === 1) {
+            children.push(node);
+          }
+
+          node.depth++;
         }
       }
-      return acc;
-    };
-
-    let result = "";
-    const rootNodes = nodes.filter((node) => node.depth === 0);
-    for (const node of rootNodes) {
-      result += stringifyNode(node);
     }
 
-    return result;
+    stacks = getNodes(str, stacks[stacks.length - 1].endIndex);
   }
+
+  for (const node of result) {
+    // if node is opened, set empty closer
+    if (node.type === "tag" && node.isOpened) {
+      node.closer = "";
+    }
+
+    // remove "isOpened" property
+    delete node.isOpened;
+  }
+
+  // create root node
+  const root: OpenedTreeRoot = {
+    type: "root",
+    depth: 0,
+    children: (result as TreeChild[]).filter((node) => node.depth === 1),
+  };
+
+  // set parent to root children
+  for (const child of root.children) {
+    child.parent = root;
+  }
+
+  // add root to front of the result
+  (result as OpenedTreeNode[]).unshift(root);
+
+  return result as TreeNode[];
+}
+
+function stringifyDOM(root: TreeRoot) {
+  const stringifyAttributes = function (attrs: Record<string, any>) {
+    let acc = "";
+    for (const [k, v] of Object.entries(attrs)) {
+      if (typeof v === "string") {
+        acc += ` ${k}="${v}"`;
+      } else if (typeof v === "boolean") {
+        // skip false
+        if (v) {
+          acc += ` ${k}`;
+        }
+      } else if (typeof v === "object" && typeof v.toString === "function") {
+        acc += ` ${k}="${v.toString()}"`;
+      }
+    }
+    return acc;
+  };
+
+  const stringifyNode = function (node: TreeNode): string {
+    let acc = "";
+    if (node.type === "text") {
+      // prevent escaping of <script> and <style>
+      const parent = node.parent;
+      if (
+        parent &&
+        parent.type === "tag" &&
+        (parent.tag === "script" || parent.tag === "style")
+      ) {
+        acc += node.content;
+      } else {
+        acc += escapeXML(node.content);
+      }
+    } else if (node.type === "comment") {
+      acc += `<!--${node.content}-->`;
+    } else if (node.type === "tag") {
+      acc += `<${node.tag}${stringifyAttributes(node.attrs)}`;
+      if (typeof node.closer === "string") {
+        acc += `${node.closer}>`;
+      } else {
+        acc += `>`;
+        for (const child of node.children) {
+          acc += stringifyNode(child);
+        }
+        acc += `</${node.tag}>`;
+      }
+    } // root
+    else {
+      for (const child of node.children) {
+        acc += stringifyNode(child);
+      }
+    }
+    return acc;
+  };
+
+  return stringifyNode(root);
+}
+
+export class Tree {
+  static parse = parseDOM;
+  static stringify = stringifyDOM;
 }

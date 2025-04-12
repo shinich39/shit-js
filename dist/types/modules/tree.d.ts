@@ -1,38 +1,37 @@
-export type TTree = {
-    map: WeakSet<TNode>;
-    nodes: TNode[];
-};
-export type TNode = TText | TComment | TTag;
-export type TTag = {
-    parent?: TTag;
+export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
+export type TreeParent = TreeRoot | TreeTag;
+export type TreeChild = TreeTag | TreeText | TreeComment;
+export interface TreeRoot {
+    type: "root";
     depth: number;
+    children: TreeChild[];
+}
+export interface TreeTag {
     type: "tag";
+    parent: TreeParent;
+    depth: number;
     tag: string;
     closer?: string;
     attrs: Record<string, boolean | string>;
-    children: TNode[];
-};
-export type TText = {
-    parent?: TTag;
-    depth: number;
-    type: "text";
-    content: string;
-};
-export type TComment = {
-    parent?: TTag;
-    depth: number;
-    type: "comment";
-    content: string;
-};
-export declare class Tree implements TTree {
-    map: WeakSet<TNode>;
-    nodes: TNode[];
-    constructor(str: string);
-    set(targetNode: TTag, ...newNodes: TNode[]): boolean;
-    add(targetNode: TTag, ...newNodes: TNode[]): boolean;
-    remove(targetNode: TNode): boolean;
-    toString(): string;
-    static parse(str: string): TNode[];
-    static stringify(nodes: TNode[]): string;
+    children: TreeChild[];
 }
+export interface TreeText {
+    type: "text";
+    parent: TreeParent;
+    depth: number;
+    content: string;
+}
+export interface TreeComment {
+    type: "comment";
+    parent: TreeParent;
+    depth: number;
+    content: string;
+}
+declare function parseDOM(str: string): TreeNode[];
+declare function stringifyDOM(root: TreeRoot): string;
+export declare class Tree {
+    static parse: typeof parseDOM;
+    static stringify: typeof stringifyDOM;
+}
+export {};
 //# sourceMappingURL=tree.d.ts.map
