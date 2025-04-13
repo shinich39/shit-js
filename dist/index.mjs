@@ -209,7 +209,7 @@ function compareString(from, to) {
 }
 
 // src/modules/tree.ts
-function _parse(str) {
+function parse(str) {
   const parseTag = function(src, i2) {
     let m = i2 + 1, n = i2 + 1, parts = [], quote = null;
     while (n < src.length) {
@@ -426,25 +426,27 @@ function _parse(str) {
   }
   return root;
 }
-function _map(root, callback) {
+function getChildren(root, callback) {
+  const result = [];
   let index = 0;
   const func = function(parent) {
-    callback(parent, index++, root);
     for (const child of parent.children) {
+      result.push(callback(child, index++, root));
       if (child.type === "tag") {
         func(child);
       }
     }
   };
   func(root);
+  return result;
 }
-function _find(root, callback) {
+function findChild(root, callback) {
   let index = 0;
   const func = function(parent) {
-    if (callback(parent, index++, root)) {
-      return parent;
-    }
     for (const child of parent.children) {
+      if (callback(child, index++, root)) {
+        return child;
+      }
       if (child.type === "tag") {
         const grandchild = func(child);
         if (grandchild) {
@@ -455,14 +457,14 @@ function _find(root, callback) {
   };
   return func(root);
 }
-function _filter(root, callback) {
+function findChildren(root, callback) {
   const result = [];
   let index = 0;
   const func = function(parent) {
-    if (callback(parent, index++, root)) {
-      result.push(parent);
-    }
     for (const child of parent.children) {
+      if (callback(child, index++, root)) {
+        result.push(child);
+      }
       if (child.type === "tag") {
         func(child);
       }
@@ -471,7 +473,51 @@ function _filter(root, callback) {
   func(root);
   return result;
 }
-function _stringify(root) {
+function getParents(leaf, callback) {
+  const result = [];
+  let index = 0;
+  const func = function(child) {
+    if (child.parent) {
+      result.push(callback(child.parent, index++, leaf));
+      if (child.parent.type !== "root") {
+        func(child.parent);
+      }
+    }
+  };
+  func(leaf);
+  return result;
+}
+function findParent(leaf, callback) {
+  let index = 0;
+  const func = function(child) {
+    if (child.parent) {
+      if (callback(child.parent, index++, leaf)) {
+        return child.parent;
+      }
+      if (child.parent.type !== "root") {
+        func(child.parent);
+      }
+    }
+  };
+  return func(leaf);
+}
+function findParents(leaf, callback) {
+  const result = [];
+  let index = 0;
+  const func = function(child) {
+    if (child.parent) {
+      if (callback(child.parent, index++, leaf)) {
+        result.push(child.parent);
+      }
+      if (child.parent.type !== "root") {
+        func(child.parent);
+      }
+    }
+  };
+  func(leaf);
+  return result;
+}
+function stringify(node) {
   const stringifyAttributes = function(attrs) {
     let acc = "";
     for (const [k, v] of Object.entries(attrs)) {
@@ -487,73 +533,111 @@ function _stringify(root) {
     }
     return acc;
   };
-  const stringifyNode = function(node) {
+  const stringifyNode = function(n) {
     let acc = "";
-    if (node.type === "text") {
-      const parent = node.parent;
+    if (n.type === "text") {
+      const parent = n.parent;
       if (parent && parent.type === "tag" && (parent.tag === "script" || parent.tag === "style")) {
-        acc += node.content;
+        acc += n.content;
       } else {
-        acc += escapeXML(node.content);
+        acc += escapeXML(n.content);
       }
-    } else if (node.type === "comment") {
-      acc += `<!--${node.content}-->`;
-    } else if (node.type === "tag") {
-      acc += `<${node.tag}${stringifyAttributes(node.attrs)}`;
-      if (typeof node.closer === "string") {
-        acc += `${node.closer}>`;
+    } else if (n.type === "comment") {
+      acc += `<!--${n.content}-->`;
+    } else if (n.type === "tag") {
+      acc += `<${n.tag}${stringifyAttributes(n.attrs)}`;
+      if (typeof n.closer === "string") {
+        acc += `${n.closer}>`;
       } else {
         acc += `>`;
-        for (const child of node.children) {
+        for (const child of n.children) {
           acc += stringifyNode(child);
         }
-        acc += `</${node.tag}>`;
+        acc += `</${n.tag}>`;
       }
     } else {
-      for (const child of node.children) {
+      for (const child of n.children) {
         acc += stringifyNode(child);
       }
     }
     return acc;
   };
-  return stringifyNode(root);
+  return stringifyNode(node);
 }
 var Tree = class {
   constructor(arg) {
     if (typeof arg === "string") {
-      this.root = _parse(arg);
-    } else if (arg.type === "root") {
-      this.root = arg;
+      this.node = parse(arg);
+    } else if (typeof arg === "object" && ["root", "tag", "text", "comment"].indexOf(arg.type) > -1) {
+      this.node = arg;
     } else {
-      throw new Error(`Invalid argument: argument must be string or TreeRoot`);
+      throw new Error(`Invalid argument: argument must be string or TreeNode`);
     }
   }
-  map(callback) {
-    return _map(this.root, callback);
+  getChildren(callback) {
+    if (this.node.type === "root" || this.node.type === "tag") {
+      return getChildren(this.node, callback);
+    } else {
+      return [];
+    }
   }
-  find(callback) {
-    return _find(this.root, callback);
+  findChild(callback) {
+    if (this.node.type === "root" || this.node.type === "tag") {
+      return findChild(this.node, callback);
+    }
   }
-  filter(callback) {
-    return _filter(this.root, callback);
+  findChildren(callback) {
+    if (this.node.type === "root" || this.node.type === "tag") {
+      return findChildren(this.node, callback);
+    } else {
+      return [];
+    }
+  }
+  getParents(callback) {
+    if (this.node.type === "tag" || this.node.type === "text" || this.node.type === "comment") {
+      return getParents(this.node, callback);
+    } else {
+      return [];
+    }
+  }
+  findParent(callback) {
+    if (this.node.type === "tag" || this.node.type === "text" || this.node.type === "comment") {
+      return findParent(this.node, callback);
+    }
+  }
+  findParents(callback) {
+    if (this.node.type === "tag" || this.node.type === "text" || this.node.type === "comment") {
+      return findParents(this.node, callback);
+    } else {
+      return [];
+    }
   }
   toString() {
-    return _stringify(this.root);
+    return stringify(this.node);
   }
   static {
-    this.parse = _parse;
+    this.parse = parse;
   }
   static {
-    this.map = _map;
+    this.stringify = stringify;
   }
   static {
-    this.find = _find;
+    this.getChildren = getChildren;
   }
   static {
-    this.filter = _filter;
+    this.findChild = findChild;
   }
   static {
-    this.stringify = _stringify;
+    this.findChildren = findChildren;
+  }
+  static {
+    this.getParents = getParents;
+  }
+  static {
+    this.findParent = findParent;
+  }
+  static {
+    this.findParents = findParents;
   }
 };
 

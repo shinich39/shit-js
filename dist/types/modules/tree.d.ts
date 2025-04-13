@@ -23,23 +23,32 @@ export interface TreeComment {
     parent: TreeParent;
     content: string;
 }
-declare function _parse(str: string): TreeRoot;
-declare function _map(root: TreeRoot, callback: (node: TreeNode, index: number, root: TreeRoot) => void): void;
-declare function _find(root: TreeRoot, callback: (node: TreeNode, index: number, root: TreeRoot) => any): TreeNode | undefined;
-declare function _filter(root: TreeRoot, callback: (node: TreeNode, index: number, root: TreeRoot) => any): TreeNode[];
-declare function _stringify(root: TreeRoot): string;
+declare function parse(str: string): TreeRoot;
+declare function getChildren<T extends TreeParent, U>(root: T, callback: (child: TreeChild, index: number, root: T) => U): U[];
+declare function findChild<T extends TreeParent>(root: T, callback: (child: TreeChild, index: number, root: T) => any): TreeChild | undefined;
+declare function findChildren<T extends TreeParent>(root: T, callback: (child: TreeChild, index: number, root: T) => any): TreeChild[];
+declare function getParents<T extends TreeChild, U>(leaf: T, callback: (parent: TreeParent, index: number, leaf: T) => U): U[];
+declare function findParent<T extends TreeChild>(leaf: T, callback: (parent: TreeParent, index: number, leaf: T) => any): TreeNode | undefined;
+declare function findParents<T extends TreeChild>(leaf: T, callback: (parent: TreeParent, index: number, leaf: T) => any): TreeParent[];
+declare function stringify(node: TreeNode): string;
 export declare class Tree {
-    root: TreeRoot;
-    constructor(arg: string | TreeRoot);
-    map(callback: (node: TreeNode, index: number, root: TreeRoot) => void): void;
-    find(callback: (node: TreeNode, index: number, root: TreeRoot) => any): TreeNode | undefined;
-    filter(callback: (node: TreeNode, index: number, root: TreeRoot) => any): TreeNode[];
+    node: TreeNode;
+    constructor(arg: string | TreeNode);
+    getChildren<U>(callback: <T extends TreeParent>(child: TreeChild, index: number, root: T) => U): U[];
+    findChild(callback: <T extends TreeParent>(child: TreeChild, index: number, root: T) => any): TreeChild | undefined;
+    findChildren(callback: <T extends TreeParent>(child: TreeChild, index: number, root: T) => any): TreeChild[];
+    getParents<U>(callback: <T extends TreeChild>(parent: TreeParent, index: number, leaf: T) => U): U[];
+    findParent(callback: <T extends TreeChild>(parent: TreeParent, index: number, leaf: T) => any): TreeNode | undefined;
+    findParents(callback: <T extends TreeChild>(parent: TreeParent, index: number, leaf: T) => any): TreeParent[];
     toString(): string;
-    static parse: typeof _parse;
-    static map: typeof _map;
-    static find: typeof _find;
-    static filter: typeof _filter;
-    static stringify: typeof _stringify;
+    static parse: typeof parse;
+    static stringify: typeof stringify;
+    static getChildren: typeof getChildren;
+    static findChild: typeof findChild;
+    static findChildren: typeof findChildren;
+    static getParents: typeof getParents;
+    static findParent: typeof findParent;
+    static findParents: typeof findParents;
 }
 export {};
 //# sourceMappingURL=tree.d.ts.map

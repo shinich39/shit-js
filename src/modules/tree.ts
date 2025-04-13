@@ -89,7 +89,7 @@ interface OpenedTreeComment {
   content: string;
 }
 
-function _parse(str: string): TreeRoot {
+function parse(str: string): TreeRoot {
   const parseTag = function (src: string, i: number) {
     let m = i + 1,
       n = i + 1,
@@ -343,15 +343,17 @@ function _parse(str: string): TreeRoot {
   return root;
 }
 
-function _map(
-  root: TreeRoot,
-  callback: (node: TreeNode, index: number, root: TreeRoot) => void
+function getChildren<T extends TreeParent, U>(
+  root: T,
+  callback: (child: TreeChild, index: number, root: T) => U
 ) {
+  const result: U[] = [];
+
   let index = 0;
 
   const func = function (parent: TreeParent) {
-    callback(parent, index++, root);
     for (const child of parent.children) {
+      result.push(callback(child, index++, root));
       if (child.type === "tag") {
         func(child);
       }
@@ -359,19 +361,21 @@ function _map(
   };
 
   func(root);
+
+  return result;
 }
 
-function _find(
-  root: TreeRoot,
-  callback: (node: TreeNode, index: number, root: TreeRoot) => any
+function findChild<T extends TreeParent>(
+  root: T,
+  callback: (child: TreeChild, index: number, root: T) => any
 ) {
   let index = 0;
 
-  const func = function (parent: TreeParent): TreeNode | undefined {
-    if (callback(parent, index++, root)) {
-      return parent;
-    }
+  const func = function (parent: TreeParent): TreeChild | undefined {
     for (const child of parent.children) {
+      if (callback(child, index++, root)) {
+        return child;
+      }
       if (child.type === "tag") {
         const grandchild = func(child);
         if (grandchild) {
@@ -384,19 +388,19 @@ function _find(
   return func(root);
 }
 
-function _filter(
-  root: TreeRoot,
-  callback: (node: TreeNode, index: number, root: TreeRoot) => any
+function findChildren<T extends TreeParent>(
+  root: T,
+  callback: (child: TreeChild, index: number, root: T) => any
 ) {
-  const result: TreeNode[] = [];
+  const result: TreeChild[] = [];
 
   let index = 0;
 
   const func = function (parent: TreeParent) {
-    if (callback(parent, index++, root)) {
-      result.push(parent);
-    }
     for (const child of parent.children) {
+      if (callback(child, index++, root)) {
+        result.push(child);
+      }
       if (child.type === "tag") {
         func(child);
       }
@@ -408,7 +412,73 @@ function _filter(
   return result;
 }
 
-function _stringify(root: TreeRoot): string {
+function getParents<T extends TreeChild, U>(
+  leaf: T,
+  callback: (parent: TreeParent, index: number, leaf: T) => U
+) {
+  const result: U[] = [];
+
+  let index = 0;
+
+  const func = function (child: TreeChild) {
+    if (child.parent) {
+      result.push(callback(child.parent, index++, leaf));
+      if (child.parent.type !== "root") {
+        func(child.parent);
+      }
+    }
+  };
+
+  func(leaf);
+
+  return result;
+}
+
+function findParent<T extends TreeChild>(
+  leaf: T,
+  callback: (parent: TreeParent, index: number, leaf: T) => any
+) {
+  let index = 0;
+
+  const func = function (child: TreeChild): TreeNode | undefined {
+    if (child.parent) {
+      if (callback(child.parent, index++, leaf)) {
+        return child.parent;
+      }
+      if (child.parent.type !== "root") {
+        func(child.parent);
+      }
+    }
+  };
+
+  return func(leaf);
+}
+
+function findParents<T extends TreeChild>(
+  leaf: T,
+  callback: (parent: TreeParent, index: number, leaf: T) => any
+) {
+  const result: TreeParent[] = [];
+
+  let index = 0;
+
+  const func = function (child: TreeChild) {
+    if (child.parent) {
+      if (callback(child.parent, index++, leaf)) {
+        result.push(child.parent);
+      }
+      if (child.parent.type !== "root") {
+        func(child.parent);
+      }
+    }
+  };
+
+  func(leaf);
+
+  return result;
+}
+
+function stringify(node: TreeNode): string {
   const stringifyAttributes = function (attrs: Record<string, any>) {
     let acc = "";
     for (const [k, v] of Object.entries(attrs)) {
@@ -426,74 +496,159 @@ function _stringify(root: TreeRoot): string {
     return acc;
   };
 
-  const stringifyNode = function (node: TreeNode): string {
+  const stringifyNode = function (n: TreeNode): string {
     let acc = "";
-    if (node.type === "text") {
+    if (n.type === "text") {
       // prevent escaping of <script> and <style>
-      const parent = node.parent;
+      const parent = n.parent;
       if (
         parent &&
         parent.type === "tag" &&
         (parent.tag === "script" || parent.tag === "style")
       ) {
-        acc += node.content;
+        acc += n.content;
       } else {
-        acc += escapeXML(node.content);
+        acc += escapeXML(n.content);
       }
-    } else if (node.type === "comment") {
-      acc += `<!--${node.content}-->`;
-    } else if (node.type === "tag") {
-      acc += `<${node.tag}${stringifyAttributes(node.attrs)}`;
-      if (typeof node.closer === "string") {
-        acc += `${node.closer}>`;
+    } else if (n.type === "comment") {
+      acc += `<!--${n.content}-->`;
+    } else if (n.type === "tag") {
+      acc += `<${n.tag}${stringifyAttributes(n.attrs)}`;
+      if (typeof n.closer === "string") {
+        acc += `${n.closer}>`;
       } else {
         acc += `>`;
-        for (const child of node.children) {
+        for (const child of n.children) {
           acc += stringifyNode(child);
         }
-        acc += `</${node.tag}>`;
+        acc += `</${n.tag}>`;
       }
     } // root
     else {
-      for (const child of node.children) {
+      for (const child of n.children) {
         acc += stringifyNode(child);
       }
     }
     return acc;
   };
 
-  return stringifyNode(root);
+  return stringifyNode(node);
 }
 
 export class Tree {
-  root: TreeRoot;
+  node: TreeNode;
 
-  constructor(arg: string | TreeRoot) {
+  constructor(arg: string | TreeNode) {
     if (typeof arg === "string") {
-      this.root = _parse(arg);
-    } else if (arg.type === "root") {
-      this.root = arg;
+      this.node = parse(arg);
+    } else if (
+      typeof arg === "object" &&
+      ["root", "tag", "text", "comment"].indexOf(arg.type) > -1
+    ) {
+      this.node = arg;
     } else {
-      throw new Error(`Invalid argument: argument must be string or TreeRoot`);
+      throw new Error(`Invalid argument: argument must be string or TreeNode`);
     }
   }
 
-  map(callback: (node: TreeNode, index: number, root: TreeRoot) => void) {
-    return _map(this.root, callback);
+  getChildren<U>(
+    callback: <T extends TreeParent>(
+      child: TreeChild,
+      index: number,
+      root: T
+    ) => U
+  ): U[] {
+    if (this.node.type === "root" || this.node.type === "tag") {
+      return getChildren(this.node, callback);
+    } else {
+      return [];
+    }
   }
-  find(callback: (node: TreeNode, index: number, root: TreeRoot) => any) {
-    return _find(this.root, callback);
+  findChild(
+    callback: <T extends TreeParent>(
+      child: TreeChild,
+      index: number,
+      root: T
+    ) => any
+  ) {
+    if (this.node.type === "root" || this.node.type === "tag") {
+      return findChild(this.node, callback);
+    }
   }
-  filter(callback: (node: TreeNode, index: number, root: TreeRoot) => any) {
-    return _filter(this.root, callback);
+  findChildren(
+    callback: <T extends TreeParent>(
+      child: TreeChild,
+      index: number,
+      root: T
+    ) => any
+  ) {
+    if (this.node.type === "root" || this.node.type === "tag") {
+      return findChildren(this.node, callback);
+    } else {
+      return [];
+    }
+  }
+  getParents<U>(
+    callback: <T extends TreeChild>(
+      parent: TreeParent,
+      index: number,
+      leaf: T
+    ) => U
+  ): U[] {
+    if (
+      this.node.type === "tag" ||
+      this.node.type === "text" ||
+      this.node.type === "comment"
+    ) {
+      return getParents(this.node, callback);
+    } else {
+      return [];
+    }
+  }
+  findParent(
+    callback: <T extends TreeChild>(
+      parent: TreeParent,
+      index: number,
+      leaf: T
+    ) => any
+  ) {
+    if (
+      this.node.type === "tag" ||
+      this.node.type === "text" ||
+      this.node.type === "comment"
+    ) {
+      return findParent(this.node, callback);
+    }
+  }
+  findParents(
+    callback: <T extends TreeChild>(
+      parent: TreeParent,
+      index: number,
+      leaf: T
+    ) => any
+  ) {
+    if (
+      this.node.type === "tag" ||
+      this.node.type === "text" ||
+      this.node.type === "comment"
+    ) {
+      return findParents(this.node, callback);
+    } else {
+      return [];
+    }
   }
   toString() {
-    return _stringify(this.root);
+    return stringify(this.node);
   }
 
-  static parse = _parse;
-  static map = _map;
-  static find = _find;
-  static filter = _filter;
-  static stringify = _stringify;
+  static parse = parse;
+  static stringify = stringify;
+
+  static getChildren = getChildren;
+  static findChild = findChild;
+  static findChildren = findChildren;
+
+  static getParents = getParents;
+  static findParent = findParent;
+  static findParents = findParents;
 }
