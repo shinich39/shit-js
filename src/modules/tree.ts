@@ -479,7 +479,7 @@ function findParents<T extends TreeChild>(
 }
 
 function stringify(node: TreeNode): string {
-  const stringifyAttributes = function (attrs: Record<string, any>) {
+  const stringifyAttrs = function (attrs: Record<string, any>) {
     let acc = "";
     for (const [k, v] of Object.entries(attrs)) {
       if (typeof v === "string") {
@@ -513,7 +513,7 @@ function stringify(node: TreeNode): string {
     } else if (n.type === "comment") {
       acc += `<!--${n.content}-->`;
     } else if (n.type === "tag") {
-      acc += `<${n.tag}${stringifyAttributes(n.attrs)}`;
+      acc += `<${n.tag}${stringifyAttrs(n.attrs)}`;
       if (typeof n.closer === "string") {
         acc += `${n.closer}>`;
       } else {
