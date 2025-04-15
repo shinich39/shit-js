@@ -3,6 +3,11 @@ export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
 export interface TreeRoot {
     type: "root";
+    parent?: undefined;
+    tag?: undefined;
+    closer?: undefined;
+    content?: undefined;
+    attrs?: undefined;
     children: TreeChild[];
 }
 export interface TreeTag {
@@ -10,18 +15,27 @@ export interface TreeTag {
     parent: TreeParent;
     tag: string;
     closer?: string;
+    content: undefined;
     attrs: Record<string, boolean | string>;
     children: TreeChild[];
 }
 export interface TreeText {
     type: "text";
     parent: TreeParent;
+    tag?: undefined;
+    closer?: undefined;
     content: string;
+    attrs?: undefined;
+    children?: undefined;
 }
 export interface TreeComment {
     type: "comment";
     parent: TreeParent;
+    tag?: undefined;
+    closer?: undefined;
     content: string;
+    attrs?: undefined;
+    children?: undefined;
 }
 declare function parse(str: string): TreeRoot;
 declare function getChildren<T extends TreeParent, U>(root: T, callback: (child: TreeChild, index: number, root: T) => U): U[];

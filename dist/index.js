@@ -577,7 +577,7 @@ var shit = (() => {
     return result;
   }
   function stringify(node) {
-    const stringifyAttributes = function(attrs) {
+    const stringifyAttrs = function(attrs) {
       let acc = "";
       for (const [k, v] of Object.entries(attrs)) {
         if (typeof v === "string") {
@@ -604,7 +604,7 @@ var shit = (() => {
       } else if (n.type === "comment") {
         acc += `<!--${n.content}-->`;
       } else if (n.type === "tag") {
-        acc += `<${n.tag}${stringifyAttributes(n.attrs)}`;
+        acc += `<${n.tag}${stringifyAttrs(n.attrs)}`;
         if (typeof n.closer === "string") {
           acc += `${n.closer}>`;
         } else {

@@ -1,36 +1,16 @@
 import { escapeXML, unescapeXML } from "./string";
 
-type Stack = StackText | StackComment | StackTag;
-
-interface StackText {
-  startIndex: number;
-  endIndex: number;
-  type: "text";
-  content: string;
-}
-
-interface StackComment {
-  startIndex: number;
-  endIndex: number;
-  type: "comment";
-  content: string;
-}
-
-interface StackTag {
-  startIndex: number;
-  endIndex: number;
-  type: "tag";
-  closer?: string;
-  tag: string;
-  attrs?: Record<string, boolean | string>;
-}
-
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
 export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
 
 export interface TreeRoot {
   type: "root";
+  parent?: undefined;
+  tag?: undefined;
+  closer?: undefined;
+  content?: undefined;
+  attrs?: undefined;
   children: TreeChild[];
 }
 
@@ -39,6 +19,7 @@ export interface TreeTag {
   parent: TreeParent;
   tag: string;
   closer?: string;
+  content: undefined;
   attrs: Record<string, boolean | string>;
   children: TreeChild[];
 }
@@ -46,45 +27,78 @@ export interface TreeTag {
 export interface TreeText {
   type: "text";
   parent: TreeParent;
+  tag?: undefined;
+  closer?: undefined;
   content: string;
+  attrs?: undefined;
+  children?: undefined;
 }
 
 export interface TreeComment {
   type: "comment";
   parent: TreeParent;
+  tag?: undefined;
+  closer?: undefined;
   content: string;
+  attrs?: undefined;
+  children?: undefined;
 }
 
-type OpenedTreeParent = OpenedTreeRoot | OpenedTreeTag;
-type OpenedTreeChild = OpenedTreeTag | OpenedTreeText | OpenedTreeComment;
+type IndexedNode = IndexedText | IndexedComment | IndexedTag;
 
-interface OpenedTreeRoot {
-  isOpened?: boolean;
-  parent?: OpenedTreeParent;
-  type: "root";
-  children: OpenedTreeChild[];
-}
-
-interface OpenedTreeTag {
-  isOpened?: boolean;
-  parent?: OpenedTreeParent;
+interface IndexedTag {
+  startIndex: number;
+  endIndex: number;
   type: "tag";
-  tag: string;
   closer?: string;
-  attrs: Record<string, boolean | string>;
-  children: OpenedTreeChild[];
+  tag: string;
+  attrs?: Record<string, boolean | string>;
 }
 
-interface OpenedTreeText {
-  isOpened?: boolean;
-  parent?: OpenedTreeParent;
+interface IndexedText {
+  startIndex: number;
+  endIndex: number;
   type: "text";
   content: string;
 }
 
-interface OpenedTreeComment {
+interface IndexedComment {
+  startIndex: number;
+  endIndex: number;
+  type: "comment";
+  content: string;
+}
+
+type OpenedParent = OpenedRoot | OpenedTag;
+type OpenedChild = OpenedTag | OpenedText | OpenedComment;
+
+interface OpenedRoot {
   isOpened?: boolean;
-  parent?: OpenedTreeParent;
+  parent?: OpenedParent;
+  type: "root";
+  children: OpenedChild[];
+}
+
+interface OpenedTag {
+  isOpened?: boolean;
+  parent?: OpenedParent;
+  type: "tag";
+  tag: string;
+  closer?: string;
+  attrs: Record<string, boolean | string>;
+  children: OpenedChild[];
+}
+
+interface OpenedText {
+  isOpened?: boolean;
+  parent?: OpenedParent;
+  type: "text";
+  content: string;
+}
+
+interface OpenedComment {
+  isOpened?: boolean;
+  parent?: OpenedParent;
   type: "comment";
   content: string;
 }
@@ -158,7 +172,10 @@ function parse(str: string): TreeRoot {
     };
   };
 
-  const getNodes = function (src: string, i: number): Stack[] | undefined {
+  const getNodes = function (
+    src: string,
+    i: number
+  ): IndexedNode[] | undefined {
     if (i >= src.length) {
       return;
     }
@@ -265,7 +282,7 @@ function parse(str: string): TreeRoot {
   // normalize
   str = unescapeXML(str);
 
-  const nodes: OpenedTreeChild[] = [];
+  const nodes: OpenedChild[] = [];
   let i = 0,
     stacks = getNodes(str, i);
   while (stacks) {
@@ -294,7 +311,7 @@ function parse(str: string): TreeRoot {
         });
       } // closing tag
       else {
-        const children: OpenedTreeChild[] = [];
+        const children: OpenedChild[] = [];
         const tag = stack.tag.substring(1);
         for (let j = nodes.length - 1; j >= 0; j--) {
           const node = nodes[j];
