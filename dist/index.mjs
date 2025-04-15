@@ -569,9 +569,8 @@ function getContent(node) {
     return node.content;
   } else {
     let acc = "";
-    const children = findChildren(node, (child) => child.type === "text");
-    for (const child of children) {
-      acc += child.content;
+    for (const child of node.children) {
+      acc += getContent(child);
     }
     return acc;
   }

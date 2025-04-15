@@ -71,6 +71,21 @@ test("Tree.parse()", () => {
     `
   );
 
+  const div1 = Tree.findChild(
+    root,
+    (child) => child.tag === "div" && child.attrs.id === "div1"
+  ) as TreeTag;
+  eq(
+    Tree.getContent(div1),
+    `
+      
+        Text 1
+        
+        Text 2
+      
+    `
+  );
+
   const seq = [
     "!DOCTYPE",
     "?xml",
