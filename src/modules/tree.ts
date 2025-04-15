@@ -552,6 +552,20 @@ function stringify(node: TreeNode): string {
   return stringifyNode(node);
 }
 
+function getContent(node: TreeNode): string {
+  if (node.type === "text" || node.type === "comment") {
+    return node.content;
+  } // root or tag
+  else {
+    let acc = "";
+    const children = findChildren(node, (child) => child.type === "text");
+    for (const child of children) {
+      acc += child.content;
+    }
+    return acc;
+  }
+}
+
 export class Tree {
   node: TreeNode;
 
@@ -654,6 +668,10 @@ export class Tree {
       return [];
     }
   }
+
+  getContent() {
+    return getContent(this.node);
+  }
   toString() {
     return stringify(this.node);
   }
@@ -668,4 +686,6 @@ export class Tree {
   static getParents = getParents;
   static findParent = findParent;
   static findParents = findParents;
+
+  static getContent = getContent;
 }

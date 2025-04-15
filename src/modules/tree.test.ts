@@ -56,6 +56,21 @@ test("Tree.parse()", () => {
 
   eq(Tree.stringify(root), html);
 
+  const script = Tree.findChild(
+    root,
+    (child) => child.tag === "script" && !child.attrs.src
+  ) as TreeTag;
+  eq(
+    Tree.getContent(script),
+    `
+      // JS Comment
+      document.getElementById("result").innerHTML = '<ol>' +
+        Object.keys(window.utils).map((item) => {
+          return \`<li>\$\{item\}</li>\`;
+        }).join("") + '</ol>';
+    `
+  );
+
   const seq = [
     "!DOCTYPE",
     "?xml",

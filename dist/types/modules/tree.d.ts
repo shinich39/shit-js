@@ -45,6 +45,7 @@ declare function getParents<T extends TreeChild, U>(leaf: T, callback: (parent: 
 declare function findParent<T extends TreeChild>(leaf: T, callback: (parent: TreeParent, index: number, leaf: T) => any): TreeNode | undefined;
 declare function findParents<T extends TreeChild>(leaf: T, callback: (parent: TreeParent, index: number, leaf: T) => any): TreeParent[];
 declare function stringify(node: TreeNode): string;
+declare function getContent(node: TreeNode): string;
 export declare class Tree {
     node: TreeNode;
     constructor(arg: string | TreeNode);
@@ -54,6 +55,7 @@ export declare class Tree {
     getParents<U>(callback: <T extends TreeChild>(parent: TreeParent, index: number, leaf: T) => U): U[];
     findParent(callback: <T extends TreeChild>(parent: TreeParent, index: number, leaf: T) => any): TreeNode | undefined;
     findParents(callback: <T extends TreeChild>(parent: TreeParent, index: number, leaf: T) => any): TreeParent[];
+    getContent(): string;
     toString(): string;
     static parse: typeof parse;
     static stringify: typeof stringify;
@@ -63,6 +65,7 @@ export declare class Tree {
     static getParents: typeof getParents;
     static findParent: typeof findParent;
     static findParents: typeof findParents;
+    static getContent: typeof getContent;
 }
 export {};
 //# sourceMappingURL=tree.d.ts.map

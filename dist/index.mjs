@@ -564,6 +564,18 @@ function stringify(node) {
   };
   return stringifyNode(node);
 }
+function getContent(node) {
+  if (node.type === "text" || node.type === "comment") {
+    return node.content;
+  } else {
+    let acc = "";
+    const children = findChildren(node, (child) => child.type === "text");
+    for (const child of children) {
+      acc += child.content;
+    }
+    return acc;
+  }
+}
 var Tree = class {
   constructor(arg) {
     if (typeof arg === "string") {
@@ -612,6 +624,9 @@ var Tree = class {
       return [];
     }
   }
+  getContent() {
+    return getContent(this.node);
+  }
   toString() {
     return stringify(this.node);
   }
@@ -638,6 +653,9 @@ var Tree = class {
   }
   static {
     this.findParents = findParents;
+  }
+  static {
+    this.getContent = getContent;
   }
 };
 
