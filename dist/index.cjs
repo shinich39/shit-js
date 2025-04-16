@@ -268,6 +268,12 @@ function compareString(from, to) {
 }
 
 // src/modules/tree.ts
+function isParent(node) {
+  return node.type === "root" || node.type === "tag";
+}
+function isChild(node) {
+  return node.type === "tag" || node.type === "text" || node.type === "comment";
+}
 function parse(str) {
   const parseTag = function(src, i2) {
     let m = i2 + 1, n = i2 + 1, parts = [], quote = null;
@@ -485,95 +491,121 @@ function parse(str) {
   }
   return root;
 }
-function getChildren(root, callback) {
+function getChildren(parent, callback) {
   const result = [];
-  let index = 0;
-  const func = function(parent) {
-    for (const child of parent.children) {
-      result.push(callback(child, index++, root));
+  const func = function(parent2, depth) {
+    for (let i = 0; i < parent2.children.length; i++) {
+      const child = parent2.children[i];
+      result.push(callback(child, depth, i, parent2.children));
       if (child.type === "tag") {
-        func(child);
+        func(child, depth + 1);
       }
     }
   };
-  func(root);
+  func(parent, 1);
   return result;
 }
-function findChild(root, callback) {
-  let index = 0;
-  const func = function(parent) {
-    for (const child of parent.children) {
-      if (callback(child, index++, root)) {
+function accChildren(parent, callback, initialValue) {
+  let result = initialValue;
+  const func = function(parent2, depth) {
+    for (let i = 0; i < parent2.children.length; i++) {
+      const child = parent2.children[i];
+      result = callback(result, child, depth, i, parent2.children);
+      if (child.type === "tag") {
+        func(child, depth + 1);
+      }
+    }
+  };
+  func(parent, 1);
+  return result;
+}
+function findChild(parent, callback) {
+  const func = function(parent2, depth) {
+    for (let i = 0; i < parent2.children.length; i++) {
+      const child = parent2.children[i];
+      if (callback(child, depth, i, parent2.children)) {
         return child;
       }
       if (child.type === "tag") {
-        const grandchild = func(child);
+        const grandchild = func(child, depth + 1);
         if (grandchild) {
           return grandchild;
         }
       }
     }
   };
-  return func(root);
+  return func(parent, 1);
 }
-function findChildren(root, callback) {
+function findChildren(parent, callback) {
   const result = [];
-  let index = 0;
-  const func = function(parent) {
-    for (const child of parent.children) {
-      if (callback(child, index++, root)) {
+  const func = function(parent2, depth) {
+    for (let i = 0; i < parent2.children.length; i++) {
+      const child = parent2.children[i];
+      if (callback(child, depth, i, parent2.children)) {
         result.push(child);
       }
       if (child.type === "tag") {
-        func(child);
+        func(child, depth + 1);
       }
     }
   };
-  func(root);
+  func(parent, 1);
   return result;
 }
-function getParents(leaf, callback) {
+function getParents(child, callback) {
   const result = [];
-  let index = 0;
-  const func = function(child) {
-    if (child.parent) {
-      result.push(callback(child.parent, index++, leaf));
-      if (child.parent.type !== "root") {
-        func(child.parent);
+  const func = function(child2, depth) {
+    if (child2.parent) {
+      result.push(callback(child2.parent, depth, child2));
+      if (child2.parent.type !== "root") {
+        func(child2.parent, depth + 1);
       }
     }
   };
-  func(leaf);
+  func(child, 1);
   return result;
 }
-function findParent(leaf, callback) {
-  let index = 0;
-  const func = function(child) {
-    if (child.parent) {
-      if (callback(child.parent, index++, leaf)) {
-        return child.parent;
+function accParents(child, callback, initialValue) {
+  let result = initialValue;
+  const func = function(child2, depth) {
+    if (child2.parent) {
+      if (callback(result, child2.parent, depth, child2)) {
+        return child2.parent;
       }
-      if (child.parent.type !== "root") {
-        func(child.parent);
+      if (child2.parent.type !== "root") {
+        func(child2.parent, depth + 1);
       }
     }
   };
-  return func(leaf);
+  func(child, 1);
+  return result;
 }
-function findParents(leaf, callback) {
-  const result = [];
-  let index = 0;
-  const func = function(child) {
-    if (child.parent) {
-      if (callback(child.parent, index++, leaf)) {
-        result.push(child.parent);
+function findParent(child, callback) {
+  const func = function(child2, depth) {
+    if (child2.parent) {
+      if (callback(child2.parent, depth, child2)) {
+        return child2.parent;
       }
-      if (child.parent.type !== "root") {
-        func(child.parent);
+      if (child2.parent.type !== "root") {
+        func(child2.parent, depth + 1);
       }
     }
   };
-  func(leaf);
+  return func(child, 1);
+}
+function findParents(child, callback) {
+  const result = [];
+  const func = function(child2, depth) {
+    if (child2.parent) {
+      if (callback(child2.parent, depth, child2)) {
+        result.push(child2.parent);
+      }
+      if (child2.parent.type !== "root") {
+        func(child2.parent, depth + 1);
+      }
+    }
+  };
+  func(child, 1);
   return result;
 }
 function stringify(node) {
@@ -623,17 +655,6 @@ function stringify(node) {
   };
   return stringifyNode(node);
 }
-function getContent(node) {
-  if (node.type === "text" || node.type === "comment") {
-    return node.content;
-  } else {
-    let acc = "";
-    for (const child of node.children) {
-      acc += getContent(child);
-    }
-    return acc;
-  }
-}
 var Tree = class {
   constructor(arg) {
     if (typeof arg === "string") {
@@ -644,49 +665,72 @@ var Tree = class {
       throw new Error(`Invalid argument: argument must be string or TreeNode`);
     }
   }
+  isParent() {
+    return isParent(this.node);
+  }
+  isChild() {
+    return isChild(this.node);
+  }
   getChildren(callback) {
-    if (this.node.type === "root" || this.node.type === "tag") {
+    if (isParent(this.node)) {
       return getChildren(this.node, callback);
     } else {
       return [];
     }
   }
+  accChildren(callback, initialValue) {
+    if (isParent(this.node)) {
+      return accChildren(this.node, callback, initialValue);
+    } else {
+      return initialValue;
+    }
+  }
   findChild(callback) {
-    if (this.node.type === "root" || this.node.type === "tag") {
+    if (isParent(this.node)) {
       return findChild(this.node, callback);
     }
   }
   findChildren(callback) {
-    if (this.node.type === "root" || this.node.type === "tag") {
+    if (isParent(this.node)) {
       return findChildren(this.node, callback);
     } else {
       return [];
     }
   }
   getParents(callback) {
-    if (this.node.type === "tag" || this.node.type === "text" || this.node.type === "comment") {
+    if (isChild(this.node)) {
       return getParents(this.node, callback);
     } else {
       return [];
     }
   }
+  accParents(callback, initialValue) {
+    if (isChild(this.node)) {
+      return accParents(this.node, callback, initialValue);
+    } else {
+      return initialValue;
+    }
+  }
   findParent(callback) {
-    if (this.node.type === "tag" || this.node.type === "text" || this.node.type === "comment") {
+    if (isChild(this.node)) {
       return findParent(this.node, callback);
     }
   }
   findParents(callback) {
-    if (this.node.type === "tag" || this.node.type === "text" || this.node.type === "comment") {
+    if (isChild(this.node)) {
       return findParents(this.node, callback);
     } else {
       return [];
     }
   }
-  getContent() {
-    return getContent(this.node);
-  }
   toString() {
     return stringify(this.node);
+  }
+  static {
+    this.isParent = isParent;
+  }
+  static {
+    this.isChild = isChild;
   }
   static {
     this.parse = parse;
@@ -698,6 +742,9 @@ var Tree = class {
     this.getChildren = getChildren;
   }
   static {
+    this.accChildren = accChildren;
+  }
+  static {
     this.findChild = findChild;
   }
   static {
@@ -707,13 +754,13 @@ var Tree = class {
     this.getParents = getParents;
   }
   static {
+    this.accParents = accParents;
+  }
+  static {
     this.findParent = findParent;
   }
   static {
     this.findParents = findParents;
-  }
-  static {
-    this.getContent = getContent;
   }
 };
 

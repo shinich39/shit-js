@@ -61,7 +61,16 @@ test("Tree.parse()", () => {
     (child) => child.tag === "script" && !child.attrs.src
   ) as TreeTag;
   eq(
-    Tree.getContent(script),
+    Tree.accChildren(
+      script,
+      (acc, node) => {
+        if (node.content) {
+          acc += node.content;
+        }
+        return acc;
+      },
+      ""
+    ),
     `
       // JS Comment
       document.getElementById("result").innerHTML = '<ol>' +
@@ -76,7 +85,16 @@ test("Tree.parse()", () => {
     (child) => child.tag === "div" && child.attrs.id === "div1"
   ) as TreeTag;
   eq(
-    Tree.getContent(div1),
+    Tree.accChildren(
+      div1,
+      (acc, node) => {
+        if (node.content) {
+          acc += node.content;
+        }
+        return acc;
+      },
+      ""
+    ),
     `
       
         Text 1
