@@ -80,6 +80,17 @@ test("Tree.parse()", () => {
     `
   );
 
+  eq(
+    Tree.getContents(script).join(""),
+    `
+      // JS Comment
+      document.getElementById("result").innerHTML = '<ol>' +
+        Object.keys(window.utils).map((item) => {
+          return \`<li>\$\{item\}</li>\`;
+        }).join("") + '</ol>';
+    `
+  );
+
   const div1 = Tree.findChild(
     root,
     (child) => child.tag === "div" && child.attrs.id === "div1"
@@ -95,6 +106,17 @@ test("Tree.parse()", () => {
       },
       ""
     ),
+    `
+      
+        Text 1
+        
+        Text 2
+      
+    `
+  );
+
+  eq(
+    Tree.getContents(div1).join(""),
     `
       
         Text 1

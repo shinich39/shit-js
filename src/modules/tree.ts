@@ -628,6 +628,24 @@ function stringify(node: TreeNode): string {
   return stringifyNode(node);
 }
 
+function getContents(node: TreeNode): string[] {
+  const acc: string[] = [];
+
+  const func = function (node: TreeNode) {
+    if (node.type === "text" || node.type === "comment") {
+      acc.push(node.content);
+    } else {
+      for (const child of node.children) {
+        func(child);
+      }
+    }
+  };
+
+  func(node);
+
+  return acc;
+}
+
 export class Tree {
   node: TreeNode;
 
@@ -756,6 +774,10 @@ export class Tree {
     }
   }
 
+  getContents() {
+    return getContents(this.node);
+  }
+
   toString() {
     return stringify(this.node);
   }
@@ -765,6 +787,7 @@ export class Tree {
 
   static parse = parse;
   static stringify = stringify;
+  static getContents = getContents;
 
   static getChildren = getChildren;
   static accChildren = accChildren;

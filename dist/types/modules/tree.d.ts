@@ -49,6 +49,7 @@ declare function accParents<T>(child: TreeChild, callback: (accumulator: T, pare
 declare function findParent(child: TreeChild, callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeNode | undefined;
 declare function findParents(child: TreeChild, callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeParent[];
 declare function stringify(node: TreeNode): string;
+declare function getContents(node: TreeNode): string[];
 export declare class Tree {
     node: TreeNode;
     constructor(arg: string | TreeNode);
@@ -62,11 +63,13 @@ export declare class Tree {
     accParents<T>(callback: (accumulator: T, parent: TreeParent, depth: number, child: TreeChild) => T, initialValue: T): T;
     findParent(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeNode | undefined;
     findParents(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeParent[];
+    getContents(): string[];
     toString(): string;
     static isParent: typeof isParent;
     static isChild: typeof isChild;
     static parse: typeof parse;
     static stringify: typeof stringify;
+    static getContents: typeof getContents;
     static getChildren: typeof getChildren;
     static accChildren: typeof accChildren;
     static findChild: typeof findChild;
