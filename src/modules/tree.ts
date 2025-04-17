@@ -3,6 +3,7 @@ import { escapeXML, unescapeXML } from "./string";
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
 export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
+export type TreeAttrs = Record<string, boolean | string>;
 
 export interface TreeRoot {
   type: "root";
@@ -19,8 +20,8 @@ export interface TreeTag {
   parent: TreeParent;
   tag: string;
   closer?: string;
-  content: undefined;
-  attrs: Record<string, boolean | string>;
+  content?: undefined;
+  attrs: TreeAttrs;
   children: TreeChild[];
 }
 
@@ -44,63 +45,113 @@ export interface TreeComment {
   children?: undefined;
 }
 
-type IndexedNode = IndexedText | IndexedComment | IndexedTag;
+type StackNode = Omit<TreeNode, "parent"> & {
+  isClosed?: boolean;
+  parent?: TreeParent;
+};
+type StackChild = Omit<TreeChild, "parent"> & {
+  isClosed?: boolean;
+  parent?: TreeParent;
+};
+type StackParent = Omit<TreeParent, "parent"> & {
+  isClosed?: boolean;
+  parent?: TreeParent;
+};
+type StackTag = Omit<TreeTag, "parent"> & {
+  isClosed?: boolean;
+  parent?: TreeParent;
+};
+type StackText = Omit<TreeText, "parent"> & {
+  isClosed?: boolean;
+  parent?: TreeParent;
+};
+type StackComment = Omit<TreeComment, "parent"> & {
+  isClosed?: boolean;
+  parent?: TreeParent;
+};
 
-interface IndexedTag {
-  startIndex: number;
-  endIndex: number;
-  type: "tag";
-  closer?: string;
-  tag: string;
-  attrs?: Record<string, boolean | string>;
+function parseTag(str: string, fromIndex: number) {
+  let i = fromIndex;
+  while (i < str.length) {
+    if (/\s|>/.test(str[i])) {
+      if (i === fromIndex) {
+        return;
+      } else {
+        return str.substring(fromIndex, i);
+      }
+    }
+    i++;
+  }
+  return;
 }
 
-interface IndexedText {
-  startIndex: number;
-  endIndex: number;
-  type: "text";
-  content: string;
-}
+function parseAttrs(str: string, fromIndex: number) {
+  let i = fromIndex,
+    j = fromIndex,
+    parts: string[] = [],
+    quote = null,
+    closer: string | undefined;
 
-interface IndexedComment {
-  startIndex: number;
-  endIndex: number;
-  type: "comment";
-  content: string;
-}
+  const addPart = function (s: string) {
+    if (s !== "") {
+      parts.push(s);
+    }
+  };
 
-type OpenedParent = OpenedRoot | OpenedTag;
-type OpenedChild = OpenedTag | OpenedText | OpenedComment;
+  while (j < str.length) {
+    const c = str[j];
+    if (!quote) {
+      if (c === ">") {
+        const part = str.substring(i, j);
+        if (/^\s*[/?]$/.test(part)) {
+          closer = part;
+        } else {
+          addPart(part.trim());
+        }
+        j++;
+        break;
+      }
+      if (/\s/.test(c)) {
+        addPart(str.substring(i, j).trim());
+        i = j;
+      } else if (c === `"` || c === `'`) {
+        quote = c;
+      }
+    } else if (c === "\\") {
+      j++;
+    } else if (c === quote) {
+      quote = null;
+      addPart(str.substring(i, j + 1).trim());
+      i = j + 1;
+    }
+    j++;
+  }
 
-interface OpenedRoot {
-  isOpened?: boolean;
-  parent?: OpenedParent;
-  type: "root";
-  children: OpenedChild[];
-}
+  const attrs: Record<string, string | boolean> = {};
+  for (const part of parts) {
+    const [key, ...values] = part.split("=");
+    if (values.length === 0) {
+      attrs[key] = true;
+    } else {
+      const value = values.join("=");
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        // remove quotes
+        attrs[key] = value.substring(1, value.length - 1);
+      } else {
+        attrs[key] = value;
+      }
+    }
+  }
 
-interface OpenedTag {
-  isOpened?: boolean;
-  parent?: OpenedParent;
-  type: "tag";
-  tag: string;
-  closer?: string;
-  attrs: Record<string, boolean | string>;
-  children: OpenedChild[];
-}
-
-interface OpenedText {
-  isOpened?: boolean;
-  parent?: OpenedParent;
-  type: "text";
-  content: string;
-}
-
-interface OpenedComment {
-  isOpened?: boolean;
-  parent?: OpenedParent;
-  type: "comment";
-  content: string;
+  return {
+    startIndex: fromIndex,
+    endIndex: j,
+    closer,
+    attrs,
+  };
 }
 
 function isParent(node: TreeNode): node is TreeParent {
@@ -111,258 +162,161 @@ function isChild(node: TreeNode): node is TreeChild {
   return node.type === "tag" || node.type === "text" || node.type === "comment";
 }
 
-function parse(str: string): TreeRoot {
-  const parseTag = function (src: string, i: number) {
-    let m = i + 1,
-      n = i + 1,
-      parts: string[] = [],
-      quote = null;
-
-    while (n < src.length) {
-      const c = src[n];
-      if (!quote) {
-        if (c === ">") {
-          parts.push(src.substring(m, n));
-          n++;
-          break;
-        }
-        if (c === " ") {
-          parts.push(src.substring(m, n));
-          m = n; // without whitespace: +1
-        } else if (c === `"` || c === `'`) {
-          quote = c;
-        }
-      } else if (c === "\\") {
-        n++;
-      } else if (c === quote) {
-        quote = null;
-        parts.push(src.substring(m, n + 1));
-        m = n + 1;
-      }
-      n++;
-    }
-
-    const tag = parts.shift();
-    if (!tag) {
-      throw new Error(`Invalid argument: Tag name not found`);
-    }
-
-    const attrs: Record<string, string | boolean> = {};
-    let closer;
-    if (parts.length > 0 && /^\s*[/?]$/.test(parts[parts.length - 1])) {
-      closer = parts.pop();
-    }
-
-    for (const part of parts) {
-      const trimmedPart = part.trim();
-      if (trimmedPart === "") {
-        continue;
-      }
-
-      const sepIndex = trimmedPart.indexOf("=");
-      if (sepIndex === -1) {
-        attrs[trimmedPart] = true;
-      } else {
-        // remove quotes
-        attrs[trimmedPart.substring(0, sepIndex)] = trimmedPart.substring(
-          sepIndex + 2,
-          trimmedPart.length - 1
-        );
-      }
-    }
-
-    return {
-      startIndex: i,
-      endIndex: n,
-      closer,
-      tag,
-      attrs,
-    };
-  };
-
-  const getNodes = function (
-    src: string,
-    i: number
-  ): IndexedNode[] | undefined {
-    if (i >= src.length) {
-      return;
-    }
-
-    const j = src.indexOf("<", i);
-    if (j === -1) {
-      return [
-        {
-          startIndex: i,
-          endIndex: src.length,
-          type: "text",
-          content: src.substring(i),
-        },
-      ];
-    }
-
-    if (src.substring(j, j + 4) === "<!--") {
-      const k = src.indexOf("-->", j + 4);
-      if (k === -1) {
-        throw new Error(
-          `Invalid argument: could not find closing bracket "-->"`
-        );
-      }
-      return [
-        {
-          startIndex: i,
-          endIndex: j,
-          type: "text",
-          content: src.substring(i, j),
-        },
-        {
-          startIndex: j,
-          endIndex: k + 3,
-          type: "comment",
-          content: src.substring(j + 4, k),
-        },
-      ];
-    }
-
-    for (const [opening, closing] of [
-      ["<style", "</style>"],
-      ["<script", "</script>"],
-    ]) {
-      if (src.substring(j, j + opening.length) === opening) {
-        const k = src.indexOf(closing, j + opening.length);
-        if (k === -1) {
-          throw new Error(
-            `Invalid argument: could not find closing tag "${closing}"`
-          );
-        }
-
-        const { endIndex, tag, attrs } = parseTag(src, j);
-
-        return [
-          {
-            startIndex: i,
-            endIndex: j,
-            type: "text",
-            content: src.substring(i, j),
-          },
-          {
-            startIndex: j,
-            endIndex: endIndex,
-            type: "tag",
-            tag,
-            attrs,
-          },
-          {
-            startIndex: endIndex,
-            endIndex: k,
-            type: "text",
-            content: src.substring(endIndex, k),
-          },
-          {
-            startIndex: k,
-            endIndex: k + closing.length,
-            type: "tag",
-            tag: "/" + tag,
-          },
-        ];
-      }
-    }
-
-    const { startIndex, endIndex, tag, closer, attrs } = parseTag(src, j);
-
-    return [
-      {
-        startIndex: i,
-        endIndex: j,
-        type: "text",
-        content: src.substring(i, j),
-      },
-      {
-        startIndex,
-        endIndex,
-        type: "tag",
-        closer,
-        tag,
-        attrs,
-      },
-    ];
-  };
-
+export function parse(str: string): TreeRoot {
   // normalize
   str = unescapeXML(str);
 
-  const nodes: OpenedChild[] = [];
-  let i = 0,
-    stacks = getNodes(str, i);
-  while (stacks) {
-    for (const stack of stacks) {
-      if (stack.type === "text") {
-        nodes.push({
-          isOpened: false,
-          type: "text",
-          content: stack.content,
-        });
-      } else if (stack.type === "comment") {
-        nodes.push({
-          isOpened: false,
-          type: "comment",
-          content: stack.content,
-        });
-      } // opening tag
-      else if (stack.tag[0] !== "/") {
-        nodes.push({
-          isOpened: !stack.closer,
-          type: "tag",
-          tag: stack.tag,
-          ...(stack.closer ? { closer: stack.closer } : {}),
-          attrs: stack.attrs || {},
-          children: [],
-        });
-      } // closing tag
-      else {
-        const children: OpenedChild[] = [];
-        const tag = stack.tag.substring(1);
-        for (let j = nodes.length - 1; j >= 0; j--) {
-          const node = nodes[j];
+  const stacks: StackNode[] = [];
 
-          if (node.isOpened && node.type === "tag" && node.tag === tag) {
-            for (const child of children) {
-              node.children = [child, ...node.children];
-              child.parent = node;
-            }
-            delete node.isOpened;
-            break;
-          }
+  let offset = 0,
+    i = str.indexOf("<", offset);
 
-          if (!node.parent) {
-            children.push(node);
-          }
-        }
-      }
-    }
-
-    stacks = getNodes(str, stacks[stacks.length - 1].endIndex);
-  }
-
-  for (const node of nodes) {
-    // if node is opened, set empty closer
-    if (node.type === "tag" && node.isOpened) {
-      node.closer = "";
-    }
-
-    // remove unused properties
-    delete node.isOpened;
-  }
-
-  // create root node
-  const root: TreeRoot = {
-    type: "root",
-    // find nodes without parent nodes
-    children: nodes.filter((node) => !node.parent) as TreeChild[],
+  const searchOpening = function (n: number) {
+    offset = n;
+    i = str.indexOf("<", offset);
   };
 
-  // set parent to root children
-  for (const child of root.children) {
-    child.parent = root;
+  while (offset < str.length) {
+    // text
+    if (i !== offset) {
+      const endIndex = i > -1 ? i : str.length;
+
+      stacks.push({
+        isClosed: true,
+        type: "text",
+        content: str.substring(offset, endIndex),
+      });
+    }
+
+    if (i === -1) {
+      break;
+    }
+
+    const tag = parseTag(str, i + 1);
+    if (!tag) {
+      // throw new Error(`Invalid argument: could not found closing bracket ">" after ${i + 1}`);
+
+      // ignore invalid html
+      const prev = stacks[stacks.length - 1];
+      if (typeof prev.content === "string") {
+        prev.content += str[i];
+      }
+
+      searchOpening(i + 1);
+      continue;
+    }
+
+    if (tag.startsWith("!--")) {
+      const j = str.indexOf("-->", i + 4);
+      if (j === -1) {
+        throw new Error(
+          `Invalid argument: could not find closing tag "-->" after ${i + 4}`
+        );
+      }
+
+      stacks.push({
+        type: "comment",
+        content: str.substring(i + 4, j),
+      });
+
+      searchOpening(j + 3);
+    } else if (tag === "style" || tag === "script") {
+      const { endIndex, attrs } = parseAttrs(str, i + 1 + tag.length);
+
+      const n = str.indexOf(`</${tag}>`, endIndex);
+      if (n === -1) {
+        throw new Error(
+          `Invalid argument: could not find closing tag "</${tag}>" after ${endIndex}`
+        );
+      }
+
+      const a: StackTag = {
+        isClosed: true,
+        type: "tag",
+        tag,
+        attrs,
+        children: [],
+      };
+
+      const b: StackText = {
+        isClosed: true,
+        type: "text",
+        parent: a as TreeTag,
+        content: str.substring(endIndex, n),
+      };
+
+      a.children.push(b as TreeText);
+
+      stacks.push(a, b);
+
+      searchOpening(n + 3 + tag.length);
+    } // closing tag
+    else if (tag.startsWith("/")) {
+      const _tag = tag.substring(1);
+
+      const children: TreeChild[] = [];
+
+      for (let n = stacks.length - 1; n >= 0; n--) {
+        const stack = stacks[n];
+
+        // opening tag found
+        if (!stack.isClosed && stack.tag === _tag) {
+          stack.children = [
+            ...children.reverse(),
+            ...(stack as StackTag).children,
+          ];
+
+          for (const child of children) {
+            child.parent = stack as TreeTag;
+          }
+
+          // close opening tag
+          stack.isClosed = true;
+          break;
+        }
+
+        if (!stack.parent) {
+          children.push(stack as TreeChild);
+        }
+      }
+
+      searchOpening(i + tag.length + 2);
+    } else {
+      const { endIndex, closer, attrs } = parseAttrs(str, i + tag.length + 1);
+
+      stacks.push({
+        isClosed: !!closer,
+        type: "tag",
+        tag,
+        closer,
+        attrs,
+        children: [],
+      });
+
+      searchOpening(endIndex);
+    }
+  }
+
+  const root: TreeRoot = {
+    type: "root",
+    children: [],
+  };
+
+  for (const stack of stacks) {
+    // close self-closing tag
+    if (stack.type === "tag" && !stack.isClosed) {
+      stack.closer = "";
+      stack.isClosed = true;
+    }
+
+    // remvoe unused property
+    delete stack.isClosed;
+
+    // top nodes append to root
+    if (!stack.parent) {
+      stack.parent = root;
+      root.children.push(stack as TreeChild);
+    }
   }
 
   return root;

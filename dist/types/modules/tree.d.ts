@@ -1,6 +1,7 @@
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
 export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
+export type TreeAttrs = Record<string, boolean | string>;
 export interface TreeRoot {
     type: "root";
     parent?: undefined;
@@ -15,8 +16,8 @@ export interface TreeTag {
     parent: TreeParent;
     tag: string;
     closer?: string;
-    content: undefined;
-    attrs: Record<string, boolean | string>;
+    content?: undefined;
+    attrs: TreeAttrs;
     children: TreeChild[];
 }
 export interface TreeText {
@@ -39,7 +40,7 @@ export interface TreeComment {
 }
 declare function isParent(node: TreeNode): node is TreeParent;
 declare function isChild(node: TreeNode): node is TreeChild;
-declare function parse(str: string): TreeRoot;
+export declare function parse(str: string): TreeRoot;
 declare function getChildren<T>(parent: TreeParent, callback: (child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => T): T[];
 declare function accChildren<T>(parent: TreeParent, callback: (accumulator: T, child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => T, initialValue: T): T;
 declare function findChild(parent: TreeParent, callback: (child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => any): TreeChild | undefined;
