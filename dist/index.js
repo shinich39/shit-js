@@ -29,6 +29,7 @@ var shit = (() => {
     compareString: () => compareString,
     convertFileSize: () => convertFileSize,
     escapeXML: () => escapeXML,
+    getAdjustedSize: () => getAdjustedSize,
     getClampedNumber: () => getClampedNumber,
     getContainedSize: () => getContainedSize,
     getCoveredSize: () => getCoveredSize,
@@ -909,19 +910,12 @@ var shit = (() => {
 
   // src/modules/path.ts
   function parsePath(...args) {
-    const parts = [];
-    for (const arg of args) {
-      for (const str of arg.split(/[\\/]/)) {
-        if (str !== "") {
-          parts.push(str);
-        }
-      }
-    }
+    const parts = args.join("/").split(/[\\/]+/).filter((p) => p);
     const basename = parts[parts.length - 1] || "";
     const dotIndex = basename.lastIndexOf(".");
     const extname = dotIndex > -1 ? basename.substring(dotIndex) : "";
     const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
-    const dirname = parts.length > 0 ? parts.slice(0, parts.length - 1).join("/") : "";
+    const dirname = parts.length > 1 ? parts.slice(0, parts.length - 1).join("/") : "";
     return {
       parts,
       basename,
@@ -956,13 +950,31 @@ var shit = (() => {
   }
 
   // src/modules/size.ts
-  function getContainedSize(sw, sh, dw, dh) {
-    const ar = sw / sh;
-    return ar < dw / dh ? [dh * ar, dh] : [dw, dw / ar];
+  function getContainedSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
+    const ar = sourceWidth / sourceHeight;
+    return ar < destinationWidth / destinationHeight ? [destinationHeight * ar, destinationHeight] : [destinationWidth, destinationWidth / ar];
   }
-  function getCoveredSize(sw, sh, dw, dh) {
-    const ar = sw / sh;
-    return ar < dw / dh ? [dw, dw / ar] : [dh * ar, dh];
+  function getCoveredSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
+    const ar = sourceWidth / sourceHeight;
+    return ar < destinationWidth / destinationHeight ? [destinationWidth, destinationWidth / ar] : [destinationHeight * ar, destinationHeight];
+  }
+  function getAdjustedSize(sourceWidth, sourceHeight, maxWidth, maxHeight, minWidth, minHeight) {
+    const ar = sourceWidth / sourceHeight;
+    let w = sourceWidth;
+    let h = sourceHeight;
+    if (h > maxHeight) {
+      h = maxHeight;
+      w = maxHeight * ar;
+    }
+    if (w < minWidth) {
+      w = minWidth;
+      h = minWidth / ar;
+    }
+    if (h < minHeight) {
+      h = minHeight;
+      w = minHeight * ar;
+    }
+    return [w, h];
   }
 
   // src/modules/type.ts

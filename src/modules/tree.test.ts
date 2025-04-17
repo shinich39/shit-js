@@ -50,7 +50,7 @@ test("Tree.parse()", () => {
     count++;
   }
 
-  console.log(`${count} * Tree.parse():`, Date.now() - now + "ms");
+  console.log(`Tree.parse()`, count, Date.now() - now + "ms");
 
   const root = Tree.parse(html);
 
@@ -193,7 +193,7 @@ test("new Tree()", () => {
     count++;
   }
 
-  console.log(`${count} * new Tree():`, Date.now() - now + "ms");
+  console.log(`new Tree()`, count, Date.now() - now + "ms");
 
   const tree = new Tree(html);
 

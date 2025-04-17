@@ -5,6 +5,16 @@ import { relative } from "node:path";
 
 test("parsePath", () => {
   let str = "./project/package.json";
+
+  let now = Date.now();
+  let count = 0;
+  while (Date.now() - now < 10) {
+    parsePath(str);
+    count++;
+  }
+
+  console.log(`parsePath()`, count, Date.now() - now + "ms");
+
   eq(parsePath(str), {
     parts: [".", "project", "package.json"],
     basename: "package.json",

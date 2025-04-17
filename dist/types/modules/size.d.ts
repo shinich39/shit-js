@@ -1,17 +1,4 @@
-/**
- *
- * @param sw source width
- * @param sh source height
- * @param dw destination width
- * @param dh destination height
- */
-export declare function getContainedSize(sw: number, sh: number, dw: number, dh: number): number[];
-/**
- *
- * @param sw source width
- * @param sh source height
- * @param dw destination width
- * @param dh destination height
- */
-export declare function getCoveredSize(sw: number, sh: number, dw: number, dh: number): number[];
+export declare function getContainedSize(sourceWidth: number, sourceHeight: number, destinationWidth: number, destinationHeight: number): [number, number];
+export declare function getCoveredSize(sourceWidth: number, sourceHeight: number, destinationWidth: number, destinationHeight: number): [number, number];
+export declare function getAdjustedSize(sourceWidth: number, sourceHeight: number, maxWidth: number, maxHeight: number, minWidth: number, minHeight: number): [number, number];
 //# sourceMappingURL=size.d.ts.map

@@ -1,12 +1,8 @@
 export function parsePath(...args: string[]) {
-  const parts: string[] = [];
-  for (const arg of args) {
-    for (const str of arg.split(/[\\/]/)) {
-      if (str !== "") {
-        parts.push(str);
-      }
-    }
-  }
+  const parts: string[] = args
+    .join("/")
+    .split(/[\\/]+/)
+    .filter((p) => p);
 
   const basename = parts[parts.length - 1] || "";
 
@@ -17,7 +13,7 @@ export function parsePath(...args: string[]) {
   const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
 
   const dirname =
-    parts.length > 0 ? parts.slice(0, parts.length - 1).join("/") : "";
+    parts.length > 1 ? parts.slice(0, parts.length - 1).join("/") : "";
 
   return {
     parts,
