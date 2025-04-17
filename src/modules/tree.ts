@@ -74,11 +74,9 @@ function parseTag(str: string, fromIndex: number) {
   let i = fromIndex;
   while (i < str.length) {
     if (/\s|>/.test(str[i])) {
-      if (i === fromIndex) {
-        return;
-      } else {
-        return str.substring(fromIndex, i);
-      }
+      return i !== fromIndex 
+        ? str.substring(fromIndex, i) 
+        : undefined;
     }
     i++;
   }
@@ -92,7 +90,8 @@ function parseAttrs(str: string, fromIndex: number) {
     quote = null,
     closer: string | undefined;
 
-  const addPart = function (s: string) {
+  const acc = function (s: string) {
+    s = s.trim();
     if (s !== "") {
       parts.push(s);
     }
@@ -106,13 +105,13 @@ function parseAttrs(str: string, fromIndex: number) {
         if (/^\s*[/?]$/.test(part)) {
           closer = part;
         } else {
-          addPart(part.trim());
+          acc(part);
         }
         j++;
         break;
       }
       if (/\s/.test(c)) {
-        addPart(str.substring(i, j).trim());
+        acc(str.substring(i, j));
         i = j;
       } else if (c === `"` || c === `'`) {
         quote = c;
@@ -121,7 +120,7 @@ function parseAttrs(str: string, fromIndex: number) {
       j++;
     } else if (c === quote) {
       quote = null;
-      addPart(str.substring(i, j + 1).trim());
+      acc(str.substring(i, j + 1));
       i = j + 1;
     }
     j++;
