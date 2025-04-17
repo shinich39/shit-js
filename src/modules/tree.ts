@@ -74,9 +74,7 @@ function parseTag(str: string, fromIndex: number) {
   let i = fromIndex;
   while (i < str.length) {
     if (/\s|>/.test(str[i])) {
-      return i !== fromIndex 
-        ? str.substring(fromIndex, i) 
-        : undefined;
+      return i !== fromIndex ? str.substring(fromIndex, i) : undefined;
     }
     i++;
   }
