@@ -1,6 +1,47 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { getRandomNumber, getClampedNumber, getLoopedNumber } from "./number";
+import {
+  getRandomNumber,
+  getClampedNumber,
+  getLoopedNumber,
+  invertBits,
+  clearBits,
+  addBits,
+  hasBits,
+  calcStringSize,
+  convertFileSize,
+  humanizeFileSize,
+  getContainedSize,
+  getCoveredSize,
+  getAdjustedSize,
+} from "./number";
+
+test("hasBit", () => {
+  eq(hasBits(0b1100, 0b1000), true);
+  eq(hasBits(0b1100, 0b0100), true);
+  eq(hasBits(0b1100, 0b1100), true);
+});
+
+test("addBit", () => {
+  eq(addBits(0b1100, 0b1000), 0b1100);
+  eq(addBits(0b1100, 0b1100), 0b1100);
+  eq(addBits(0b1100, 0b1110), 0b1110);
+  eq(addBits(0b1100, 0b1111), 0b1111);
+});
+
+test("clearBit", () => {
+  eq(clearBits(0b1100, 0b1000), 0b0100);
+  eq(clearBits(0b1100, 0b1100), 0b0000);
+  eq(clearBits(0b1100, 0b1110), 0b0000);
+  eq(clearBits(0b1100, 0b1111), 0b0000);
+});
+
+test("invertBit", () => {
+  eq(invertBits(0b1100, 0b1000), 0b0100);
+  eq(invertBits(0b1100, 0b1100), 0b0000);
+  eq(invertBits(0b1100, 0b1110), 0b0010);
+  eq(invertBits(0b1100, 0b1111), 0b0011);
+});
 
 test("getRandomNumber", () => {
   eq(getRandomNumber(0, 1) < 1, true);
@@ -28,6 +69,43 @@ test("getLoopedNumber", () => {
   eq(getLoopedNumber(-2.5, 5, 10), 7.5);
   eq(getLoopedNumber(7.5, 5, 10), 7.5);
   eq(getLoopedNumber(10, 5, 10), 5);
+});
+
+test("calcStringSize", () => {
+  eq(calcStringSize("abc"), 3);
+  eq(calcStringSize("ㄱㄴㄷ"), 9);
+  eq(calcStringSize("가나다"), 9);
+});
+
+test("convertFileSize", () => {
+  eq(convertFileSize(1024 * 1024, "Bytes", "MB"), 1);
+  eq(convertFileSize(1024 * 1024 * 1024, "Bytes", "GB"), 1);
+});
+
+test("humanizeFileSize", () => {
+  eq(humanizeFileSize(1024 * 1024, "Bytes"), "1.00 MB");
+  eq(humanizeFileSize(1024 * 1024 * 1024, "Bytes"), "1.00 GB");
+  eq(
+    humanizeFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512, "Bytes"),
+    "1.50 GB"
+  );
+});
+
+test("getContainedSize", () => {
+  eq(getContainedSize(1, 1, 2, 1), [1, 1]);
+});
+
+test("getCoveredSize", () => {
+  eq(getCoveredSize(1, 1, 2, 1), [2, 2]);
+});
+
+test("getAdjustedSize", () => {
+  eq(getAdjustedSize(500, 500, 200, 200, 100, 100), [200, 200]);
+  eq(getAdjustedSize(500, 1000, 200, 200, 100, 100), [100, 200]);
+  eq(getAdjustedSize(5, 10, 200, 200, 100, 100), [100, 200]);
+
+  eq(getAdjustedSize(150, 150, 200, 200, 100, 100), [150, 150]);
+  eq(getAdjustedSize(175, 175, 200, 200, 100, 100), [175, 175]);
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

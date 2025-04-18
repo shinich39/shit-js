@@ -1,68 +1,147 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { getRelativePath, parsePath } from "./path";
-import { relative } from "node:path";
+import {
+  getBasename,
+  getDirname,
+  getExtname,
+  getFilename,
+  getRelativePath,
+  getRootPath,
+  joinPaths,
+} from "./path";
+import { basename, dirname, extname, join, relative } from "node:path";
 
-test("parsePath", () => {
-  let str = "./project/package.json";
+test("basename", () => {
+  const strs = [
+    ["./project/package.json", "package.json"],
+    ["./project/", "project"],
+    ["./", "."],
+  ];
 
-  let now = Date.now();
-  let count = 0;
-  while (Date.now() - now < 10) {
-    parsePath(str);
-    count++;
+  for (const str of strs) {
+    eq(basename(str[0]), getBasename(str[0]), str[0]);
+    eq(basename(str[0]), getBasename(str[0]), str[0]);
+    eq(basename(str[0]), getBasename(str[0]), str[0]);
+    eq(str[1], getBasename(str[0]), str[0]);
   }
+});
 
-  console.log(`parsePath()`, count, Date.now() - now + "ms");
+test("extname", () => {
+  const strs = [
+    ["./project/package.json", ".json"],
+    ["./project/", ""],
+    ["./", ""],
+  ];
 
-  eq(parsePath(str), {
-    parts: [".", "project", "package.json"],
-    basename: "package.json",
-    extname: ".json",
-    filename: "package",
-    dirname: "./project",
-  });
+  for (const str of strs) {
+    eq(extname(str[0]), getExtname(str[0]), str[0]);
+    eq(extname(str[0]), getExtname(str[0]), str[0]);
+    eq(extname(str[0]), getExtname(str[0]), str[0]);
+    eq(str[1], getExtname(str[0]), str[0]);
+  }
+});
 
-  str = "./project/package";
-  eq(parsePath(str), {
-    parts: [".", "project", "package"],
-    basename: "package",
-    extname: "",
-    filename: "package",
-    dirname: "./project",
-  });
+test("filename", () => {
+  const strs = [
+    ["./project/package.json", "package"],
+    ["./project/", "project"],
+    ["./", "."],
+    ["package", "package"],
+    ["package.json", "package"],
+  ];
 
-  str = "./project/";
-  eq(parsePath(str), {
-    parts: [".", "project"],
-    basename: "project",
-    extname: "",
-    filename: "project",
-    dirname: ".",
-  });
+  for (const str of strs) {
+    eq(basename(str[0], extname(str[0])), getFilename(str[0]), str[0]);
+    eq(basename(str[0], extname(str[0])), getFilename(str[0]), str[0]);
+    eq(basename(str[0], extname(str[0])), getFilename(str[0]), str[0]);
+    eq(str[1], getFilename(str[0]), str[0]);
+  }
+});
+
+test("dirname", () => {
+  const strs = [
+    ["./project/package.json", "./project"],
+    ["./project/", "."],
+    ["./", "."],
+  ];
+
+  for (const str of strs) {
+    eq(dirname(str[0]), getDirname(str[0]), str[0]);
+    eq(dirname(str[0]), getDirname(str[0]), str[0]);
+    eq(dirname(str[0]), getDirname(str[0]), str[0]);
+    eq(str[1], getDirname(str[0]), str[0]);
+  }
+});
+
+test("joinPaths", () => {
+  const strs = [
+    ["./project/", "abc", "./package.json"],
+    ["./project/", "abc", "../package.json"],
+    ["./project/", "abc", "."],
+    ["./", "abc", "."],
+    [".", "abc", "."],
+    ["abc", "package.json"],
+    ["abc", "..", "package.json"],
+  ];
+
+  for (const str of strs) {
+    eq(join(...str), joinPaths(...str), str[0]);
+    eq(join(...str), joinPaths(...str), str[0]);
+    eq(join(...str), joinPaths(...str), str[0]);
+  }
 });
 
 test("getRelativePath", () => {
-  const paths = [
-    ".Users/me/Git/node-py-old",
-    "./Users/me/Git/noe-py-old/package.js.on",
-    "Users/me/Git/node-py-old/package",
-    "./Users/me/Git/node-py-old/package/",
-    "dir1/dir2",
-    "./dir",
-    ".dir",
-    ".",
-    "",
-    "...fe",
+  const strs = [
+    ["./project/", "./package.json"],
+    ["./project/", "../package.json"],
+    ["./project/", "."],
+    ["./", "."],
+    [".", "."],
+    ["", "package.json"],
+    ["", "project/package.json"],
+    ["", "./project/package.json"],
+    ["abc", "package.json"],
   ];
 
-  for (let i = 0; i < paths.length; i++) {
-    const a = paths[i];
-    for (let j = 0; j < paths.length; j++) {
-      const b = paths[j];
-      eq(relative(a, b), getRelativePath(a, b));
-    }
+  for (const str of strs) {
+    eq(relative(str[0], str[1]), getRelativePath(str[0], str[1]));
   }
+});
+
+test("getRootPath", () => {
+  let strs = [
+    "./project/abc/package.json",
+    "./project/abc/def",
+    "./project/abc/def/package.json",
+    "./project/abc/def/ghi/package.json",
+    "./project/abc/ghi/package.json",
+    "project/abc/def/ghi/package.json",
+  ];
+
+  eq("project/abc", getRootPath(...strs));
+
+  strs = [
+    "./project/abc/def/package.json",
+    "./project/abc/def/ab",
+    "./project/abc/def/package.json",
+    "./project/abc/def/ghi/package.json",
+    "./project/abc/def/ghi/package.json",
+    "project/abc/def/",
+  ];
+
+  eq("project/abc/def", getRootPath(...strs));
+
+  strs = [
+    "/project/abc/def/package.json",
+    "/project/abc/def/ab",
+    "/project/abc/def/package.json",
+    "/project/abc/def/ghi/package.json",
+    "/project/abc/def/ghi/package.json",
+    "/project/abc/def/",
+  ];
+
+  eq("/project/abc/def", getRootPath(...strs));
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

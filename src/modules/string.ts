@@ -1,4 +1,4 @@
-export function getUUID(seed?: number) {
+export function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -24,6 +24,19 @@ export function getInts(str: string) {
 
 export function getFloats(str: string) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
+}
+
+export function getXORString(str: string, salt: string) {
+  const l = salt.length;
+  if (l === 0) {
+    throw new Error(`Invalid argument: salt.length === 0`);
+  }
+
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+  }
+  return result;
 }
 /**
  * change full-width characters to half-width characters

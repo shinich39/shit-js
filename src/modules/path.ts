@@ -1,27 +1,92 @@
-export function parsePath(...args: string[]) {
-  const parts: string[] = args
-    .join("/")
-    .split(/[\\/]+/)
-    .filter((p) => p);
+export function joinPaths(...args: string[]) {
+  const parts = args.join("/").split(/[\\/]+/);
 
-  const basename = parts[parts.length - 1] || "";
+  const resolved: string[] = [];
 
-  const dotIndex = basename.lastIndexOf(".");
+  for (const part of parts) {
+    if (!part || part === ".") {
+      continue;
+    }
 
-  const extname = dotIndex > -1 ? basename.substring(dotIndex) : "";
+    if (part === "..") {
+      if (
+        !resolved[resolved.length - 1] ||
+        resolved[resolved.length - 1] === ".."
+      ) {
+        resolved.push("..");
+      } else {
+        resolved.pop();
+      }
+      continue;
+    }
 
-  const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
+    resolved.push(part);
+  }
 
-  const dirname =
-    parts.length > 1 ? parts.slice(0, parts.length - 1).join("/") : "";
+  return resolved.join("/");
+}
 
-  return {
-    parts,
-    basename,
-    extname,
-    filename,
-    dirname,
-  };
+export function getBasename(str: string) {
+  str = str.replace(/[\\/]$/, "");
+
+  let i = str.length - 2;
+  while (i >= 0) {
+    if (str[i] === "/" || str[i] === "\\") {
+      return str.substring(i + 1);
+    }
+    i--;
+  }
+  return str;
+}
+
+export function getFilename(str: string) {
+  str = str.replace(/[\\/]$/, "");
+
+  let i = str.length - 2,
+    offset;
+  while (i >= 0) {
+    if (!offset && str[i] === ".") {
+      offset = i;
+      continue;
+    }
+    if (str[i] === "/" || str[i] === "\\") {
+      return str.substring(i + 1, offset);
+    }
+    i--;
+  }
+
+  if (offset) {
+    return str.substring(0, offset);
+  }
+
+  return str;
+}
+
+export function getExtname(str: string) {
+  str = str.replace(/[\\/]$/, "");
+
+  let i = str.length - 2;
+  while (i >= 0) {
+    if (str[i] === ".") {
+      return str.substring(i);
+    }
+    if (str[i] === "/" || str[i] === "\\") {
+      return "";
+    }
+    i--;
+  }
+  return "";
+}
+
+export function getDirname(str: string) {
+  let i = str.length - 2;
+  while (i >= 0) {
+    if (str[i] === "/" || str[i] === "\\") {
+      return str.substring(0, i);
+    }
+    i--;
+  }
+  return ".";
 }
 
 export function getRelativePath(from: string, to: string) {
@@ -63,3 +128,65 @@ export function getRelativePath(from: string, to: string) {
   // join up and down paths
   return up + (up && down ? "/" : "") + down;
 }
+
+export function getRootPath(...args: string[]) {
+  if (args.length === 0) {
+    return "";
+  }
+
+  const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
+
+  const resolved: string[] = [];
+
+  let j = 0;
+  while (true) {
+    let seg: string | null = parts[0][j];
+
+    if (typeof seg !== "string") {
+      break;
+    }
+
+    for (let i = 1; i < parts.length; i++) {
+      if (seg !== parts[i][j]) {
+        seg = null;
+        break;
+      }
+    }
+
+    if (seg === null) {
+      break;
+    }
+
+    resolved.push(seg);
+    j++;
+  }
+
+  return resolved.join("/");
+}
+
+// deprecated
+// export function parsePath(...args: string[]) {
+//   const parts: string[] = args
+//     .join("/")
+//     .split(/[\\/]+/)
+//     .filter((p) => p);
+
+//   const basename = parts[parts.length - 1] || "";
+
+//   const dotIndex = basename.lastIndexOf(".");
+
+//   const extname = dotIndex > -1 ? basename.substring(dotIndex) : "";
+
+//   const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
+
+//   const dirname =
+//     parts.length > 1 ? parts.slice(0, parts.length - 1).join("/") : "";
+
+//   return {
+//     parts,
+//     basename,
+//     extname,
+//     filename,
+//     dirname,
+//   };
+// }

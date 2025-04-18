@@ -85,38 +85,8 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// src/modules/bit.ts
-function bitwise(a) {
-  return {
-    equals: (b) => !!(a & b),
-    set: (b) => a |= b,
-    unset: (b) => a &= ~b,
-    invert: (b) => a ^= b
-  };
-}
-
-// src/modules/clone.ts
-function clone(obj) {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-  if (obj instanceof Date) {
-    return new Date(obj.getTime());
-  }
-  if (obj instanceof RegExp) {
-    return new RegExp(obj.source, obj.flags);
-  }
-  if (Array.isArray(obj)) {
-    return obj.map((item) => clone(item));
-  }
-  return Object.entries(obj).reduce((acc, cur) => {
-    acc[cur[0]] = clone(cur[1]);
-    return acc;
-  }, {});
-}
-
 // src/modules/string.ts
-function getUUID(seed) {
+function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
     const v = c === "x" ? r : r & 3 | 8;
@@ -138,6 +108,17 @@ function getInts(str) {
 }
 function getFloats(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
+}
+function getXORString(str, salt) {
+  const l = salt.length;
+  if (l === 0) {
+    throw new Error(`Invalid argument: salt.length === 0`);
+  }
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+  }
+  return result;
 }
 function normalizeString(str) {
   return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
@@ -691,20 +672,36 @@ var Tree = class {
   }
 };
 
-// src/modules/encrypt.ts
-function xor(str, salt) {
-  const l = salt.length;
-  if (l === 0) {
-    throw new Error(`Invalid argument: salt.length === 0`);
-  }
-  let result = "";
-  for (let i = 0; i < str.length; i++) {
-    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
-  }
-  return result;
+// src/modules/number.ts
+function hasBits(a, b) {
+  return !!(a & b);
 }
-
-// src/modules/file.ts
+function addBits(a, b) {
+  return a | b;
+}
+function clearBits(a, b) {
+  return a & ~b;
+}
+function invertBits(a, b) {
+  return a ^ b;
+}
+function getRandomNumber(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function getClampedNumber(num, min, max) {
+  return Math.min(max, Math.max(num, min));
+}
+function getLoopedNumber(num, min, max) {
+  num -= min;
+  max -= min;
+  if (num < 0) {
+    num = num % max + max;
+  }
+  if (num >= max) {
+    num = num % max;
+  }
+  return num + min;
+}
 function calcStringSize(str) {
   let result = 0;
   for (let i = 0; i < str.length; i++) {
@@ -742,27 +739,56 @@ function humanizeFileSize(num, format) {
   const size = (bytes / Math.pow(1024, i)).toFixed(2);
   return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
 }
-
-// src/modules/number.ts
-function getRandomNumber(min, max) {
-  return Math.random() * (max - min) + min;
+function getContainedSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
+  const ar = sourceWidth / sourceHeight;
+  return ar < destinationWidth / destinationHeight ? [destinationHeight * ar, destinationHeight] : [destinationWidth, destinationWidth / ar];
 }
-function getClampedNumber(num, min, max) {
-  return Math.min(max, Math.max(num, min));
+function getCoveredSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
+  const ar = sourceWidth / sourceHeight;
+  return ar < destinationWidth / destinationHeight ? [destinationWidth, destinationWidth / ar] : [destinationHeight * ar, destinationHeight];
 }
-function getLoopedNumber(num, min, max) {
-  num -= min;
-  max -= min;
-  if (num < 0) {
-    num = num % max + max;
+function getAdjustedSize(sourceWidth, sourceHeight, maxWidth, maxHeight, minWidth, minHeight) {
+  const ar = sourceWidth / sourceHeight;
+  let w = sourceWidth;
+  let h = sourceHeight;
+  if (w > maxWidth) {
+    w = maxWidth;
+    h = maxWidth / ar;
   }
-  if (num >= max) {
-    num = num % max;
+  if (h > maxHeight) {
+    h = maxHeight;
+    w = maxHeight * ar;
   }
-  return num + min;
+  if (w < minWidth) {
+    w = minWidth;
+    h = minWidth / ar;
+  }
+  if (h < minHeight) {
+    h = minHeight;
+    w = minHeight * ar;
+  }
+  return [w, h];
 }
 
 // src/modules/object.ts
+function clone(obj) {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+  if (obj instanceof Date) {
+    return new Date(obj.getTime());
+  }
+  if (obj instanceof RegExp) {
+    return new RegExp(obj.source, obj.flags);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => clone(item));
+  }
+  return Object.entries(obj).reduce((acc, cur) => {
+    acc[cur[0]] = clone(cur[1]);
+    return acc;
+  }, {});
+}
 function getObjectValue(obj, key) {
   let cur = obj;
   for (const k of key.split(".")) {
@@ -848,20 +874,77 @@ function compareObject(a, b, seen = /* @__PURE__ */ new WeakMap()) {
 }
 
 // src/modules/path.ts
-function parsePath(...args) {
-  const parts = args.join("/").split(/[\\/]+/).filter((p) => p);
-  const basename = parts[parts.length - 1] || "";
-  const dotIndex = basename.lastIndexOf(".");
-  const extname = dotIndex > -1 ? basename.substring(dotIndex) : "";
-  const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
-  const dirname = parts.length > 1 ? parts.slice(0, parts.length - 1).join("/") : "";
-  return {
-    parts,
-    basename,
-    extname,
-    filename,
-    dirname
-  };
+function joinPaths(...args) {
+  const parts = args.join("/").split(/[\\/]+/);
+  const resolved = [];
+  for (const part of parts) {
+    if (!part || part === ".") {
+      continue;
+    }
+    if (part === "..") {
+      if (!resolved[resolved.length - 1] || resolved[resolved.length - 1] === "..") {
+        resolved.push("..");
+      } else {
+        resolved.pop();
+      }
+      continue;
+    }
+    resolved.push(part);
+  }
+  return resolved.join("/");
+}
+function getBasename(str) {
+  str = str.replace(/[\\/]$/, "");
+  let i = str.length - 2;
+  while (i >= 0) {
+    if (str[i] === "/" || str[i] === "\\") {
+      return str.substring(i + 1);
+    }
+    i--;
+  }
+  return str;
+}
+function getFilename(str) {
+  str = str.replace(/[\\/]$/, "");
+  let i = str.length - 2, offset;
+  while (i >= 0) {
+    if (!offset && str[i] === ".") {
+      offset = i;
+      continue;
+    }
+    if (str[i] === "/" || str[i] === "\\") {
+      return str.substring(i + 1, offset);
+    }
+    i--;
+  }
+  if (offset) {
+    return str.substring(0, offset);
+  }
+  return str;
+}
+function getExtname(str) {
+  str = str.replace(/[\\/]$/, "");
+  let i = str.length - 2;
+  while (i >= 0) {
+    if (str[i] === ".") {
+      return str.substring(i);
+    }
+    if (str[i] === "/" || str[i] === "\\") {
+      return "";
+    }
+    i--;
+  }
+  return "";
+}
+function getDirname(str) {
+  let i = str.length - 2;
+  while (i >= 0) {
+    if (str[i] === "/" || str[i] === "\\") {
+      return str.substring(0, i);
+    }
+    i--;
+  }
+  return ".";
 }
 function getRelativePath(from, to) {
   const normalize = (str) => {
@@ -887,33 +970,31 @@ function getRelativePath(from, to) {
   const down = b.slice(i).join("/");
   return up + (up && down ? "/" : "") + down;
 }
-
-// src/modules/size.ts
-function getContainedSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
-  const ar = sourceWidth / sourceHeight;
-  return ar < destinationWidth / destinationHeight ? [destinationHeight * ar, destinationHeight] : [destinationWidth, destinationWidth / ar];
-}
-function getCoveredSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
-  const ar = sourceWidth / sourceHeight;
-  return ar < destinationWidth / destinationHeight ? [destinationWidth, destinationWidth / ar] : [destinationHeight * ar, destinationHeight];
-}
-function getAdjustedSize(sourceWidth, sourceHeight, maxWidth, maxHeight, minWidth, minHeight) {
-  const ar = sourceWidth / sourceHeight;
-  let w = sourceWidth;
-  let h = sourceHeight;
-  if (h > maxHeight) {
-    h = maxHeight;
-    w = maxHeight * ar;
+function getRootPath(...args) {
+  if (args.length === 0) {
+    return "";
   }
-  if (w < minWidth) {
-    w = minWidth;
-    h = minWidth / ar;
+  const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
+  const resolved = [];
+  let j = 0;
+  while (true) {
+    let seg = parts[0][j];
+    if (typeof seg !== "string") {
+      break;
+    }
+    for (let i = 1; i < parts.length; i++) {
+      if (seg !== parts[i][j]) {
+        seg = null;
+        break;
+      }
+    }
+    if (seg === null) {
+      break;
+    }
+    resolved.push(seg);
+    j++;
   }
-  if (h < minHeight) {
-    h = minHeight;
-    w = minHeight * ar;
-  }
-  return [w, h];
+  return resolved.join("/");
 }
 
 // src/modules/type.ts
@@ -955,17 +1036,22 @@ function toNumber(e) {
 }
 export {
   Tree,
-  bitwise,
+  addBits,
   calcStringSize,
+  clearBits,
   clone,
   compareObject,
   compareString,
   convertFileSize,
   escapeXML,
   getAdjustedSize,
+  getBasename,
   getClampedNumber,
   getContainedSize,
   getCoveredSize,
+  getDirname,
+  getExtname,
+  getFilename,
   getFloats,
   getInts,
   getLoopedNumber,
@@ -974,20 +1060,23 @@ export {
   getRandomNumber,
   getRandomString,
   getRelativePath,
+  getRootPath,
   getType,
   getUUID,
+  getXORString,
   groupBy,
+  hasBits,
   humanizeFileSize,
+  invertBits,
   isNumeric,
+  joinPaths,
   normalizeString,
   parse,
   parseNumbers,
-  parsePath,
   plotBy,
   shuffleArray,
   sleep,
   toNumber,
   toRegExp,
-  unescapeXML,
-  xor
+  unescapeXML
 };

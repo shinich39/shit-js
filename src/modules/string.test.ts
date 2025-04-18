@@ -7,6 +7,7 @@ import {
   getInts,
   getRandomCharacter,
   getRandomString,
+  getXORString,
   normalizeString,
   toRegExp,
   unescapeXML,
@@ -29,6 +30,15 @@ test("getFloats", () => {
   eq(getFloats("abc 39.39 miku"), [39.39]);
   eq(getFloats("abc 39 miku 39"), [39, 39]);
   eq(getFloats("abc 39 39.39 miku"), [39, 39.39]);
+});
+
+test("getXORString", () => {
+  const orig =
+    "https://translate.google.co.kr/?sl=en&tl=ko&text=encrypt%20string%20with%20XOR%20cipher&op=translate";
+  const encrypted = getXORString(orig, "this is salt!");
+  eq(encrypted !== orig, true);
+  const decrypted = getXORString(encrypted, "this is salt!");
+  eq(decrypted, orig);
 });
 
 test("normalizeString", () => {

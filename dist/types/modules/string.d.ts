@@ -1,8 +1,9 @@
-export declare function getUUID(seed?: number): string;
+export declare function getUUID(): string;
 export declare function getRandomCharacter(charset: string): string;
 export declare function getRandomString(charset: string, size: number): string;
 export declare function getInts(str: string): number[];
 export declare function getFloats(str: string): number[];
+export declare function getXORString(str: string, salt: string): string;
 /**
  * change full-width characters to half-width characters
  */

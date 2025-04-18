@@ -1,6 +1,15 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { compareObject, getObjectValue } from "./object";
+import { clone, compareObject, getObjectValue } from "./object";
+
+test("clone", () => {
+  const a = { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } };
+  const b = clone(a);
+  eq(b, { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } });
+  a.arr = [0, 0, 0];
+  eq(a, { arr: [0, 0, 0], obj: { o: 1, b: 2, j: 3 } });
+  eq(b, { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } });
+});
 
 test("getObjectValue", () => {
   const a = { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } };

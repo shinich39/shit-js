@@ -1,4 +1,18 @@
-export function getType(e: any) {
+export function getType(
+  e: any
+):
+  | "string"
+  | "number"
+  | "bigint"
+  | "boolean"
+  | "symbol"
+  | "undefined"
+  | "object"
+  | "function"
+  | "null"
+  | "array"
+  | "date"
+  | "regexp" {
   if (e === undefined) {
     return "undefined";
   }
@@ -30,7 +44,7 @@ export function isNumeric(e: any): e is string {
   );
 }
 
-export function toNumber(e?: any) {
+export function toNumber(e: any) {
   if (isNumeric(e)) {
     return parseFloat(e);
   }
