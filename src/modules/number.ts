@@ -75,36 +75,52 @@ export function calcStringSize(str: string) {
   return result;
 }
 
-export function convertFileSize(
+export function toBytes(
   num: number,
-  from: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-  to: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
 ) {
-  const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  if (format === "Bytes") {
+    return num;
+  }
 
-  const i = units.indexOf(from);
+  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
+
   if (i === -1) {
-    throw new Error(`Invalid source unit: ${from}`);
+    throw new Error(`Invalid argument: ${format} is not supported format`);
   }
 
-  const j = units.indexOf(to);
-  if (j === -1) {
-    throw new Error(`Invalid destination unit: ${to}`);
+  return num * Math.pow(1024, i + 1);
+}
+
+export function toFileSize(
+  bytes: number,
+  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+) {
+  if (format === "Bytes") {
+    return bytes;
   }
 
-  return num * Math.pow(1024, i - j);
+  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
+
+  if (i === -1) {
+    throw new Error(`Invalid argument: ${format} is not supported format`);
+  }
+
+  return bytes * Math.pow(1024, -(i + 1));
 }
 
 export function humanizeFileSize(
   num: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
 ) {
-  const bytes = convertFileSize(num, format, "Bytes");
+  const bytes = toBytes(num, format);
+
   if (bytes === 0) {
     return "0 Bytes";
   }
 
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
   // keep 2 decimal places
   const size = (bytes / Math.pow(1024, i)).toFixed(2);
 
@@ -119,10 +135,10 @@ export function getContainedSize(
   destinationWidth: number,
   destinationHeight: number
 ): [number, number] {
-  const ar = sourceWidth / sourceHeight; // aspect ratio
-  return ar < destinationWidth / destinationHeight
-    ? [destinationHeight * ar, destinationHeight]
-    : [destinationWidth, destinationWidth / ar];
+  const aspectRatio = sourceWidth / sourceHeight;
+  return aspectRatio < destinationWidth / destinationHeight
+    ? [destinationHeight * aspectRatio, destinationHeight]
+    : [destinationWidth, destinationWidth / aspectRatio];
 }
 
 export function getCoveredSize(
@@ -131,10 +147,10 @@ export function getCoveredSize(
   destinationWidth: number,
   destinationHeight: number
 ): [number, number] {
-  const ar = sourceWidth / sourceHeight; // aspect ratio
-  return ar < destinationWidth / destinationHeight
-    ? [destinationWidth, destinationWidth / ar]
-    : [destinationHeight * ar, destinationHeight];
+  const aspectRatio = sourceWidth / sourceHeight;
+  return aspectRatio < destinationWidth / destinationHeight
+    ? [destinationWidth, destinationWidth / aspectRatio]
+    : [destinationHeight * aspectRatio, destinationHeight];
 }
 
 export function getAdjustedSize(
@@ -145,29 +161,29 @@ export function getAdjustedSize(
   minWidth: number,
   minHeight: number
 ): [number, number] {
-  const ar = sourceWidth / sourceHeight; // aspect ratio
+  const aspectRatio = sourceWidth / sourceHeight;
 
   let w = sourceWidth;
   let h = sourceHeight;
 
   if (w > maxWidth) {
     w = maxWidth;
-    h = maxWidth / ar;
+    h = maxWidth / aspectRatio;
   }
 
   if (h > maxHeight) {
     h = maxHeight;
-    w = maxHeight * ar;
+    w = maxHeight * aspectRatio;
   }
 
   if (w < minWidth) {
     w = minWidth;
-    h = minWidth / ar;
+    h = minWidth / aspectRatio;
   }
 
   if (h < minHeight) {
     h = minHeight;
-    w = minHeight * ar;
+    w = minHeight * aspectRatio;
   }
 
   return [w, h];

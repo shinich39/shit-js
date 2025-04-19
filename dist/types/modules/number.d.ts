@@ -30,7 +30,8 @@ export declare function getLoopedNumber(num: number, min: number, max: number): 
  * @returns bytes
  */
 export declare function calcStringSize(str: string): number;
-export declare function convertFileSize(num: number, from: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB", to: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): number;
+export declare function toBytes(num: number, format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): number;
+export declare function toFileSize(bytes: number, format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): number;
 export declare function humanizeFileSize(num: number, format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): string;
 export declare function getContainedSize(sourceWidth: number, sourceHeight: number, destinationWidth: number, destinationHeight: number): [number, number];
 export declare function getCoveredSize(sourceWidth: number, sourceHeight: number, destinationWidth: number, destinationHeight: number): [number, number];

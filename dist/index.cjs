@@ -27,7 +27,6 @@ __export(index_exports, {
   clone: () => clone,
   compareObject: () => compareObject,
   compareString: () => compareString,
-  convertFileSize: () => convertFileSize,
   escapeXML: () => escapeXML,
   getAdjustedSize: () => getAdjustedSize,
   getBasename: () => getBasename,
@@ -67,6 +66,8 @@ __export(index_exports, {
   plotBy: () => plotBy,
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
+  toBytes: () => toBytes,
+  toFileSize: () => toFileSize,
   toNumber: () => toNumber,
   toRegExp: () => toRegExp,
   unescapeXML: () => unescapeXML
@@ -800,20 +801,28 @@ function calcStringSize(str) {
   }
   return result;
 }
-function convertFileSize(num, from, to) {
-  const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  const i = units.indexOf(from);
+function toBytes(num, format) {
+  if (format === "Bytes") {
+    return num;
+  }
+  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
   if (i === -1) {
-    throw new Error(`Invalid source unit: ${from}`);
+    throw new Error(`Invalid argument: ${format} is not supported format`);
   }
-  const j = units.indexOf(to);
-  if (j === -1) {
-    throw new Error(`Invalid destination unit: ${to}`);
+  return num * Math.pow(1024, i + 1);
+}
+function toFileSize(bytes, format) {
+  if (format === "Bytes") {
+    return bytes;
   }
-  return num * Math.pow(1024, i - j);
+  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
+  if (i === -1) {
+    throw new Error(`Invalid argument: ${format} is not supported format`);
+  }
+  return bytes * Math.pow(1024, -(i + 1));
 }
 function humanizeFileSize(num, format) {
-  const bytes = convertFileSize(num, format, "Bytes");
+  const bytes = toBytes(num, format);
   if (bytes === 0) {
     return "0 Bytes";
   }
@@ -822,32 +831,32 @@ function humanizeFileSize(num, format) {
   return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
 }
 function getContainedSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
-  const ar = sourceWidth / sourceHeight;
-  return ar < destinationWidth / destinationHeight ? [destinationHeight * ar, destinationHeight] : [destinationWidth, destinationWidth / ar];
+  const aspectRatio = sourceWidth / sourceHeight;
+  return aspectRatio < destinationWidth / destinationHeight ? [destinationHeight * aspectRatio, destinationHeight] : [destinationWidth, destinationWidth / aspectRatio];
 }
 function getCoveredSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
-  const ar = sourceWidth / sourceHeight;
-  return ar < destinationWidth / destinationHeight ? [destinationWidth, destinationWidth / ar] : [destinationHeight * ar, destinationHeight];
+  const aspectRatio = sourceWidth / sourceHeight;
+  return aspectRatio < destinationWidth / destinationHeight ? [destinationWidth, destinationWidth / aspectRatio] : [destinationHeight * aspectRatio, destinationHeight];
 }
 function getAdjustedSize(sourceWidth, sourceHeight, maxWidth, maxHeight, minWidth, minHeight) {
-  const ar = sourceWidth / sourceHeight;
+  const aspectRatio = sourceWidth / sourceHeight;
   let w = sourceWidth;
   let h = sourceHeight;
   if (w > maxWidth) {
     w = maxWidth;
-    h = maxWidth / ar;
+    h = maxWidth / aspectRatio;
   }
   if (h > maxHeight) {
     h = maxHeight;
-    w = maxHeight * ar;
+    w = maxHeight * aspectRatio;
   }
   if (w < minWidth) {
     w = minWidth;
-    h = minWidth / ar;
+    h = minWidth / aspectRatio;
   }
   if (h < minHeight) {
     h = minHeight;
-    w = minHeight * ar;
+    w = minHeight * aspectRatio;
   }
   return [w, h];
 }

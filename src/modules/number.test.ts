@@ -9,11 +9,12 @@ import {
   addBits,
   hasBits,
   calcStringSize,
-  convertFileSize,
   humanizeFileSize,
   getContainedSize,
   getCoveredSize,
   getAdjustedSize,
+  toFileSize,
+  toBytes,
 } from "./number";
 
 test("hasBit", () => {
@@ -77,9 +78,14 @@ test("calcStringSize", () => {
   eq(calcStringSize("가나다"), 9);
 });
 
-test("convertFileSize", () => {
-  eq(convertFileSize(1024 * 1024, "Bytes", "MB"), 1);
-  eq(convertFileSize(1024 * 1024 * 1024, "Bytes", "GB"), 1);
+test("toBytes", () => {
+  eq(toBytes(1, "MB"), 1024 * 1024);
+  eq(toBytes(1, "GB"), 1024 * 1024 * 1024);
+});
+
+test("toFileSize", () => {
+  eq(toFileSize(1024 * 1024, "MB"), 1);
+  eq(toFileSize(1024 * 1024 * 1024, "GB"), 1);
 });
 
 test("humanizeFileSize", () => {

@@ -44,7 +44,7 @@ export function getFilename(str: string) {
 
   let i = str.length - 2,
     offset;
-    
+
   while (i >= 0) {
     if (!offset && str[i] === ".") {
       offset = i;
