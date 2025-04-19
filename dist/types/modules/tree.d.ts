@@ -68,10 +68,10 @@ export declare class Tree {
     reduce<T>(callback: (accumulator: T, child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => T, initialValue: T): T;
     find(callback: (child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => any): TreeChild | undefined;
     filter(callback: (child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => any): TreeChild[];
-    mapParents<T>(callback: (parent: TreeParent, depth: number, child: TreeChild) => T): T[];
-    reduceParents<T>(callback: (accumulator: T, parent: TreeParent, depth: number, child: TreeChild) => T, initialValue: T): T;
-    findParent(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeNode | undefined;
-    filterParents(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeParent[];
+    mapTop<T>(callback: (parent: TreeParent, depth: number, child: TreeChild) => T): T[];
+    reduceTop<T>(callback: (accumulator: T, parent: TreeParent, depth: number, child: TreeChild) => T, initialValue: T): T;
+    findTop(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeNode | undefined;
+    filterTop(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeParent[];
     getContents(): string[];
     toString(): string;
     static isParent: typeof isParent;
@@ -87,10 +87,10 @@ export declare class Tree {
     static reduce: typeof reduceChildren;
     static find: typeof findChild;
     static filter: typeof filterChildren;
-    static mapParents: typeof mapParents;
-    static reduceParents: typeof reduceParents;
-    static findParent: typeof findParent;
-    static filterParents: typeof filterParents;
+    static mapTop: typeof mapParents;
+    static reduceTop: typeof reduceParents;
+    static findTop: typeof findParent;
+    static filterTop: typeof filterParents;
 }
 export {};
 //# sourceMappingURL=tree.d.ts.map

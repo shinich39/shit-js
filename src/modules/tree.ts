@@ -713,7 +713,7 @@ export class Tree {
     }
   }
 
-  mapParents<T>(
+  mapTop<T>(
     callback: (parent: TreeParent, depth: number, child: TreeChild) => T
   ): T[] {
     if (isChild(this.node)) {
@@ -723,7 +723,7 @@ export class Tree {
     }
   }
 
-  reduceParents<T>(
+  reduceTop<T>(
     callback: (
       accumulator: T,
       parent: TreeParent,
@@ -739,7 +739,7 @@ export class Tree {
     }
   }
 
-  findParent(
+  findTop(
     callback: (parent: TreeParent, depth: number, child: TreeChild) => any
   ) {
     if (isChild(this.node)) {
@@ -747,7 +747,7 @@ export class Tree {
     }
   }
 
-  filterParents(
+  filterTop(
     callback: (parent: TreeParent, depth: number, child: TreeChild) => any
   ) {
     if (isChild(this.node)) {
@@ -781,8 +781,8 @@ export class Tree {
   static find = findChild;
   static filter = filterChildren;
 
-  static mapParents = mapParents;
-  static reduceParents = reduceParents;
-  static findParent = findParent;
-  static filterParents = filterParents;
+  static mapTop = mapParents;
+  static reduceTop = reduceParents;
+  static findTop = findParent;
+  static filterTop = filterParents;
 }

@@ -153,7 +153,7 @@ test("Tree.parse()", () => {
   tagChildren.forEach((item) => eq(item.type, "tag"));
   eq(tagChildren.length, 15);
 
-  const parents = Tree.mapParents(preNode, (parent, index) => {
+  const parents = Tree.mapTop(preNode, (parent, index) => {
     return parent;
   });
 
@@ -162,13 +162,13 @@ test("Tree.parse()", () => {
   );
   eq(parents.length, 3);
 
-  const bodyNode = Tree.findParent(preNode, (parent, index) => {
+  const bodyNode = Tree.findTop(preNode, (parent, index) => {
     return parent.type === "tag" && parent.tag === "body";
   });
 
   eq(bodyNode && bodyNode.type === "tag" && bodyNode.tag === "body", true);
 
-  const tagParents = Tree.filterParents(preNode, (parent, index) => {
+  const tagParents = Tree.filterTop(preNode, (parent, index) => {
     return parent.type === "tag";
   });
 

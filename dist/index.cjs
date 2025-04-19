@@ -750,26 +750,26 @@ var Tree = class {
       return [];
     }
   }
-  mapParents(callback) {
+  mapTop(callback) {
     if (isChild(this.node)) {
       return mapParents(this.node, callback);
     } else {
       return [];
     }
   }
-  reduceParents(callback, initialValue) {
+  reduceTop(callback, initialValue) {
     if (isChild(this.node)) {
       return reduceParents(this.node, callback, initialValue);
     } else {
       return initialValue;
     }
   }
-  findParent(callback) {
+  findTop(callback) {
     if (isChild(this.node)) {
       return findParent(this.node, callback);
     }
   }
-  filterParents(callback) {
+  filterTop(callback) {
     if (isChild(this.node)) {
       return filterParents(this.node, callback);
     } else {
@@ -822,16 +822,16 @@ var Tree = class {
     this.filter = filterChildren;
   }
   static {
-    this.mapParents = mapParents;
+    this.mapTop = mapParents;
   }
   static {
-    this.reduceParents = reduceParents;
+    this.reduceTop = reduceParents;
   }
   static {
-    this.findParent = findParent;
+    this.findTop = findParent;
   }
   static {
-    this.filterParents = filterParents;
+    this.filterTop = filterParents;
   }
 };
 
