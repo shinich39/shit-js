@@ -159,6 +159,22 @@ function isChild(node: TreeNode): node is TreeChild {
   return node.type === "tag" || node.type === "text" || node.type === "comment";
 }
 
+function isRoot(node: TreeNode): node is TreeRoot {
+  return node.type === "root";
+}
+
+function isTag(node: TreeNode): node is TreeTag {
+  return node.type === "tag";
+}
+
+function isText(node: TreeNode): node is TreeText {
+  return node.type === "text";
+}
+
+function isComment(node: TreeNode): node is TreeComment {
+  return node.type === "comment";
+}
+
 export function parse(str: string): TreeRoot {
   // normalize
   str = unescapeXML(str);
@@ -319,7 +335,7 @@ export function parse(str: string): TreeRoot {
   return root;
 }
 
-function getChildren<T>(
+function mapChildren<T>(
   parent: TreeParent,
   callback: (
     child: TreeChild,
@@ -345,7 +361,7 @@ function getChildren<T>(
   return result;
 }
 
-function accChildren<T>(
+function reduceChildren<T>(
   parent: TreeParent,
   callback: (
     accumulator: T,
@@ -403,7 +419,7 @@ function findChild(
   return func(parent, 1);
 }
 
-function findChildren(
+function filterChildren(
   parent: TreeParent,
   callback: (
     child: TreeChild,
@@ -431,7 +447,7 @@ function findChildren(
   return result;
 }
 
-function getParents<T>(
+function mapParents<T>(
   child: TreeChild,
   callback: (parent: TreeParent, depth: number, child: TreeChild) => T
 ): T[] {
@@ -451,7 +467,7 @@ function getParents<T>(
   return result;
 }
 
-function accParents<T>(
+function reduceParents<T>(
   child: TreeChild,
   callback: (
     accumulator: T,
@@ -500,7 +516,7 @@ function findParent(
   return func(child, 1);
 }
 
-function findParents(
+function filterParents(
   child: TreeChild,
   callback: (parent: TreeParent, depth: number, child: TreeChild) => any
 ) {
@@ -621,7 +637,23 @@ export class Tree {
     return isChild(this.node);
   }
 
-  getChildren<T>(
+  isRoot() {
+    return isRoot(this.node);
+  }
+
+  isTag() {
+    return isTag(this.node);
+  }
+
+  isText() {
+    return isText(this.node);
+  }
+
+  isComment() {
+    return isComment(this.node);
+  }
+
+  map<T>(
     callback: (
       child: TreeChild,
       depth: number,
@@ -630,13 +662,13 @@ export class Tree {
     ) => T
   ): T[] {
     if (isParent(this.node)) {
-      return getChildren(this.node, callback);
+      return mapChildren(this.node, callback);
     } else {
       return [];
     }
   }
 
-  accChildren<T>(
+  reduce<T>(
     callback: (
       accumulator: T,
       child: TreeChild,
@@ -647,13 +679,13 @@ export class Tree {
     initialValue: T
   ): T {
     if (isParent(this.node)) {
-      return accChildren(this.node, callback, initialValue);
+      return reduceChildren(this.node, callback, initialValue);
     } else {
       return initialValue;
     }
   }
 
-  findChild(
+  find(
     callback: (
       child: TreeChild,
       depth: number,
@@ -666,7 +698,7 @@ export class Tree {
     }
   }
 
-  findChildren(
+  filter(
     callback: (
       child: TreeChild,
       depth: number,
@@ -675,23 +707,23 @@ export class Tree {
     ) => any
   ): TreeChild[] {
     if (isParent(this.node)) {
-      return findChildren(this.node, callback);
+      return filterChildren(this.node, callback);
     } else {
       return [];
     }
   }
 
-  getParents<T>(
+  mapParents<T>(
     callback: (parent: TreeParent, depth: number, child: TreeChild) => T
   ): T[] {
     if (isChild(this.node)) {
-      return getParents(this.node, callback);
+      return mapParents(this.node, callback);
     } else {
       return [];
     }
   }
 
-  accParents<T>(
+  reduceParents<T>(
     callback: (
       accumulator: T,
       parent: TreeParent,
@@ -701,7 +733,7 @@ export class Tree {
     initialValue: T
   ): T {
     if (isChild(this.node)) {
-      return accParents(this.node, callback, initialValue);
+      return reduceParents(this.node, callback, initialValue);
     } else {
       return initialValue;
     }
@@ -715,11 +747,11 @@ export class Tree {
     }
   }
 
-  findParents(
+  filterParents(
     callback: (parent: TreeParent, depth: number, child: TreeChild) => any
   ) {
     if (isChild(this.node)) {
-      return findParents(this.node, callback);
+      return filterParents(this.node, callback);
     } else {
       return [];
     }
@@ -735,18 +767,22 @@ export class Tree {
 
   static isParent = isParent;
   static isChild = isChild;
+  static isRoot = isRoot;
+  static isTag = isTag;
+  static isText = isText;
+  static isComment = isComment;
 
   static parse = parse;
   static stringify = stringify;
   static getContents = getContents;
 
-  static getChildren = getChildren;
-  static accChildren = accChildren;
-  static findChild = findChild;
-  static findChildren = findChildren;
+  static map = mapChildren;
+  static reduce = reduceChildren;
+  static find = findChild;
+  static filter = filterChildren;
 
-  static getParents = getParents;
-  static accParents = accParents;
+  static mapParents = mapParents;
+  static reduceParents = reduceParents;
   static findParent = findParent;
-  static findParents = findParents;
+  static filterParents = filterParents;
 }

@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
-import { Tree, TreeTag } from "./tree";
+import { Tree, TreeChild, TreeTag } from "./tree";
 
 const html = `
 <!DOCTYPE html>
@@ -43,25 +43,16 @@ const html = `
   `.trim();
 
 test("Tree.parse()", () => {
-  // const now = Date.now();
-  // let count = 0;
-  // while (Date.now() - now < 10) {
-  //   Tree.parse(html);
-  //   count++;
-  // }
-
-  // console.log(`Tree.parse()`, count, Date.now() - now + "ms");
-
   const root = Tree.parse(html);
 
   eq(Tree.stringify(root), html);
 
-  const script = Tree.findChild(
+  const script = Tree.find(
     root,
     (child) => child.tag === "script" && !child.attrs.src
   ) as TreeTag;
   eq(
-    Tree.accChildren(
+    Tree.reduce(
       script,
       (acc, node) => {
         if (node.content) {
@@ -91,12 +82,12 @@ test("Tree.parse()", () => {
     `
   );
 
-  const div1 = Tree.findChild(
+  const div1 = Tree.find(
     root,
     (child) => child.tag === "div" && child.attrs.id === "div1"
   ) as TreeTag;
   eq(
-    Tree.accChildren(
+    Tree.reduce(
       div1,
       (acc, node) => {
         if (node.content) {
@@ -143,26 +134,26 @@ test("Tree.parse()", () => {
     "script",
     "script",
   ];
-  Tree.getChildren(root, (node, index) => {
+  Tree.map(root, (node, index) => {
     if (node.type === "tag") {
       eq(node.tag, seq.shift());
     }
   });
 
-  const preNode = Tree.findChild(root, (node, index) => {
+  const preNode = Tree.find(root, (node, index) => {
     return node.type === "tag" && node.tag === "pre";
   }) as TreeTag;
 
   eq(preNode && preNode.type === "tag" && preNode.tag === "pre", true);
 
-  const tagChildren = Tree.findChildren(root, (node, index) => {
+  const tagChildren = Tree.filter(root, (node, index) => {
     return node.type === "tag";
   });
 
   tagChildren.forEach((item) => eq(item.type, "tag"));
   eq(tagChildren.length, 15);
 
-  const parents = Tree.getParents(preNode, (parent, index) => {
+  const parents = Tree.mapParents(preNode, (parent, index) => {
     return parent;
   });
 
@@ -177,7 +168,7 @@ test("Tree.parse()", () => {
 
   eq(bodyNode && bodyNode.type === "tag" && bodyNode.tag === "body", true);
 
-  const tagParents = Tree.findParents(preNode, (parent, index) => {
+  const tagParents = Tree.filterParents(preNode, (parent, index) => {
     return parent.type === "tag";
   });
 
@@ -186,15 +177,6 @@ test("Tree.parse()", () => {
 });
 
 test("new Tree()", () => {
-  // const now = Date.now();
-  // let count = 0;
-  // while (Date.now() - now < 10) {
-  //   new Tree(html);
-  //   count++;
-  // }
-
-  // console.log(`new Tree()`, count, Date.now() - now + "ms");
-
   const tree = new Tree(html);
 
   eq(tree.toString(), html);
@@ -216,19 +198,19 @@ test("new Tree()", () => {
     "script",
     "script",
   ];
-  tree.getChildren((node, index) => {
+  tree.map((node, index) => {
     if (node.type === "tag") {
       eq(node.tag, seq.shift());
     }
   });
 
-  const preNode = tree.findChild((node, index) => {
+  const preNode = tree.find((node, index) => {
     return node.type === "tag" && node.tag === "pre";
   });
 
   eq(preNode && preNode.type === "tag" && preNode.tag === "pre", true);
 
-  const tagNodes = tree.findChildren((node, index) => {
+  const tagNodes = tree.filter((node, index) => {
     return node.type === "tag";
   });
 
@@ -237,7 +219,7 @@ test("new Tree()", () => {
 
 test("subtree", () => {
   const root = Tree.parse(html);
-  const body = Tree.findChild(
+  const body = Tree.find(
     root,
     (node) => node.type === "tag" && node.tag === "body"
   ) as TreeTag;

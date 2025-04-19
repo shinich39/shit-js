@@ -313,6 +313,18 @@ function isParent(node) {
 function isChild(node) {
   return node.type === "tag" || node.type === "text" || node.type === "comment";
 }
+function isRoot(node) {
+  return node.type === "root";
+}
+function isTag(node) {
+  return node.type === "tag";
+}
+function isText(node) {
+  return node.type === "text";
+}
+function isComment(node) {
+  return node.type === "comment";
+}
 function parse(str) {
   str = unescapeXML(str);
   const stacks = [];
@@ -429,7 +441,7 @@ function parse(str) {
   }
   return root;
 }
-function getChildren(parent, callback) {
+function mapChildren(parent, callback) {
   const result = [];
   const func = function(parent2, depth) {
     for (let i = 0; i < parent2.children.length; i++) {
@@ -443,7 +455,7 @@ function getChildren(parent, callback) {
   func(parent, 1);
   return result;
 }
-function accChildren(parent, callback, initialValue) {
+function reduceChildren(parent, callback, initialValue) {
   let result = initialValue;
   const func = function(parent2, depth) {
     for (let i = 0; i < parent2.children.length; i++) {
@@ -474,7 +486,7 @@ function findChild(parent, callback) {
   };
   return func(parent, 1);
 }
-function findChildren(parent, callback) {
+function filterChildren(parent, callback) {
   const result = [];
   const func = function(parent2, depth) {
     for (let i = 0; i < parent2.children.length; i++) {
@@ -490,7 +502,7 @@ function findChildren(parent, callback) {
   func(parent, 1);
   return result;
 }
-function getParents(child, callback) {
+function mapParents(child, callback) {
   const result = [];
   const func = function(child2, depth) {
     if (child2.parent) {
@@ -503,7 +515,7 @@ function getParents(child, callback) {
   func(child, 1);
   return result;
 }
-function accParents(child, callback, initialValue) {
+function reduceParents(child, callback, initialValue) {
   let result = initialValue;
   const func = function(child2, depth) {
     if (child2.parent) {
@@ -531,7 +543,7 @@ function findParent(child, callback) {
   };
   return func(child, 1);
 }
-function findParents(child, callback) {
+function filterParents(child, callback) {
   const result = [];
   const func = function(child2, depth) {
     if (child2.parent) {
@@ -623,42 +635,54 @@ var Tree = class {
   isChild() {
     return isChild(this.node);
   }
-  getChildren(callback) {
+  isRoot() {
+    return isRoot(this.node);
+  }
+  isTag() {
+    return isTag(this.node);
+  }
+  isText() {
+    return isText(this.node);
+  }
+  isComment() {
+    return isComment(this.node);
+  }
+  map(callback) {
     if (isParent(this.node)) {
-      return getChildren(this.node, callback);
+      return mapChildren(this.node, callback);
     } else {
       return [];
     }
   }
-  accChildren(callback, initialValue) {
+  reduce(callback, initialValue) {
     if (isParent(this.node)) {
-      return accChildren(this.node, callback, initialValue);
+      return reduceChildren(this.node, callback, initialValue);
     } else {
       return initialValue;
     }
   }
-  findChild(callback) {
+  find(callback) {
     if (isParent(this.node)) {
       return findChild(this.node, callback);
     }
   }
-  findChildren(callback) {
+  filter(callback) {
     if (isParent(this.node)) {
-      return findChildren(this.node, callback);
+      return filterChildren(this.node, callback);
     } else {
       return [];
     }
   }
-  getParents(callback) {
+  mapParents(callback) {
     if (isChild(this.node)) {
-      return getParents(this.node, callback);
+      return mapParents(this.node, callback);
     } else {
       return [];
     }
   }
-  accParents(callback, initialValue) {
+  reduceParents(callback, initialValue) {
     if (isChild(this.node)) {
-      return accParents(this.node, callback, initialValue);
+      return reduceParents(this.node, callback, initialValue);
     } else {
       return initialValue;
     }
@@ -668,9 +692,9 @@ var Tree = class {
       return findParent(this.node, callback);
     }
   }
-  findParents(callback) {
+  filterParents(callback) {
     if (isChild(this.node)) {
-      return findParents(this.node, callback);
+      return filterParents(this.node, callback);
     } else {
       return [];
     }
@@ -688,6 +712,18 @@ var Tree = class {
     this.isChild = isChild;
   }
   static {
+    this.isRoot = isRoot;
+  }
+  static {
+    this.isTag = isTag;
+  }
+  static {
+    this.isText = isText;
+  }
+  static {
+    this.isComment = isComment;
+  }
+  static {
     this.parse = parse;
   }
   static {
@@ -697,28 +733,28 @@ var Tree = class {
     this.getContents = getContents;
   }
   static {
-    this.getChildren = getChildren;
+    this.map = mapChildren;
   }
   static {
-    this.accChildren = accChildren;
+    this.reduce = reduceChildren;
   }
   static {
-    this.findChild = findChild;
+    this.find = findChild;
   }
   static {
-    this.findChildren = findChildren;
+    this.filter = filterChildren;
   }
   static {
-    this.getParents = getParents;
+    this.mapParents = mapParents;
   }
   static {
-    this.accParents = accParents;
+    this.reduceParents = reduceParents;
   }
   static {
     this.findParent = findParent;
   }
   static {
-    this.findParents = findParents;
+    this.filterParents = filterParents;
   }
 };
 
