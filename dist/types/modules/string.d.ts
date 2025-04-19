@@ -1,3 +1,9 @@
+/**
+ * find top level string
+ *
+ * skip inside of bracket and quotes
+ */
+export declare function findString(str: string, target: string, fromIndex?: number): number;
 export declare function getUUID(): string;
 export declare function getRandomCharacter(charset: string): string;
 export declare function getRandomString(charset: string, size: number): string;

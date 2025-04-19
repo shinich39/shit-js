@@ -26,7 +26,7 @@ export function joinPaths(...args: string[]) {
   return resolved.join("/");
 }
 
-export function getBasename(str: string) {
+export function getBaseName(str: string) {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 2;
@@ -39,7 +39,7 @@ export function getBasename(str: string) {
   return str;
 }
 
-export function getFilename(str: string) {
+export function getFileName(str: string) {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 2,
@@ -63,7 +63,7 @@ export function getFilename(str: string) {
   return str;
 }
 
-export function getExtname(str: string) {
+export function getExtName(str: string) {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 2;
@@ -79,7 +79,7 @@ export function getExtname(str: string) {
   return "";
 }
 
-export function getDirname(str: string) {
+export function getDirName(str: string) {
   let i = str.length - 2;
   while (i >= 0) {
     if (str[i] === "/" || str[i] === "\\") {

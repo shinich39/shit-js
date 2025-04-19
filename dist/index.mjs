@@ -93,6 +93,49 @@ function sleep(ms) {
 }
 
 // src/modules/string.ts
+function findString(str, target, fromIndex) {
+  if (!fromIndex) {
+    fromIndex = 0;
+  } else if (fromIndex < 0) {
+    fromIndex = str.length - 1 + fromIndex;
+  }
+  const len = target.length;
+  let i = fromIndex, closing = null;
+  const match = len === 1 ? () => str[i] === target : () => {
+    for (let j = 0; j < len; j++) {
+      if (str[i + j] !== target[j]) {
+        return false;
+      }
+    }
+    return true;
+  };
+  while (i < str.length) {
+    if (str[i] === "\\") {
+      i++;
+    } else if (!closing) {
+      if (match()) {
+        return i;
+      }
+      if (str[i] === '"' || str[i] === "'") {
+        closing = str[i];
+      } else if (str[i] === "(") {
+        closing = ")";
+      } else if (str[i] === "{") {
+        closing = "}";
+      } else if (str[i] === "[") {
+        closing = "]";
+      } else if (str[i] === "<") {
+        closing = ">";
+      }
+    } else {
+      if (str[i] === closing) {
+        closing = null;
+      }
+    }
+    i++;
+  }
+  return -1;
+}
 function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
@@ -908,7 +951,7 @@ function joinPaths(...args) {
   }
   return resolved.join("/");
 }
-function getBasename(str) {
+function getBaseName(str) {
   str = str.replace(/[\\/]$/, "");
   let i = str.length - 2;
   while (i >= 0) {
@@ -919,7 +962,7 @@ function getBasename(str) {
   }
   return str;
 }
-function getFilename(str) {
+function getFileName(str) {
   str = str.replace(/[\\/]$/, "");
   let i = str.length - 2, offset;
   while (i >= 0) {
@@ -937,7 +980,7 @@ function getFilename(str) {
   }
   return str;
 }
-function getExtname(str) {
+function getExtName(str) {
   str = str.replace(/[\\/]$/, "");
   let i = str.length - 2;
   while (i >= 0) {
@@ -951,7 +994,7 @@ function getExtname(str) {
   }
   return "";
 }
-function getDirname(str) {
+function getDirName(str) {
   let i = str.length - 2;
   while (i >= 0) {
     if (str[i] === "/" || str[i] === "\\") {
@@ -1058,14 +1101,15 @@ export {
   compareObject,
   compareString,
   escapeXML,
+  findString,
   getAdjustedSize,
-  getBasename,
+  getBaseName,
   getClampedNumber,
   getContainedSize,
   getCoveredSize,
-  getDirname,
-  getExtname,
-  getFilename,
+  getDirName,
+  getExtName,
+  getFileName,
   getFloats,
   getInts,
   getLoopedNumber,

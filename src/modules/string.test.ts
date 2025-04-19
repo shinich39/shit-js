@@ -3,15 +3,26 @@ import assert from "node:assert";
 import {
   compareString,
   escapeXML,
+  findString,
   getFloats,
   getInts,
   getRandomCharacter,
   getRandomString,
+  getUUID,
   getXORString,
   normalizeString,
   toRegExp,
   unescapeXML,
 } from "./string";
+
+test("findString", () => {
+  eq(findString("<div>div</div>", "d"), 5);
+  eq(findString("<div>div</div>", "div"), 5);
+});
+
+test("getUUID", () => {
+  eq(getUUID().length, 36);
+});
 
 test("getRandomCharacter", () => {
   eq(/[abc]/.test(getRandomCharacter("abc")), true);

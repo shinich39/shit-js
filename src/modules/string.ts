@@ -1,3 +1,65 @@
+/**
+ * find top level string
+ *
+ * skip inside of bracket and quotes
+ */
+export function findString(str: string, target: string, fromIndex?: number) {
+  if (!fromIndex) {
+    fromIndex = 0;
+  } else if (fromIndex < 0) {
+    fromIndex = str.length - 1 + fromIndex;
+  }
+
+  const len = target.length;
+
+  let i = fromIndex,
+    closing: string | null = null;
+
+  const match =
+    len === 1
+      ? () => str[i] === target
+      : () => {
+          for (let j = 0; j < len; j++) {
+            if (str[i + j] !== target[j]) {
+              return false;
+            }
+          }
+          return true;
+        };
+
+  while (i < str.length) {
+    // pass escaped character
+    if (str[i] === "\\") {
+      i++;
+    } else if (!closing) {
+      if (match()) {
+        return i;
+      }
+
+      if (str[i] === '"' || str[i] === "'") {
+        closing = str[i];
+      } else if (str[i] === "(") {
+        closing = ")";
+      } else if (str[i] === "{") {
+        closing = "}";
+      } else if (str[i] === "[") {
+        closing = "]";
+      } else if (str[i] === "<") {
+        closing = ">";
+      }
+    } // find closing
+    else {
+      if (str[i] === closing) {
+        closing = null;
+      }
+    }
+
+    i++;
+  }
+
+  return -1;
+}
+
 export function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;

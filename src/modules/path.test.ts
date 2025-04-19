@@ -1,10 +1,10 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import {
-  getBasename,
-  getDirname,
-  getExtname,
-  getFilename,
+  getBaseName,
+  getDirName,
+  getExtName,
+  getFileName,
   getRelativePath,
   getRootPath,
   joinPaths,
@@ -19,10 +19,10 @@ test("basename", () => {
   ];
 
   for (const str of strs) {
-    eq(basename(str[0]), getBasename(str[0]), str[0]);
-    eq(basename(str[0]), getBasename(str[0]), str[0]);
-    eq(basename(str[0]), getBasename(str[0]), str[0]);
-    eq(str[1], getBasename(str[0]), str[0]);
+    eq(basename(str[0]), getBaseName(str[0]), str[0]);
+    eq(basename(str[0]), getBaseName(str[0]), str[0]);
+    eq(basename(str[0]), getBaseName(str[0]), str[0]);
+    eq(str[1], getBaseName(str[0]), str[0]);
   }
 });
 
@@ -34,10 +34,10 @@ test("extname", () => {
   ];
 
   for (const str of strs) {
-    eq(extname(str[0]), getExtname(str[0]), str[0]);
-    eq(extname(str[0]), getExtname(str[0]), str[0]);
-    eq(extname(str[0]), getExtname(str[0]), str[0]);
-    eq(str[1], getExtname(str[0]), str[0]);
+    eq(extname(str[0]), getExtName(str[0]), str[0]);
+    eq(extname(str[0]), getExtName(str[0]), str[0]);
+    eq(extname(str[0]), getExtName(str[0]), str[0]);
+    eq(str[1], getExtName(str[0]), str[0]);
   }
 });
 
@@ -51,10 +51,10 @@ test("filename", () => {
   ];
 
   for (const str of strs) {
-    eq(basename(str[0], extname(str[0])), getFilename(str[0]), str[0]);
-    eq(basename(str[0], extname(str[0])), getFilename(str[0]), str[0]);
-    eq(basename(str[0], extname(str[0])), getFilename(str[0]), str[0]);
-    eq(str[1], getFilename(str[0]), str[0]);
+    eq(basename(str[0], extname(str[0])), getFileName(str[0]), str[0]);
+    eq(basename(str[0], extname(str[0])), getFileName(str[0]), str[0]);
+    eq(basename(str[0], extname(str[0])), getFileName(str[0]), str[0]);
+    eq(str[1], getFileName(str[0]), str[0]);
   }
 });
 
@@ -66,10 +66,10 @@ test("dirname", () => {
   ];
 
   for (const str of strs) {
-    eq(dirname(str[0]), getDirname(str[0]), str[0]);
-    eq(dirname(str[0]), getDirname(str[0]), str[0]);
-    eq(dirname(str[0]), getDirname(str[0]), str[0]);
-    eq(str[1], getDirname(str[0]), str[0]);
+    eq(dirname(str[0]), getDirName(str[0]), str[0]);
+    eq(dirname(str[0]), getDirName(str[0]), str[0]);
+    eq(dirname(str[0]), getDirName(str[0]), str[0]);
+    eq(str[1], getDirName(str[0]), str[0]);
   }
 });
 
