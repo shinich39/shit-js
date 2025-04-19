@@ -163,30 +163,3 @@ export function getRootPath(...args: string[]) {
 
   return resolved.join("/");
 }
-
-// deprecated
-// export function parsePath(...args: string[]) {
-//   const parts: string[] = args
-//     .join("/")
-//     .split(/[\\/]+/)
-//     .filter((p) => p);
-
-//   const basename = parts[parts.length - 1] || "";
-
-//   const dotIndex = basename.lastIndexOf(".");
-
-//   const extname = dotIndex > -1 ? basename.substring(dotIndex) : "";
-
-//   const filename = dotIndex > -1 ? basename.substring(0, dotIndex) : basename;
-
-//   const dirname =
-//     parts.length > 1 ? parts.slice(0, parts.length - 1).join("/") : "";
-
-//   return {
-//     parts,
-//     basename,
-//     extname,
-//     filename,
-//     dirname,
-//   };
-// }
