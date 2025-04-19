@@ -27,8 +27,10 @@ export function getModeValueWithCount(arr: any[]) {
   }
 
   const seen: Record<string, number> = {};
+
   let value,
     count = 0;
+
   for (const item of arr) {
     seen[item] = seen[item] ? seen[item] + 1 : 1;
 
@@ -53,11 +55,15 @@ export function getModeValue(arr: any[]) {
  */
 export function shuffleArray<T>(arr: T[]) {
   let i = arr.length;
+
   while (i > 0) {
     const j = Math.floor(Math.random() * i);
+
     i--;
+
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+
   return arr;
 }
 
@@ -65,6 +71,7 @@ export function plotBy(...args: any[][]) {
   if (args.length === 0) {
     return [];
   }
+
   for (const arg in args) {
     if (arg.length === 0) {
       throw new Error(`Invalid argument: argument cannot be empty`);

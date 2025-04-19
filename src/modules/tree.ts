@@ -73,7 +73,7 @@ type StackComment = Omit<TreeComment, "parent"> & {
 function parseTag(str: string, fromIndex: number) {
   let i = fromIndex;
   while (i < str.length) {
-    if (/\s|>/.test(str[i])) {
+    if (str[i] === " " || str[i] === "\n" || str[i] === ">") {
       return i !== fromIndex ? str.substring(fromIndex, i) : undefined;
     }
     i++;
@@ -96,11 +96,11 @@ function parseAttrs(str: string, fromIndex: number) {
   };
 
   while (j < str.length) {
-    const c = str[j];
+    const char = str[j];
     if (!quote) {
-      if (c === ">") {
+      if (char === ">") {
         const part = str.substring(i, j);
-        if (/^\s*[/?]$/.test(part)) {
+        if (part.endsWith("/") || part.endsWith("?")) {
           closer = part;
         } else {
           acc(part);
@@ -108,15 +108,15 @@ function parseAttrs(str: string, fromIndex: number) {
         j++;
         break;
       }
-      if (/\s/.test(c)) {
+      if (char === " " || char === "\n") {
         acc(str.substring(i, j));
         i = j;
-      } else if (c === `"` || c === `'`) {
-        quote = c;
+      } else if (char === `"` || char === `'`) {
+        quote = char;
       }
-    } else if (c === "\\") {
+    } else if (char === "\\") {
       j++;
-    } else if (c === quote) {
+    } else if (char === quote) {
       quote = null;
       acc(str.substring(i, j + 1));
       i = j + 1;

@@ -48,12 +48,15 @@ export function toNumber(e: any) {
   if (isNumeric(e)) {
     return parseFloat(e);
   }
+
   if (typeof e === "number") {
     return e;
   }
+
   if (typeof e === "boolean") {
     return e ? 1 : 0;
   }
+
   if (!e) {
     return 0; // undefined, null
   }

@@ -44,6 +44,7 @@ export function getFilename(str: string) {
 
   let i = str.length - 2,
     offset;
+    
   while (i >= 0) {
     if (!offset && str[i] === ".") {
       offset = i;
@@ -109,8 +110,8 @@ export function getRelativePath(from: string, to: string) {
   };
 
   // normalize paths
-  let a = normalize(from).split("/").filter(Boolean);
-  let b = normalize(to).split("/").filter(Boolean);
+  const a = normalize(from).split("/").filter(Boolean);
+  const b = normalize(to).split("/").filter(Boolean);
 
   // find root
   let i = 0;
@@ -158,6 +159,7 @@ export function getRootPath(...args: string[]) {
     }
 
     resolved.push(seg);
+
     j++;
   }
 

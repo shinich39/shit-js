@@ -43,14 +43,14 @@ const html = `
   `.trim();
 
 test("Tree.parse()", () => {
-  const now = Date.now();
-  let count = 0;
-  while (Date.now() - now < 10) {
-    Tree.parse(html);
-    count++;
-  }
+  // const now = Date.now();
+  // let count = 0;
+  // while (Date.now() - now < 10) {
+  //   Tree.parse(html);
+  //   count++;
+  // }
 
-  console.log(`Tree.parse()`, count, Date.now() - now + "ms");
+  // console.log(`Tree.parse()`, count, Date.now() - now + "ms");
 
   const root = Tree.parse(html);
 
@@ -186,14 +186,14 @@ test("Tree.parse()", () => {
 });
 
 test("new Tree()", () => {
-  const now = Date.now();
-  let count = 0;
-  while (Date.now() - now < 10) {
-    new Tree(html);
-    count++;
-  }
+  // const now = Date.now();
+  // let count = 0;
+  // while (Date.now() - now < 10) {
+  //   new Tree(html);
+  //   count++;
+  // }
 
-  console.log(`new Tree()`, count, Date.now() - now + "ms");
+  // console.log(`new Tree()`, count, Date.now() - now + "ms");
 
   const tree = new Tree(html);
 

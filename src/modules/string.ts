@@ -36,6 +36,7 @@ export function getXORString(str: string, salt: string) {
   for (let i = 0; i < str.length; i++) {
     result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
   }
+
   return result;
 }
 /**

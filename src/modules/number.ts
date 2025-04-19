@@ -103,9 +103,11 @@ export function humanizeFileSize(
   if (bytes === 0) {
     return "0 Bytes";
   }
+
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   // keep 2 decimal places
   const size = (bytes / Math.pow(1024, i)).toFixed(2);
+
   return (
     size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i]
   );
