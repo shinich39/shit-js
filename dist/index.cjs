@@ -40,12 +40,19 @@ __export(index_exports, {
   getFloats: () => getFloats,
   getInts: () => getInts,
   getLoopedNumber: () => getLoopedNumber,
+  getMaxValue: () => getMaxValue,
+  getMeanValue: () => getMeanValue,
+  getMinValue: () => getMinValue,
+  getModeCount: () => getModeCount,
+  getModeValue: () => getModeValue,
+  getModeValueWithCount: () => getModeValueWithCount,
   getObjectValue: () => getObjectValue,
   getRandomCharacter: () => getRandomCharacter,
   getRandomNumber: () => getRandomNumber,
   getRandomString: () => getRandomString,
   getRelativePath: () => getRelativePath,
   getRootPath: () => getRootPath,
+  getSumValue: () => getSumValue,
   getType: () => getType,
   getUUID: () => getUUID,
   getXORString: () => getXORString,
@@ -57,7 +64,6 @@ __export(index_exports, {
   joinPaths: () => joinPaths,
   normalizeString: () => normalizeString,
   parse: () => parse,
-  parseNumbers: () => parseNumbers,
   plotBy: () => plotBy,
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
@@ -68,38 +74,45 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/modules/array.ts
-function parseNumbers(arr) {
+function getMaxValue(arr) {
+  return arr.reduce((acc, cur) => {
+    return acc > cur ? acc : cur;
+  }, Number.MIN_SAFE_INTEGER);
+}
+function getMinValue(arr) {
+  return arr.reduce((acc, cur) => {
+    return acc < cur ? acc : cur;
+  }, Number.MAX_SAFE_INTEGER);
+}
+function getSumValue(arr) {
+  return arr.reduce((acc, cur) => acc + cur, 0);
+}
+function getMeanValue(arr) {
+  return arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
+}
+function getModeValueWithCount(arr) {
   if (arr.length === 0) {
-    throw new Error(`Invalid argument: arr.length === 0`);
+    return {
+      count: void 0,
+      value: void 0
+    };
   }
-  let max = Number.MIN_SAFE_INTEGER, min = Number.MAX_SAFE_INTEGER, mode = 0, modeCount = 0, sum = 0, seen = {};
-  for (const num of arr) {
-    if (max < num) {
-      max = num;
+  const seen = {};
+  let value, count = 0;
+  for (const item of arr) {
+    seen[item] = seen[item] ? seen[item] + 1 : 1;
+    if (count < seen[item]) {
+      count = seen[item];
+      value = item;
     }
-    if (min > num) {
-      min = num;
-    }
-    if (!seen[num]) {
-      seen[num] = 1;
-    } else {
-      seen[num] += 1;
-    }
-    if (modeCount < seen[num]) {
-      modeCount = seen[num];
-      mode = num;
-    }
-    sum += num;
   }
-  return {
-    max,
-    min,
-    sum,
-    mean: sum / arr.length,
-    // average, arithmetic mean
-    mode,
-    modeCount
-  };
+  return { count, value };
+}
+function getModeCount(arr) {
+  return getModeValueWithCount(arr).count;
+}
+function getModeValue(arr) {
+  return getModeValueWithCount(arr).value;
 }
 function shuffleArray(arr) {
   let i = arr.length;

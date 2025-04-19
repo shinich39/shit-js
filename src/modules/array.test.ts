@@ -1,16 +1,46 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { groupBy, parseNumbers, plotBy, shuffleArray } from "./array";
+import {
+  getMaxValue,
+  getMeanValue,
+  getMinValue,
+  getModeCount,
+  getModeValue,
+  getModeValueWithCount,
+  getSumValue,
+  groupBy,
+  plotBy,
+  shuffleArray,
+} from "./array";
 
-test("parseNumbers", () => {
-  eq(parseNumbers([0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9]), {
-    max: 9,
-    min: 0,
-    sum: 45,
-    mean: 4.5,
-    mode: 0,
-    modeCount: 2,
-  });
+const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
+
+test("getMaxValue", () => {
+  eq(getMaxValue(arr), 9);
+});
+
+test("getMinValue", () => {
+  eq(getMinValue(arr), 0);
+});
+
+test("getSumValue", () => {
+  eq(getSumValue(arr), 45);
+});
+
+test("getMeanValue", () => {
+  eq(getMeanValue(arr), 4.5);
+});
+
+test("getModeValueWithCount", () => {
+  eq(getModeValueWithCount(arr), { value: 0, count: 2 });
+});
+
+test("getModeValue", () => {
+  eq(getModeValue(arr), 0);
+});
+
+test("getModeCount", () => {
+  eq(getModeCount(arr), 2);
 });
 
 test("shuffleArray", () => {

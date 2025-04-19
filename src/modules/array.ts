@@ -1,46 +1,52 @@
-export function parseNumbers(arr: number[]) {
+export function getMaxValue(arr: number[]) {
+  return arr.reduce((acc, cur) => {
+    return acc > cur ? acc : cur;
+  }, Number.MIN_SAFE_INTEGER);
+}
+
+export function getMinValue(arr: number[]) {
+  return arr.reduce((acc, cur) => {
+    return acc < cur ? acc : cur;
+  }, Number.MAX_SAFE_INTEGER);
+}
+
+export function getSumValue(arr: number[]) {
+  return arr.reduce((acc, cur) => acc + cur, 0);
+}
+
+export function getMeanValue(arr: number[]) {
+  return arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
+}
+
+export function getModeValueWithCount(arr: any[]) {
   if (arr.length === 0) {
-    throw new Error(`Invalid argument: arr.length === 0`);
+    return {
+      count: undefined,
+      value: undefined,
+    };
   }
 
-  let max = Number.MIN_SAFE_INTEGER,
-    min = Number.MAX_SAFE_INTEGER,
-    mode = 0, // most frequent value
-    modeCount = 0,
-    sum = 0,
-    seen: Record<string, number> = {};
+  const seen: Record<string, number> = {};
+  let value,
+    count = 0;
+  for (const item of arr) {
+    seen[item] = seen[item] ? seen[item] + 1 : 1;
 
-  for (const num of arr) {
-    if (max < num) {
-      max = num;
+    if (count < seen[item]) {
+      count = seen[item];
+      value = item;
     }
-
-    if (min > num) {
-      min = num;
-    }
-
-    if (!seen[num]) {
-      seen[num] = 1;
-    } else {
-      seen[num] += 1;
-    }
-
-    if (modeCount < seen[num]) {
-      modeCount = seen[num];
-      mode = num;
-    }
-
-    sum += num;
   }
 
-  return {
-    max,
-    min,
-    sum,
-    mean: sum / arr.length, // average, arithmetic mean
-    mode,
-    modeCount,
-  };
+  return { count, value };
+}
+
+export function getModeCount(arr: any[]) {
+  return getModeValueWithCount(arr).count;
+}
+
+export function getModeValue(arr: any[]) {
+  return getModeValueWithCount(arr).value;
 }
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array

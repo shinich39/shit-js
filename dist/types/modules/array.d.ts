@@ -1,11 +1,16 @@
-export declare function parseNumbers(arr: number[]): {
-    max: number;
-    min: number;
-    sum: number;
-    mean: number;
-    mode: number;
-    modeCount: number;
+export declare function getMaxValue(arr: number[]): number;
+export declare function getMinValue(arr: number[]): number;
+export declare function getSumValue(arr: number[]): number;
+export declare function getMeanValue(arr: number[]): number;
+export declare function getModeValueWithCount(arr: any[]): {
+    count: undefined;
+    value: undefined;
+} | {
+    count: number;
+    value: any;
 };
+export declare function getModeCount(arr: any[]): number | undefined;
+export declare function getModeValue(arr: any[]): any;
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  */
