@@ -11,7 +11,7 @@ import {
 } from "./path";
 import { basename, dirname, extname, join, relative } from "node:path";
 
-test("basename", () => {
+test("getBaseName", () => {
   const strs = [
     ["./project/package.json", "package.json"],
     ["./project/", "project"],
@@ -26,7 +26,7 @@ test("basename", () => {
   }
 });
 
-test("extname", () => {
+test("getExtName", () => {
   const strs = [
     ["./project/package.json", ".json"],
     ["./project/", ""],
@@ -41,7 +41,7 @@ test("extname", () => {
   }
 });
 
-test("filename", () => {
+test("getFileName", () => {
   const strs = [
     ["./project/package.json", "package"],
     ["./project/", "project"],
@@ -58,7 +58,7 @@ test("filename", () => {
   }
 });
 
-test("dirname", () => {
+test("getDirName", () => {
   const strs = [
     ["./project/package.json", "./project"],
     ["./project/", "."],

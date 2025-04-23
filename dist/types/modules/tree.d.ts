@@ -1,5 +1,5 @@
-import { selectChild, selectChildren } from "./selector";
-import { setStyle } from "./stylesheet";
+import { selectChild, selectChildren } from "./tree-selector";
+import { setStyle } from "./tree-style";
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
 export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;

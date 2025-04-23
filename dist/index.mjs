@@ -239,7 +239,7 @@ function compareString(from, to) {
   return result.reverse();
 }
 
-// src/modules/selector.ts
+// src/modules/tree-selector.ts
 function parseSelector(selector) {
   const result = [];
   const atMatch = selector.match(/^@([a-zA-Z0-9-]+)(?:\s|$)/);
@@ -302,7 +302,7 @@ function parseSelector(selector) {
         continue;
       }
       if (typeof value !== "string") {
-        continue;
+        value = "";
       }
       if (operator === "=") {
         result.push({
@@ -526,7 +526,7 @@ function selectChildren(parent, selector) {
   return targets;
 }
 
-// src/modules/stylesheet.ts
+// src/modules/tree-style.ts
 function parseDeclaration(str) {
   const result = {};
   const re = /([^:]+):([^;]+);/g;

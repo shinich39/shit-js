@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
-import { selectChild, selectChildren } from "./selector";
+import { selectChild, selectChildren } from "./tree-selector";
 import { Tree } from "./tree";
 
 const html = `

@@ -134,9 +134,10 @@ function parseSelector(selector: string) {
         continue;
       }
 
-      // no attr value
+      // error: no attr value
+      // [attr=]
       if (typeof value !== "string") {
-        continue;
+        value = "";
       }
 
       // [attr=value]

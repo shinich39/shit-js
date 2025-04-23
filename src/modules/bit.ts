@@ -1,26 +1,24 @@
-export class Bit {
-  /**
-   * include
-   */
-  static check(a: number, b: number) {
-    return !!(a & b);
-  }
-  /**
-   * or
-   */
-  static set(a: number, b: number) {
-    return a | b;
-  }
-  /**
-   * and-not
-   */
-  static clear(a: number, b: number) {
-    return a & ~b;
-  }
-  /**
-   * xor
-   */
-  static invert(a: number, b: number) {
-    return a ^ b;
-  }
+/**
+ * and !== 0
+ */
+export function checkBit(a: number, b: number) {
+  return (a & b) !== 0;
+}
+/**
+ * or
+ */
+export function setBit(a: number, b: number) {
+  return a | b;
+}
+/**
+ * and-not
+ */
+export function clearBit(a: number, b: number) {
+  return a & ~b;
+}
+/**
+ * xor
+ */
+export function toggleBit(a: number, b: number) {
+  return a ^ b;
 }

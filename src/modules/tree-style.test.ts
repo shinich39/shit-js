@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
 import { Tree } from "./tree";
-import { setStyle } from "./stylesheet";
+import { setStyle } from "./tree-style";
 
 const html = `
 <!DOCTYPE html>
