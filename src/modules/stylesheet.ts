@@ -46,6 +46,7 @@ function parseStyle(style: string) {
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean);
+
       const declarations = parseDeclaration(match[3]);
 
       result.push({
@@ -97,6 +98,7 @@ export function setStyle(parent: TreeParent, style: string) {
   }
 }
 
+// regex: slower than object
 // export function setStyle(parent: TreeParent, style: string) {
 
 //   const parsedStyles = parseStyle(style);

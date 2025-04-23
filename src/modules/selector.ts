@@ -366,11 +366,13 @@ function getCandidates(node: TreeParent, combinator: StyleCombinator) {
 }
 
 function matchSelectors(
-  candidates: TreeTag[],
+  parent: TreeParent,
   selectors: StyleSelector[],
   combinator: StyleCombinator
 ) {
   let result: TreeTag[] = [];
+
+  const candidates = getCandidates(parent, combinator);
 
   for (const c of candidates) {
     let toggle = true;
@@ -451,9 +453,7 @@ function matchSelectors(
 
   if (combinator === " ") {
     for (const c of candidates) {
-      result.push(
-        ...matchSelectors(getCandidates(c, combinator), selectors, combinator)
-      );
+      result.push(...matchSelectors(c, selectors, combinator));
     }
   }
 
@@ -485,9 +485,7 @@ export function selectChildren(
     targets = [];
 
     for (const target of prevTargets) {
-      const candidates = getCandidates(target, combinator);
-
-      targets.push(...matchSelectors(candidates, selectors, combinator));
+      targets.push(...matchSelectors(target, selectors, combinator));
     }
   }
 

@@ -403,8 +403,9 @@ var shit = (() => {
     }
     return result;
   }
-  function matchSelectors(candidates, selectors, combinator) {
+  function matchSelectors(parent, selectors, combinator) {
     let result = [];
+    const candidates = getCandidates(parent, combinator);
     for (const c of candidates) {
       let toggle = true;
       for (const s of selectors) {
@@ -437,9 +438,7 @@ var shit = (() => {
     }
     if (combinator === " ") {
       for (const c of candidates) {
-        result.push(
-          ...matchSelectors(getCandidates(c, combinator), selectors, combinator)
-        );
+        result.push(...matchSelectors(c, selectors, combinator));
       }
     }
     return result;
@@ -455,8 +454,7 @@ var shit = (() => {
       const prevTargets = targets;
       targets = [];
       for (const target of prevTargets) {
-        const candidates = getCandidates(target, combinator);
-        targets.push(...matchSelectors(candidates, selectors, combinator));
+        targets.push(...matchSelectors(target, selectors, combinator));
       }
     }
     return targets;

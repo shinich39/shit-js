@@ -42,6 +42,24 @@ const html = `
 </html>
   `.trim();
 
+const seq = [
+  "!DOCTYPE",
+  "?xml",
+  "html",
+  "head",
+  "meta",
+  "meta",
+  "title",
+  "body",
+  "div",
+  "div",
+  "img",
+  "pre",
+  "code",
+  "script",
+  "script",
+];
+
 test("Tree.parse", () => {
   const root = Tree.parse(html);
 
@@ -117,26 +135,10 @@ test("Tree.parse", () => {
     `
   );
 
-  const seq = [
-    "!DOCTYPE",
-    "?xml",
-    "html",
-    "head",
-    "meta",
-    "meta",
-    "title",
-    "body",
-    "div",
-    "div",
-    "img",
-    "pre",
-    "code",
-    "script",
-    "script",
-  ];
+  let tagCount = 0;
   Tree.map(root, (node, index) => {
     if (node.type === "tag") {
-      eq(node.tag, seq.shift());
+      eq(node.tag, seq[tagCount++]);
     }
   });
 
@@ -181,26 +183,10 @@ test("new Tree", () => {
 
   eq(tree.toString(), html);
 
-  const seq = [
-    "!DOCTYPE",
-    "?xml",
-    "html",
-    "head",
-    "meta",
-    "meta",
-    "title",
-    "body",
-    "div",
-    "div",
-    "img",
-    "pre",
-    "code",
-    "script",
-    "script",
-  ];
+  let tagCount = 0;
   tree.map((node, index) => {
     if (node.type === "tag") {
-      eq(node.tag, seq.shift());
+      eq(node.tag, seq[tagCount++]);
     }
   });
 
@@ -288,36 +274,6 @@ test("Tree.selectAll", () => {
 
   // all tag elements
   eq(root.filter((c) => c.type === "tag").length, root.selectAll("*").length);
-
-  // let t1 = Date.now(),
-  //   c1 = 0;
-  // while (Date.now() - t1 < 10) {
-  //   const div = root.find(
-  //     (child) =>
-  //       child.type === "tag" &&
-  //       child.tag === "div" &&
-  //       child.attrs.hidden === null
-  //   );
-  //   c1++;
-  // }
-
-  // let t2 = Date.now(),
-  //   c2 = 0;
-  // while (Date.now() - t2 < 10) {
-  //   const div = root.select("body #div2");
-  //   c2++;
-  // }
-
-  // let t3 = Date.now(),
-  //   c3 = 0;
-  // while (Date.now() - t3 < 10) {
-  //   const divs = root.selectAll("body #div2");
-  //   c3++;
-  // }
-
-  // console.log(`root.find():`, c1); // 10000
-  // console.log(`root.select():`, c2); // 3300
-  // console.log(`root.selectAll():`, c3); // 3100
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

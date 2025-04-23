@@ -63,14 +63,14 @@ test("selectChildren", () => {
     (c) => c.tag === "img" && c.attrs?.alt === "image"
   );
 
-  let t = Date.now(),
-    c = 0;
-  while (Date.now() - t < 10) {
-    const _ = selectChildren(root, s);
-    c++;
-  }
+  // let t = Date.now(),
+  //   c = 0;
+  // while (Date.now() - t < 10) {
+  //   const _ = selectChildren(root, s);
+  //   c++;
+  // }
 
-  console.log(`selectChildren():`, c);
+  // console.log(`selectChildren():`, c);
 
   const result = selectChildren(root, s);
 
