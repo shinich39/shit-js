@@ -1,7 +1,9 @@
+import { selectChild, selectChildren } from "./selector";
+import { setStyle } from "./stylesheet";
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
 export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
-export type TreeAttrs = Record<string, boolean | string>;
+export type TreeAttrs = Record<string, string | null>;
 export interface TreeRoot {
     type: "root";
     parent?: undefined;
@@ -68,11 +70,14 @@ export declare class Tree {
     reduce<T>(callback: (accumulator: T, child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => T, initialValue: T): T;
     find(callback: (child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => any): TreeChild | undefined;
     filter(callback: (child: TreeChild, depth: number, index: number, siblings: TreeChild[]) => any): TreeChild[];
+    select(selector: string): TreeTag | undefined;
+    selectAll(selector: string): TreeTag[];
     mapTop<T>(callback: (parent: TreeParent, depth: number, child: TreeChild) => T): T[];
     reduceTop<T>(callback: (accumulator: T, parent: TreeParent, depth: number, child: TreeChild) => T, initialValue: T): T;
     findTop(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeNode | undefined;
     filterTop(callback: (parent: TreeParent, depth: number, child: TreeChild) => any): TreeParent[];
     getContents(): string[];
+    setStyle(style: string): void;
     toString(): string;
     static isParent: typeof isParent;
     static isChild: typeof isChild;
@@ -83,10 +88,13 @@ export declare class Tree {
     static parse: typeof parse;
     static stringify: typeof stringify;
     static getContents: typeof getContents;
+    static setStyle: typeof setStyle;
     static map: typeof mapChildren;
     static reduce: typeof reduceChildren;
     static find: typeof findChild;
     static filter: typeof filterChildren;
+    static select: typeof selectChild;
+    static selectAll: typeof selectChildren;
     static mapTop: typeof mapParents;
     static reduceTop: typeof reduceParents;
     static findTop: typeof findParent;

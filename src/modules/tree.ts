@@ -1,9 +1,11 @@
+import { selectChild, selectChildren } from "./selector";
 import { escapeXML, unescapeXML } from "./string";
+import { setStyle } from "./stylesheet";
 
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
 export type TreeParent = TreeRoot | TreeTag;
 export type TreeChild = TreeTag | TreeText | TreeComment;
-export type TreeAttrs = Record<string, boolean | string>;
+export type TreeAttrs = Record<string, string | null>;
 
 export interface TreeRoot {
   type: "root";
@@ -45,29 +47,27 @@ export interface TreeComment {
   children?: undefined;
 }
 
-type StackNode = Omit<TreeNode, "parent"> & {
+type StackNode = StackRoot | StackTag | StackText | StackComment;
+type StackChild = StackTag | StackText | StackComment;
+type StackParent = StackRoot | StackTag;
+
+type StackRoot = Omit<TreeRoot, "parent" | "children"> & {
   isClosed?: boolean;
-  parent?: TreeParent;
+  parent?: StackParent;
+  children: StackChild[];
 };
-type StackChild = Omit<TreeChild, "parent"> & {
+type StackTag = Omit<TreeTag, "parent" | "children"> & {
   isClosed?: boolean;
-  parent?: TreeParent;
-};
-type StackParent = Omit<TreeParent, "parent"> & {
-  isClosed?: boolean;
-  parent?: TreeParent;
-};
-type StackTag = Omit<TreeTag, "parent"> & {
-  isClosed?: boolean;
-  parent?: TreeParent;
+  parent?: StackParent;
+  children: StackChild[];
 };
 type StackText = Omit<TreeText, "parent"> & {
   isClosed?: boolean;
-  parent?: TreeParent;
+  parent?: StackParent;
 };
 type StackComment = Omit<TreeComment, "parent"> & {
   isClosed?: boolean;
-  parent?: TreeParent;
+  parent?: StackParent;
 };
 
 function parseTag(str: string, fromIndex: number) {
@@ -85,11 +85,12 @@ function parseAttrs(str: string, fromIndex: number) {
   let i = fromIndex,
     j = fromIndex,
     parts: string[] = [],
-    quote = null,
+    quotes = null,
     closer: string | undefined;
 
   const acc = function (s: string) {
     s = s.trim();
+
     if (s !== "") {
       parts.push(s);
     }
@@ -97,7 +98,10 @@ function parseAttrs(str: string, fromIndex: number) {
 
   while (j < str.length) {
     const char = str[j];
-    if (!quote) {
+
+    if (char === "\\") {
+      j++;
+    } else if (!quotes) {
       if (char === ">") {
         const part = str.substring(i, j);
         if (part.endsWith("/") || part.endsWith("?")) {
@@ -112,34 +116,33 @@ function parseAttrs(str: string, fromIndex: number) {
         acc(str.substring(i, j));
         i = j;
       } else if (char === `"` || char === `'`) {
-        quote = char;
+        quotes = char;
       }
-    } else if (char === "\\") {
-      j++;
-    } else if (char === quote) {
-      quote = null;
+    } else if (char === quotes) {
+      quotes = null;
       acc(str.substring(i, j + 1));
       i = j + 1;
     }
     j++;
   }
 
-  const attrs: Record<string, string | boolean> = {};
+  const attrs: TreeAttrs = {};
   for (const part of parts) {
     const [key, ...values] = part.split("=");
     if (values.length === 0) {
-      attrs[key] = true;
+      attrs[key] = null;
     } else {
-      const value = values.join("=");
+      let value = values.join("=");
+
+      // remove quotes
       if (
         (value.startsWith('"') && value.endsWith('"')) ||
         (value.startsWith("'") && value.endsWith("'"))
       ) {
-        // remove quotes
-        attrs[key] = value.substring(1, value.length - 1);
-      } else {
-        attrs[key] = value;
+        value = value.substring(1, value.length - 1);
       }
+
+      attrs[key] = value;
     }
   }
 
@@ -179,7 +182,7 @@ export function parse(str: string): TreeRoot {
   // normalize
   str = unescapeXML(str);
 
-  const stacks: StackNode[] = [];
+  const stacks: StackChild[] = [];
 
   let offset = 0,
     i = str.indexOf("<", offset);
@@ -254,11 +257,11 @@ export function parse(str: string): TreeRoot {
       const b: StackText = {
         isClosed: true,
         type: "text",
-        parent: a as TreeTag,
+        parent: a,
         content: str.substring(endIndex, n),
       };
 
-      a.children.push(b as TreeText);
+      a.children.push(b);
 
       stacks.push(a, b);
 
@@ -267,20 +270,17 @@ export function parse(str: string): TreeRoot {
     else if (tag.startsWith("/")) {
       const _tag = tag.substring(1);
 
-      const children: TreeChild[] = [];
+      const children: StackChild[] = [];
 
       for (let n = stacks.length - 1; n >= 0; n--) {
         const stack = stacks[n];
 
         // opening tag found
         if (!stack.isClosed && stack.tag === _tag) {
-          stack.children = [
-            ...children.reverse(),
-            ...(stack as StackTag).children,
-          ];
+          stack.children = [...children.reverse(), ...stack.children];
 
           for (const child of children) {
-            child.parent = stack as TreeTag;
+            child.parent = stack;
           }
 
           // close opening tag
@@ -289,7 +289,7 @@ export function parse(str: string): TreeRoot {
         }
 
         if (!stack.parent) {
-          children.push(stack as TreeChild);
+          children.push(stack);
         }
       }
 
@@ -539,31 +539,31 @@ function filterParents(
 }
 
 function stringify(node: TreeNode): string {
-  const stringifyAttrs = function (attrs: Record<string, any>) {
+  const stringifyAttrs = function (attrs: TreeAttrs) {
     let acc = "";
-    for (const [k, v] of Object.entries(attrs)) {
-      if (typeof v === "string") {
-        acc += ` ${k}="${v}"`;
-      } else if (typeof v === "boolean") {
-        // skip false
-        if (v) {
-          acc += ` ${k}`;
-        }
-      } else if (typeof v === "object" && typeof v.toString === "function") {
-        acc += ` ${k}="${v.toString()}"`;
+
+    for (const key of Object.keys(attrs)) {
+      const value = attrs[key];
+
+      if (typeof value === "string") {
+        acc += ` ${key}="${value}"`;
+      } else if (value === null) {
+        acc += ` ${key}`;
       }
     }
+
     return acc;
   };
 
   const stringifyNode = function (n: TreeNode): string {
     let acc = "";
     if (n.type === "text") {
-      // prevent escaping of <script> and <style>
       const parent = n.parent;
+
       if (
         parent &&
         parent.type === "tag" &&
+        // prevent escape <script> and <style>
         (parent.tag === "script" || parent.tag === "style")
       ) {
         acc += n.content;
@@ -619,13 +619,8 @@ export class Tree {
   constructor(arg: string | TreeNode) {
     if (typeof arg === "string") {
       this.node = parse(arg);
-    } else if (
-      typeof arg === "object" &&
-      ["root", "tag", "text", "comment"].indexOf(arg.type) > -1
-    ) {
-      this.node = arg;
     } else {
-      throw new Error(`Invalid argument: argument must be string or TreeNode`);
+      this.node = arg;
     }
   }
 
@@ -713,6 +708,20 @@ export class Tree {
     }
   }
 
+  select(selector: string): TreeTag | undefined {
+    if (isParent(this.node)) {
+      return selectChild(this.node, selector);
+    }
+  }
+
+  selectAll(selector: string): TreeTag[] {
+    if (isParent(this.node)) {
+      return selectChildren(this.node, selector);
+    } else {
+      return [];
+    }
+  }
+
   mapTop<T>(
     callback: (parent: TreeParent, depth: number, child: TreeChild) => T
   ): T[] {
@@ -761,6 +770,12 @@ export class Tree {
     return getContents(this.node);
   }
 
+  setStyle(style: string) {
+    if (isParent(this.node)) {
+      return setStyle(this.node, style);
+    }
+  }
+
   toString() {
     return stringify(this.node);
   }
@@ -775,11 +790,15 @@ export class Tree {
   static parse = parse;
   static stringify = stringify;
   static getContents = getContents;
+  static setStyle = setStyle;
 
   static map = mapChildren;
   static reduce = reduceChildren;
   static find = findChild;
   static filter = filterChildren;
+
+  static select = selectChild;
+  static selectAll = selectChildren;
 
   static mapTop = mapParents;
   static reduceTop = reduceParents;

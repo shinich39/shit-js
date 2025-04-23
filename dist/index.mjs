@@ -92,6 +92,299 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// src/modules/selector.ts
+function parseSelector(selector) {
+  const result = [];
+  const atMatch = selector.match(/^@([a-zA-Z0-9-]+)(?:\s|$)/);
+  if (atMatch) {
+    const key = atMatch[1];
+    throw new Error(`Invalid argument: @${key} not supported`);
+  }
+  const tagMatch = selector.match(/^[^.#[:][^.#[:]*/);
+  if (tagMatch) {
+    const value = tagMatch[0];
+    result.push({
+      type: "tag",
+      value
+    });
+  }
+  const re = /\.([^.#[:]+)|#([^.#[:]+)|\[([^\]]+)|(::?[^.#[:]+)/g;
+  let match;
+  while (match = re.exec(selector)) {
+    if (match[1]) {
+      const value = match[1];
+      result.push({
+        type: "attribute",
+        key: "class",
+        value,
+        operator: "~=",
+        regex: new RegExp(`(?:^|\\s)${value}(?:\\s|$)`)
+      });
+    } else if (match[2]) {
+      const value = match[2];
+      result.push({
+        type: "attribute",
+        key: "id",
+        value,
+        operator: "~=",
+        regex: new RegExp(`(?:^|\\s)${value}(?:\\s|$)`)
+      });
+    } else if (match[3]) {
+      let key;
+      let value;
+      let operator;
+      const operatorMatch = match[3].match(/[~|^$*]?=/);
+      if (!operatorMatch) {
+        key = match[3];
+      } else {
+        key = match[3].substring(0, operatorMatch.index);
+        value = match[3].substring(
+          operatorMatch.index + operatorMatch[0].length
+        );
+        if (value.startsWith('"') && value.endsWith('"') || value.startsWith("'") && value.endsWith("'")) {
+          value = value.substring(1, value.length - 1);
+        }
+        operator = operatorMatch[0];
+      }
+      if (!operator) {
+        result.push({
+          type: "attribute",
+          key,
+          value
+        });
+        continue;
+      }
+      if (typeof value !== "string") {
+        continue;
+      }
+      if (operator === "=") {
+        result.push({
+          type: "attribute",
+          key,
+          value,
+          operator,
+          regex: new RegExp(`^${value}$`)
+        });
+      } else if (operator === "~=") {
+        result.push({
+          type: "attribute",
+          key,
+          value,
+          operator,
+          regex: new RegExp(`(?:^|\\s)${value}(?:\\s|$)`)
+        });
+      } else if (operator === "|=") {
+        result.push({
+          type: "attribute",
+          key,
+          value,
+          operator,
+          regex: new RegExp(`(?:^|\\s)${value}(?:\\s|-|$)`)
+        });
+      } else if (operator === "*=") {
+        result.push({
+          type: "attribute",
+          key,
+          value,
+          operator,
+          regex: new RegExp(value)
+        });
+      } else if (operator === "^=") {
+        result.push({
+          type: "attribute",
+          key,
+          value,
+          operator,
+          regex: new RegExp(`(?:^|\\s)${value}`)
+        });
+      } else if (operator === "$=") {
+        result.push({
+          type: "attribute",
+          key,
+          value,
+          operator,
+          regex: new RegExp(`${value}(?:\\s|$)`)
+        });
+      } else {
+        throw new Error(`Invalid argument: operator ${operator} not supported`);
+      }
+    } else if (match[4]) {
+      const pseudoMatch = match[4].match(/\(([^)]+)\)/);
+      let key, value;
+      if (pseudoMatch) {
+        key = match[4].substring(0, pseudoMatch.index);
+        value = pseudoMatch[1];
+      } else {
+        key = match[4];
+      }
+      result.push({
+        type: "pseudo",
+        key,
+        // ::key, :key
+        value
+      });
+    }
+  }
+  return result;
+}
+function splitSelector(str) {
+  const result = [
+    {
+      combinator: " ",
+      selectors: []
+    }
+  ];
+  let buffer = "", quotes = null, bracket = null, combinator = null;
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === "\\") {
+      buffer += char;
+      i++;
+      if (i < str.length) {
+        buffer += str[i];
+      }
+      continue;
+    }
+    if (quotes) {
+      if (quotes === "[") {
+        if (char === "]") {
+          quotes = null;
+        }
+      } else if (quotes === char) {
+        quotes = null;
+      }
+      buffer += char;
+      continue;
+    }
+    if (bracket) {
+      if (bracket === "[" && char === "]") {
+        bracket = null;
+      }
+      buffer += char;
+      continue;
+    }
+    if (char === ">" || char === "+" || char === "~" || char === " ") {
+      if (!combinator) {
+        combinator = char;
+        result[result.length - 1].selectors.push(...parseSelector(buffer));
+        buffer = "";
+      } else {
+        combinator += char;
+      }
+      continue;
+    }
+    if (combinator) {
+      const value = combinator.trim() || " ";
+      if (value !== " " && value !== ">" && value !== "~" && value !== "+") {
+        throw new Error(
+          `Invalid argument: combinator ${value} is not supported`
+        );
+      }
+      result.push({
+        combinator: value,
+        selectors: []
+      });
+      combinator = null;
+    }
+    if (char === `"` || char === `'`) {
+      quotes = char;
+      buffer += char;
+      continue;
+    }
+    if (char === "[") {
+      bracket = char;
+      buffer += char;
+      continue;
+    }
+    buffer += char;
+  }
+  if (buffer.length > 0) {
+    result[result.length - 1].selectors.push(...parseSelector(buffer));
+  }
+  return result;
+}
+function getCandidates(node, combinator) {
+  if (combinator === " " || combinator === ">") {
+    return node.children.filter((child) => child.type === "tag");
+  }
+  const result = [];
+  let toggle = false;
+  for (const sibling of node.parent.children) {
+    if (sibling.type !== "tag") {
+      continue;
+    }
+    if (!toggle) {
+      if (sibling == node) {
+        toggle = true;
+      }
+      continue;
+    }
+    result.push(sibling);
+    if (combinator === "+") {
+      break;
+    }
+  }
+  return result;
+}
+function matchSelectors(candidates, selectors, combinator) {
+  let result = [];
+  for (const c of candidates) {
+    let toggle = true;
+    for (const s of selectors) {
+      if (s.type === "tag") {
+        if (s.value !== "*" && s.value !== c.tag) {
+          toggle = false;
+          break;
+        }
+      } else if (s.type === "attribute") {
+        const attr = c.attrs[s.key];
+        if (!s.regex) {
+          if (typeof attr === "undefined") {
+            toggle = false;
+            break;
+          }
+        } else {
+          if (!attr || !attr.match(s.regex)) {
+            toggle = false;
+            break;
+          }
+        }
+      } else if (s.type === "pseudo") {
+        toggle = false;
+        break;
+      }
+    }
+    if (toggle) {
+      result.push(c);
+    }
+  }
+  if (combinator === " ") {
+    for (const c of candidates) {
+      result.push(
+        ...matchSelectors(getCandidates(c, combinator), selectors, combinator)
+      );
+    }
+  }
+  return result;
+}
+function selectChild(parent, selecotr) {
+  return selectChildren(parent, selecotr)[0];
+}
+function selectChildren(parent, selector) {
+  selector = selector.trim();
+  const stages = splitSelector(selector);
+  let targets = [parent];
+  for (const { combinator, selectors } of stages) {
+    const prevTargets = targets;
+    targets = [];
+    for (const target of prevTargets) {
+      const candidates = getCandidates(target, combinator);
+      targets.push(...matchSelectors(candidates, selectors, combinator));
+    }
+  }
+  return targets;
+}
+
 // src/modules/string.ts
 function findString(str, target, fromIndex) {
   if (!fromIndex) {
@@ -239,6 +532,68 @@ function compareString(from, to) {
   return result.reverse();
 }
 
+// src/modules/stylesheet.ts
+function parseDeclaration(str) {
+  const result = {};
+  const re = /([^:]+):([^;]+);/g;
+  let match;
+  while (match = re.exec(str)) {
+    const key = match[1].trim();
+    const value = match[2].trim();
+    result[key] = value;
+  }
+  return result;
+}
+function parseStyle(style) {
+  style = style.replace(/\/\*[\s\S]*?\*\//g, "");
+  const result = [];
+  const func = (str, mediaQuery) => {
+    const re = /(@media )?([^{]+){([^}]*?)}/g;
+    let match;
+    while (match = re.exec(str)) {
+      const isMediaQuery = !!match[1];
+      if (isMediaQuery) {
+        func(match[3], match[2]);
+        continue;
+      }
+      const selectors = match[2].split(",").map((item) => item.trim()).filter(Boolean);
+      const declarations = parseDeclaration(match[3]);
+      result.push({
+        mediaQuery,
+        selectors,
+        declarations
+      });
+    }
+  };
+  func(style);
+  return result;
+}
+function setStyle(parent, style) {
+  const parsedStyles = parseStyle(style);
+  for (const s of parsedStyles) {
+    if (s.mediaQuery) {
+      continue;
+    }
+    const declarations = s.declarations;
+    if (Object.keys(declarations).length === 0) {
+      continue;
+    }
+    for (const selector of s.selectors) {
+      const children = Tree.selectAll(parent, selector);
+      for (const child of children) {
+        if (typeof child.attrs.style !== "string") {
+          child.attrs.style = "";
+        }
+        const newStyle = Object.assign(
+          parseDeclaration(child.attrs.style),
+          declarations
+        );
+        child.attrs.style = Object.entries(newStyle).map(([k, v]) => `${k}:${v};`).join("");
+      }
+    }
+  }
+}
+
 // src/modules/tree.ts
 function parseTag(str, fromIndex) {
   let i = fromIndex;
@@ -251,7 +606,7 @@ function parseTag(str, fromIndex) {
   return;
 }
 function parseAttrs(str, fromIndex) {
-  let i = fromIndex, j = fromIndex, parts = [], quote = null, closer;
+  let i = fromIndex, j = fromIndex, parts = [], quotes = null, closer;
   const acc = function(s) {
     s = s.trim();
     if (s !== "") {
@@ -260,7 +615,9 @@ function parseAttrs(str, fromIndex) {
   };
   while (j < str.length) {
     const char = str[j];
-    if (!quote) {
+    if (char === "\\") {
+      j++;
+    } else if (!quotes) {
       if (char === ">") {
         const part = str.substring(i, j);
         if (part.endsWith("/") || part.endsWith("?")) {
@@ -275,12 +632,10 @@ function parseAttrs(str, fromIndex) {
         acc(str.substring(i, j));
         i = j;
       } else if (char === `"` || char === `'`) {
-        quote = char;
+        quotes = char;
       }
-    } else if (char === "\\") {
-      j++;
-    } else if (char === quote) {
-      quote = null;
+    } else if (char === quotes) {
+      quotes = null;
       acc(str.substring(i, j + 1));
       i = j + 1;
     }
@@ -290,14 +645,13 @@ function parseAttrs(str, fromIndex) {
   for (const part of parts) {
     const [key, ...values] = part.split("=");
     if (values.length === 0) {
-      attrs[key] = true;
+      attrs[key] = null;
     } else {
-      const value = values.join("=");
+      let value = values.join("=");
       if (value.startsWith('"') && value.endsWith('"') || value.startsWith("'") && value.endsWith("'")) {
-        attrs[key] = value.substring(1, value.length - 1);
-      } else {
-        attrs[key] = value;
+        value = value.substring(1, value.length - 1);
       }
+      attrs[key] = value;
     }
   }
   return {
@@ -396,10 +750,7 @@ function parse(str) {
       for (let n = stacks.length - 1; n >= 0; n--) {
         const stack = stacks[n];
         if (!stack.isClosed && stack.tag === _tag) {
-          stack.children = [
-            ...children.reverse(),
-            ...stack.children
-          ];
+          stack.children = [...children.reverse(), ...stack.children];
           for (const child of children) {
             child.parent = stack;
           }
@@ -561,15 +912,12 @@ function filterParents(child, callback) {
 function stringify(node) {
   const stringifyAttrs = function(attrs) {
     let acc = "";
-    for (const [k, v] of Object.entries(attrs)) {
-      if (typeof v === "string") {
-        acc += ` ${k}="${v}"`;
-      } else if (typeof v === "boolean") {
-        if (v) {
-          acc += ` ${k}`;
-        }
-      } else if (typeof v === "object" && typeof v.toString === "function") {
-        acc += ` ${k}="${v.toString()}"`;
+    for (const key of Object.keys(attrs)) {
+      const value = attrs[key];
+      if (typeof value === "string") {
+        acc += ` ${key}="${value}"`;
+      } else if (value === null) {
+        acc += ` ${key}`;
       }
     }
     return acc;
@@ -578,7 +926,8 @@ function stringify(node) {
     let acc = "";
     if (n.type === "text") {
       const parent = n.parent;
-      if (parent && parent.type === "tag" && (parent.tag === "script" || parent.tag === "style")) {
+      if (parent && parent.type === "tag" && // prevent escape <script> and <style>
+      (parent.tag === "script" || parent.tag === "style")) {
         acc += n.content;
       } else {
         acc += escapeXML(n.content);
@@ -623,10 +972,8 @@ var Tree = class {
   constructor(arg) {
     if (typeof arg === "string") {
       this.node = parse(arg);
-    } else if (typeof arg === "object" && ["root", "tag", "text", "comment"].indexOf(arg.type) > -1) {
-      this.node = arg;
     } else {
-      throw new Error(`Invalid argument: argument must be string or TreeNode`);
+      this.node = arg;
     }
   }
   isParent() {
@@ -673,6 +1020,18 @@ var Tree = class {
       return [];
     }
   }
+  select(selector) {
+    if (isParent(this.node)) {
+      return selectChild(this.node, selector);
+    }
+  }
+  selectAll(selector) {
+    if (isParent(this.node)) {
+      return selectChildren(this.node, selector);
+    } else {
+      return [];
+    }
+  }
   mapTop(callback) {
     if (isChild(this.node)) {
       return mapParents(this.node, callback);
@@ -701,6 +1060,11 @@ var Tree = class {
   }
   getContents() {
     return getContents(this.node);
+  }
+  setStyle(style) {
+    if (isParent(this.node)) {
+      return setStyle(this.node, style);
+    }
   }
   toString() {
     return stringify(this.node);
@@ -733,6 +1097,9 @@ var Tree = class {
     this.getContents = getContents;
   }
   static {
+    this.setStyle = setStyle;
+  }
+  static {
     this.map = mapChildren;
   }
   static {
@@ -743,6 +1110,12 @@ var Tree = class {
   }
   static {
     this.filter = filterChildren;
+  }
+  static {
+    this.select = selectChild;
+  }
+  static {
+    this.selectAll = selectChildren;
   }
   static {
     this.mapTop = mapParents;

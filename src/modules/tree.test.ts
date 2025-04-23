@@ -1,12 +1,12 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import fs from "node:fs";
-import { Tree, TreeChild, TreeTag } from "./tree";
+import { Tree, TreeTag } from "./tree";
 
 const html = `
 <!DOCTYPE html>
 <?xml version="1.0" encoding="utf-8"?>
-<html>
+<html style="  line-height: 2;  ">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -42,7 +42,7 @@ const html = `
 </html>
   `.trim();
 
-test("Tree.parse()", () => {
+test("Tree.parse", () => {
   const root = Tree.parse(html);
 
   eq(Tree.stringify(root), html);
@@ -176,7 +176,7 @@ test("Tree.parse()", () => {
   eq(tagParents.length, 2);
 });
 
-test("new Tree()", () => {
+test("new Tree", () => {
   const tree = new Tree(html);
 
   eq(tree.toString(), html);
@@ -217,12 +217,13 @@ test("new Tree()", () => {
   tagNodes.forEach((item) => eq(item.type, "tag"));
 });
 
-test("subtree", () => {
+test("Tree.parse => Tree.find => Tree.stringify", () => {
   const root = Tree.parse(html);
   const body = Tree.find(
     root,
     (node) => node.type === "tag" && node.tag === "body"
   ) as TreeTag;
+
   eq(
     Tree.stringify(body),
     `<body>
@@ -252,6 +253,71 @@ test("subtree", () => {
     </script>
   </body>`
   );
+});
+
+test("Tree.selectAll", () => {
+  const root = new Tree(html);
+
+  const img = root.find(
+    (child) =>
+      child.type === "tag" && child.tag === "img" && child.attrs.alt === "image"
+  );
+  const img1 = root.selectAll("body > #div1 > div [alt^='ima']");
+  const img2 = root.selectAll('body div[id^="div1"] img');
+  const img3 = root.selectAll("[alt$='age']");
+  const img4 = root.selectAll("div > [class|='self'][class~='self-closing']");
+
+  eq(!!img, true);
+  eq(img, img1[0]);
+  eq(img1[0], img2[0]);
+  eq(img2[0], img3[0]);
+  eq(img3[0], img4[0]);
+
+  const div = root.find(
+    (child) =>
+      child.type === "tag" && child.tag === "div" && child.attrs.hidden === null
+  );
+  const div1 = root.select("body #div2");
+  const div2 = root.select("body #div2[hidden]");
+  const div3 = root.select('body #div2[hidden][class*="abc"]');
+
+  eq(!!div, true);
+  eq(div, div1);
+  eq(div1, div2);
+  eq(div2, div3);
+
+  // all tag elements
+  eq(root.filter((c) => c.type === "tag").length, root.selectAll("*").length);
+
+  // let t1 = Date.now(),
+  //   c1 = 0;
+  // while (Date.now() - t1 < 10) {
+  //   const div = root.find(
+  //     (child) =>
+  //       child.type === "tag" &&
+  //       child.tag === "div" &&
+  //       child.attrs.hidden === null
+  //   );
+  //   c1++;
+  // }
+
+  // let t2 = Date.now(),
+  //   c2 = 0;
+  // while (Date.now() - t2 < 10) {
+  //   const div = root.select("body #div2");
+  //   c2++;
+  // }
+
+  // let t3 = Date.now(),
+  //   c3 = 0;
+  // while (Date.now() - t3 < 10) {
+  //   const divs = root.selectAll("body #div2");
+  //   c3++;
+  // }
+
+  // console.log(`root.find():`, c1); // 10000
+  // console.log(`root.select():`, c2); // 3300
+  // console.log(`root.selectAll():`, c3); // 3100
 });
 
 function eq(a: any, b: any, msg?: string | Error) {
