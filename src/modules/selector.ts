@@ -255,11 +255,7 @@ function splitSelector(str: string) {
     }
 
     if (quotes) {
-      if (quotes === "[") {
-        if (char === "]") {
-          quotes = null;
-        }
-      } else if (quotes === char) {
+      if (quotes === char) {
         quotes = null;
       }
 

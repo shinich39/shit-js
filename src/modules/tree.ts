@@ -1,5 +1,5 @@
-import { selectChild, selectChildren } from "./selector";
 import { escapeXML, unescapeXML } from "./string";
+import { selectChild, selectChildren } from "./selector";
 import { setStyle } from "./stylesheet";
 
 export type TreeNode = TreeRoot | TreeTag | TreeText | TreeComment;
@@ -787,11 +787,6 @@ export class Tree {
   static isText = isText;
   static isComment = isComment;
 
-  static parse = parse;
-  static stringify = stringify;
-  static getContents = getContents;
-  static setStyle = setStyle;
-
   static map = mapChildren;
   static reduce = reduceChildren;
   static find = findChild;
@@ -804,4 +799,9 @@ export class Tree {
   static reduceTop = reduceParents;
   static findTop = findParent;
   static filterTop = filterParents;
+
+  static parse = parse;
+  static stringify = stringify;
+  static getContents = getContents;
+  static setStyle = setStyle;
 }

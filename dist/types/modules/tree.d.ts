@@ -85,10 +85,6 @@ export declare class Tree {
     static isTag: typeof isTag;
     static isText: typeof isText;
     static isComment: typeof isComment;
-    static parse: typeof parse;
-    static stringify: typeof stringify;
-    static getContents: typeof getContents;
-    static setStyle: typeof setStyle;
     static map: typeof mapChildren;
     static reduce: typeof reduceChildren;
     static find: typeof findChild;
@@ -99,6 +95,10 @@ export declare class Tree {
     static reduceTop: typeof reduceParents;
     static findTop: typeof findParent;
     static filterTop: typeof filterParents;
+    static parse: typeof parse;
+    static stringify: typeof stringify;
+    static getContents: typeof getContents;
+    static setStyle: typeof setStyle;
 }
 export {};
 //# sourceMappingURL=tree.d.ts.map

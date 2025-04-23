@@ -1,20 +1,4 @@
 /**
- * include
- */
-export declare function hasBits(a: number, b: number): boolean;
-/**
- * or
- */
-export declare function addBits(a: number, b: number): number;
-/**
- * and-not
- */
-export declare function clearBits(a: number, b: number): number;
-/**
- * xor
- */
-export declare function invertBits(a: number, b: number): number;
-/**
  * @returns min <= n < max
  */
 export declare function getRandomNumber(min: number, max: number): number;

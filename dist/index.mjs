@@ -92,6 +92,153 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// src/modules/string.ts
+function findString(str, target, fromIndex) {
+  if (!fromIndex) {
+    fromIndex = 0;
+  } else if (fromIndex < 0) {
+    fromIndex = str.length - 1 + fromIndex;
+  }
+  const len = target.length;
+  let i = fromIndex, closing = null;
+  const match = len === 1 ? () => str[i] === target : () => {
+    for (let j = 0; j < len; j++) {
+      if (str[i + j] !== target[j]) {
+        return false;
+      }
+    }
+    return true;
+  };
+  while (i < str.length) {
+    if (str[i] === "\\") {
+      i++;
+    } else if (!closing) {
+      if (match()) {
+        return i;
+      }
+      if (str[i] === '"' || str[i] === "'") {
+        closing = str[i];
+      } else if (str[i] === "(") {
+        closing = ")";
+      } else if (str[i] === "{") {
+        closing = "}";
+      } else if (str[i] === "[") {
+        closing = "]";
+      } else if (str[i] === "<") {
+        closing = ">";
+      }
+    } else {
+      if (str[i] === closing) {
+        closing = null;
+      }
+    }
+    i++;
+  }
+  return -1;
+}
+function getUUID() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === "x" ? r : r & 3 | 8;
+    return v.toString(16);
+  });
+}
+function getRandomCharacter(charset) {
+  return charset.charAt(Math.floor(Math.random() * charset.length));
+}
+function getRandomString(charset, size) {
+  let result = "";
+  for (let i = 0; i < size; i++) {
+    result += getRandomCharacter(charset);
+  }
+  return result;
+}
+function getInts(str) {
+  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+}
+function getFloats(str) {
+  return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
+}
+function getXORString(str, salt) {
+  const l = salt.length;
+  if (l === 0) {
+    throw new Error(`Invalid argument: salt.length === 0`);
+  }
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+  }
+  return result;
+}
+function normalizeString(str) {
+  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+}
+function toRegExp(str) {
+  const parts = str.split("/");
+  if (parts.length < 3) {
+    throw new Error(`Invalid argument: ${str}`);
+  }
+  const flags = parts.pop();
+  const pattern = parts.slice(1).join("/");
+  return new RegExp(pattern, flags);
+}
+function escapeXML(str, whitespace = false) {
+  str = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  return whitespace ? str.replace(/ /g, "&nbsp;") : str;
+}
+function unescapeXML(str) {
+  return str.replace(/&nbsp;|&#32;|&#160;/g, " ").replace(/&lt;|&#60;/g, "<").replace(/&gt;|&#62;/g, ">").replace(/&quot;|&#34;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&amp;|&#38;/g, "&");
+}
+function compareString(from, to) {
+  const dp = [];
+  for (let i2 = 0; i2 < from.length + 1; i2++) {
+    dp.push([]);
+    for (let j2 = 0; j2 < from.length + 1; j2++) {
+      dp[i2][j2] = 0;
+    }
+  }
+  for (let i2 = 1; i2 <= from.length; i2++) {
+    for (let j2 = 1; j2 <= to.length; j2++) {
+      if (from[i2 - 1] === to[j2 - 1]) {
+        dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
+      } else {
+        dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
+      }
+    }
+  }
+  const result = [];
+  let i = from.length, j = to.length;
+  while (i > 0 || j > 0) {
+    const prev = result[result.length - 1];
+    const a = from[i - 1];
+    const b = to[j - 1];
+    if (i > 0 && j > 0 && a === b) {
+      if (prev && prev[0] === 0) {
+        prev[1] = a + prev[1];
+      } else {
+        result.push([0, a]);
+      }
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      if (prev && prev[0] === 1) {
+        prev[1] = b + prev[1];
+      } else {
+        result.push([1, b]);
+      }
+      j--;
+    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+      if (prev && prev[0] === -1) {
+        prev[1] = a + prev[1];
+      } else {
+        result.push([-1, a]);
+      }
+      i--;
+    }
+  }
+  return result.reverse();
+}
+
 // src/modules/selector.ts
 function parseSelector(selector) {
   const result = [];
@@ -246,11 +393,7 @@ function splitSelector(str) {
       continue;
     }
     if (quotes) {
-      if (quotes === "[") {
-        if (char === "]") {
-          quotes = null;
-        }
-      } else if (quotes === char) {
+      if (quotes === char) {
         quotes = null;
       }
       buffer += char;
@@ -381,153 +524,6 @@ function selectChildren(parent, selector) {
     }
   }
   return targets;
-}
-
-// src/modules/string.ts
-function findString(str, target, fromIndex) {
-  if (!fromIndex) {
-    fromIndex = 0;
-  } else if (fromIndex < 0) {
-    fromIndex = str.length - 1 + fromIndex;
-  }
-  const len = target.length;
-  let i = fromIndex, closing = null;
-  const match = len === 1 ? () => str[i] === target : () => {
-    for (let j = 0; j < len; j++) {
-      if (str[i + j] !== target[j]) {
-        return false;
-      }
-    }
-    return true;
-  };
-  while (i < str.length) {
-    if (str[i] === "\\") {
-      i++;
-    } else if (!closing) {
-      if (match()) {
-        return i;
-      }
-      if (str[i] === '"' || str[i] === "'") {
-        closing = str[i];
-      } else if (str[i] === "(") {
-        closing = ")";
-      } else if (str[i] === "{") {
-        closing = "}";
-      } else if (str[i] === "[") {
-        closing = "]";
-      } else if (str[i] === "<") {
-        closing = ">";
-      }
-    } else {
-      if (str[i] === closing) {
-        closing = null;
-      }
-    }
-    i++;
-  }
-  return -1;
-}
-function getUUID() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0;
-    const v = c === "x" ? r : r & 3 | 8;
-    return v.toString(16);
-  });
-}
-function getRandomCharacter(charset) {
-  return charset.charAt(Math.floor(Math.random() * charset.length));
-}
-function getRandomString(charset, size) {
-  let result = "";
-  for (let i = 0; i < size; i++) {
-    result += getRandomCharacter(charset);
-  }
-  return result;
-}
-function getInts(str) {
-  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
-}
-function getFloats(str) {
-  return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
-}
-function getXORString(str, salt) {
-  const l = salt.length;
-  if (l === 0) {
-    throw new Error(`Invalid argument: salt.length === 0`);
-  }
-  let result = "";
-  for (let i = 0; i < str.length; i++) {
-    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
-  }
-  return result;
-}
-function normalizeString(str) {
-  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
-}
-function toRegExp(str) {
-  const parts = str.split("/");
-  if (parts.length < 3) {
-    throw new Error(`Invalid argument: ${str}`);
-  }
-  const flags = parts.pop();
-  const pattern = parts.slice(1).join("/");
-  return new RegExp(pattern, flags);
-}
-function escapeXML(str, whitespace = false) {
-  str = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  return whitespace ? str.replace(/ /g, "&nbsp;") : str;
-}
-function unescapeXML(str) {
-  return str.replace(/&nbsp;|&#32;|&#160;/g, " ").replace(/&lt;|&#60;/g, "<").replace(/&gt;|&#62;/g, ">").replace(/&quot;|&#34;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&amp;|&#38;/g, "&");
-}
-function compareString(from, to) {
-  const dp = [];
-  for (let i2 = 0; i2 < from.length + 1; i2++) {
-    dp.push([]);
-    for (let j2 = 0; j2 < from.length + 1; j2++) {
-      dp[i2][j2] = 0;
-    }
-  }
-  for (let i2 = 1; i2 <= from.length; i2++) {
-    for (let j2 = 1; j2 <= to.length; j2++) {
-      if (from[i2 - 1] === to[j2 - 1]) {
-        dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
-      } else {
-        dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
-      }
-    }
-  }
-  const result = [];
-  let i = from.length, j = to.length;
-  while (i > 0 || j > 0) {
-    const prev = result[result.length - 1];
-    const a = from[i - 1];
-    const b = to[j - 1];
-    if (i > 0 && j > 0 && a === b) {
-      if (prev && prev[0] === 0) {
-        prev[1] = a + prev[1];
-      } else {
-        result.push([0, a]);
-      }
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      if (prev && prev[0] === 1) {
-        prev[1] = b + prev[1];
-      } else {
-        result.push([1, b]);
-      }
-      j--;
-    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
-      if (prev && prev[0] === -1) {
-        prev[1] = a + prev[1];
-      } else {
-        result.push([-1, a]);
-      }
-      i--;
-    }
-  }
-  return result.reverse();
 }
 
 // src/modules/stylesheet.ts
@@ -1086,18 +1082,6 @@ var Tree = class {
     this.isComment = isComment;
   }
   static {
-    this.parse = parse;
-  }
-  static {
-    this.stringify = stringify;
-  }
-  static {
-    this.getContents = getContents;
-  }
-  static {
-    this.setStyle = setStyle;
-  }
-  static {
     this.map = mapChildren;
   }
   static {
@@ -1127,21 +1111,21 @@ var Tree = class {
   static {
     this.filterTop = filterParents;
   }
+  static {
+    this.parse = parse;
+  }
+  static {
+    this.stringify = stringify;
+  }
+  static {
+    this.getContents = getContents;
+  }
+  static {
+    this.setStyle = setStyle;
+  }
 };
 
 // src/modules/number.ts
-function hasBits(a, b) {
-  return !!(a & b);
-}
-function addBits(a, b) {
-  return a | b;
-}
-function clearBits(a, b) {
-  return a & ~b;
-}
-function invertBits(a, b) {
-  return a ^ b;
-}
 function getRandomNumber(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -1501,9 +1485,7 @@ function toNumber(e) {
 }
 export {
   Tree,
-  addBits,
   calcStringSize,
-  clearBits,
   clone,
   compareObject,
   compareString,
@@ -1537,9 +1519,7 @@ export {
   getUUID,
   getXORString,
   groupBy,
-  hasBits,
   humanizeFileSize,
-  invertBits,
   isNumeric,
   joinPaths,
   normalizeString,

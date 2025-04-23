@@ -4,10 +4,6 @@ import {
   getRandomNumber,
   getClampedNumber,
   getLoopedNumber,
-  invertBits,
-  clearBits,
-  addBits,
-  hasBits,
   calcStringSize,
   humanizeFileSize,
   getContainedSize,
@@ -16,33 +12,6 @@ import {
   toFileSize,
   toBytes,
 } from "./number";
-
-test("hasBit", () => {
-  eq(hasBits(0b1100, 0b1000), true);
-  eq(hasBits(0b1100, 0b0100), true);
-  eq(hasBits(0b1100, 0b1100), true);
-});
-
-test("addBit", () => {
-  eq(addBits(0b1100, 0b1000), 0b1100);
-  eq(addBits(0b1100, 0b1100), 0b1100);
-  eq(addBits(0b1100, 0b1110), 0b1110);
-  eq(addBits(0b1100, 0b1111), 0b1111);
-});
-
-test("clearBit", () => {
-  eq(clearBits(0b1100, 0b1000), 0b0100);
-  eq(clearBits(0b1100, 0b1100), 0b0000);
-  eq(clearBits(0b1100, 0b1110), 0b0000);
-  eq(clearBits(0b1100, 0b1111), 0b0000);
-});
-
-test("invertBit", () => {
-  eq(invertBits(0b1100, 0b1000), 0b0100);
-  eq(invertBits(0b1100, 0b1100), 0b0000);
-  eq(invertBits(0b1100, 0b1110), 0b0010);
-  eq(invertBits(0b1100, 0b1111), 0b0011);
-});
 
 test("getRandomNumber", () => {
   eq(getRandomNumber(0, 1) < 1, true);

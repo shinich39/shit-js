@@ -1,28 +1,4 @@
 /**
- * include
- */
-export function hasBits(a: number, b: number) {
-  return !!(a & b);
-}
-/**
- * or
- */
-export function addBits(a: number, b: number) {
-  return a | b;
-}
-/**
- * and-not
- */
-export function clearBits(a: number, b: number) {
-  return a & ~b;
-}
-/**
- * xor
- */
-export function invertBits(a: number, b: number) {
-  return a ^ b;
-}
-/**
  * @returns min <= n < max
  */
 export function getRandomNumber(min: number, max: number) {
