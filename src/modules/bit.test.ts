@@ -6,6 +6,10 @@ test("checkBit", () => {
   eq(checkBit(0b1100, 0b1000), true);
   eq(checkBit(0b1100, 0b0100), true);
   eq(checkBit(0b1100, 0b1100), true);
+
+  eq(checkBit(0b1100, 0b0001), false);
+  eq(checkBit(0b1100, 0b0010), false);
+  eq(checkBit(0b1100, 0b0011), false);
 });
 
 test("setBit", () => {

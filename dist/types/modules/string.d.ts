@@ -19,14 +19,6 @@ export declare function normalizeString(str: string): string;
  */
 export declare function toRegExp(str: string): RegExp;
 /**
- * https://www.w3schools.com/xml/xml_syntax.asp
- */
-export declare function escapeXML(str: string, whitespace?: boolean): string;
-/**
- * https://www.w3schools.com/xml/xml_syntax.asp
- */
-export declare function unescapeXML(str: string): string;
-/**
  * analyze diff between two strings
  *
  * \-1: Number of deleted characters

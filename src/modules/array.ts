@@ -67,19 +67,24 @@ export function shuffleArray<T>(arr: T[]) {
   return arr;
 }
 
-export function plotBy(...args: any[][]) {
+export function plotBy(...args: any[][]): number[][] {
   if (args.length === 0) {
     return [];
   }
 
-  for (const arg in args) {
-    if (arg.length === 0) {
+  const indexes: number[] = Array(args.length).fill(0);
+
+  const result: number[][] = [[]];
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].length === 0) {
       throw new Error(`Invalid argument: argument cannot be empty`);
     }
-  }
 
-  const indexes: number[] = Array(args.length).fill(0);
-  const result = [args.map((arg, idx) => indexes[idx])];
+    // create first plot
+    // append first item of arrays
+    result[0].push(indexes[i]);
+  }
 
   let i = args.length - 1;
   while (true) {

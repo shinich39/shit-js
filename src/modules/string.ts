@@ -122,33 +122,6 @@ export function toRegExp(str: string) {
   return new RegExp(pattern, flags);
 }
 /**
- * https://www.w3schools.com/xml/xml_syntax.asp
- */
-export function escapeXML(str: string, whitespace = false) {
-  str = str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    // does not work in IE
-    // .replace(/'/g,"&apos;")
-    .replace(/'/g, "&#39;");
-
-  return whitespace ? str.replace(/ /g, "&nbsp;") : str;
-}
-/**
- * https://www.w3schools.com/xml/xml_syntax.asp
- */
-export function unescapeXML(str: string) {
-  return str
-    .replace(/&nbsp;|&#32;|&#160;/g, " ")
-    .replace(/&lt;|&#60;/g, "<")
-    .replace(/&gt;|&#62;/g, ">")
-    .replace(/&quot;|&#34;/g, '"')
-    .replace(/&apos;|&#39;/g, "'")
-    .replace(/&amp;|&#38;/g, "&");
-}
-/**
  * analyze diff between two strings
  *
  * \-1: Number of deleted characters

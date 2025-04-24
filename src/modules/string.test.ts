@@ -2,7 +2,6 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import {
   compareString,
-  escapeXML,
   findString,
   getFloats,
   getInts,
@@ -12,7 +11,6 @@ import {
   getXORString,
   normalizeString,
   toRegExp,
-  unescapeXML,
 } from "./string";
 
 test("findString", () => {
@@ -54,16 +52,6 @@ test("getXORString", () => {
 
 test("normalizeString", () => {
   eq(normalizeString("Ｈｅｌｌｏ，　ｗｏｒｌｄ！"), "Hello, world!");
-});
-
-test("escapeXML", () => {
-  eq(escapeXML(`<div>a c</div>`), `&lt;div&gt;a c&lt;/div&gt;`);
-  eq(escapeXML(`<div>a c</div>`, true), `&lt;div&gt;a&nbsp;c&lt;/div&gt;`);
-});
-
-test("unescapeXML", () => {
-  eq(unescapeXML(`&lt;div&gt;a c&lt;/div&gt;`), `<div>a c</div>`);
-  eq(unescapeXML(`&lt;div&gt;a&nbsp;c&lt;/div&gt;`), `<div>a c</div>`);
 });
 
 test("toRegExp", () => {

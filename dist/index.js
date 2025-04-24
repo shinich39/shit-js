@@ -21,12 +21,12 @@ var shit = (() => {
   // src/index.ts
   var index_exports = {};
   __export(index_exports, {
-    Tree: () => Tree,
     calcStringSize: () => calcStringSize,
+    checkBit: () => checkBit,
+    clearBit: () => clearBit,
     clone: () => clone,
     compareObject: () => compareObject,
     compareString: () => compareString,
-    escapeXML: () => escapeXML,
     findString: () => findString,
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
@@ -60,15 +60,15 @@ var shit = (() => {
     isNumeric: () => isNumeric,
     joinPaths: () => joinPaths,
     normalizeString: () => normalizeString,
-    parse: () => parse,
     plotBy: () => plotBy,
+    setBit: () => setBit,
     shuffleArray: () => shuffleArray,
     sleep: () => sleep,
     toBytes: () => toBytes,
     toFileSize: () => toFileSize,
     toNumber: () => toNumber,
     toRegExp: () => toRegExp,
-    unescapeXML: () => unescapeXML
+    toggleBit: () => toggleBit
   });
 
   // src/modules/array.ts
@@ -125,13 +125,14 @@ var shit = (() => {
     if (args.length === 0) {
       return [];
     }
-    for (const arg in args) {
-      if (arg.length === 0) {
+    const indexes = Array(args.length).fill(0);
+    const result = [[]];
+    for (let i2 = 0; i2 < args.length; i2++) {
+      if (args[i2].length === 0) {
         throw new Error(`Invalid argument: argument cannot be empty`);
       }
+      result[0].push(indexes[i2]);
     }
-    const indexes = Array(args.length).fill(0);
-    const result = [args.map((arg, idx) => indexes[idx])];
     let i = args.length - 1;
     while (true) {
       if (indexes[i] < args[i].length - 1) {
@@ -165,1038 +166,19 @@ var shit = (() => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  // src/modules/string.ts
-  function findString(str, target, fromIndex) {
-    if (!fromIndex) {
-      fromIndex = 0;
-    } else if (fromIndex < 0) {
-      fromIndex = str.length - 1 + fromIndex;
-    }
-    const len = target.length;
-    let i = fromIndex, closing = null;
-    const match = len === 1 ? () => str[i] === target : () => {
-      for (let j = 0; j < len; j++) {
-        if (str[i + j] !== target[j]) {
-          return false;
-        }
-      }
-      return true;
-    };
-    while (i < str.length) {
-      if (str[i] === "\\") {
-        i++;
-      } else if (!closing) {
-        if (match()) {
-          return i;
-        }
-        if (str[i] === '"' || str[i] === "'") {
-          closing = str[i];
-        } else if (str[i] === "(") {
-          closing = ")";
-        } else if (str[i] === "{") {
-          closing = "}";
-        } else if (str[i] === "[") {
-          closing = "]";
-        } else if (str[i] === "<") {
-          closing = ">";
-        }
-      } else {
-        if (str[i] === closing) {
-          closing = null;
-        }
-      }
-      i++;
-    }
-    return -1;
+  // src/modules/bit.ts
+  function checkBit(a, b) {
+    return (a & b) !== 0;
   }
-  function getUUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === "x" ? r : r & 3 | 8;
-      return v.toString(16);
-    });
+  function setBit(a, b) {
+    return a | b;
   }
-  function getRandomCharacter(charset) {
-    return charset.charAt(Math.floor(Math.random() * charset.length));
+  function clearBit(a, b) {
+    return a & ~b;
   }
-  function getRandomString(charset, size) {
-    let result = "";
-    for (let i = 0; i < size; i++) {
-      result += getRandomCharacter(charset);
-    }
-    return result;
+  function toggleBit(a, b) {
+    return a ^ b;
   }
-  function getInts(str) {
-    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
-  }
-  function getFloats(str) {
-    return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
-  }
-  function getXORString(str, salt) {
-    const l = salt.length;
-    if (l === 0) {
-      throw new Error(`Invalid argument: salt.length === 0`);
-    }
-    let result = "";
-    for (let i = 0; i < str.length; i++) {
-      result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
-    }
-    return result;
-  }
-  function normalizeString(str) {
-    return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
-  }
-  function toRegExp(str) {
-    const parts = str.split("/");
-    if (parts.length < 3) {
-      throw new Error(`Invalid argument: ${str}`);
-    }
-    const flags = parts.pop();
-    const pattern = parts.slice(1).join("/");
-    return new RegExp(pattern, flags);
-  }
-  function escapeXML(str, whitespace = false) {
-    str = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-    return whitespace ? str.replace(/ /g, "&nbsp;") : str;
-  }
-  function unescapeXML(str) {
-    return str.replace(/&nbsp;|&#32;|&#160;/g, " ").replace(/&lt;|&#60;/g, "<").replace(/&gt;|&#62;/g, ">").replace(/&quot;|&#34;/g, '"').replace(/&apos;|&#39;/g, "'").replace(/&amp;|&#38;/g, "&");
-  }
-  function compareString(from, to) {
-    const dp = [];
-    for (let i2 = 0; i2 < from.length + 1; i2++) {
-      dp.push([]);
-      for (let j2 = 0; j2 < from.length + 1; j2++) {
-        dp[i2][j2] = 0;
-      }
-    }
-    for (let i2 = 1; i2 <= from.length; i2++) {
-      for (let j2 = 1; j2 <= to.length; j2++) {
-        if (from[i2 - 1] === to[j2 - 1]) {
-          dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
-        } else {
-          dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
-        }
-      }
-    }
-    const result = [];
-    let i = from.length, j = to.length;
-    while (i > 0 || j > 0) {
-      const prev = result[result.length - 1];
-      const a = from[i - 1];
-      const b = to[j - 1];
-      if (i > 0 && j > 0 && a === b) {
-        if (prev && prev[0] === 0) {
-          prev[1] = a + prev[1];
-        } else {
-          result.push([0, a]);
-        }
-        i--;
-        j--;
-      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-        if (prev && prev[0] === 1) {
-          prev[1] = b + prev[1];
-        } else {
-          result.push([1, b]);
-        }
-        j--;
-      } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
-        if (prev && prev[0] === -1) {
-          prev[1] = a + prev[1];
-        } else {
-          result.push([-1, a]);
-        }
-        i--;
-      }
-    }
-    return result.reverse();
-  }
-
-  // src/modules/tree-selector.ts
-  function parseSelector(selector) {
-    const result = [];
-    const atMatch = selector.match(/^@([a-zA-Z0-9-]+)(?:\s|$)/);
-    if (atMatch) {
-      const key = atMatch[1];
-      throw new Error(`Invalid argument: @${key} not supported`);
-    }
-    const tagMatch = selector.match(/^[^.#[:][^.#[:]*/);
-    if (tagMatch) {
-      const value = tagMatch[0];
-      result.push({
-        type: "tag",
-        value
-      });
-    }
-    const re = /\.([^.#[:]+)|#([^.#[:]+)|\[([^\]]+)|(::?[^.#[:]+)/g;
-    let match;
-    while (match = re.exec(selector)) {
-      if (match[1]) {
-        const value = match[1];
-        result.push({
-          type: "attribute",
-          key: "class",
-          value,
-          operator: "~=",
-          regex: new RegExp(`(?:^|\\s)${value}(?:\\s|$)`)
-        });
-      } else if (match[2]) {
-        const value = match[2];
-        result.push({
-          type: "attribute",
-          key: "id",
-          value,
-          operator: "~=",
-          regex: new RegExp(`(?:^|\\s)${value}(?:\\s|$)`)
-        });
-      } else if (match[3]) {
-        let key;
-        let value;
-        let operator;
-        const operatorMatch = match[3].match(/[~|^$*]?=/);
-        if (!operatorMatch) {
-          key = match[3];
-        } else {
-          key = match[3].substring(0, operatorMatch.index);
-          value = match[3].substring(
-            operatorMatch.index + operatorMatch[0].length
-          );
-          if (value.startsWith('"') && value.endsWith('"') || value.startsWith("'") && value.endsWith("'")) {
-            value = value.substring(1, value.length - 1);
-          }
-          operator = operatorMatch[0];
-        }
-        if (!operator) {
-          result.push({
-            type: "attribute",
-            key,
-            value
-          });
-          continue;
-        }
-        if (typeof value !== "string") {
-          value = "";
-        }
-        if (operator === "=") {
-          result.push({
-            type: "attribute",
-            key,
-            value,
-            operator,
-            regex: new RegExp(`^${value}$`)
-          });
-        } else if (operator === "~=") {
-          result.push({
-            type: "attribute",
-            key,
-            value,
-            operator,
-            regex: new RegExp(`(?:^|\\s)${value}(?:\\s|$)`)
-          });
-        } else if (operator === "|=") {
-          result.push({
-            type: "attribute",
-            key,
-            value,
-            operator,
-            regex: new RegExp(`(?:^|\\s)${value}(?:\\s|-|$)`)
-          });
-        } else if (operator === "*=") {
-          result.push({
-            type: "attribute",
-            key,
-            value,
-            operator,
-            regex: new RegExp(value)
-          });
-        } else if (operator === "^=") {
-          result.push({
-            type: "attribute",
-            key,
-            value,
-            operator,
-            regex: new RegExp(`(?:^|\\s)${value}`)
-          });
-        } else if (operator === "$=") {
-          result.push({
-            type: "attribute",
-            key,
-            value,
-            operator,
-            regex: new RegExp(`${value}(?:\\s|$)`)
-          });
-        } else {
-          throw new Error(`Invalid argument: operator ${operator} not supported`);
-        }
-      } else if (match[4]) {
-        const pseudoMatch = match[4].match(/\(([^)]+)\)/);
-        let key, value;
-        if (pseudoMatch) {
-          key = match[4].substring(0, pseudoMatch.index);
-          value = pseudoMatch[1];
-        } else {
-          key = match[4];
-        }
-        result.push({
-          type: "pseudo",
-          key,
-          // ::key, :key
-          value
-        });
-      }
-    }
-    return result;
-  }
-  function splitSelector(str) {
-    const result = [
-      {
-        combinator: " ",
-        selectors: []
-      }
-    ];
-    let buffer = "", quotes = null, bracket = null, combinator = null;
-    for (let i = 0; i < str.length; i++) {
-      const char = str[i];
-      if (char === "\\") {
-        buffer += char;
-        i++;
-        if (i < str.length) {
-          buffer += str[i];
-        }
-        continue;
-      }
-      if (quotes) {
-        if (quotes === char) {
-          quotes = null;
-        }
-        buffer += char;
-        continue;
-      }
-      if (bracket) {
-        if (bracket === "[" && char === "]") {
-          bracket = null;
-        }
-        buffer += char;
-        continue;
-      }
-      if (char === ">" || char === "+" || char === "~" || char === " ") {
-        if (!combinator) {
-          combinator = char;
-          result[result.length - 1].selectors.push(...parseSelector(buffer));
-          buffer = "";
-        } else {
-          combinator += char;
-        }
-        continue;
-      }
-      if (combinator) {
-        const value = combinator.trim() || " ";
-        if (value !== " " && value !== ">" && value !== "~" && value !== "+") {
-          throw new Error(
-            `Invalid argument: combinator ${value} is not supported`
-          );
-        }
-        result.push({
-          combinator: value,
-          selectors: []
-        });
-        combinator = null;
-      }
-      if (char === `"` || char === `'`) {
-        quotes = char;
-        buffer += char;
-        continue;
-      }
-      if (char === "[") {
-        bracket = char;
-        buffer += char;
-        continue;
-      }
-      buffer += char;
-    }
-    if (buffer.length > 0) {
-      result[result.length - 1].selectors.push(...parseSelector(buffer));
-    }
-    return result;
-  }
-  function getCandidates(node, combinator) {
-    if (combinator === " " || combinator === ">") {
-      return node.children.filter((child) => child.type === "tag");
-    }
-    const result = [];
-    let toggle = false;
-    for (const sibling of node.parent.children) {
-      if (sibling.type !== "tag") {
-        continue;
-      }
-      if (!toggle) {
-        if (sibling == node) {
-          toggle = true;
-        }
-        continue;
-      }
-      result.push(sibling);
-      if (combinator === "+") {
-        break;
-      }
-    }
-    return result;
-  }
-  function matchSelectors(parent, selectors, combinator) {
-    let result = [];
-    const candidates = getCandidates(parent, combinator);
-    for (const c of candidates) {
-      let toggle = true;
-      for (const s of selectors) {
-        if (s.type === "tag") {
-          if (s.value !== "*" && s.value !== c.tag) {
-            toggle = false;
-            break;
-          }
-        } else if (s.type === "attribute") {
-          const attr = c.attrs[s.key];
-          if (!s.regex) {
-            if (typeof attr === "undefined") {
-              toggle = false;
-              break;
-            }
-          } else {
-            if (!attr || !attr.match(s.regex)) {
-              toggle = false;
-              break;
-            }
-          }
-        } else if (s.type === "pseudo") {
-          toggle = false;
-          break;
-        }
-      }
-      if (toggle) {
-        result.push(c);
-      }
-    }
-    if (combinator === " ") {
-      for (const c of candidates) {
-        result.push(...matchSelectors(c, selectors, combinator));
-      }
-    }
-    return result;
-  }
-  function selectChild(parent, selecotr) {
-    return selectChildren(parent, selecotr)[0];
-  }
-  function selectChildren(parent, selector) {
-    selector = selector.trim();
-    const stages = splitSelector(selector);
-    let targets = [parent];
-    for (const { combinator, selectors } of stages) {
-      const prevTargets = targets;
-      targets = [];
-      for (const target of prevTargets) {
-        targets.push(...matchSelectors(target, selectors, combinator));
-      }
-    }
-    return targets;
-  }
-
-  // src/modules/tree-style.ts
-  function parseDeclaration(str) {
-    const result = {};
-    const re = /([^:]+):([^;]+);/g;
-    let match;
-    while (match = re.exec(str)) {
-      const key = match[1].trim();
-      const value = match[2].trim();
-      result[key] = value;
-    }
-    return result;
-  }
-  function parseStyle(style) {
-    style = style.replace(/\/\*[\s\S]*?\*\//g, "");
-    const result = [];
-    const func = (str, mediaQuery) => {
-      const re = /(@media )?([^{]+){([^}]*?)}/g;
-      let match;
-      while (match = re.exec(str)) {
-        const isMediaQuery = !!match[1];
-        if (isMediaQuery) {
-          func(match[3], match[2]);
-          continue;
-        }
-        const selectors = match[2].split(",").map((item) => item.trim()).filter(Boolean);
-        const declarations = parseDeclaration(match[3]);
-        result.push({
-          mediaQuery,
-          selectors,
-          declarations
-        });
-      }
-    };
-    func(style);
-    return result;
-  }
-  function setStyle(parent, style) {
-    const parsedStyles = parseStyle(style);
-    for (const s of parsedStyles) {
-      if (s.mediaQuery) {
-        continue;
-      }
-      const declarations = s.declarations;
-      if (Object.keys(declarations).length === 0) {
-        continue;
-      }
-      for (const selector of s.selectors) {
-        const children = Tree.selectAll(parent, selector);
-        for (const child of children) {
-          if (typeof child.attrs.style !== "string") {
-            child.attrs.style = "";
-          }
-          const newStyle = Object.assign(
-            parseDeclaration(child.attrs.style),
-            declarations
-          );
-          child.attrs.style = Object.entries(newStyle).map(([k, v]) => `${k}:${v};`).join("");
-        }
-      }
-    }
-  }
-
-  // src/modules/tree.ts
-  function parseTag(str, fromIndex) {
-    let i = fromIndex;
-    while (i < str.length) {
-      if (str[i] === " " || str[i] === "\n" || str[i] === ">") {
-        return i !== fromIndex ? str.substring(fromIndex, i) : void 0;
-      }
-      i++;
-    }
-    return;
-  }
-  function parseAttrs(str, fromIndex) {
-    let i = fromIndex, j = fromIndex, parts = [], quotes = null, closer;
-    const acc = function(s) {
-      s = s.trim();
-      if (s !== "") {
-        parts.push(s);
-      }
-    };
-    while (j < str.length) {
-      const char = str[j];
-      if (char === "\\") {
-        j++;
-      } else if (!quotes) {
-        if (char === ">") {
-          const part = str.substring(i, j);
-          if (part.endsWith("/") || part.endsWith("?")) {
-            closer = part;
-          } else {
-            acc(part);
-          }
-          j++;
-          break;
-        }
-        if (char === " " || char === "\n") {
-          acc(str.substring(i, j));
-          i = j;
-        } else if (char === `"` || char === `'`) {
-          quotes = char;
-        }
-      } else if (char === quotes) {
-        quotes = null;
-        acc(str.substring(i, j + 1));
-        i = j + 1;
-      }
-      j++;
-    }
-    const attrs = {};
-    for (const part of parts) {
-      const [key, ...values] = part.split("=");
-      if (values.length === 0) {
-        attrs[key] = null;
-      } else {
-        let value = values.join("=");
-        if (value.startsWith('"') && value.endsWith('"') || value.startsWith("'") && value.endsWith("'")) {
-          value = value.substring(1, value.length - 1);
-        }
-        attrs[key] = value;
-      }
-    }
-    return {
-      startIndex: fromIndex,
-      endIndex: j,
-      closer,
-      attrs
-    };
-  }
-  function isParent(node) {
-    return node.type === "root" || node.type === "tag";
-  }
-  function isChild(node) {
-    return node.type === "tag" || node.type === "text" || node.type === "comment";
-  }
-  function isRoot(node) {
-    return node.type === "root";
-  }
-  function isTag(node) {
-    return node.type === "tag";
-  }
-  function isText(node) {
-    return node.type === "text";
-  }
-  function isComment(node) {
-    return node.type === "comment";
-  }
-  function parse(str) {
-    str = unescapeXML(str);
-    const stacks = [];
-    let offset = 0, i = str.indexOf("<", offset);
-    const searchOpening = function(n) {
-      offset = n;
-      i = str.indexOf("<", offset);
-    };
-    while (offset < str.length) {
-      if (i !== offset) {
-        const endIndex = i > -1 ? i : str.length;
-        stacks.push({
-          isClosed: true,
-          type: "text",
-          content: str.substring(offset, endIndex)
-        });
-      }
-      if (i === -1) {
-        break;
-      }
-      const tag = parseTag(str, i + 1);
-      if (!tag) {
-        const prev = stacks[stacks.length - 1];
-        if (typeof prev.content === "string") {
-          prev.content += str[i];
-        }
-        searchOpening(i + 1);
-        continue;
-      }
-      if (tag.startsWith("!--")) {
-        const j = str.indexOf("-->", i + 4);
-        if (j === -1) {
-          throw new Error(
-            `Invalid argument: could not find closing tag "-->" after ${i + 4}`
-          );
-        }
-        stacks.push({
-          type: "comment",
-          content: str.substring(i + 4, j)
-        });
-        searchOpening(j + 3);
-      } else if (tag === "style" || tag === "script") {
-        const { endIndex, attrs } = parseAttrs(str, i + 1 + tag.length);
-        const n = str.indexOf(`</${tag}>`, endIndex);
-        if (n === -1) {
-          throw new Error(
-            `Invalid argument: could not find closing tag "</${tag}>" after ${endIndex}`
-          );
-        }
-        const a = {
-          isClosed: true,
-          type: "tag",
-          tag,
-          attrs,
-          children: []
-        };
-        const b = {
-          isClosed: true,
-          type: "text",
-          parent: a,
-          content: str.substring(endIndex, n)
-        };
-        a.children.push(b);
-        stacks.push(a, b);
-        searchOpening(n + 3 + tag.length);
-      } else if (tag.startsWith("/")) {
-        const _tag = tag.substring(1);
-        const children = [];
-        for (let n = stacks.length - 1; n >= 0; n--) {
-          const stack = stacks[n];
-          if (!stack.isClosed && stack.tag === _tag) {
-            stack.children = [...children.reverse(), ...stack.children];
-            for (const child of children) {
-              child.parent = stack;
-            }
-            stack.isClosed = true;
-            break;
-          }
-          if (!stack.parent) {
-            children.push(stack);
-          }
-        }
-        searchOpening(i + tag.length + 2);
-      } else {
-        const { endIndex, closer, attrs } = parseAttrs(str, i + tag.length + 1);
-        stacks.push({
-          isClosed: !!closer,
-          type: "tag",
-          tag,
-          closer,
-          attrs,
-          children: []
-        });
-        searchOpening(endIndex);
-      }
-    }
-    const root = {
-      type: "root",
-      children: []
-    };
-    for (const stack of stacks) {
-      if (stack.type === "tag" && !stack.isClosed) {
-        stack.closer = "";
-        stack.isClosed = true;
-      }
-      delete stack.isClosed;
-      if (!stack.parent) {
-        stack.parent = root;
-        root.children.push(stack);
-      }
-    }
-    return root;
-  }
-  function mapChildren(parent, callback) {
-    const result = [];
-    const func = function(parent2, depth) {
-      for (let i = 0; i < parent2.children.length; i++) {
-        const child = parent2.children[i];
-        result.push(callback(child, depth, i, parent2.children));
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(parent, 1);
-    return result;
-  }
-  function reduceChildren(parent, callback, initialValue) {
-    let result = initialValue;
-    const func = function(parent2, depth) {
-      for (let i = 0; i < parent2.children.length; i++) {
-        const child = parent2.children[i];
-        result = callback(result, child, depth, i, parent2.children);
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(parent, 1);
-    return result;
-  }
-  function findChild(parent, callback) {
-    const func = function(parent2, depth) {
-      for (let i = 0; i < parent2.children.length; i++) {
-        const child = parent2.children[i];
-        if (callback(child, depth, i, parent2.children)) {
-          return child;
-        }
-        if (child.type === "tag") {
-          const grandchild = func(child, depth + 1);
-          if (grandchild) {
-            return grandchild;
-          }
-        }
-      }
-    };
-    return func(parent, 1);
-  }
-  function filterChildren(parent, callback) {
-    const result = [];
-    const func = function(parent2, depth) {
-      for (let i = 0; i < parent2.children.length; i++) {
-        const child = parent2.children[i];
-        if (callback(child, depth, i, parent2.children)) {
-          result.push(child);
-        }
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(parent, 1);
-    return result;
-  }
-  function mapParents(child, callback) {
-    const result = [];
-    const func = function(child2, depth) {
-      if (child2.parent) {
-        result.push(callback(child2.parent, depth, child2));
-        if (child2.parent.type !== "root") {
-          func(child2.parent, depth + 1);
-        }
-      }
-    };
-    func(child, 1);
-    return result;
-  }
-  function reduceParents(child, callback, initialValue) {
-    let result = initialValue;
-    const func = function(child2, depth) {
-      if (child2.parent) {
-        if (callback(result, child2.parent, depth, child2)) {
-          return child2.parent;
-        }
-        if (child2.parent.type !== "root") {
-          func(child2.parent, depth + 1);
-        }
-      }
-    };
-    func(child, 1);
-    return result;
-  }
-  function findParent(child, callback) {
-    const func = function(child2, depth) {
-      if (child2.parent) {
-        if (callback(child2.parent, depth, child2)) {
-          return child2.parent;
-        }
-        if (child2.parent.type !== "root") {
-          func(child2.parent, depth + 1);
-        }
-      }
-    };
-    return func(child, 1);
-  }
-  function filterParents(child, callback) {
-    const result = [];
-    const func = function(child2, depth) {
-      if (child2.parent) {
-        if (callback(child2.parent, depth, child2)) {
-          result.push(child2.parent);
-        }
-        if (child2.parent.type !== "root") {
-          func(child2.parent, depth + 1);
-        }
-      }
-    };
-    func(child, 1);
-    return result;
-  }
-  function stringify(node) {
-    const stringifyAttrs = function(attrs) {
-      let acc = "";
-      for (const key of Object.keys(attrs)) {
-        const value = attrs[key];
-        if (typeof value === "string") {
-          acc += ` ${key}="${value}"`;
-        } else if (value === null) {
-          acc += ` ${key}`;
-        }
-      }
-      return acc;
-    };
-    const stringifyNode = function(n) {
-      let acc = "";
-      if (n.type === "text") {
-        const parent = n.parent;
-        if (parent && parent.type === "tag" && // prevent escape <script> and <style>
-        (parent.tag === "script" || parent.tag === "style")) {
-          acc += n.content;
-        } else {
-          acc += escapeXML(n.content);
-        }
-      } else if (n.type === "comment") {
-        acc += `<!--${n.content}-->`;
-      } else if (n.type === "tag") {
-        acc += `<${n.tag}${stringifyAttrs(n.attrs)}`;
-        if (typeof n.closer === "string") {
-          acc += `${n.closer}>`;
-        } else {
-          acc += `>`;
-          for (const child of n.children) {
-            acc += stringifyNode(child);
-          }
-          acc += `</${n.tag}>`;
-        }
-      } else {
-        for (const child of n.children) {
-          acc += stringifyNode(child);
-        }
-      }
-      return acc;
-    };
-    return stringifyNode(node);
-  }
-  function getContents(node) {
-    const acc = [];
-    const func = function(node2) {
-      if (node2.type === "text" || node2.type === "comment") {
-        acc.push(node2.content);
-      } else {
-        for (const child of node2.children) {
-          func(child);
-        }
-      }
-    };
-    func(node);
-    return acc;
-  }
-  var Tree = class {
-    constructor(arg) {
-      if (typeof arg === "string") {
-        this.node = parse(arg);
-      } else {
-        this.node = arg;
-      }
-    }
-    isParent() {
-      return isParent(this.node);
-    }
-    isChild() {
-      return isChild(this.node);
-    }
-    isRoot() {
-      return isRoot(this.node);
-    }
-    isTag() {
-      return isTag(this.node);
-    }
-    isText() {
-      return isText(this.node);
-    }
-    isComment() {
-      return isComment(this.node);
-    }
-    map(callback) {
-      if (isParent(this.node)) {
-        return mapChildren(this.node, callback);
-      } else {
-        return [];
-      }
-    }
-    reduce(callback, initialValue) {
-      if (isParent(this.node)) {
-        return reduceChildren(this.node, callback, initialValue);
-      } else {
-        return initialValue;
-      }
-    }
-    find(callback) {
-      if (isParent(this.node)) {
-        return findChild(this.node, callback);
-      }
-    }
-    filter(callback) {
-      if (isParent(this.node)) {
-        return filterChildren(this.node, callback);
-      } else {
-        return [];
-      }
-    }
-    select(selector) {
-      if (isParent(this.node)) {
-        return selectChild(this.node, selector);
-      }
-    }
-    selectAll(selector) {
-      if (isParent(this.node)) {
-        return selectChildren(this.node, selector);
-      } else {
-        return [];
-      }
-    }
-    mapTop(callback) {
-      if (isChild(this.node)) {
-        return mapParents(this.node, callback);
-      } else {
-        return [];
-      }
-    }
-    reduceTop(callback, initialValue) {
-      if (isChild(this.node)) {
-        return reduceParents(this.node, callback, initialValue);
-      } else {
-        return initialValue;
-      }
-    }
-    findTop(callback) {
-      if (isChild(this.node)) {
-        return findParent(this.node, callback);
-      }
-    }
-    filterTop(callback) {
-      if (isChild(this.node)) {
-        return filterParents(this.node, callback);
-      } else {
-        return [];
-      }
-    }
-    getContents() {
-      return getContents(this.node);
-    }
-    setStyle(style) {
-      if (isParent(this.node)) {
-        return setStyle(this.node, style);
-      }
-    }
-    toString() {
-      return stringify(this.node);
-    }
-    static {
-      this.isParent = isParent;
-    }
-    static {
-      this.isChild = isChild;
-    }
-    static {
-      this.isRoot = isRoot;
-    }
-    static {
-      this.isTag = isTag;
-    }
-    static {
-      this.isText = isText;
-    }
-    static {
-      this.isComment = isComment;
-    }
-    static {
-      this.map = mapChildren;
-    }
-    static {
-      this.reduce = reduceChildren;
-    }
-    static {
-      this.find = findChild;
-    }
-    static {
-      this.filter = filterChildren;
-    }
-    static {
-      this.select = selectChild;
-    }
-    static {
-      this.selectAll = selectChildren;
-    }
-    static {
-      this.mapTop = mapParents;
-    }
-    static {
-      this.reduceTop = reduceParents;
-    }
-    static {
-      this.findTop = findParent;
-    }
-    static {
-      this.filterTop = filterParents;
-    }
-    static {
-      this.parse = parse;
-    }
-    static {
-      this.stringify = stringify;
-    }
-    static {
-      this.getContents = getContents;
-    }
-    static {
-      this.setStyle = setStyle;
-    }
-  };
 
   // src/modules/number.ts
   function getRandomNumber(min, max) {
@@ -1517,6 +499,146 @@ var shit = (() => {
       j++;
     }
     return resolved.join("/");
+  }
+
+  // src/modules/string.ts
+  function findString(str, target, fromIndex) {
+    if (!fromIndex) {
+      fromIndex = 0;
+    } else if (fromIndex < 0) {
+      fromIndex = str.length - 1 + fromIndex;
+    }
+    const len = target.length;
+    let i = fromIndex, closing = null;
+    const match = len === 1 ? () => str[i] === target : () => {
+      for (let j = 0; j < len; j++) {
+        if (str[i + j] !== target[j]) {
+          return false;
+        }
+      }
+      return true;
+    };
+    while (i < str.length) {
+      if (str[i] === "\\") {
+        i++;
+      } else if (!closing) {
+        if (match()) {
+          return i;
+        }
+        if (str[i] === '"' || str[i] === "'") {
+          closing = str[i];
+        } else if (str[i] === "(") {
+          closing = ")";
+        } else if (str[i] === "{") {
+          closing = "}";
+        } else if (str[i] === "[") {
+          closing = "]";
+        } else if (str[i] === "<") {
+          closing = ">";
+        }
+      } else {
+        if (str[i] === closing) {
+          closing = null;
+        }
+      }
+      i++;
+    }
+    return -1;
+  }
+  function getUUID() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0;
+      const v = c === "x" ? r : r & 3 | 8;
+      return v.toString(16);
+    });
+  }
+  function getRandomCharacter(charset) {
+    return charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  function getRandomString(charset, size) {
+    let result = "";
+    for (let i = 0; i < size; i++) {
+      result += getRandomCharacter(charset);
+    }
+    return result;
+  }
+  function getInts(str) {
+    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+  }
+  function getFloats(str) {
+    return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
+  }
+  function getXORString(str, salt) {
+    const l = salt.length;
+    if (l === 0) {
+      throw new Error(`Invalid argument: salt.length === 0`);
+    }
+    let result = "";
+    for (let i = 0; i < str.length; i++) {
+      result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+    }
+    return result;
+  }
+  function normalizeString(str) {
+    return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+  }
+  function toRegExp(str) {
+    const parts = str.split("/");
+    if (parts.length < 3) {
+      throw new Error(`Invalid argument: ${str}`);
+    }
+    const flags = parts.pop();
+    const pattern = parts.slice(1).join("/");
+    return new RegExp(pattern, flags);
+  }
+  function compareString(from, to) {
+    const dp = [];
+    for (let i2 = 0; i2 < from.length + 1; i2++) {
+      dp.push([]);
+      for (let j2 = 0; j2 < from.length + 1; j2++) {
+        dp[i2][j2] = 0;
+      }
+    }
+    for (let i2 = 1; i2 <= from.length; i2++) {
+      for (let j2 = 1; j2 <= to.length; j2++) {
+        if (from[i2 - 1] === to[j2 - 1]) {
+          dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
+        } else {
+          dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
+        }
+      }
+    }
+    const result = [];
+    let i = from.length, j = to.length;
+    while (i > 0 || j > 0) {
+      const prev = result[result.length - 1];
+      const a = from[i - 1];
+      const b = to[j - 1];
+      if (i > 0 && j > 0 && a === b) {
+        if (prev && prev[0] === 0) {
+          prev[1] = a + prev[1];
+        } else {
+          result.push([0, a]);
+        }
+        i--;
+        j--;
+      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+        if (prev && prev[0] === 1) {
+          prev[1] = b + prev[1];
+        } else {
+          result.push([1, b]);
+        }
+        j--;
+      } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+        if (prev && prev[0] === -1) {
+          prev[1] = a + prev[1];
+        } else {
+          result.push([-1, a]);
+        }
+        i--;
+      }
+    }
+    return result.reverse();
   }
 
   // src/modules/type.ts
