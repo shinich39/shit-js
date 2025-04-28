@@ -67,6 +67,39 @@ export function shuffleArray<T>(arr: T[]) {
   return arr;
 }
 
+export function uniqueBy<T>(
+  arr: T[],
+  func: (item: T, index: number, array: T[]) => any
+) {
+  const keys = arr.map(func),
+    result: T[] = [];
+
+  for (let i = 0; i < keys.length; i++) {
+    if (i === keys.findIndex((k) => k == keys[i])) {
+      result.push(arr[i]);
+    }
+  }
+
+  return result;
+}
+
+export function groupBy<T>(
+  arr: T[],
+  func: (item: T, index: number, array: T[]) => string
+) {
+  const group: Record<string, T[]> = {};
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i],
+      key = func(item, i, arr);
+    if (!group[key]) {
+      group[key] = [item];
+    } else {
+      group[key].push(item);
+    }
+  }
+  return group;
+}
+
 export function plotBy(...args: any[][]): number[][] {
   if (args.length === 0) {
     return [];
@@ -108,17 +141,4 @@ export function plotBy(...args: any[][]): number[][] {
       }
     }
   }
-}
-
-export function groupBy<T>(arr: T[], func: (arg: T) => string) {
-  const group: Record<string, T[]> = {};
-  for (const obj of arr) {
-    const key = func(obj);
-    if (!group[key]) {
-      group[key] = [obj];
-    } else {
-      group[key].push(obj);
-    }
-  }
-  return group;
 }

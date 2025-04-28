@@ -11,6 +11,7 @@ import {
   groupBy,
   plotBy,
   shuffleArray,
+  uniqueBy,
 } from "./array";
 
 const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
@@ -45,6 +46,45 @@ test("getModeCount", () => {
 
 test("shuffleArray", () => {
   eq(Array.isArray(shuffleArray([0, 1, 2])), true);
+});
+
+test("uniqueBy", () => {
+  const arr = [
+    { name: "a", age: 10 },
+    { name: "b", age: 12 },
+    { name: "c", age: 11 },
+    { name: "d", age: 15 },
+    { name: "e", age: 13 },
+    { name: "f", age: 12 },
+    { name: "g", age: 11 },
+    { name: "h", age: 10 },
+  ];
+
+  const u1 = uniqueBy(arr, (item) => item.age);
+
+  eq(u1, [
+    { name: "a", age: 10 },
+    { name: "b", age: 12 },
+    { name: "c", age: 11 },
+    { name: "d", age: 15 },
+    { name: "e", age: 13 },
+  ]);
+
+  // let n = Date.now(), c = 0;
+  // while(Date.now() - n < 10) {
+  //   uniqueBy(arr, (item) => item.age);
+  //   c++;
+  // }
+
+  // console.log("uniqueBy()", c);
+
+  // n = Date.now(), c = 0;
+  // while(Date.now() - n < 10) {
+  //   arr.filter((a, i, array) => i === array.findIndex((b) => a.age === b.age));
+  //   c++;
+  // }
+
+  // console.log("filter()", c);
 });
 
 test("groupBy", () => {

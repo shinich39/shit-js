@@ -10,5 +10,5 @@ export declare function getObjectValue(obj: Record<string, any>, key: string): a
  *
  * equals: undefined, null, boolean, number, string, Date,
  */
-export declare function compareObject(a: any, b: any, seen?: WeakMap<object, any>): boolean;
+export declare function compareObject(a: any, b: any): boolean;
 //# sourceMappingURL=object.d.ts.map

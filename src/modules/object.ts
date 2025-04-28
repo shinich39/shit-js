@@ -43,97 +43,102 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  *
  * equals: undefined, null, boolean, number, string, Date,
  */
-export function compareObject(a: any, b: any, seen = new WeakMap()) {
-  // same address
-  if (Object.is(a, b)) {
-    return true;
-  }
+export function compareObject(a: any, b: any) {
+  const func = function (m: any, n: any, seen = new WeakMap()) {
+    // same address
+    if (Object.is(m, n)) {
+      return true;
+    }
 
-  // type mismatch
-  if (typeof a !== typeof b) {
-    return false;
-  }
-
-  // boolean, number, string, undefined
-  if (typeof b !== "object") {
-    return a === b;
-  }
-
-  // null
-  if (b === null) {
-    return a === null;
-  }
-
-  // handle circular references
-  if (seen.has(b)) {
-    return seen.get(b) === a;
-  }
-  seen.set(b, a);
-
-  // include
-  if (Array.isArray(b)) {
-    if (!Array.isArray(a) || a.length < b.length) {
+    // type mismatch
+    if (typeof m !== typeof n) {
       return false;
     }
-    for (const j of b) {
-      let isExists = false;
-      for (const i of a) {
-        if (compareObject(i, j, seen)) {
-          isExists = true;
-          break;
+
+    // boolean, number, string, undefined
+    if (typeof n !== "object") {
+      return m === n;
+    }
+
+    // null
+    if (n === null) {
+      return m === null;
+    }
+
+    // handle circular references
+    if (seen.has(n)) {
+      return seen.get(n) === m;
+    }
+    seen.set(n, m);
+
+    // include
+    if (Array.isArray(n)) {
+      if (!Array.isArray(m) || m.length < n.length) {
+        return false;
+      }
+      for (const j of n) {
+        let isExists = false;
+        for (const i of m) {
+          if (func(i, j, seen)) {
+            isExists = true;
+            break;
+          }
+        }
+        if (!isExists) {
+          return false;
         }
       }
-      if (!isExists) {
+      return true;
+    }
+
+    if (n instanceof Date) {
+      if (!(m instanceof Date)) {
+        return false;
+      }
+      return m.valueOf() === n.valueOf();
+    }
+
+    // include
+    if (n instanceof Set) {
+      if (!(m instanceof Set) || m.size < n.size) {
+        return false;
+      }
+      return func(Array.from(m), Array.from(n), seen);
+    }
+
+    // include
+    if (n instanceof Map) {
+      if (!(m instanceof Map) || m.size < n.size) {
+        return false;
+      }
+      for (const [key, value] of n) {
+        if (!m.has(key) || !func(m.get(key), value, seen)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (Object.getPrototypeOf(m) !== Object.getPrototypeOf(n)) {
+      return false;
+    }
+
+    // plain object
+    const keysA = Object.keys(m);
+    const keysB = Object.keys(n);
+
+    if (keysA.length < keysB.length) {
+      return false;
+    }
+
+    for (const key of keysB) {
+      if (keysA.indexOf(key) === -1 || !func(m[key], n[key], seen)) {
         return false;
       }
     }
+
     return true;
-  }
+  };
 
-  if (b instanceof Date) {
-    if (!(a instanceof Date)) {
-      return false;
-    }
-    return a.valueOf() === b.valueOf();
-  }
-
-  // include
-  if (b instanceof Set) {
-    if (!(a instanceof Set) || a.size < b.size) {
-      return false;
-    }
-    return compareObject(Array.from(a), Array.from(b), seen);
-  }
-
-  // include
-  if (b instanceof Map) {
-    if (!(a instanceof Map) || a.size < b.size) {
-      return false;
-    }
-    for (const [key, value] of b) {
-      if (!a.has(key) || !compareObject(a.get(key), value, seen)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
-    return false;
-  }
-
-  // plain object
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-
-  if (keysA.length < keysB.length) {
-    return false;
-  }
-
-  for (const key of keysB) {
-    if (keysA.indexOf(key) === -1 || !compareObject(a[key], b[key], seen)) {
-      return false;
-    }
-  }
-  return true;
+  return func(a, b);
 }

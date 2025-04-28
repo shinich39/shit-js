@@ -68,7 +68,8 @@ var shit = (() => {
     toFileSize: () => toFileSize,
     toNumber: () => toNumber,
     toRegExp: () => toRegExp,
-    toggleBit: () => toggleBit
+    toggleBit: () => toggleBit,
+    uniqueBy: () => uniqueBy
   });
 
   // src/modules/array.ts
@@ -121,6 +122,27 @@ var shit = (() => {
     }
     return arr;
   }
+  function uniqueBy(arr, func) {
+    const keys = arr.map(func), result = [];
+    for (let i = 0; i < keys.length; i++) {
+      if (i === keys.findIndex((k) => k == keys[i])) {
+        result.push(arr[i]);
+      }
+    }
+    return result;
+  }
+  function groupBy(arr, func) {
+    const group = {};
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i], key = func(item, i, arr);
+      if (!group[key]) {
+        group[key] = [item];
+      } else {
+        group[key].push(item);
+      }
+    }
+    return group;
+  }
   function plotBy(...args) {
     if (args.length === 0) {
       return [];
@@ -147,18 +169,6 @@ var shit = (() => {
         }
       }
     }
-  }
-  function groupBy(arr, func) {
-    const group = {};
-    for (const obj of arr) {
-      const key = func(obj);
-      if (!group[key]) {
-        group[key] = [obj];
-      } else {
-        group[key].push(obj);
-      }
-    }
-    return group;
   }
 
   // src/modules/async.ts
@@ -303,78 +313,81 @@ var shit = (() => {
     }
     return cur;
   }
-  function compareObject(a, b, seen = /* @__PURE__ */ new WeakMap()) {
-    if (Object.is(a, b)) {
-      return true;
-    }
-    if (typeof a !== typeof b) {
-      return false;
-    }
-    if (typeof b !== "object") {
-      return a === b;
-    }
-    if (b === null) {
-      return a === null;
-    }
-    if (seen.has(b)) {
-      return seen.get(b) === a;
-    }
-    seen.set(b, a);
-    if (Array.isArray(b)) {
-      if (!Array.isArray(a) || a.length < b.length) {
+  function compareObject(a, b) {
+    const func = function(m, n, seen = /* @__PURE__ */ new WeakMap()) {
+      if (Object.is(m, n)) {
+        return true;
+      }
+      if (typeof m !== typeof n) {
         return false;
       }
-      for (const j of b) {
-        let isExists = false;
-        for (const i of a) {
-          if (compareObject(i, j, seen)) {
-            isExists = true;
-            break;
+      if (typeof n !== "object") {
+        return m === n;
+      }
+      if (n === null) {
+        return m === null;
+      }
+      if (seen.has(n)) {
+        return seen.get(n) === m;
+      }
+      seen.set(n, m);
+      if (Array.isArray(n)) {
+        if (!Array.isArray(m) || m.length < n.length) {
+          return false;
+        }
+        for (const j of n) {
+          let isExists = false;
+          for (const i of m) {
+            if (func(i, j, seen)) {
+              isExists = true;
+              break;
+            }
+          }
+          if (!isExists) {
+            return false;
           }
         }
-        if (!isExists) {
+        return true;
+      }
+      if (n instanceof Date) {
+        if (!(m instanceof Date)) {
+          return false;
+        }
+        return m.valueOf() === n.valueOf();
+      }
+      if (n instanceof Set) {
+        if (!(m instanceof Set) || m.size < n.size) {
+          return false;
+        }
+        return func(Array.from(m), Array.from(n), seen);
+      }
+      if (n instanceof Map) {
+        if (!(m instanceof Map) || m.size < n.size) {
+          return false;
+        }
+        for (const [key, value] of n) {
+          if (!m.has(key) || !func(m.get(key), value, seen)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      if (Object.getPrototypeOf(m) !== Object.getPrototypeOf(n)) {
+        return false;
+      }
+      const keysA = Object.keys(m);
+      const keysB = Object.keys(n);
+      if (keysA.length < keysB.length) {
+        return false;
+      }
+      for (const key of keysB) {
+        if (keysA.indexOf(key) === -1 || !func(m[key], n[key], seen)) {
           return false;
         }
       }
       return true;
-    }
-    if (b instanceof Date) {
-      if (!(a instanceof Date)) {
-        return false;
-      }
-      return a.valueOf() === b.valueOf();
-    }
-    if (b instanceof Set) {
-      if (!(a instanceof Set) || a.size < b.size) {
-        return false;
-      }
-      return compareObject(Array.from(a), Array.from(b), seen);
-    }
-    if (b instanceof Map) {
-      if (!(a instanceof Map) || a.size < b.size) {
-        return false;
-      }
-      for (const [key, value] of b) {
-        if (!a.has(key) || !compareObject(a.get(key), value, seen)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
-      return false;
-    }
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
-    if (keysA.length < keysB.length) {
-      return false;
-    }
-    for (const key of keysB) {
-      if (keysA.indexOf(key) === -1 || !compareObject(a[key], b[key], seen)) {
-        return false;
-      }
-    }
-    return true;
+    };
+    return func(a, b);
   }
 
   // src/modules/path.ts
