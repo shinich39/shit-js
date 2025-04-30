@@ -64,6 +64,7 @@ __export(index_exports, {
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
   toBytes: () => toBytes,
+  toError: () => toError,
   toFileSize: () => toFileSize,
   toNumber: () => toNumber,
   toRegExp: () => toRegExp,
@@ -690,4 +691,32 @@ function toNumber(e) {
     return 0;
   }
   throw new Error(`Invalid argument type: ${typeof e}`);
+}
+function toError(e) {
+  if (e instanceof Error) {
+    return e;
+  }
+  if (typeof e === "string") {
+    return new Error(e);
+  }
+  if (typeof e !== "object") {
+    return new Error("Unknown Error");
+  }
+  if (Array.isArray(e)) {
+    return new Error("Unknown Error");
+  }
+  if (!e.name || !e.message) {
+    return new Error("Unknown Error");
+  }
+  const err = new Error();
+  if (typeof e.name === "string") {
+    err.name = e.name;
+  }
+  if (typeof e.message === "string") {
+    err.message = e.message;
+  }
+  if (typeof e.stack === "string") {
+    err.stack = e.stack;
+  }
+  return err;
 }
