@@ -70,7 +70,7 @@ export function shuffleArray<T>(arr: T[]) {
 export function uniqueBy<T>(
   arr: T[],
   func: (item: T, index: number, array: T[]) => any
-) {
+): T[] {
   const map = new Map();
 
   for (let i = 0; i < arr.length; i++) {
@@ -81,7 +81,7 @@ export function uniqueBy<T>(
     }
   }
 
-  return Array.from(map.values());
+  return Array.from(map.values()) as T[];
 }
 
 export function groupBy<T>(
