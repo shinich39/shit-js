@@ -49,13 +49,14 @@ function shuffleArray(arr) {
   return arr;
 }
 function uniqueBy(arr, func) {
-  const keys = arr.map(func), result = [];
-  for (let i = 0; i < keys.length; i++) {
-    if (i === keys.findIndex((k) => k == keys[i])) {
-      result.push(arr[i]);
+  const map = /* @__PURE__ */ new Map();
+  for (let i = 0; i < arr.length; i++) {
+    const key = func(arr[i], i, arr);
+    if (!map.has(key)) {
+      map.set(key, arr[i]);
     }
   }
-  return result;
+  return Array.from(map.values());
 }
 function groupBy(arr, func) {
   const group = {};

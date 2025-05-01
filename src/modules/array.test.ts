@@ -13,6 +13,7 @@ import {
   shuffleArray,
   uniqueBy,
 } from "./array";
+import { getRandomNumber } from "./number";
 
 const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
 
@@ -49,29 +50,22 @@ test("shuffleArray", () => {
 });
 
 test("uniqueBy", () => {
-  const arr = [
-    { name: "a", age: 10 },
-    { name: "b", age: 12 },
-    { name: "c", age: 11 },
-    { name: "d", age: 15 },
-    { name: "e", age: 13 },
-    { name: "f", age: 12 },
-    { name: "g", age: 11 },
-    { name: "h", age: 10 },
-  ];
+  const arr: { age: number }[] = [];
+
+  for (let i = 0; i < 10000; i++) {
+    const age = getRandomNumber(8, 20);
+    arr.push({ age });
+  }
 
   const u1 = uniqueBy(arr, (item) => item.age);
+  const u2 = arr.filter(
+    (a, i, array) => i === array.findIndex((b) => a.age === b.age)
+  );
 
-  eq(u1, [
-    { name: "a", age: 10 },
-    { name: "b", age: 12 },
-    { name: "c", age: 11 },
-    { name: "d", age: 15 },
-    { name: "e", age: 13 },
-  ]);
+  eq(u1, u2);
 
   // let n = Date.now(), c = 0;
-  // while(Date.now() - n < 10) {
+  // while(Date.now() - n < 100) {
   //   uniqueBy(arr, (item) => item.age);
   //   c++;
   // }
@@ -79,7 +73,7 @@ test("uniqueBy", () => {
   // console.log("uniqueBy()", c);
 
   // n = Date.now(), c = 0;
-  // while(Date.now() - n < 10) {
+  // while(Date.now() - n < 100) {
   //   arr.filter((a, i, array) => i === array.findIndex((b) => a.age === b.age));
   //   c++;
   // }

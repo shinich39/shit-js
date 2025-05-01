@@ -71,16 +71,17 @@ export function uniqueBy<T>(
   arr: T[],
   func: (item: T, index: number, array: T[]) => any
 ) {
-  const keys = arr.map(func),
-    result: T[] = [];
+  const map = new Map();
 
-  for (let i = 0; i < keys.length; i++) {
-    if (i === keys.findIndex((k) => k == keys[i])) {
-      result.push(arr[i]);
+  for (let i = 0; i < arr.length; i++) {
+    const key = func(arr[i], i, arr);
+
+    if (!map.has(key)) {
+      map.set(key, arr[i]);
     }
   }
 
-  return result;
+  return Array.from(map.values());
 }
 
 export function groupBy<T>(
