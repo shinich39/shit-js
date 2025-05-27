@@ -14,12 +14,8 @@
   "type": "module",
   "scripts": {
     "test": "tsx --test \"**/*.test.{js,jsx,ts,tsx}\"",
-    "build": "npm run lint && npm run format && npm run bundle && npm run compile",
-    "compile": "tsc --project tsconfig.json",
-    "bundle": "node esbuild.config.js",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
-    "lint": "eslint \"src/**/*\"",
-    "lint:fix": "eslint \"src/**/*\" --fix"
+    "build": "npm run lint && rimraf dist && node esbuild.config.js && tsc --project tsconfig.json",
+    "lint": "eslint \"src/**/*\""
   },
   "keywords": [
     "typescript"
@@ -31,8 +27,7 @@
     "@types/node": "^22.14.0",
     "esbuild": "^0.25.2",
     "eslint": "^9.24.0",
-    "eslint-config-prettier": "^10.1.1",
-    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.0"

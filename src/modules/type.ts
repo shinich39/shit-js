@@ -1,18 +1,4 @@
-export function getType(
-  e: any
-):
-  | "string"
-  | "number"
-  | "bigint"
-  | "boolean"
-  | "symbol"
-  | "undefined"
-  | "object"
-  | "function"
-  | "null"
-  | "array"
-  | "date"
-  | "regexp" {
+export function getType(e: any) {
   if (e === undefined) {
     return "undefined";
   }

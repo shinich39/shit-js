@@ -25,7 +25,7 @@ import * as shit from "shit-js";
 ```html
 <script src="./dist/index.js"></script>
 <script>
-  const { add, sub, mul, div, wait } = window.shit;
+  const { } = window.shit;
 </script>
 ```
 
@@ -37,6 +37,5 @@ import * as shit from "shit-js";
 ## Acknowledgements
 
 - [esbuild](https://esbuild.github.io/)
-- [prettier](https://prettier.io/)
 - [eslint](https://eslint.org/)
 - [tsx](https://tsx.is/)
