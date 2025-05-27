@@ -14,7 +14,7 @@
   "type": "module",
   "scripts": {
     "test": "tsx --test \"**/*.test.{js,jsx,ts,tsx}\"",
-    "build": "npm run lint && rimraf dist && node esbuild.config.js && tsc --project tsconfig.json",
+    "build": "npm run lint && node esbuild.config.js && tsc --project tsconfig.json",
     "lint": "eslint \"src/**/*\""
   },
   "keywords": [
