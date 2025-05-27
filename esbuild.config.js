@@ -5,7 +5,7 @@ const pkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 const ESM = true;
 const CJS = true;
 const BROWSER = true;
-const BROWSER_GLOBAL_NAME = "shit";
+const BROWSER_GLOBAL_NAME = "ShitJs";
 const entryPoints = ["./src/index.ts"];
 // https://esbuild.github.io/api/#external
 const externalPackages = [];
