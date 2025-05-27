@@ -3,6 +3,12 @@
  */
 export declare function getRandomNumber(min: number, max: number): number;
 /**
+ * mulberry32 PRNG (Pseudo Random Number Generator)
+ *
+ * https://github.com/cprosche/mulberry32
+ */
+export declare function getRandomSeed(seed: number): number;
+/**
  * @returns min <= n <= max
  */
 export declare function getClampedNumber(num: number, min: number, max: number): number;

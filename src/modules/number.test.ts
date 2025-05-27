@@ -11,11 +11,21 @@ import {
   getAdjustedSize,
   toFileSize,
   toBytes,
+  getRandomSeed,
 } from "./number";
 
 test("getRandomNumber", () => {
   eq(getRandomNumber(0, 1) < 1, true);
   eq(getRandomNumber(0, 1) >= 0, true);
+});
+
+test("getRandomSeed", () => {
+  for (let i = 0; i < 10; i++) {
+    const seed = 12345 * Math.random() * 10;
+    const a = getRandomSeed(seed);
+    const b = getRandomSeed(seed);
+    eq(a, b);
+  }
 });
 
 test("getClampedNumber", () => {

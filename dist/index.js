@@ -48,6 +48,7 @@ var ShitJs = (() => {
     getObjectValue: () => getObjectValue,
     getRandomCharacter: () => getRandomCharacter,
     getRandomNumber: () => getRandomNumber,
+    getRandomSeed: () => getRandomSeed,
     getRandomString: () => getRandomString,
     getRelativePath: () => getRelativePath,
     getRootPath: () => getRootPath,
@@ -195,6 +196,12 @@ var ShitJs = (() => {
   // src/modules/number.ts
   function getRandomNumber(min, max) {
     return Math.random() * (max - min) + min;
+  }
+  function getRandomSeed(seed) {
+    let t = seed += 1831565813;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
   }
   function getClampedNumber(num, min, max) {
     return Math.min(max, Math.max(num, min));
