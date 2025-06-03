@@ -1,7 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
 import {
-  getRandomNumber,
   getClampedNumber,
   getLoopedNumber,
   calcStringSize,
@@ -12,11 +11,18 @@ import {
   toFileSize,
   toBytes,
   getRandomSeed,
+  getRandomInt,
+  getRandomFloat,
 } from "./number";
 
-test("getRandomNumber", () => {
-  eq(getRandomNumber(0, 1) < 1, true);
-  eq(getRandomNumber(0, 1) >= 0, true);
+test("getRandomFloat", () => {
+  eq(getRandomFloat(0, 1) < 1, true);
+  eq(getRandomFloat(0, 1) >= 0, true);
+});
+
+test("getRandomInt", () => {
+  eq(getRandomInt(0, 1) < 1, true);
+  eq(getRandomInt(0, 1) >= 0, true);
 });
 
 test("getRandomSeed", () => {

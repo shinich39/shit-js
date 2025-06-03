@@ -45,8 +45,9 @@ __export(index_exports, {
   getModeValue: () => getModeValue,
   getModeValueWithCount: () => getModeValueWithCount,
   getObjectValue: () => getObjectValue,
-  getRandomCharacter: () => getRandomCharacter,
-  getRandomNumber: () => getRandomNumber,
+  getRandomChar: () => getRandomChar,
+  getRandomFloat: () => getRandomFloat,
+  getRandomInt: () => getRandomInt,
   getRandomSeed: () => getRandomSeed,
   getRandomString: () => getRandomString,
   getRelativePath: () => getRelativePath,
@@ -194,8 +195,11 @@ function toggleBit(a, b) {
 }
 
 // src/modules/number.ts
-function getRandomNumber(min, max) {
+function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
+}
+function getRandomInt(min, max) {
+  return Math.floor(getRandomFloat(min, max));
 }
 function getRandomSeed(seed) {
   let t = seed += 1831565813;
@@ -574,13 +578,13 @@ function getUUID() {
     return v.toString(16);
   });
 }
-function getRandomCharacter(charset) {
+function getRandomChar(charset) {
   return charset.charAt(Math.floor(Math.random() * charset.length));
 }
 function getRandomString(charset, size) {
   let result = "";
   for (let i = 0; i < size; i++) {
-    result += getRandomCharacter(charset);
+    result += getRandomChar(charset);
   }
   return result;
 }

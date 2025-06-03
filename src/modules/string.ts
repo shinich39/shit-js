@@ -68,14 +68,14 @@ export function getUUID() {
   });
 }
 
-export function getRandomCharacter(charset: string) {
+export function getRandomChar(charset: string) {
   return charset.charAt(Math.floor(Math.random() * charset.length));
 }
 
 export function getRandomString(charset: string, size: number) {
   let result = "";
   for (let i = 0; i < size; i++) {
-    result += getRandomCharacter(charset);
+    result += getRandomChar(charset);
   }
   return result;
 }

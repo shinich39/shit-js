@@ -5,7 +5,7 @@ import {
   findString,
   getFloats,
   getInts,
-  getRandomCharacter,
+  getRandomChar,
   getRandomString,
   getUUID,
   getXORString,
@@ -22,8 +22,8 @@ test("getUUID", () => {
   eq(getUUID().length, 36);
 });
 
-test("getRandomCharacter", () => {
-  eq(/[abc]/.test(getRandomCharacter("abc")), true);
+test("getRandomChar", () => {
+  eq(/[abc]/.test(getRandomChar("abc")), true);
 });
 
 test("getRandomString", () => {

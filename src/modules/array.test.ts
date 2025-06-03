@@ -13,7 +13,6 @@ import {
   shuffleArray,
   uniqueBy,
 } from "./array";
-import { getRandomNumber } from "./number";
 
 const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
 
@@ -53,7 +52,7 @@ test("uniqueBy", () => {
   const arr: { age: number }[] = [];
 
   for (let i = 0; i < 10000; i++) {
-    const age = getRandomNumber(8, 20);
+    const age = Math.random() * (100 - 1) + 1;
     arr.push({ age });
   }
 

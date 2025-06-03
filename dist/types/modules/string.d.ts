@@ -5,7 +5,7 @@
  */
 export declare function findString(str: string, target: string, fromIndex?: number): number;
 export declare function getUUID(): string;
-export declare function getRandomCharacter(charset: string): string;
+export declare function getRandomChar(charset: string): string;
 export declare function getRandomString(charset: string, size: number): string;
 export declare function getInts(str: string): number[];
 export declare function getFloats(str: string): number[];

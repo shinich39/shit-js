@@ -1,7 +1,11 @@
 /**
  * @returns min <= n < max
  */
-export declare function getRandomNumber(min: number, max: number): number;
+export declare function getRandomFloat(min: number, max: number): number;
+/**
+ * @returns min <= n < max
+ */
+export declare function getRandomInt(min: number, max: number): number;
 /**
  * mulberry32 PRNG (Pseudo Random Number Generator)
  *
