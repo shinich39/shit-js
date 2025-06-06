@@ -25,7 +25,7 @@ import * as shit from "shit-js";
 ```html
 <script src="./dist/index.js"></script>
 <script>
-  const { } = window.shit;
+  const { } = window.Shit;
 </script>
 ```
 
