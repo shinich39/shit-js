@@ -2,26 +2,26 @@
   "name": "shit-js",
   "version": "1.0.0",
   "description": "God breathe on me",
-  "main": "./dist/index.min.mjs",
-  "types": "./dist/types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.min.mjs",
-      "require": "./dist/index.min.cjs"
-    }
-  },
-  "type": "module",
-  "scripts": {
-    "test": "tsx --test \"**/*.test.{js,jsx,ts,tsx}\"",
-    "build": "npm run lint && node esbuild.config.js && tsc --project tsconfig.json",
-    "lint": "eslint \"src/**/*\""
-  },
   "keywords": [
     "typescript"
   ],
-  "author": "shinich39 <shinich39@gmail.com>",
   "license": "MIT",
+  "author": "shinich39 <shinich39@gmail.com>",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types/shit.d.ts",
+      "import": "./dist/shit.min.mjs",
+      "require": "./dist/shit.min.cjs"
+    }
+  },
+  "main": "./dist/shit.min.mjs",
+  "types": "./dist/types/shit.d.ts",
+  "scripts": {
+    "test": "tsx --test \"**/*.test.{js,jsx,ts,tsx}\"",
+    "build": "npm run lint && node esbuild.config.js && tsc",
+    "lint": "eslint \"src/**/*\""
+  },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@types/node": "^22.14.0",

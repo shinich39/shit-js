@@ -1,5 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
+import path from "node:path";
+import fs from "node:fs";
 import {
   getClampedNumber,
   getLoopedNumber,
@@ -15,88 +17,92 @@ import {
   getRandomFloat,
 } from "./number";
 
-test("getRandomFloat", () => {
-  eq(getRandomFloat(0, 1) < 1, true);
-  eq(getRandomFloat(0, 1) >= 0, true);
-});
+describe(path.basename(import.meta.filename), () => {
 
-test("getRandomInt", () => {
-  eq(getRandomInt(0, 1) < 1, true);
-  eq(getRandomInt(0, 1) >= 0, true);
-});
+  test("getRandomFloat", () => {
+    eq(getRandomFloat(0, 1) < 1, true);
+    eq(getRandomFloat(0, 1) >= 0, true);
+  });
 
-test("getRandomSeed", () => {
-  for (let i = 0; i < 10; i++) {
-    const seed = 12345 * Math.random() * 10;
-    const a = getRandomSeed(seed);
-    const b = getRandomSeed(seed);
-    eq(a, b);
-  }
-});
+  test("getRandomInt", () => {
+    eq(getRandomInt(0, 1) < 1, true);
+    eq(getRandomInt(0, 1) >= 0, true);
+  });
 
-test("getClampedNumber", () => {
-  eq(getClampedNumber(0.5, 0, 1), 0.5);
-  eq(getClampedNumber(2, 0, 1), 1);
-  eq(getClampedNumber(-1, 0, 1), 0);
-  eq(getClampedNumber(1, 0, 1), 1);
-  eq(getClampedNumber(0, 0, 1), 0);
-});
+  test("getRandomSeed", () => {
+    for (let i = 0; i < 10; i++) {
+      const seed = 12345 * Math.random() * 10;
+      const a = getRandomSeed(seed);
+      const b = getRandomSeed(seed);
+      eq(a, b);
+    }
+  });
 
-test("getLoopedNumber", () => {
-  eq(getLoopedNumber(0, 0, 10), 0);
-  eq(getLoopedNumber(5, 0, 10), 5);
-  eq(getLoopedNumber(10, 0, 10), 0);
-  eq(getLoopedNumber(11, 0, 10), 1);
-  eq(getLoopedNumber(15, 0, 10), 5);
-  eq(getLoopedNumber(20, 0, 10), 0);
-  eq(getLoopedNumber(5, 5, 10), 5);
-  eq(getLoopedNumber(0, 5, 10), 5);
-  eq(getLoopedNumber(2.5, 5, 10), 7.5);
-  eq(getLoopedNumber(-2.5, 5, 10), 7.5);
-  eq(getLoopedNumber(7.5, 5, 10), 7.5);
-  eq(getLoopedNumber(10, 5, 10), 5);
-});
+  test("getClampedNumber", () => {
+    eq(getClampedNumber(0.5, 0, 1), 0.5);
+    eq(getClampedNumber(2, 0, 1), 1);
+    eq(getClampedNumber(-1, 0, 1), 0);
+    eq(getClampedNumber(1, 0, 1), 1);
+    eq(getClampedNumber(0, 0, 1), 0);
+  });
 
-test("calcStringSize", () => {
-  eq(calcStringSize("abc"), 3);
-  eq(calcStringSize("ㄱㄴㄷ"), 9);
-  eq(calcStringSize("가나다"), 9);
-});
+  test("getLoopedNumber", () => {
+    eq(getLoopedNumber(0, 0, 10), 0);
+    eq(getLoopedNumber(5, 0, 10), 5);
+    eq(getLoopedNumber(10, 0, 10), 0);
+    eq(getLoopedNumber(11, 0, 10), 1);
+    eq(getLoopedNumber(15, 0, 10), 5);
+    eq(getLoopedNumber(20, 0, 10), 0);
+    eq(getLoopedNumber(5, 5, 10), 5);
+    eq(getLoopedNumber(0, 5, 10), 5);
+    eq(getLoopedNumber(2.5, 5, 10), 7.5);
+    eq(getLoopedNumber(-2.5, 5, 10), 7.5);
+    eq(getLoopedNumber(7.5, 5, 10), 7.5);
+    eq(getLoopedNumber(10, 5, 10), 5);
+  });
 
-test("toBytes", () => {
-  eq(toBytes(1, "MB"), 1024 * 1024);
-  eq(toBytes(1, "GB"), 1024 * 1024 * 1024);
-});
+  test("calcStringSize", () => {
+    eq(calcStringSize("abc"), 3);
+    eq(calcStringSize("ㄱㄴㄷ"), 9);
+    eq(calcStringSize("가나다"), 9);
+  });
 
-test("toFileSize", () => {
-  eq(toFileSize(1024 * 1024, "MB"), 1);
-  eq(toFileSize(1024 * 1024 * 1024, "GB"), 1);
-});
+  test("toBytes", () => {
+    eq(toBytes(1, "MB"), 1024 * 1024);
+    eq(toBytes(1, "GB"), 1024 * 1024 * 1024);
+  });
 
-test("humanizeFileSize", () => {
-  eq(humanizeFileSize(1024 * 1024, "Bytes"), "1.00 MB");
-  eq(humanizeFileSize(1024 * 1024 * 1024, "Bytes"), "1.00 GB");
-  eq(
-    humanizeFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512, "Bytes"),
-    "1.50 GB"
-  );
-});
+  test("toFileSize", () => {
+    eq(toFileSize(1024 * 1024, "MB"), 1);
+    eq(toFileSize(1024 * 1024 * 1024, "GB"), 1);
+  });
 
-test("getContainedSize", () => {
-  eq(getContainedSize(1, 1, 2, 1), [1, 1]);
-});
+  test("humanizeFileSize", () => {
+    eq(humanizeFileSize(1024 * 1024, "Bytes"), "1.00 MB");
+    eq(humanizeFileSize(1024 * 1024 * 1024, "Bytes"), "1.00 GB");
+    eq(
+      humanizeFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512, "Bytes"),
+      "1.50 GB"
+    );
+  });
 
-test("getCoveredSize", () => {
-  eq(getCoveredSize(1, 1, 2, 1), [2, 2]);
-});
+  test("getContainedSize", () => {
+    eq(getContainedSize(1, 1, 2, 1), [1, 1]);
+  });
 
-test("getAdjustedSize", () => {
-  eq(getAdjustedSize(500, 500, 200, 200, 100, 100), [200, 200]);
-  eq(getAdjustedSize(500, 1000, 200, 200, 100, 100), [100, 200]);
-  eq(getAdjustedSize(5, 10, 200, 200, 100, 100), [100, 200]);
+  test("getCoveredSize", () => {
+    eq(getCoveredSize(1, 1, 2, 1), [2, 2]);
+  });
 
-  eq(getAdjustedSize(150, 150, 200, 200, 100, 100), [150, 150]);
-  eq(getAdjustedSize(175, 175, 200, 200, 100, 100), [175, 175]);
+  test("getAdjustedSize", () => {
+    eq(getAdjustedSize(500, 500, 200, 200, 100, 100), [200, 200]);
+    eq(getAdjustedSize(500, 1000, 200, 200, 100, 100), [100, 200]);
+    eq(getAdjustedSize(5, 10, 200, 200, 100, 100), [100, 200]);
+
+    eq(getAdjustedSize(150, 150, 200, 200, 100, 100), [150, 150]);
+    eq(getAdjustedSize(175, 175, 200, 200, 100, 100), [175, 175]);
+  });
+
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

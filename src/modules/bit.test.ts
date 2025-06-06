@@ -1,36 +1,42 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
+import path from "node:path";
+import fs from "node:fs";
 import { checkBit, clearBit, setBit, toggleBit } from "./bit";
 
-test("checkBit", () => {
-  eq(checkBit(0b1100, 0b1000), true);
-  eq(checkBit(0b1100, 0b0100), true);
-  eq(checkBit(0b1100, 0b1100), true);
+describe(path.basename(import.meta.filename), () => {
 
-  eq(checkBit(0b1100, 0b0001), false);
-  eq(checkBit(0b1100, 0b0010), false);
-  eq(checkBit(0b1100, 0b0011), false);
-});
+  test("checkBit", () => {
+    eq(checkBit(0b1100, 0b1000), true);
+    eq(checkBit(0b1100, 0b0100), true);
+    eq(checkBit(0b1100, 0b1100), true);
 
-test("setBit", () => {
-  eq(setBit(0b1100, 0b1000), 0b1100);
-  eq(setBit(0b1100, 0b1100), 0b1100);
-  eq(setBit(0b1100, 0b1110), 0b1110);
-  eq(setBit(0b1100, 0b1111), 0b1111);
-});
+    eq(checkBit(0b1100, 0b0001), false);
+    eq(checkBit(0b1100, 0b0010), false);
+    eq(checkBit(0b1100, 0b0011), false);
+  });
 
-test("clearBit", () => {
-  eq(clearBit(0b1100, 0b1000), 0b0100);
-  eq(clearBit(0b1100, 0b1100), 0b0000);
-  eq(clearBit(0b1100, 0b1110), 0b0000);
-  eq(clearBit(0b1100, 0b1111), 0b0000);
-});
+  test("setBit", () => {
+    eq(setBit(0b1100, 0b1000), 0b1100);
+    eq(setBit(0b1100, 0b1100), 0b1100);
+    eq(setBit(0b1100, 0b1110), 0b1110);
+    eq(setBit(0b1100, 0b1111), 0b1111);
+  });
 
-test("toggleBit", () => {
-  eq(toggleBit(0b1100, 0b1000), 0b0100);
-  eq(toggleBit(0b1100, 0b1100), 0b0000);
-  eq(toggleBit(0b1100, 0b1110), 0b0010);
-  eq(toggleBit(0b1100, 0b1111), 0b0011);
+  test("clearBit", () => {
+    eq(clearBit(0b1100, 0b1000), 0b0100);
+    eq(clearBit(0b1100, 0b1100), 0b0000);
+    eq(clearBit(0b1100, 0b1110), 0b0000);
+    eq(clearBit(0b1100, 0b1111), 0b0000);
+  });
+
+  test("toggleBit", () => {
+    eq(toggleBit(0b1100, 0b1000), 0b0100);
+    eq(toggleBit(0b1100, 0b1100), 0b0000);
+    eq(toggleBit(0b1100, 0b1110), 0b0010);
+    eq(toggleBit(0b1100, 0b1111), 0b0011);
+  });
+
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

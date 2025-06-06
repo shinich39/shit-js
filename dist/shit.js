@@ -1,5 +1,5 @@
 "use strict";
-var ShitJs = (() => {
+var Shit = (() => {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -18,9 +18,9 @@ var ShitJs = (() => {
   };
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-  // src/index.ts
-  var index_exports = {};
-  __export(index_exports, {
+  // src/shit.ts
+  var shit_exports = {};
+  __export(shit_exports, {
     calcStringSize: () => calcStringSize,
     checkBit: () => checkBit,
     clearBit: () => clearBit,
@@ -732,5 +732,5 @@ var ShitJs = (() => {
     }
     return err;
   }
-  return __toCommonJS(index_exports);
+  return __toCommonJS(shit_exports);
 })();

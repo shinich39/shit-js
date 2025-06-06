@@ -1,83 +1,92 @@
 import fs from "node:fs";
+import path from "node:path";
 import * as esbuild from 'esbuild';
 
-const pkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+// const pkg = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+
+const FILENAME = "shit";
+
 const ESM = true;
 const CJS = true;
 const BROWSER = true;
-const BROWSER_GLOBAL_NAME = "ShitJs";
-const entryPoints = ["./src/index.ts"];
+const BROWSER_GLOBAL_NAME = "Shit";
+
+const ENTRY_POINT = `./src/${FILENAME}.ts`;
+
 // https://esbuild.github.io/api/#external
 const externalPackages = [];
+
 // https://esbuild.github.io/api/#packages
-const bundlePackages = true;
+const bundleExternalPackages = true;
 
 const options = [];
 if (ESM) {
   options.push(
     {
-      entryPoints: entryPoints,
+      entryPoints: [ENTRY_POINT],
       platform: BROWSER ? "browser" : "node",
       format: 'esm',
       bundle: true,
-      outfile: `./dist/index.mjs`,
+      outfile: `./dist/${FILENAME}.mjs`,
       external: externalPackages,
-      ...(bundlePackages ? {} : { packages: "external" }),
+      ...(bundleExternalPackages ? {} : { packages: "external" }),
     },
     {
-      entryPoints: entryPoints,
+      entryPoints: [ENTRY_POINT],
       platform: BROWSER ? "browser" : "node",
       format: 'esm',
       bundle: true,
       minify: true,
-      outfile: `./dist/index.min.mjs`,
+      outfile: `./dist/${FILENAME}.min.mjs`,
       external: externalPackages,
-      ...(bundlePackages ? {} : { packages: "external" }),
+      ...(bundleExternalPackages ? {} : { packages: "external" }),
     },
   );
 }
+
 if (CJS) {
   options.push(
     {
-      entryPoints: entryPoints,
+      entryPoints: [ENTRY_POINT],
       platform: BROWSER ? "browser" : "node",
       format: 'cjs',
       bundle: true,
-      outfile: `./dist/index.cjs`,
+      outfile: `./dist/${FILENAME}.cjs`,
       external: externalPackages,
-      ...(bundlePackages ? {} : { packages: "external" }),
+      ...(bundleExternalPackages ? {} : { packages: "external" }),
     },
     {
-      entryPoints: entryPoints,
+      entryPoints: [ENTRY_POINT],
       platform: BROWSER ? "browser" : "node",
       format: 'cjs',
       bundle: true,
       minify: true,
-      outfile: `./dist/index.min.cjs`,
+      outfile: `./dist/${FILENAME}.min.cjs`,
       external: externalPackages,
-      ...(bundlePackages ? {} : { packages: "external" }),
+      ...(bundleExternalPackages ? {} : { packages: "external" }),
     },
   );
 }
+
 if (BROWSER) {
   options.push(
     {
-      entryPoints: entryPoints,
+      entryPoints: [ENTRY_POINT],
       platform: "browser",
       format: "iife",
       globalName: BROWSER_GLOBAL_NAME,
       bundle: true,
-      outfile: `./dist/index.js`,
+      outfile: `./dist/${FILENAME}.js`,
       external: externalPackages,
     },
     {
-      entryPoints: entryPoints,
+      entryPoints: [ENTRY_POINT],
       platform: "browser",
       format: "iife",
       globalName: BROWSER_GLOBAL_NAME,
       bundle: true,
       minify: true,
-      outfile: `./dist/index.min.js`,
+      outfile: `./dist/${FILENAME}.min.js`,
       external: externalPackages,
     },
   );

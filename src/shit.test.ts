@@ -1,9 +1,17 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { getType } from "./index";
+import path from "node:path";
+import fs from "node:fs";
+import { getType } from "./shit";
 
-test("index", () => {
-  eq(getType([]), "array");
+describe(path.basename(import.meta.filename), () => {
+
+  test("getType", () => {
+
+    eq(getType([]), "array");
+
+  });
+
 });
 
 function eq(a: any, b: any, msg?: string | Error) {
