@@ -50,6 +50,20 @@ export function getModeCount(arr: any[]) {
 export function getModeValue(arr: any[]) {
   return getModeValueWithCount(arr).value;
 }
+export function getAllCombinations<T>(arr: T[]) {
+  const result: T[][] = [];
+  const n = arr.length;
+  for (let i = 1; i < (1 << n); i++) {
+    const combo = [];
+    for (let j = 0; j < n; j++) {
+      if ((i >> j) & 1) {
+        combo.push(arr[j]);
+      }
+    }
+    result.push(combo);
+  }
+  return result;
+}
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  */

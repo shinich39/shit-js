@@ -3,6 +3,7 @@ import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
 import {
+  getAllCombinations,
   getMaxValue,
   getMeanValue,
   getMinValue,
@@ -46,6 +47,10 @@ describe(path.basename(import.meta.filename), () => {
 
   test("getModeCount", () => {
     eq(getModeCount(arr), 2);
+  });
+
+  test("getAllCombinations", () => {
+    eq(getAllCombinations([1,2]), [[1], [2], [1,2]]);
   });
 
   test("shuffleArray", () => {

@@ -11,6 +11,7 @@ export declare function getModeValueWithCount(arr: any[]): {
 };
 export declare function getModeCount(arr: any[]): number | undefined;
 export declare function getModeValue(arr: any[]): any;
+export declare function getAllCombinations<T>(arr: T[]): T[][];
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  */

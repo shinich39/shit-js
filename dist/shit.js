@@ -29,6 +29,7 @@ var Shit = (() => {
     compareString: () => compareString,
     findString: () => findString,
     getAdjustedSize: () => getAdjustedSize,
+    getAllCombinations: () => getAllCombinations,
     getBaseName: () => getBaseName,
     getClampedNumber: () => getClampedNumber,
     getContainedSize: () => getContainedSize,
@@ -116,6 +117,20 @@ var Shit = (() => {
   }
   function getModeValue(arr) {
     return getModeValueWithCount(arr).value;
+  }
+  function getAllCombinations(arr) {
+    const result = [];
+    const n = arr.length;
+    for (let i = 1; i < 1 << n; i++) {
+      const combo = [];
+      for (let j = 0; j < n; j++) {
+        if (i >> j & 1) {
+          combo.push(arr[j]);
+        }
+      }
+      result.push(combo);
+    }
+    return result;
   }
   function shuffleArray(arr) {
     let i = arr.length;
