@@ -62,6 +62,7 @@ __export(shit_exports, {
   joinPaths: () => joinPaths,
   normalizeString: () => normalizeString,
   plotBy: () => plotBy,
+  retry: () => retry,
   setBit: () => setBit,
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
@@ -178,6 +179,22 @@ function plotBy(...args) {
 // src/modules/async.ts
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function retry(func, count, delay) {
+  return async function wrapped(...args) {
+    let error;
+    for (let i = 1; i <= count; i++) {
+      try {
+        return await func(...args);
+      } catch (err) {
+        error = err;
+        if (i < count) {
+          await new Promise((res) => setTimeout(res, delay));
+        }
+      }
+    }
+    throw error;
+  };
 }
 
 // src/modules/bit.ts

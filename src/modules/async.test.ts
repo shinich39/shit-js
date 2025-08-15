@@ -13,6 +13,21 @@ describe(path.basename(import.meta.filename), () => {
     eq(b - a >= 38, true);
   });
 
+  // test("retry", async () => {
+  //   const failure = (message: string) => {
+  //     return new Promise((resolve, reject) => {
+  //       console.log(message);
+  //       reject(new Error("An error occurred"));
+  //     });
+  //   }
+  //   const promise = retry(failure, 3, 256);
+  //   try {
+  //     await promise("GG");
+  //   } catch(err) {
+  //     console.error(err);
+  //   }
+  // });
+
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

@@ -102,6 +102,22 @@ function plotBy(...args) {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+function retry(func, count, delay) {
+  return async function wrapped(...args) {
+    let error;
+    for (let i = 1; i <= count; i++) {
+      try {
+        return await func(...args);
+      } catch (err) {
+        error = err;
+        if (i < count) {
+          await new Promise((res) => setTimeout(res, delay));
+        }
+      }
+    }
+    throw error;
+  };
+}
 
 // src/modules/bit.ts
 function checkBit(a, b) {
@@ -698,6 +714,7 @@ export {
   joinPaths,
   normalizeString,
   plotBy,
+  retry,
   setBit,
   shuffleArray,
   sleep,
