@@ -189,10 +189,8 @@ export function compareString(from: string, to: string) {
     }
   }
 
-  const accuracy = score * 2 / (from.length + to.length);
-
   return {
-    accuracy,
+    accuracy: score * 2 / (from.length + to.length),
     score,
     result: result.reverse(),
   }
