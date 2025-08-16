@@ -574,7 +574,7 @@ function compareString(from, to) {
   const dp = [];
   for (let i2 = 0; i2 < from.length + 1; i2++) {
     dp.push([]);
-    for (let j2 = 0; j2 < from.length + 1; j2++) {
+    for (let j2 = 0; j2 < to.length + 1; j2++) {
       dp[i2][j2] = 0;
     }
   }

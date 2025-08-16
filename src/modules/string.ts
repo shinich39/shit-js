@@ -135,7 +135,7 @@ export function compareString(from: string, to: string) {
   const dp: number[][] = [];
   for (let i = 0; i < from.length + 1; i++) {
     dp.push([]);
-    for (let j = 0; j < from.length + 1; j++) {
+    for (let j = 0; j < to.length + 1; j++) {
       dp[i][j] = 0;
     }
   }
