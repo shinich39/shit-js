@@ -667,7 +667,7 @@ function compareString(from, to) {
     }
   }
   const result = [];
-  let i = from.length, j = to.length;
+  let score = 0, i = from.length, j = to.length;
   while (i > 0 || j > 0) {
     const prev = result[result.length - 1];
     const a = from[i - 1];
@@ -678,6 +678,7 @@ function compareString(from, to) {
       } else {
         result.push([0, a]);
       }
+      score++;
       i--;
       j--;
     } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
@@ -696,7 +697,12 @@ function compareString(from, to) {
       i--;
     }
   }
-  return result.reverse();
+  const accuracy = score * 2 / (from.length + to.length);
+  return {
+    accuracy,
+    score,
+    result: result.reverse()
+  };
 }
 
 // src/modules/type.ts

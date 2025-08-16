@@ -155,7 +155,8 @@ export function compareString(from: string, to: string) {
   // write diffs
   const result: [-1 | 0 | 1, string][] = [];
 
-  let i = from.length,
+  let score = 0,
+    i = from.length,
     j = to.length;
 
   while (i > 0 || j > 0) {
@@ -168,6 +169,7 @@ export function compareString(from: string, to: string) {
       } else {
         result.push([0, a]);
       }
+      score++;
       i--;
       j--;
     } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
@@ -187,5 +189,11 @@ export function compareString(from: string, to: string) {
     }
   }
 
-  return result.reverse();
+  const accuracy = score * 2 / (from.length + to.length);
+
+  return {
+    accuracy,
+    score,
+    result: result.reverse(),
+  }
 }

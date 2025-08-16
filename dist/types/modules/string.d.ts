@@ -27,5 +27,9 @@ export declare function toRegExp(str: string): RegExp;
  *
  * 1: Number of inserted characters
  */
-export declare function compareString(from: string, to: string): [0 | 1 | -1, string][];
+export declare function compareString(from: string, to: string): {
+    accuracy: number;
+    score: number;
+    result: [0 | 1 | -1, string][];
+};
 //# sourceMappingURL=string.d.ts.map

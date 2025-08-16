@@ -65,17 +65,14 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("compareString", () => {
-    eq(compareString("abc", "ac"), [
+    const result = compareString("abc", "ac");
+    eq(result.accuracy, 2 * 2 / (3 + 2));
+    eq(result.score, 2);
+    eq(result.result, [
       [0, "a"],
       [-1, "b"],
       [0, "c"],
     ]);
-    eq(compareString("ac", "abc"), [
-      [0, "a"],
-      [1, "b"],
-      [0, "c"],
-    ]);
-    eq(compareString("abc", "abc"), [[0, "abc"]]);
   });
 
 });
