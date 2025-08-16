@@ -192,6 +192,6 @@ export function compareString(from: string, to: string) {
   return {
     accuracy: score * 2 / (from.length + to.length),
     score,
-    result: result.reverse(),
+    match: result.reverse(),
   }
 }

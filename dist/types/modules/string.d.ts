@@ -30,6 +30,6 @@ export declare function toRegExp(str: string): RegExp;
 export declare function compareString(from: string, to: string): {
     accuracy: number;
     score: number;
-    result: [0 | 1 | -1, string][];
+    match: [0 | 1 | -1, string][];
 };
 //# sourceMappingURL=string.d.ts.map
