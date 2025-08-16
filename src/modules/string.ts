@@ -131,19 +131,14 @@ export function toRegExp(str: string) {
  * 1: Number of inserted characters
  */
 export function compareString(from: string, to: string) {
-  // create a dynamic programming table
-  const dp: number[][] = [];
-  for (let i = 0; i < from.length + 1; i++) {
-    dp.push([]);
-    for (let j = 0; j < to.length + 1; j++) {
-      dp[i][j] = 0;
-    }
-  }
+    // create a dynamic programming table
+  const dp: number[][] = Array.from({ length: from.length + 1 }, () =>
+    Array(to.length + 1).fill(0)
+  );
 
-  // match a to b
+  // fill dp with LCS
   for (let i = 1; i <= from.length; i++) {
     for (let j = 1; j <= to.length; j++) {
-      // 1 more characters in dp
       if (from[i - 1] === to[j - 1]) {
         dp[i][j] = dp[i - 1][j - 1] + 1;
       } else {
@@ -152,18 +147,19 @@ export function compareString(from: string, to: string) {
     }
   }
 
-  // write diffs
+  // backtrack to get diffs
   const result: [-1 | 0 | 1, string][] = [];
-
-  let score = 0,
-    i = from.length,
+  let score = 0;
+  let i = from.length,
     j = to.length;
 
   while (i > 0 || j > 0) {
     const prev = result[result.length - 1];
     const a = from[i - 1];
     const b = to[j - 1];
+
     if (i > 0 && j > 0 && a === b) {
+      // match
       if (prev && prev[0] === 0) {
         prev[1] = a + prev[1];
       } else {
@@ -173,6 +169,7 @@ export function compareString(from: string, to: string) {
       i--;
       j--;
     } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      // insertion
       if (prev && prev[0] === 1) {
         prev[1] = b + prev[1];
       } else {
@@ -180,6 +177,7 @@ export function compareString(from: string, to: string) {
       }
       j--;
     } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+      // deletion
       if (prev && prev[0] === -1) {
         prev[1] = a + prev[1];
       } else {

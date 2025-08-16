@@ -571,13 +571,10 @@ function toRegExp(str) {
   return new RegExp(pattern, flags);
 }
 function compareString(from, to) {
-  const dp = [];
-  for (let i2 = 0; i2 < from.length + 1; i2++) {
-    dp.push([]);
-    for (let j2 = 0; j2 < to.length + 1; j2++) {
-      dp[i2][j2] = 0;
-    }
-  }
+  const dp = Array.from(
+    { length: from.length + 1 },
+    () => Array(to.length + 1).fill(0)
+  );
   for (let i2 = 1; i2 <= from.length; i2++) {
     for (let j2 = 1; j2 <= to.length; j2++) {
       if (from[i2 - 1] === to[j2 - 1]) {
@@ -588,7 +585,8 @@ function compareString(from, to) {
     }
   }
   const result = [];
-  let score = 0, i = from.length, j = to.length;
+  let score = 0;
+  let i = from.length, j = to.length;
   while (i > 0 || j > 0) {
     const prev = result[result.length - 1];
     const a = from[i - 1];
