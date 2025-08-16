@@ -154,18 +154,17 @@ export function compareString(from: string, to: string) {
     j = to.length;
 
   let currentType: -1 | 0 | 1 | null = null;
-  let buffer = "";
+  let buffer: string[] = [];
 
   const flush = function() {
-    if (currentType !== null && buffer) {
-      result.push([currentType, buffer.split("").reverse().join("")]);
+    if (currentType !== null && buffer.length > 0) {
+      result.push([currentType, buffer.reverse().join("")]);
     }
     currentType = null;
-    buffer = "";
+    buffer = [];
   }
 
   while (i > 0 || j > 0) {
-    const prev = result[result.length - 1];
     const a = from[i - 1];
     const b = to[j - 1];
 
@@ -175,7 +174,7 @@ export function compareString(from: string, to: string) {
         flush();
       }
       currentType = 0;
-      buffer += a;
+      buffer.push(a);
       score++;
       i--;
       j--;
@@ -185,15 +184,15 @@ export function compareString(from: string, to: string) {
         flush();
       }
       currentType = 1;
-      buffer += b;
+      buffer.push(b);
       j--;
-    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+    } else if (i > 0) {
       // deletion
       if (currentType !== -1) {
         flush();
       }
       currentType = -1;
-      buffer += a;
+      buffer.push(a);
       i--;
     }
   }

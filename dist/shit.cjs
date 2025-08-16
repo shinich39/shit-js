@@ -667,16 +667,15 @@ function compareString(from, to) {
   let score = 0;
   let i = from.length, j = to.length;
   let currentType = null;
-  let buffer = "";
+  let buffer = [];
   const flush = function() {
-    if (currentType !== null && buffer) {
-      result.push([currentType, buffer.split("").reverse().join("")]);
+    if (currentType !== null && buffer.length > 0) {
+      result.push([currentType, buffer.reverse().join("")]);
     }
     currentType = null;
-    buffer = "";
+    buffer = [];
   };
   while (i > 0 || j > 0) {
-    const prev = result[result.length - 1];
     const a = from[i - 1];
     const b = to[j - 1];
     if (i > 0 && j > 0 && a === b) {
@@ -684,7 +683,7 @@ function compareString(from, to) {
         flush();
       }
       currentType = 0;
-      buffer += a;
+      buffer.push(a);
       score++;
       i--;
       j--;
@@ -693,14 +692,14 @@ function compareString(from, to) {
         flush();
       }
       currentType = 1;
-      buffer += b;
+      buffer.push(b);
       j--;
-    } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+    } else if (i > 0) {
       if (currentType !== -1) {
         flush();
       }
       currentType = -1;
-      buffer += a;
+      buffer.push(a);
       i--;
     }
   }
