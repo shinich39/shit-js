@@ -666,35 +666,45 @@ function compareString(from, to) {
   const result = [];
   let score = 0;
   let i = from.length, j = to.length;
+  let currentType = null;
+  let buffer = "";
+  const flush = function() {
+    if (currentType !== null && buffer) {
+      result.push([currentType, buffer.split("").reverse().join("")]);
+    }
+    currentType = null;
+    buffer = "";
+  };
   while (i > 0 || j > 0) {
     const prev = result[result.length - 1];
     const a = from[i - 1];
     const b = to[j - 1];
     if (i > 0 && j > 0 && a === b) {
-      if (prev && prev[0] === 0) {
-        prev[1] = a + prev[1];
-      } else {
-        result.push([0, a]);
+      if (currentType !== 0) {
+        flush();
       }
+      currentType = 0;
+      buffer += a;
       score++;
       i--;
       j--;
     } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      if (prev && prev[0] === 1) {
-        prev[1] = b + prev[1];
-      } else {
-        result.push([1, b]);
+      if (currentType !== 1) {
+        flush();
       }
+      currentType = 1;
+      buffer += b;
       j--;
     } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
-      if (prev && prev[0] === -1) {
-        prev[1] = a + prev[1];
-      } else {
-        result.push([-1, a]);
+      if (currentType !== -1) {
+        flush();
       }
+      currentType = -1;
+      buffer += a;
       i--;
     }
   }
+  flush();
   return {
     accuracy: score * 2 / (from.length + to.length),
     score,

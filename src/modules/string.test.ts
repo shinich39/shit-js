@@ -65,13 +65,20 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("compareString", () => {
-    const result = compareString("abc", "ac");
-    eq(result.accuracy, 2 * 2 / (3 + 2));
-    eq(result.score, 2);
+    const result = compareString(
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "sit amet"
+    );
+    eq(result.accuracy, 0.25);
+    eq(result.score, 8);
     eq(result.match, [
-      [0, "a"],
-      [-1, "b"],
-      [0, "c"],
+      [ -1, 'Lorem ipsum dolor ' ],
+      [ 0, 'sit am' ],
+      [ -1, 'et, consectetur adipiscing ' ],
+      [ 0, 'e' ],
+      [ -1, 'li' ],
+      [ 0, 't' ],
+      [ -1, '.' ]
     ]);
   });
 
