@@ -707,9 +707,7 @@ var Shit = (() => {
     return {
       accuracy: score * 2 / (from.length + to.length),
       score,
-      match: result.reverse(),
-      from,
-      to
+      match: result.reverse()
     };
   }
 

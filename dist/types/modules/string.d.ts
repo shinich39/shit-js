@@ -31,7 +31,5 @@ export declare function compareString(from: string, to: string): {
     accuracy: number;
     score: number;
     match: [0 | 1 | -1, string][];
-    from: string;
-    to: string;
 };
 //# sourceMappingURL=string.d.ts.map
