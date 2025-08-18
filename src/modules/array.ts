@@ -50,6 +50,7 @@ export function getModeCount(arr: any[]) {
 export function getModeValue(arr: any[]) {
   return getModeValueWithCount(arr).value;
 }
+
 export function getAllCombinations<T>(arr: T[]) {
   const result: T[][] = [];
   const n = arr.length;
