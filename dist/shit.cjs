@@ -26,6 +26,7 @@ __export(shit_exports, {
   clone: () => clone,
   compareObject: () => compareObject,
   compareString: () => compareString,
+  debounce: () => debounce,
   findString: () => findString,
   getAdjustedSize: () => getAdjustedSize,
   getAllCombinations: () => getAllCombinations,
@@ -209,6 +210,13 @@ function retry(func, count, delay) {
       }
     }
     throw error;
+  };
+}
+function debounce(func, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
   };
 }
 

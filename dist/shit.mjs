@@ -132,6 +132,13 @@ function retry(func, count, delay) {
     throw error;
   };
 }
+function debounce(func, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+}
 
 // src/modules/bit.ts
 function checkBit(a, b) {
@@ -704,6 +711,7 @@ export {
   clone,
   compareObject,
   compareString,
+  debounce,
   findString,
   getAdjustedSize,
   getAllCombinations,

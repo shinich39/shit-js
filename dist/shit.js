@@ -27,6 +27,7 @@ var Shit = (() => {
     clone: () => clone,
     compareObject: () => compareObject,
     compareString: () => compareString,
+    debounce: () => debounce,
     findString: () => findString,
     getAdjustedSize: () => getAdjustedSize,
     getAllCombinations: () => getAllCombinations,
@@ -209,6 +210,13 @@ var Shit = (() => {
         }
       }
       throw error;
+    };
+  }
+  function debounce(func, delay) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
     };
   }
 
