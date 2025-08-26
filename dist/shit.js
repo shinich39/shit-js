@@ -40,6 +40,8 @@ var Shit = (() => {
     getFileName: () => getFileName,
     getFloats: () => getFloats,
     getInts: () => getInts,
+    getLengthFromFloat: () => getLengthFromFloat,
+    getLengthFromInt: () => getLengthFromInt,
     getLoopedNumber: () => getLoopedNumber,
     getMaxValue: () => getMaxValue,
     getMeanValue: () => getMeanValue,
@@ -240,6 +242,12 @@ var Shit = (() => {
   }
   function getRandomInt(min, max) {
     return Math.floor(getRandomFloat(min, max));
+  }
+  function getLengthFromInt(num) {
+    return Math.log(num) * Math.LOG10E + 1 | 0;
+  }
+  function getLengthFromFloat(num) {
+    return ("" + num).replace(".", "").length;
   }
   function getRandomSeed(seed) {
     let t = seed += 1831565813;

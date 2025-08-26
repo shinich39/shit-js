@@ -161,6 +161,12 @@ function getRandomFloat(min, max) {
 function getRandomInt(min, max) {
   return Math.floor(getRandomFloat(min, max));
 }
+function getLengthFromInt(num) {
+  return Math.log(num) * Math.LOG10E + 1 | 0;
+}
+function getLengthFromFloat(num) {
+  return ("" + num).replace(".", "").length;
+}
 function getRandomSeed(seed) {
   let t = seed += 1831565813;
   t = Math.imul(t ^ t >>> 15, t | 1);
@@ -724,6 +730,8 @@ export {
   getFileName,
   getFloats,
   getInts,
+  getLengthFromFloat,
+  getLengthFromInt,
   getLoopedNumber,
   getMaxValue,
   getMeanValue,

@@ -15,6 +15,8 @@ import {
   getRandomSeed,
   getRandomInt,
   getRandomFloat,
+  getLengthFromInt,
+  getLengthFromFloat,
 } from "./number";
 
 describe(path.basename(import.meta.filename), () => {
@@ -27,6 +29,16 @@ describe(path.basename(import.meta.filename), () => {
   test("getRandomInt", () => {
     eq(getRandomInt(0, 1) < 1, true);
     eq(getRandomInt(0, 1) >= 0, true);
+  });
+
+  test("getRandomInt", () => {
+    eq(getLengthFromInt(1), 1);
+    eq(getLengthFromInt(10), 2);
+    eq(getLengthFromInt(100), 3);
+    eq(getLengthFromFloat(1), 1);
+    eq(getLengthFromFloat(10), 2);
+    eq(getLengthFromFloat(100), 3);
+    eq(getLengthFromFloat(100.1), 4);
   });
 
   test("getRandomSeed", () => {

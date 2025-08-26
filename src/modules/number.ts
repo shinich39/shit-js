@@ -10,6 +10,14 @@ export function getRandomFloat(min: number, max: number) {
 export function getRandomInt(min: number, max: number) {
   return Math.floor(getRandomFloat(min, max));
 }
+
+export function getLengthFromInt(num: number) {
+  return Math.log(num) * Math.LOG10E + 1 | 0;
+}
+
+export function getLengthFromFloat(num: number) {
+  return ("" + num).replace(".", "").length;
+}
 /**
  * mulberry32 PRNG (Pseudo Random Number Generator)
  * 

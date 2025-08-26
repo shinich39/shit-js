@@ -6,6 +6,8 @@ export declare function getRandomFloat(min: number, max: number): number;
  * @returns min <= n < max
  */
 export declare function getRandomInt(min: number, max: number): number;
+export declare function getLengthFromInt(num: number): number;
+export declare function getLengthFromFloat(num: number): number;
 /**
  * mulberry32 PRNG (Pseudo Random Number Generator)
  *
