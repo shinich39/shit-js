@@ -12,9 +12,10 @@ import {
   getAdjustedSize,
   toFileSize,
   toBytes,
-  getRandomSeed,
   getRandomInt,
+  getRandomIntWithSeed,
   getRandomFloat,
+  getRandomFloatWithSeed,
   getLengthFromInt,
   getLengthFromFloat,
 } from "./number";
@@ -26,12 +27,24 @@ describe(path.basename(import.meta.filename), () => {
     eq(getRandomFloat(0, 1) >= 0, true);
   });
 
+  test("getRandomFloatWithSeed", () => {
+    eq(getRandomFloatWithSeed(0, 1, 0), 0.26642920868471265);
+    eq(getRandomFloatWithSeed(0, 1, 10), 0.5019920116756111);
+    eq(getRandomFloatWithSeed(0, 1, 100), 0.2043598669115454);
+  });
+
   test("getRandomInt", () => {
     eq(getRandomInt(0, 1) < 1, true);
     eq(getRandomInt(0, 1) >= 0, true);
   });
 
-  test("getRandomInt", () => {
+  test("getRandomIntWithSeed", () => {
+    eq(getRandomIntWithSeed(0, 10, 0), 2);
+    eq(getRandomIntWithSeed(0, 10, 10), 5);
+    eq(getRandomIntWithSeed(0, 10, 100), 2);
+  });
+
+  test("getLengthFromInt", () => {
     eq(getLengthFromInt(1), 1);
     eq(getLengthFromInt(10), 2);
     eq(getLengthFromInt(100), 3);
@@ -39,15 +52,6 @@ describe(path.basename(import.meta.filename), () => {
     eq(getLengthFromFloat(10), 2);
     eq(getLengthFromFloat(100), 3);
     eq(getLengthFromFloat(100.1), 4);
-  });
-
-  test("getRandomSeed", () => {
-    for (let i = 0; i < 10; i++) {
-      const seed = 12345 * Math.random() * 10;
-      const a = getRandomSeed(seed);
-      const b = getRandomSeed(seed);
-      eq(a, b);
-    }
   });
 
   test("getClampedNumber", () => {

@@ -3,17 +3,23 @@
  */
 export declare function getRandomFloat(min: number, max: number): number;
 /**
+ * mulberry32 PRNG
+ *
+ * @returns min <= n < max
+ */
+export declare function getRandomFloatWithSeed(min: number, max: number, seed: number): number;
+/**
  * @returns min <= n < max
  */
 export declare function getRandomInt(min: number, max: number): number;
+/**
+ * mulberry32 PRNG
+ *
+ * @returns min <= n < max
+ */
+export declare function getRandomIntWithSeed(min: number, max: number, seed: number): number;
 export declare function getLengthFromInt(num: number): number;
 export declare function getLengthFromFloat(num: number): number;
-/**
- * mulberry32 PRNG (Pseudo Random Number Generator)
- *
- * https://github.com/cprosche/mulberry32
- */
-export declare function getRandomSeed(seed: number): number;
 /**
  * @returns min <= n <= max
  */

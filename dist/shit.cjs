@@ -51,8 +51,9 @@ __export(shit_exports, {
   getObjectValue: () => getObjectValue,
   getRandomChar: () => getRandomChar,
   getRandomFloat: () => getRandomFloat,
+  getRandomFloatWithSeed: () => getRandomFloatWithSeed,
   getRandomInt: () => getRandomInt,
-  getRandomSeed: () => getRandomSeed,
+  getRandomIntWithSeed: () => getRandomIntWithSeed,
   getRandomString: () => getRandomString,
   getRelativePath: () => getRelativePath,
   getRootPath: () => getRootPath,
@@ -237,23 +238,29 @@ function toggleBit(a, b) {
 }
 
 // src/modules/number.ts
+function mulberry32(seed) {
+  let t = seed += 1831565813;
+  t = Math.imul(t ^ t >>> 15, t | 1);
+  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+  return ((t ^ t >>> 14) >>> 0) / 4294967296;
+}
 function getRandomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
+function getRandomFloatWithSeed(min, max, seed) {
+  return mulberry32(seed) * (max - min) + min;
+}
 function getRandomInt(min, max) {
   return Math.floor(getRandomFloat(min, max));
+}
+function getRandomIntWithSeed(min, max, seed) {
+  return Math.floor(getRandomFloatWithSeed(min, max, seed));
 }
 function getLengthFromInt(num) {
   return Math.log(num) * Math.LOG10E + 1 | 0;
 }
 function getLengthFromFloat(num) {
   return ("" + num).replace(".", "").length;
-}
-function getRandomSeed(seed) {
-  let t = seed += 1831565813;
-  t = Math.imul(t ^ t >>> 15, t | 1);
-  t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-  return ((t ^ t >>> 14) >>> 0) / 4294967296;
 }
 function getClampedNumber(num, min, max) {
   return Math.min(max, Math.max(num, min));

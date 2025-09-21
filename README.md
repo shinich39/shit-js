@@ -8,7 +8,7 @@ God breathe on me
 
 - npm
 
-```console
+```sh
 npm install github:shinich39/shit-js
 ```
 
@@ -25,7 +25,7 @@ import * as shit from "shit-js";
 ```html
 <script src="./dist/index.js"></script>
 <script>
-  const { } = window.Shit;
+  const { ... } = window.Shit;
 </script>
 ```
 
