@@ -1,7 +1,13 @@
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
+/**
+ * @example
+ * const func = await function(arg: any) => arg;
+ * const wrappedFunc = retry(func, 10, 1000);
+ * const result = await wrappedFunc(1);
+ * console.log(result); // 1
+ */
 export function retry<T extends (...args: any[]) => any>(
   func: T,
   count: number,
@@ -28,7 +34,7 @@ export function retry<T extends (...args: any[]) => any>(
 }
 /**
  * @example
- * input.addEventListener("input", debounce((e) => ..., 100));
+ * input.addEventListener("input", debounce((e) => { ... }, 100));
  */
 export function debounce(
   func: (...args: any[]) => any,
