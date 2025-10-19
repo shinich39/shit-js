@@ -1,56 +1,78 @@
+/**
+ * @example
+ * const result = getMaxValue([1,2,3]); // 3
+ */
 export function getMaxValue(arr: number[]) {
   return arr.reduce((acc, cur) => {
     return acc > cur ? acc : cur;
   }, Number.MIN_SAFE_INTEGER);
 }
-
+/**
+ * @example
+ * const result = getMinValue([1,2,3]); // 1
+ */
 export function getMinValue(arr: number[]) {
   return arr.reduce((acc, cur) => {
     return acc < cur ? acc : cur;
   }, Number.MAX_SAFE_INTEGER);
 }
-
+/**
+ * @example
+ * const result = getSumValue([1,2,3]); // 6
+ */
 export function getSumValue(arr: number[]) {
   return arr.reduce((acc, cur) => acc + cur, 0);
 }
-
+/**
+ * @example
+ * const result = getMeanValue([1,2,3]); // 2
+ */
 export function getMeanValue(arr: number[]) {
   return arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
 }
-
-export function getModeValueWithCount(arr: any[]) {
+/**
+ * @example
+ * const result = getModeValueWithCount(["a", "a", "b"]); // { count: 2, value: "a" }
+ */
+export function getModeValueWithCount<T>(arr: T[]) {
   if (arr.length === 0) {
-    return {
-      count: undefined,
-      value: undefined,
-    };
+    return;
   }
 
-  const seen: Record<string, number> = {};
+  const seen = new Map<T, number>();
 
-  let value,
-    count = 0;
+  let maxValue, maxCount = 0;
 
-  for (const item of arr) {
-    seen[item] = seen[item] ? seen[item] + 1 : 1;
+  for (const v of arr) {
+    const c = (seen.get(v) || 0) + 1;
+    seen.set(v, c);
 
-    if (count < seen[item]) {
-      count = seen[item];
-      value = item;
+    if (maxCount < c) {
+      maxCount = c;
+      maxValue = v;
     }
   }
 
-  return { count, value };
+  return { count: maxCount, value: maxValue };
 }
-
-export function getModeCount(arr: any[]) {
-  return getModeValueWithCount(arr).count;
+/**
+ * @example
+ * const result = getModeCount(["a", "a", "b"]); // 2
+ */
+export function getModeCount<T>(arr: T[]) {
+  return getModeValueWithCount(arr)?.count || 0;
 }
-
-export function getModeValue(arr: any[]) {
-  return getModeValueWithCount(arr).value;
+/**
+ * @example
+ * const result = getModeValue(["a", "a", "b"]); // "a"
+ */
+export function getModeValue<T>(arr: T[]) {
+  return getModeValueWithCount(arr)?.value;
 }
-
+/**
+ * @example
+ * const result = getAllCombinations([1,2]); // [[1], [2], [1,2]]
+ */
 export function getAllCombinations<T>(arr: T[]) {
   const result: T[][] = [];
   const n = arr.length;
@@ -67,6 +89,9 @@ export function getAllCombinations<T>(arr: T[]) {
 }
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * 
+ * @example
+ * const result = shuffleArray([1,2,3]); // [2, 1, 3]
  */
 export function shuffleArray<T>(arr: T[]) {
   let i = arr.length;
@@ -81,7 +106,10 @@ export function shuffleArray<T>(arr: T[]) {
 
   return arr;
 }
-
+/**
+ * @example
+ * const result = uniqueBy([1,2,2,3], (item) => item); // [1,2,3]
+ */
 export function uniqueBy<T>(
   arr: T[],
   func: (item: T, index: number, array: T[]) => any
@@ -98,7 +126,10 @@ export function uniqueBy<T>(
 
   return Array.from(map.values()) as T[];
 }
-
+/**
+ * @example
+ * const result = groupBy([1,2,2,3], (item) => item); // { 1: [1], 2: [2,2], 3: [3,3]}
+ */
 export function groupBy<T>(
   arr: T[],
   func: (item: T, index: number, array: T[]) => string
@@ -115,24 +146,27 @@ export function groupBy<T>(
   }
   return group;
 }
-
-export function plotBy(...args: any[][]): number[][] {
+/**
+ * @example
+ * const result = plotBy(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
+ */
+export function plotBy<T>(...args: T[][]): T[][] {
   if (args.length === 0) {
     return [];
   }
 
   const indexes: number[] = Array(args.length).fill(0);
+  const result: T[][] = [[]];
 
-  const result: number[][] = [[]];
-
+  // create first plot
   for (let i = 0; i < args.length; i++) {
     if (args[i].length === 0) {
       throw new Error(`Invalid argument: argument cannot be empty`);
     }
 
-    // create first plot
     // append first item of arrays
-    result[0].push(indexes[i]);
+    const item = args[i][indexes[i]];
+    result[0].push(item);
   }
 
   let i = args.length - 1;
@@ -141,8 +175,8 @@ export function plotBy(...args: any[][]): number[][] {
       // increase index
       indexes[i] += 1;
 
-      // store indexes
-      result.push(args.map((arg, idx) => indexes[idx]));
+      // store values
+      result.push(args.map((arg, idx) => arg[indexes[idx]]));
 
       i = args.length - 1;
     } else {

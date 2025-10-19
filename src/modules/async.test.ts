@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import { sleep } from "./async";
+import { QueueWorker, sleep } from "./async";
 
 describe(path.basename(import.meta.filename), () => {
 
@@ -28,6 +28,16 @@ describe(path.basename(import.meta.filename), () => {
   //   }
   // });
 
+  // test("QueueWorker", async () => {
+  //   const worker = new QueueWorker();
+  //   for (let i = 0; i < 3; i++) {
+  //     worker.add(async () => {
+  //       await sleep(1000);
+  //       const isEnd = worker.queue.length === 0;
+  //       console.log(`Task ${i}, isEnd: ${isEnd}`);
+  //     });
+  //   }
+  // });
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

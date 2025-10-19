@@ -19,17 +19,27 @@ export declare function normalizeString(str: string): string;
  */
 export declare function toRegExp(str: string): RegExp;
 /**
- * analyze diff between two strings
+ * myers Algorithm
  *
- * \-1: Number of deleted characters
+ * \-1: number of deleted characters
  *
- * 0: Number of matched characters
+ * 0: number of matched characters
  *
- * 1: Number of inserted characters
+ * 1: number of inserted characters
+ *
+ * @example
+ * const result = compareString("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export declare function compareString(from: string, to: string): {
-    accuracy: number;
-    score: number;
-    match: [0 | 1 | -1, string][];
+export declare function compareString(from: string, to: string): [0 | 1 | -1, string][];
+export declare function matchStrings(from: string, to: string): {
+    matchRate: number;
+    similarity: number;
+    diceSimilarity: number;
+    jaccardSimilarity: number;
+    distance: number;
+    normalizedDistance: number;
+    matches: number;
+    insertions: number;
+    deletions: number;
 };
 //# sourceMappingURL=string.d.ts.map

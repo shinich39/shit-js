@@ -20,6 +20,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/shit.ts
 var shit_exports = {};
 __export(shit_exports, {
+  QueueWorker: () => QueueWorker,
   calcStringSize: () => calcStringSize,
   checkBit: () => checkBit,
   clearBit: () => clearBit,
@@ -65,6 +66,7 @@ __export(shit_exports, {
   humanizeFileSize: () => humanizeFileSize,
   isNumeric: () => isNumeric,
   joinPaths: () => joinPaths,
+  matchStrings: () => matchStrings,
   normalizeString: () => normalizeString,
   plotBy: () => plotBy,
   retry: () => retry,
@@ -100,27 +102,25 @@ function getMeanValue(arr) {
 }
 function getModeValueWithCount(arr) {
   if (arr.length === 0) {
-    return {
-      count: void 0,
-      value: void 0
-    };
+    return;
   }
-  const seen = {};
-  let value, count = 0;
-  for (const item of arr) {
-    seen[item] = seen[item] ? seen[item] + 1 : 1;
-    if (count < seen[item]) {
-      count = seen[item];
-      value = item;
+  const seen = /* @__PURE__ */ new Map();
+  let maxValue, maxCount = 0;
+  for (const v of arr) {
+    const c = (seen.get(v) || 0) + 1;
+    seen.set(v, c);
+    if (maxCount < c) {
+      maxCount = c;
+      maxValue = v;
     }
   }
-  return { count, value };
+  return { count: maxCount, value: maxValue };
 }
 function getModeCount(arr) {
-  return getModeValueWithCount(arr).count;
+  return getModeValueWithCount(arr)?.count || 0;
 }
 function getModeValue(arr) {
-  return getModeValueWithCount(arr).value;
+  return getModeValueWithCount(arr)?.value;
 }
 function getAllCombinations(arr) {
   const result = [];
@@ -177,13 +177,14 @@ function plotBy(...args) {
     if (args[i2].length === 0) {
       throw new Error(`Invalid argument: argument cannot be empty`);
     }
-    result[0].push(indexes[i2]);
+    const item = args[i2][indexes[i2]];
+    result[0].push(item);
   }
   let i = args.length - 1;
   while (true) {
     if (indexes[i] < args[i].length - 1) {
       indexes[i] += 1;
-      result.push(args.map((arg, idx) => indexes[idx]));
+      result.push(args.map((arg, idx) => arg[indexes[idx]]));
       i = args.length - 1;
     } else {
       indexes[i] = 0;
@@ -222,6 +223,25 @@ function debounce(func, delay) {
     timer = setTimeout(() => func(...args), delay);
   };
 }
+var QueueWorker = class {
+  constructor() {
+    this.inProgress = false;
+    this.queue = [];
+  }
+  add(func) {
+    this.queue.push(func);
+    if (!this.inProgress) {
+      this.run();
+    }
+  }
+  async run() {
+    this.inProgress = true;
+    while (this.queue.length > 0) {
+      await this.queue.shift()();
+    }
+    this.inProgress = false;
+  }
+};
 
 // src/modules/bit.ts
 function checkBit(a, b) {
@@ -292,15 +312,15 @@ function calcStringSize(str) {
   }
   return result;
 }
-function toBytes(num, format) {
+function toBytes(bytes, format) {
   if (format === "Bytes") {
-    return num;
+    return bytes;
   }
   const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
   if (i === -1) {
     throw new Error(`Invalid argument: ${format} is not supported format`);
   }
-  return num * Math.pow(1024, i + 1);
+  return bytes * Math.pow(1024, i + 1);
 }
 function toFileSize(bytes, format) {
   if (format === "Bytes") {
@@ -321,18 +341,18 @@ function humanizeFileSize(num, format) {
   const size = (bytes / Math.pow(1024, i)).toFixed(2);
   return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
 }
-function getContainedSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
-  const aspectRatio = sourceWidth / sourceHeight;
-  return aspectRatio < destinationWidth / destinationHeight ? [destinationHeight * aspectRatio, destinationHeight] : [destinationWidth, destinationWidth / aspectRatio];
+function getContainedSize(srcWidth, srcHeight, dstWidth, dstHeight) {
+  const aspectRatio = srcWidth / srcHeight;
+  return aspectRatio < dstWidth / dstHeight ? [dstHeight * aspectRatio, dstHeight] : [dstWidth, dstWidth / aspectRatio];
 }
-function getCoveredSize(sourceWidth, sourceHeight, destinationWidth, destinationHeight) {
-  const aspectRatio = sourceWidth / sourceHeight;
-  return aspectRatio < destinationWidth / destinationHeight ? [destinationWidth, destinationWidth / aspectRatio] : [destinationHeight * aspectRatio, destinationHeight];
+function getCoveredSize(srcWidth, srcHeight, dstWidth, dstHeight) {
+  const aspectRatio = srcWidth / srcHeight;
+  return aspectRatio < dstWidth / dstHeight ? [dstWidth, dstWidth / aspectRatio] : [dstHeight * aspectRatio, dstHeight];
 }
-function getAdjustedSize(sourceWidth, sourceHeight, maxWidth, maxHeight, minWidth, minHeight) {
-  const aspectRatio = sourceWidth / sourceHeight;
-  let w = sourceWidth;
-  let h = sourceHeight;
+function getAdjustedSize(srcWidth, srcHeight, maxWidth, maxHeight, minWidth, minHeight) {
+  const aspectRatio = srcWidth / srcHeight;
+  let w = srcWidth;
+  let h = srcHeight;
   if (w > maxWidth) {
     w = maxWidth;
     h = maxWidth / aspectRatio;
@@ -673,64 +693,114 @@ function toRegExp(str) {
   return new RegExp(pattern, flags);
 }
 function compareString(from, to) {
-  const dp = Array.from(
-    { length: from.length + 1 },
-    () => Array(to.length + 1).fill(0)
-  );
-  for (let i2 = 1; i2 <= from.length; i2++) {
-    for (let j2 = 1; j2 <= to.length; j2++) {
-      if (from[i2 - 1] === to[j2 - 1]) {
-        dp[i2][j2] = dp[i2 - 1][j2 - 1] + 1;
+  const backtrack = function(from2, to2, trace2, d) {
+    const result = [];
+    let x = from2.length;
+    let y = to2.length;
+    const max2 = from2.length + to2.length;
+    let currentOp = null;
+    let currentStr = "";
+    const push = (op, char) => {
+      if (currentOp === op) {
+        currentStr = char + currentStr;
       } else {
-        dp[i2][j2] = Math.max(dp[i2 - 1][j2], dp[i2][j2 - 1]);
+        if (currentOp !== null && currentStr) {
+          result.push([currentOp, currentStr]);
+        }
+        currentOp = op;
+        currentStr = char;
+      }
+    };
+    for (let depth = d; depth >= 0; depth--) {
+      const v2 = trace2[depth];
+      const k = x - y;
+      let prevK;
+      if (k === -depth || k !== depth && v2[k - 1 + max2] < v2[k + 1 + max2]) {
+        prevK = k + 1;
+      } else {
+        prevK = k - 1;
+      }
+      const prevX = v2[prevK + max2];
+      const prevY = prevX - prevK;
+      while (x > prevX && y > prevY) {
+        x--;
+        y--;
+        push(0, from2[x]);
+      }
+      if (depth === 0) break;
+      if (x === prevX) {
+        y--;
+        push(1, to2[y]);
+      } else {
+        x--;
+        push(-1, from2[x]);
       }
     }
-  }
-  const result = [];
-  let score = 0;
-  let i = from.length, j = to.length;
-  let currentType = null;
-  let buffer = [];
-  const flush = function() {
-    if (currentType !== null && buffer.length > 0) {
-      result.push([currentType, buffer.reverse().join("")]);
+    if (currentOp !== null && currentStr) {
+      result.push([currentOp, currentStr]);
     }
-    currentType = null;
-    buffer = [];
+    return result.reverse();
   };
-  while (i > 0 || j > 0) {
-    const a = from[i - 1];
-    const b = to[j - 1];
-    if (i > 0 && j > 0 && a === b) {
-      if (currentType !== 0) {
-        flush();
+  const n = from.length;
+  const m = to.length;
+  const max = n + m;
+  const v = Array(2 * max + 1).fill(0);
+  const trace = [];
+  for (let d = 0; d <= max; d++) {
+    trace.push([...v]);
+    for (let k = -d; k <= d; k += 2) {
+      let x;
+      if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+        x = v[k + 1 + max];
+      } else {
+        x = v[k - 1 + max] + 1;
       }
-      currentType = 0;
-      buffer.push(a);
-      score++;
-      i--;
-      j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      if (currentType !== 1) {
-        flush();
+      let y = x - k;
+      while (x < n && y < m && from[x] === to[y]) {
+        x++;
+        y++;
       }
-      currentType = 1;
-      buffer.push(b);
-      j--;
-    } else if (i > 0) {
-      if (currentType !== -1) {
-        flush();
+      v[k + max] = x;
+      if (x >= n && y >= m) {
+        return backtrack(from, to, trace, d);
       }
-      currentType = -1;
-      buffer.push(a);
-      i--;
     }
   }
-  flush();
+  return [];
+}
+function matchStrings(from, to) {
+  const diff = compareString(from, to);
+  let matches = 0;
+  let insertions = 0;
+  let deletions = 0;
+  for (const [op, str] of diff) {
+    const len = str.length;
+    if (op === 0) {
+      matches += len;
+    } else if (op === 1) {
+      insertions += len;
+    } else {
+      deletions += len;
+    }
+  }
+  const totalOperations = matches + insertions + deletions;
   return {
-    accuracy: score * 2 / (from.length + to.length),
-    score,
-    match: result.reverse()
+    // proportion of matching characters
+    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
+    // similarity based on longer string
+    similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
+    // sørensen-dice similarity coefficient
+    diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
+    // jaccard similarity coefficient
+    jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
+    // levenshtein distance (edit distance)
+    distance: insertions + deletions,
+    // Normalized edit distance (0 = identical, 1 = completely different)
+    normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
+    // detailed counts
+    matches,
+    insertions,
+    deletions
   };
 }
 

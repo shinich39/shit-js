@@ -1,3 +1,7 @@
+/**
+ * @example
+ * await sleep(1000); // 1s
+ */
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -45,4 +49,37 @@ export function debounce(
     clearTimeout(timer);
     timer = setTimeout(() => func(...args), delay);
   };
+}
+/**
+ * @example
+ * const worker = new QueueWorker();
+ * worker.add(() => console.log('Task 1'));
+ * worker.add(async () => {
+ *   await fetch('/api/data');
+ *   console.log('Task 2');
+ * });
+ */
+export class QueueWorker {
+  inProgress: boolean;
+  queue: (() => void | Promise<void>)[];
+
+  constructor() {
+    this.inProgress = false;
+    this.queue = [];
+  }
+
+  add(func: () => void | Promise<void>): void {
+    this.queue.push(func);
+    if (!this.inProgress) {
+      this.run();
+    }
+  }
+
+  async run(): Promise<void> {
+    this.inProgress = true;
+    while(this.queue.length > 0) {
+      await this.queue.shift()!();
+    }
+    this.inProgress = false;
+  }
 }

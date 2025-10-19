@@ -11,6 +11,7 @@ import {
   getRandomString,
   getUUID,
   getXORString,
+  matchStrings,
   normalizeString,
   toRegExp,
 } from "./string";
@@ -65,23 +66,38 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("compareString", () => {
-    const result = compareString(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "sit amet"
-    );
-    eq(result.accuracy, 0.25);
-    eq(result.score, 8);
-    eq(result.match, [
-      [ -1, 'Lorem ipsum dolor ' ],
-      [ 0, 'sit am' ],
-      [ -1, 'et, consectetur adipiscing ' ],
-      [ 0, 'e' ],
-      [ -1, 'li' ],
-      [ 0, 't' ],
-      [ -1, '.' ]
+    const b = "sit amet, adipiscing";
+    const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+    const result = compareString(a, b);
+
+    eq(result, [
+      [ -1, 'Lorem ip' ],
+      [ 0, 's' ],
+      [ -1, 'um dolor s' ],
+      [ 0, 'it amet, ' ],
+      [ -1, 'consectetur ' ],
+      [ 0, 'adipiscing' ],
+      [ -1, ' elit.' ]
     ]);
   });
 
+  test("matchStrings", () => {
+    const b = "sit amet, adipiscing";
+    const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+    const result = matchStrings(a, b);
+
+    eq(result, {
+      matchRate: 0.35714285714285715,
+      similarity: 0.35714285714285715,
+      diceSimilarity: 0.5263157894736842,
+      jaccardSimilarity: 0.35714285714285715,
+      distance: 36,
+      normalizedDistance: 0.6428571428571429,
+      matches: 20,
+      insertions: 0,
+      deletions: 36
+    });
+  });
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

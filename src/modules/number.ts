@@ -1,5 +1,5 @@
 /**
- * mulberry32 PRNG (Pseudo Random Number Generator)
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
  * 
  * https://github.com/cprosche/mulberry32
  */
@@ -16,7 +16,7 @@ export function getRandomFloat(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 /**
- * mulberry32 PRNG
+ * Use mulberry32 PRNG
  * 
  * @returns min <= n < max
  */
@@ -30,7 +30,7 @@ export function getRandomInt(min: number, max: number) {
   return Math.floor(getRandomFloat(min, max));
 }
 /**
- * mulberry32 PRNG
+ * Use mulberry32 PRNG
  * 
  * @returns min <= n < max
  */
@@ -93,11 +93,11 @@ export function calcStringSize(str: string) {
 }
 
 export function toBytes(
-  num: number,
-  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+  bytes: number,
+  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
 ) {
   if (format === "Bytes") {
-    return num;
+    return bytes;
   }
 
   const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
@@ -106,12 +106,12 @@ export function toBytes(
     throw new Error(`Invalid argument: ${format} is not supported format`);
   }
 
-  return num * Math.pow(1024, i + 1);
+  return bytes * Math.pow(1024, i + 1);
 }
 
 export function toFileSize(
   bytes: number,
-  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
 ) {
   if (format === "Bytes") {
     return bytes;
@@ -128,7 +128,7 @@ export function toFileSize(
 
 export function humanizeFileSize(
   num: number,
-  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"
+  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
 ) {
   const bytes = toBytes(num, format);
 
@@ -147,41 +147,41 @@ export function humanizeFileSize(
 }
 
 export function getContainedSize(
-  sourceWidth: number,
-  sourceHeight: number,
-  destinationWidth: number,
-  destinationHeight: number
+  srcWidth: number,
+  srcHeight: number,
+  dstWidth: number,
+  dstHeight: number
 ): [number, number] {
-  const aspectRatio = sourceWidth / sourceHeight;
-  return aspectRatio < destinationWidth / destinationHeight
-    ? [destinationHeight * aspectRatio, destinationHeight]
-    : [destinationWidth, destinationWidth / aspectRatio];
+  const aspectRatio = srcWidth / srcHeight;
+  return aspectRatio < dstWidth / dstHeight
+    ? [dstHeight * aspectRatio, dstHeight]
+    : [dstWidth, dstWidth / aspectRatio];
 }
 
 export function getCoveredSize(
-  sourceWidth: number,
-  sourceHeight: number,
-  destinationWidth: number,
-  destinationHeight: number
+  srcWidth: number,
+  srcHeight: number,
+  dstWidth: number,
+  dstHeight: number
 ): [number, number] {
-  const aspectRatio = sourceWidth / sourceHeight;
-  return aspectRatio < destinationWidth / destinationHeight
-    ? [destinationWidth, destinationWidth / aspectRatio]
-    : [destinationHeight * aspectRatio, destinationHeight];
+  const aspectRatio = srcWidth / srcHeight;
+  return aspectRatio < dstWidth / dstHeight
+    ? [dstWidth, dstWidth / aspectRatio]
+    : [dstHeight * aspectRatio, dstHeight];
 }
 
 export function getAdjustedSize(
-  sourceWidth: number,
-  sourceHeight: number,
+  srcWidth: number,
+  srcHeight: number,
   maxWidth: number,
   maxHeight: number,
   minWidth: number,
   minHeight: number
 ): [number, number] {
-  const aspectRatio = sourceWidth / sourceHeight;
+  const aspectRatio = srcWidth / srcHeight;
 
-  let w = sourceWidth;
-  let h = sourceHeight;
+  let w = srcWidth;
+  let h = srcHeight;
 
   if (w > maxWidth) {
     w = maxWidth;

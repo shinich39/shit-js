@@ -1,3 +1,7 @@
+/**
+ * @example
+ * await sleep(1000); // 1s
+ */
 export declare function sleep(ms: number): Promise<unknown>;
 /**
  * @example
@@ -12,4 +16,20 @@ export declare function retry<T extends (...args: any[]) => any>(func: T, count:
  * input.addEventListener("input", debounce((e) => { ... }, 100));
  */
 export declare function debounce(func: (...args: any[]) => any, delay: number): (...args: any[]) => void;
+/**
+ * @example
+ * const worker = new QueueWorker();
+ * worker.add(() => console.log('Task 1'));
+ * worker.add(async () => {
+ *   await fetch('/api/data');
+ *   console.log('Task 2');
+ * });
+ */
+export declare class QueueWorker {
+    inProgress: boolean;
+    queue: (() => void | Promise<void>)[];
+    constructor();
+    add(func: () => void | Promise<void>): void;
+    run(): Promise<void>;
+}
 //# sourceMappingURL=async.d.ts.map
