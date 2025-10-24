@@ -3,8 +3,8 @@ import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
 import {
+  Brackets,
   compareString,
-  findString,
   getFloats,
   getInts,
   getRandomChar,
@@ -13,7 +13,7 @@ import {
   getXORString,
   matchStrings,
   normalizeString,
-  splitString,
+  Quotes,
   toRegExp,
 } from "./string";
 
@@ -94,21 +94,13 @@ describe(path.basename(import.meta.filename), () => {
     });
   });
 
-  test("findString", () => {
-    eq(findString("<div>div</div>", "d"), 5);
-    eq(findString("<div>div</div>", "div"), 5);
-  });
+  test("Brackets", () => {
+    const result = "( )[ ]{ }< >〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(toRegExp(
+      "/" + [...Object.values(Brackets), ...Object.keys(Brackets)].map((e) => "\\" + e).join("|") + "/"
+    ));
 
-  test("splitString", () => {
-    const result = splitString("[artist] title (subtitle (subsubtitle)) vol.1.zip");
-    eq(result, [
-      'artist',
-      ' title ',
-      'subtitle ',
-      'subsubtitle',
-      ' vol.1.zip'
-    ]);
-  });
+    eq(result.join("").trim(), "");
+  })
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

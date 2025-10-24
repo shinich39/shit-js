@@ -504,6 +504,45 @@ function getRootPath(...args) {
 }
 
 // src/modules/string.ts
+var Brackets = {
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  "<": ">",
+  "\uFF08": "\uFF09",
+  "\uFF3B": "\uFF3D",
+  "\uFF5B": "\uFF5D",
+  "\uFF1C": "\uFF1E",
+  "\u300C": "\u300D",
+  "\u300E": "\u300F",
+  "\u3010": "\u3011",
+  "\u3014": "\u3015",
+  "\u3018": "\u3019",
+  "\u3016": "\u3017",
+  "\u3008": "\u3009",
+  "\u300A": "\u300B",
+  "\u2768": "\u2769",
+  "\u276A": "\u276B",
+  "\u2774": "\u2775",
+  "\u276C": "\u276D",
+  "\u276E": "\u276F",
+  "\u2772": "\u2773",
+  "\u301A": "\u301B",
+  "\uFF62": "\uFF63",
+  "\u27E8": "\u27E9",
+  "\u2770": "\u2771"
+};
+var Quotes = {
+  "'": "'",
+  '"': '"',
+  "`": "`",
+  "\u2018": "\u2019",
+  "\u201C": "\u201D",
+  "\u201B": "\u201B",
+  "\u201F": "\u201F",
+  "\u201E": "\u201C",
+  "\xAB": "\xBB"
+};
 function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
@@ -539,7 +578,7 @@ function getXORString(str, salt) {
   return result;
 }
 function normalizeString(str) {
-  return str.normalize("NFC").replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
 }
 function toRegExp(str) {
   const parts = str.split("/");
@@ -661,99 +700,6 @@ function matchStrings(from, to) {
     deletions
   };
 }
-function findString(str, target, fromIndex) {
-  if (!fromIndex) {
-    fromIndex = 0;
-  } else if (fromIndex < 0) {
-    fromIndex = str.length - 1 + fromIndex;
-  }
-  const len = target.length;
-  let i = fromIndex, closing = null;
-  const match = () => {
-    for (let j = 0; j < len; j++) {
-      if (str[i + j] !== target[j]) {
-        return false;
-      }
-    }
-    return true;
-  };
-  while (i < str.length) {
-    const ch = str[i];
-    if (ch === "\\") {
-      i++;
-    } else if (closing) {
-      if (ch === closing) {
-        closing = null;
-      }
-    } else if (match()) {
-      return i;
-    } else if (ch === '"' || ch === "'") {
-      closing = ch;
-    } else if (ch === "(") {
-      closing = ")";
-    } else if (ch === "{") {
-      closing = "}";
-    } else if (ch === "[") {
-      closing = "]";
-    } else if (ch === "<") {
-      closing = ">";
-    }
-    i++;
-  }
-  return -1;
-}
-function splitString(str, pairs = {
-  // "'": "'",
-  // "\"": "\"",
-  "(": ")",
-  "[": "]",
-  "{": "}",
-  "<": ">",
-  "\uFF08": "\uFF09",
-  "\uFF3B": "\uFF3D",
-  "\uFF5B": "\uFF5D",
-  "\uFF1C": "\uFF1E",
-  "\u300C": "\u300D",
-  "\u300E": "\u300F",
-  "\u3010": "\u3011",
-  "\u3014": "\u3015",
-  "\u3016": "\u3017",
-  "\u3008": "\u3009",
-  "\u300A": "\u300B"
-}) {
-  const result = [];
-  const openings = Object.keys(pairs);
-  let i = 0, closings = [], buffer = "";
-  const flush = () => {
-    if (buffer) {
-      result.push(buffer);
-      buffer = "";
-    }
-  };
-  while (i < str.length) {
-    const ch = str[i];
-    if (ch === "\\") {
-      i++;
-    } else if (openings.indexOf(ch) > -1) {
-      flush();
-      const closing = pairs[ch];
-      closings.push(closing);
-    } else if (closings.length > 0) {
-      const lastClosing = closings[closings.length - 1];
-      if (ch === lastClosing) {
-        flush();
-        closings.pop();
-      } else {
-        buffer += ch;
-      }
-    } else {
-      buffer += ch;
-    }
-    i++;
-  }
-  flush();
-  return result;
-}
 
 // src/modules/type.ts
 function getType(e) {
@@ -821,7 +767,9 @@ function toError(e) {
   return err;
 }
 export {
+  Brackets,
   QueueWorker,
+  Quotes,
   calcStringSize,
   checkBit,
   clearBit,
@@ -829,7 +777,6 @@ export {
   compareObject,
   compareString,
   debounce,
-  findString,
   getAdjustedSize,
   getAllCombinations,
   getBaseName,
@@ -873,7 +820,6 @@ export {
   setBit,
   shuffleArray,
   sleep,
-  splitString,
   toBytes,
   toError,
   toFileSize,

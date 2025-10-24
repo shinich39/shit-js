@@ -10,7 +10,7 @@ export declare function joinPaths(...args: string[]): string;
  * // "package.json"
  *
  * const result = getBaseName("./project/package.json", ".json");
- * // "package.json"
+ * // "package"
  */
 export declare function getBaseName(str: string, suffix?: string): string;
 /**
@@ -33,14 +33,14 @@ export declare function getDirName(str: string): string;
 export declare function getRelativePath(from: string, to: string): string;
 /**
  * @example
- * const result = getRootPath([
+ * const result = getRootPath(
  *   "./project/abc/package.json",
  *   "./project/abc/def",
  *   "./project/abc/def/package.json",
  *   "./project/abc/def/ghi/package.json",
  *   "./project/abc/ghi/package.json",
  *   "project/abc/def/ghi/package.json",
- * ]);
+ * );
  * // "project/abc"
  */
 export declare function getRootPath(...args: string[]): string;

@@ -1,8 +1,51 @@
+export declare const Brackets: {
+    readonly "(": ")";
+    readonly "[": "]";
+    readonly "{": "}";
+    readonly "<": ">";
+    readonly "\uFF08": "）";
+    readonly "\uFF3B": "］";
+    readonly "\uFF5B": "｝";
+    readonly "\uFF1C": "＞";
+    readonly "\u300C": "」";
+    readonly "\u300E": "』";
+    readonly "\u3010": "】";
+    readonly "\u3014": "〕";
+    readonly "\u3018": "〙";
+    readonly "\u3016": "〗";
+    readonly "\u3008": "〉";
+    readonly "\u300A": "》";
+    readonly "\u2768": "❩";
+    readonly "\u276A": "❫";
+    readonly "\u2774": "❵";
+    readonly "\u276C": "❭";
+    readonly "\u276E": "❯";
+    readonly "\u2772": "❳";
+    readonly "\u301A": "〛";
+    readonly "\uFF62": "｣";
+    readonly "\u27E8": "⟩";
+    readonly "\u2770": "❱";
+};
+export declare const Quotes: {
+    readonly "'": "'";
+    readonly "\"": "\"";
+    readonly "`": "`";
+    readonly "\u2018": "’";
+    readonly "\u201C": "”";
+    readonly "\u201B": "‛";
+    readonly "\u201F": "‟";
+    readonly "\u201E": "“";
+    readonly "\u00AB": "»";
+};
 /**
  * @example
  * const uuid = getUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export declare function getUUID(): string;
+/**
+ * @example
+ * const result = getRandomChar("abc"); // "a"
+ */
 export declare function getRandomChar(charset: string): string;
 /**
  * @example
@@ -18,11 +61,13 @@ export declare function getFloats(str: string): number[];
  */
 export declare function getXORString(str: string, salt: string): string;
 /**
- * change full-width characters to half-width characters
+ * 1. Change full-width characters to half-width characters
+ * 2. Change all type of whitespaces to " "
  */
 export declare function normalizeString(str: string): string;
 /**
- * @param str "/abc/gi"
+ * @example
+ * const result = toRegExp("/abc/gi"); // /abc/gi
  */
 export declare function toRegExp(str: string): RegExp;
 /**
@@ -66,19 +111,4 @@ export declare function matchStrings(from: string, to: string): {
     insertions: number;
     deletions: number;
 };
-/**
- * find top level string
- *
- * skip inside of bracket and quotes
- *
- * @example
- * const result = findString("<div>div</div>", "d"); // 5
- */
-export declare function findString(str: string, target: string, fromIndex?: number): number;
-/**
- * @example
- * const result = splitString("[artist] title (subtitle (subsubtitle)) vol.1.zip");
- * // ['artist', ' title ', 'subtitle ', 'subsubtitle', ' vol.1.zip']
- */
-export declare function splitString(str: string, pairs?: Record<string, string>): string[];
 //# sourceMappingURL=string.d.ts.map

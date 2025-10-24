@@ -1,3 +1,44 @@
+export const Brackets = {
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  "<": ">",
+  "（": "）",
+  "［": "］",
+  "｛": "｝",
+  "＜": "＞",
+  "「": "」",
+  "『": "』",
+  "【": "】",
+  "〔": "〕",
+  "〘": "〙",
+  "〖": "〗",
+  "〈": "〉",
+  "《": "》",
+  "❨": "❩",
+  "❪": "❫",
+  "❴": "❵",
+  "❬": "❭",
+  "❮": "❯",
+  "❲": "❳",
+  "〚": "〛",
+  "｢": "｣",
+  "⟨": "⟩",
+  "❰": "❱",
+} as const;
+
+export const Quotes = {
+  "'": "'",
+  "\"": "\"",
+  "`": "`",
+  "‘": "’",
+  "“": "”",
+  "‛": "‛",
+  "‟": "‟",
+  "„": "“",
+  "«": "»",
+} as const;
+
 /**
  * @example
  * const uuid = getUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
@@ -9,7 +50,10 @@ export function getUUID() {
     return v.toString(16);
   });
 }
-
+/**
+ * @example
+ * const result = getRandomChar("abc"); // "a"
+ */
 export function getRandomChar(charset: string) {
   return charset.charAt(Math.floor(Math.random() * charset.length));
 }
@@ -51,16 +95,17 @@ export function getXORString(str: string, salt: string) {
   return result;
 }
 /**
- * change full-width characters to half-width characters
+ * 1. Change full-width characters to half-width characters
+ * 2. Change all type of whitespaces to " "
  */
 export function normalizeString(str: string) {
   return str
-    .normalize("NFC")
     .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
     .replace(/[^\S\r\n]/g, " ");
 }
 /**
- * @param str "/abc/gi"
+ * @example
+ * const result = toRegExp("/abc/gi"); // /abc/gi
  */
 export function toRegExp(str: string) {
   const parts = str.split("/");
@@ -271,142 +316,4 @@ export function matchStrings(from: string, to: string) {
     insertions,
     deletions,
   };
-}
-/**
- * find top level string
- *
- * skip inside of bracket and quotes
- * 
- * @example
- * const result = findString("<div>div</div>", "d"); // 5
- */
-export function findString(str: string, target: string, fromIndex?: number) {
-  if (!fromIndex) {
-    fromIndex = 0;
-  } else if (fromIndex < 0) {
-    fromIndex = str.length - 1 + fromIndex;
-  }
-
-  const len = target.length;
-
-  let i = fromIndex,
-    closing: string | null = null;
-
-  const match = () => {
-    for (let j = 0; j < len; j++) {
-      if (str[i + j] !== target[j]) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  while (i < str.length) {
-    const ch = str[i];
-
-    // pass escaped character
-    if (ch === "\\") {
-      i++;
-    } // find closing
-    else if (closing) {
-      if (ch === closing) {
-        closing = null;
-      }
-    } // find target
-    else if (match()) {
-      return i;
-    } // find bracket and quotes
-    else if (ch === '"' || ch === "'") {
-      closing = ch;
-    } else if (ch === "(") {
-      closing = ")";
-    } else if (ch === "{") {
-      closing = "}";
-    } else if (ch === "[") {
-      closing = "]";
-    } else if (ch === "<") {
-      closing = ">";
-    }
-    i++;
-  }
-
-  return -1;
-}
-/**
- * @example
- * const result = splitString("[artist] title (subtitle (subsubtitle)) vol.1.zip");
- * // ['artist', ' title ', 'subtitle ', 'subsubtitle', ' vol.1.zip']
- */
-export function splitString(
-  str: string,
-  pairs: Record<string, string> = {
-    // "'": "'",
-    // "\"": "\"",
-    "(": ")",
-    "[": "]",
-    "{": "}",
-    "<": ">",
-    "（": "）",
-    "［": "］",
-    "｛": "｝",
-    "＜": "＞",
-    "「": "」",
-    "『": "』",
-    "【": "】",
-    "〔": "〕",
-    "〖": "〗",
-    "〈": "〉",
-    "《": "》",
-  },
-) {
-  const result: string[] = [];
-
-  const openings = Object.keys(pairs);
-
-  let i = 0,
-      closings: string[] = [],
-      buffer = "";
-
-  const flush = () => {
-    if (buffer) {
-      result.push(buffer);
-      buffer = "";
-    }
-  }
-
-  while (i < str.length) {
-    const ch = str[i];
-
-    // pass escaped character
-    if (ch === "\\") {
-      i++;
-    } // find opening
-    else if (openings.indexOf(ch) > -1) {
-      flush();
-
-      // add closing
-      const closing = pairs[ch];
-      closings.push(closing);
-    } // find closing
-    else if (closings.length > 0) {
-      const lastClosing = closings[closings.length - 1];
-      if (ch === lastClosing) {
-        flush();
-        
-        // remove last closing
-        closings.pop();
-      } else {
-        buffer += ch;
-      }
-    } // add buffer
-    else {
-      buffer += ch;
-    }
-
-    i++;
-  }
-
-  flush();
-
-  return result;
 }
