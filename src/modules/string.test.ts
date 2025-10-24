@@ -13,18 +13,14 @@ import {
   getXORString,
   matchStrings,
   normalizeString,
+  splitString,
   toRegExp,
 } from "./string";
 
 describe(path.basename(import.meta.filename), () => {
-  
-  test("findString", () => {
-    eq(findString("<div>div</div>", "d"), 5);
-    eq(findString("<div>div</div>", "div"), 5);
-  });
 
   test("getUUID", () => {
-    eq(getUUID().length, 36);
+    eq(getUUID().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
   });
 
   test("getRandomChar", () => {
@@ -47,8 +43,7 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("getXORString", () => {
-    const orig =
-      "https://translate.google.co.kr/?sl=en&tl=ko&text=encrypt%20string%20with%20XOR%20cipher&op=translate";
+    const orig = "Hello, world!";
     const encrypted = getXORString(orig, "this is salt!");
     eq(encrypted !== orig, true);
     const decrypted = getXORString(encrypted, "this is salt!");
@@ -97,6 +92,22 @@ describe(path.basename(import.meta.filename), () => {
       insertions: 0,
       deletions: 36
     });
+  });
+
+  test("findString", () => {
+    eq(findString("<div>div</div>", "d"), 5);
+    eq(findString("<div>div</div>", "div"), 5);
+  });
+
+  test("splitString", () => {
+    const result = splitString("[artist] title (subtitle (subsubtitle)) vol.1.zip");
+    eq(result, [
+      'artist',
+      ' title ',
+      'subtitle ',
+      'subsubtitle',
+      ' vol.1.zip'
+    ]);
   });
 });
 

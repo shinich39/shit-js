@@ -413,38 +413,23 @@ function joinPaths(...args) {
   }
   return resolved.join("/");
 }
-function getBaseName(str) {
+function getBaseName(str, suffix) {
   str = str.replace(/[\\/]$/, "");
-  let i = str.length - 2;
+  let i = str.length - 1;
   while (i >= 0) {
     if (str[i] === "/" || str[i] === "\\") {
-      return str.substring(i + 1);
+      str = str.substring(i + 1);
+      break;
     }
     i--;
   }
-  return str;
-}
-function getFileName(str) {
-  str = str.replace(/[\\/]$/, "");
-  let i = str.length - 2, offset;
-  while (i >= 0) {
-    if (!offset && str[i] === ".") {
-      offset = i;
-      continue;
-    }
-    if (str[i] === "/" || str[i] === "\\") {
-      return str.substring(i + 1, offset);
-    }
-    i--;
-  }
-  if (offset) {
-    return str.substring(0, offset);
+  if (suffix) {
+    str = str.substring(0, str.length - suffix.length);
   }
   return str;
 }
 function getExtName(str) {
-  str = str.replace(/[\\/]$/, "");
-  let i = str.length - 2;
+  let i = str.length - 1;
   while (i >= 0) {
     if (str[i] === ".") {
       return str.substring(i);
@@ -457,7 +442,8 @@ function getExtName(str) {
   return "";
 }
 function getDirName(str) {
-  let i = str.length - 2;
+  str = str.replace(/[\\/]$/, "");
+  let i = str.length - 1;
   while (i >= 0) {
     if (str[i] === "/" || str[i] === "\\") {
       return str.substring(0, i);
@@ -518,49 +504,6 @@ function getRootPath(...args) {
 }
 
 // src/modules/string.ts
-function findString(str, target, fromIndex) {
-  if (!fromIndex) {
-    fromIndex = 0;
-  } else if (fromIndex < 0) {
-    fromIndex = str.length - 1 + fromIndex;
-  }
-  const len = target.length;
-  let i = fromIndex, closing = null;
-  const match = len === 1 ? () => str[i] === target : () => {
-    for (let j = 0; j < len; j++) {
-      if (str[i + j] !== target[j]) {
-        return false;
-      }
-    }
-    return true;
-  };
-  while (i < str.length) {
-    if (str[i] === "\\") {
-      i++;
-    } else if (!closing) {
-      if (match()) {
-        return i;
-      }
-      if (str[i] === '"' || str[i] === "'") {
-        closing = str[i];
-      } else if (str[i] === "(") {
-        closing = ")";
-      } else if (str[i] === "{") {
-        closing = "}";
-      } else if (str[i] === "[") {
-        closing = "]";
-      } else if (str[i] === "<") {
-        closing = ">";
-      }
-    } else {
-      if (str[i] === closing) {
-        closing = null;
-      }
-    }
-    i++;
-  }
-  return -1;
-}
 function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
@@ -596,7 +539,7 @@ function getXORString(str, salt) {
   return result;
 }
 function normalizeString(str) {
-  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+  return str.normalize("NFC").replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
 }
 function toRegExp(str) {
   const parts = str.split("/");
@@ -718,6 +661,99 @@ function matchStrings(from, to) {
     deletions
   };
 }
+function findString(str, target, fromIndex) {
+  if (!fromIndex) {
+    fromIndex = 0;
+  } else if (fromIndex < 0) {
+    fromIndex = str.length - 1 + fromIndex;
+  }
+  const len = target.length;
+  let i = fromIndex, closing = null;
+  const match = () => {
+    for (let j = 0; j < len; j++) {
+      if (str[i + j] !== target[j]) {
+        return false;
+      }
+    }
+    return true;
+  };
+  while (i < str.length) {
+    const ch = str[i];
+    if (ch === "\\") {
+      i++;
+    } else if (closing) {
+      if (ch === closing) {
+        closing = null;
+      }
+    } else if (match()) {
+      return i;
+    } else if (ch === '"' || ch === "'") {
+      closing = ch;
+    } else if (ch === "(") {
+      closing = ")";
+    } else if (ch === "{") {
+      closing = "}";
+    } else if (ch === "[") {
+      closing = "]";
+    } else if (ch === "<") {
+      closing = ">";
+    }
+    i++;
+  }
+  return -1;
+}
+function splitString(str, pairs = {
+  // "'": "'",
+  // "\"": "\"",
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  "<": ">",
+  "\uFF08": "\uFF09",
+  "\uFF3B": "\uFF3D",
+  "\uFF5B": "\uFF5D",
+  "\uFF1C": "\uFF1E",
+  "\u300C": "\u300D",
+  "\u300E": "\u300F",
+  "\u3010": "\u3011",
+  "\u3014": "\u3015",
+  "\u3016": "\u3017",
+  "\u3008": "\u3009",
+  "\u300A": "\u300B"
+}) {
+  const result = [];
+  const openings = Object.keys(pairs);
+  let i = 0, closings = [], buffer = "";
+  const flush = () => {
+    if (buffer) {
+      result.push(buffer);
+      buffer = "";
+    }
+  };
+  while (i < str.length) {
+    const ch = str[i];
+    if (ch === "\\") {
+      i++;
+    } else if (openings.indexOf(ch) > -1) {
+      flush();
+      const closing = pairs[ch];
+      closings.push(closing);
+    } else if (closings.length > 0) {
+      const lastClosing = closings[closings.length - 1];
+      if (ch === lastClosing) {
+        flush();
+        closings.pop();
+      } else {
+        buffer += ch;
+      }
+    } else {
+      buffer += ch;
+    }
+    i++;
+  }
+  flush();
+  return result;
+}
 
 // src/modules/type.ts
 function getType(e) {
@@ -802,7 +838,6 @@ export {
   getCoveredSize,
   getDirName,
   getExtName,
-  getFileName,
   getFloats,
   getInts,
   getLengthFromFloat,
@@ -838,6 +873,7 @@ export {
   setBit,
   shuffleArray,
   sleep,
+  splitString,
   toBytes,
   toError,
   toFileSize,

@@ -1,65 +1,7 @@
 /**
- * find top level string
- *
- * skip inside of bracket and quotes
+ * @example
+ * const uuid = getUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export function findString(str: string, target: string, fromIndex?: number) {
-  if (!fromIndex) {
-    fromIndex = 0;
-  } else if (fromIndex < 0) {
-    fromIndex = str.length - 1 + fromIndex;
-  }
-
-  const len = target.length;
-
-  let i = fromIndex,
-    closing: string | null = null;
-
-  const match =
-    len === 1
-      ? () => str[i] === target
-      : () => {
-          for (let j = 0; j < len; j++) {
-            if (str[i + j] !== target[j]) {
-              return false;
-            }
-          }
-          return true;
-        };
-
-  while (i < str.length) {
-    // pass escaped character
-    if (str[i] === "\\") {
-      i++;
-    } else if (!closing) {
-      if (match()) {
-        return i;
-      }
-
-      if (str[i] === '"' || str[i] === "'") {
-        closing = str[i];
-      } else if (str[i] === "(") {
-        closing = ")";
-      } else if (str[i] === "{") {
-        closing = "}";
-      } else if (str[i] === "[") {
-        closing = "]";
-      } else if (str[i] === "<") {
-        closing = ">";
-      }
-    } // find closing
-    else {
-      if (str[i] === closing) {
-        closing = null;
-      }
-    }
-
-    i++;
-  }
-
-  return -1;
-}
-
 export function getUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -71,7 +13,10 @@ export function getUUID() {
 export function getRandomChar(charset: string) {
   return charset.charAt(Math.floor(Math.random() * charset.length));
 }
-
+/**
+ * @example
+ * const result = getRandomString("abc", 1); // "a"
+ */
 export function getRandomString(charset: string, size: number) {
   let result = "";
   for (let i = 0; i < size; i++) {
@@ -87,7 +32,11 @@ export function getInts(str: string) {
 export function getFloats(str: string) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
-
+/**
+ * @example
+ * const encrypted = getXORString("text", "this is salt!");
+ * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
+ */
 export function getXORString(str: string, salt: string) {
   const l = salt.length;
   if (l === 0) {
@@ -106,6 +55,7 @@ export function getXORString(str: string, salt: string) {
  */
 export function normalizeString(str: string) {
   return str
+    .normalize("NFC")
     .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
     .replace(/[^\S\r\n]/g, " ");
 }
@@ -251,7 +201,23 @@ export function compareString(from: string, to: string) {
   // in theory, does not reach here.
   return [];
 }
-
+/**
+ * @example
+ * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+ * const b = "sit amet, adipiscing";
+ * const result = matchStrings(a, b);
+ * // {
+ * //   matchRate: 0.35714285714285715,
+ * //   similarity: 0.35714285714285715,
+ * //   diceSimilarity: 0.5263157894736842,
+ * //   jaccardSimilarity: 0.35714285714285715,
+ * //   distance: 36,
+ * //   normalizedDistance: 0.6428571428571429,
+ * //   matches: 20,
+ * //   insertions: 0,
+ * //   deletions: 36
+ * // }
+ */
 export function matchStrings(from: string, to: string) {
   const diff = compareString(from, to);
   
@@ -305,4 +271,142 @@ export function matchStrings(from: string, to: string) {
     insertions,
     deletions,
   };
+}
+/**
+ * find top level string
+ *
+ * skip inside of bracket and quotes
+ * 
+ * @example
+ * const result = findString("<div>div</div>", "d"); // 5
+ */
+export function findString(str: string, target: string, fromIndex?: number) {
+  if (!fromIndex) {
+    fromIndex = 0;
+  } else if (fromIndex < 0) {
+    fromIndex = str.length - 1 + fromIndex;
+  }
+
+  const len = target.length;
+
+  let i = fromIndex,
+    closing: string | null = null;
+
+  const match = () => {
+    for (let j = 0; j < len; j++) {
+      if (str[i + j] !== target[j]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  while (i < str.length) {
+    const ch = str[i];
+
+    // pass escaped character
+    if (ch === "\\") {
+      i++;
+    } // find closing
+    else if (closing) {
+      if (ch === closing) {
+        closing = null;
+      }
+    } // find target
+    else if (match()) {
+      return i;
+    } // find bracket and quotes
+    else if (ch === '"' || ch === "'") {
+      closing = ch;
+    } else if (ch === "(") {
+      closing = ")";
+    } else if (ch === "{") {
+      closing = "}";
+    } else if (ch === "[") {
+      closing = "]";
+    } else if (ch === "<") {
+      closing = ">";
+    }
+    i++;
+  }
+
+  return -1;
+}
+/**
+ * @example
+ * const result = splitString("[artist] title (subtitle (subsubtitle)) vol.1.zip");
+ * // ['artist', ' title ', 'subtitle ', 'subsubtitle', ' vol.1.zip']
+ */
+export function splitString(
+  str: string,
+  pairs: Record<string, string> = {
+    // "'": "'",
+    // "\"": "\"",
+    "(": ")",
+    "[": "]",
+    "{": "}",
+    "<": ">",
+    "（": "）",
+    "［": "］",
+    "｛": "｝",
+    "＜": "＞",
+    "「": "」",
+    "『": "』",
+    "【": "】",
+    "〔": "〕",
+    "〖": "〗",
+    "〈": "〉",
+    "《": "》",
+  },
+) {
+  const result: string[] = [];
+
+  const openings = Object.keys(pairs);
+
+  let i = 0,
+      closings: string[] = [],
+      buffer = "";
+
+  const flush = () => {
+    if (buffer) {
+      result.push(buffer);
+      buffer = "";
+    }
+  }
+
+  while (i < str.length) {
+    const ch = str[i];
+
+    // pass escaped character
+    if (ch === "\\") {
+      i++;
+    } // find opening
+    else if (openings.indexOf(ch) > -1) {
+      flush();
+
+      // add closing
+      const closing = pairs[ch];
+      closings.push(closing);
+    } // find closing
+    else if (closings.length > 0) {
+      const lastClosing = closings[closings.length - 1];
+      if (ch === lastClosing) {
+        flush();
+        
+        // remove last closing
+        closings.pop();
+      } else {
+        buffer += ch;
+      }
+    } // add buffer
+    else {
+      buffer += ch;
+    }
+
+    i++;
+  }
+
+  flush();
+
+  return result;
 }

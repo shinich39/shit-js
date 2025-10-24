@@ -1,3 +1,8 @@
+/**
+ * @example
+ * const result = joinPaths("./project/", "abc", "./package.json");
+ * // "project/abc/package.json"
+ */
 export function joinPaths(...args: string[]) {
   const parts = args.join("/").split(/[\\/]+/);
 
@@ -25,71 +30,84 @@ export function joinPaths(...args: string[]) {
 
   return resolved.join("/");
 }
-
-export function getBaseName(str: string) {
+/**
+ * @example
+ * const result = getBaseName("./project/package.json");
+ * // "package.json"
+ * 
+ * const result = getBaseName("./project/package.json", ".json");
+ * // "package.json"
+ */
+export function getBaseName(str: string, suffix?: string) {
   str = str.replace(/[\\/]$/, "");
 
-  let i = str.length - 2;
-  while (i >= 0) {
-    if (str[i] === "/" || str[i] === "\\") {
-      return str.substring(i + 1);
-    }
-    i--;
-  }
-  return str;
-}
-
-export function getFileName(str: string) {
-  str = str.replace(/[\\/]$/, "");
-
-  let i = str.length - 2,
-    offset;
+  let i = str.length - 1;
 
   while (i >= 0) {
-    if (!offset && str[i] === ".") {
-      offset = i;
-      continue;
-    }
+
     if (str[i] === "/" || str[i] === "\\") {
-      return str.substring(i + 1, offset);
+      str = str.substring(i + 1);
+      break;
     }
+
     i--;
   }
 
-  if (offset) {
-    return str.substring(0, offset);
+  if (suffix) {
+    str = str.substring(0, str.length - suffix.length);
   }
 
   return str;
 }
-
+/**
+ * @example
+ * const result = getExtName("./project/package.json");
+ * // ".json"
+ */
 export function getExtName(str: string) {
-  str = str.replace(/[\\/]$/, "");
+  let i = str.length - 1;
 
-  let i = str.length - 2;
   while (i >= 0) {
+
     if (str[i] === ".") {
       return str.substring(i);
     }
+
     if (str[i] === "/" || str[i] === "\\") {
       return "";
     }
+
     i--;
   }
+
   return "";
 }
-
+/**
+ * @example
+ * const result = getDirName("./project/package.json");
+ * // "./project"
+ */
 export function getDirName(str: string) {
-  let i = str.length - 2;
+  str = str.replace(/[\\/]$/, "");
+
+  let i = str.length - 1;
+
   while (i >= 0) {
+
     if (str[i] === "/" || str[i] === "\\") {
       return str.substring(0, i);
     }
+
     i--;
   }
+
   return ".";
 }
-
+/**
+ * @example
+ * const result = getRelativePath("./project/", "./package.json");
+ * // "../package.json"
+ */
 export function getRelativePath(from: string, to: string) {
   const normalize = (str: string) => {
     str = str.replace(/[\\]/g, "/").replace(/\/$/, "");
@@ -129,7 +147,18 @@ export function getRelativePath(from: string, to: string) {
   // join up and down paths
   return up + (up && down ? "/" : "") + down;
 }
-
+/**
+ * @example
+ * const result = getRootPath([
+ *   "./project/abc/package.json",
+ *   "./project/abc/def",
+ *   "./project/abc/def/package.json",
+ *   "./project/abc/def/ghi/package.json",
+ *   "./project/abc/ghi/package.json",
+ *   "project/abc/def/ghi/package.json",
+ * ]);
+ * // "project/abc"
+ */
 export function getRootPath(...args: string[]) {
   if (args.length === 0) {
     return "";

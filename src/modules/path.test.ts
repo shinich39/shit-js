@@ -6,7 +6,6 @@ import {
   getBaseName,
   getDirName,
   getExtName,
-  getFileName,
   getRelativePath,
   getRootPath,
   joinPaths,
@@ -14,70 +13,8 @@ import {
 
 describe(path.basename(import.meta.filename), () => {
 
-  test("getBaseName", () => {
-    const strs = [
-      ["./project/package.json", "package.json"],
-      ["./project/", "project"],
-      ["./", "."],
-    ];
-
-    for (const str of strs) {
-      eq(path.basename(str[0]), getBaseName(str[0]), str[0]);
-      eq(path.basename(str[0]), getBaseName(str[0]), str[0]);
-      eq(path.basename(str[0]), getBaseName(str[0]), str[0]);
-      eq(str[1], getBaseName(str[0]), str[0]);
-    }
-  });
-
-  test("getExtName", () => {
-    const strs = [
-      ["./project/package.json", ".json"],
-      ["./project/", ""],
-      ["./", ""],
-    ];
-
-    for (const str of strs) {
-      eq(path.extname(str[0]), getExtName(str[0]), str[0]);
-      eq(path.extname(str[0]), getExtName(str[0]), str[0]);
-      eq(path.extname(str[0]), getExtName(str[0]), str[0]);
-      eq(str[1], getExtName(str[0]), str[0]);
-    }
-  });
-
-  test("getFileName", () => {
-    const strs = [
-      ["./project/package.json", "package"],
-      ["./project/", "project"],
-      ["./", "."],
-      ["package", "package"],
-      ["package.json", "package"],
-    ];
-
-    for (const str of strs) {
-      eq(path.basename(str[0], path.extname(str[0])), getFileName(str[0]), str[0]);
-      eq(path.basename(str[0], path.extname(str[0])), getFileName(str[0]), str[0]);
-      eq(path.basename(str[0], path.extname(str[0])), getFileName(str[0]), str[0]);
-      eq(str[1], getFileName(str[0]), str[0]);
-    }
-  });
-
-  test("getDirName", () => {
-    const strs = [
-      ["./project/package.json", "./project"],
-      ["./project/", "."],
-      ["./", "."],
-    ];
-
-    for (const str of strs) {
-      eq(path.dirname(str[0]), getDirName(str[0]), str[0]);
-      eq(path.dirname(str[0]), getDirName(str[0]), str[0]);
-      eq(path.dirname(str[0]), getDirName(str[0]), str[0]);
-      eq(str[1], getDirName(str[0]), str[0]);
-    }
-  });
-
   test("joinPaths", () => {
-    const strs = [
+    const arrs = [
       ["./project/", "abc", "./package.json"],
       ["./project/", "abc", "../package.json"],
       ["./project/", "abc", "."],
@@ -87,15 +24,56 @@ describe(path.basename(import.meta.filename), () => {
       ["abc", "..", "package.json"],
     ];
 
-    for (const str of strs) {
-      eq(path.join(...str), joinPaths(...str), str[0]);
-      eq(path.join(...str), joinPaths(...str), str[0]);
-      eq(path.join(...str), joinPaths(...str), str[0]);
+    for (const arr of arrs) {
+      eq(path.join(...arr), joinPaths(...arr), arr[0]);
+      eq(path.join(...arr), joinPaths(...arr), arr[0]);
+      eq(path.join(...arr), joinPaths(...arr), arr[0]);
+    }
+  });
+
+  test("getBaseName", () => {
+    const arrs = [
+      ["./project/package.json", "package.json", "package"],
+      ["./project/", "project", "project"],
+      ["./", ".", "."],
+    ];
+
+    for (const arr of arrs) {
+      eq(path.basename(arr[0]), getBaseName(arr[0]), arr[0]);
+      eq(getBaseName(arr[0], getExtName(arr[0])), arr[2], arr[0]);
+      eq(arr[1], getBaseName(arr[0]), arr[0]);
+    }
+  });
+
+  test("getExtName", () => {
+    const arrs = [
+      ["./project/package.json", ".json"],
+      ["./project/package", ""],
+      ["./project/", ""],
+      ["./", ""],
+    ];
+
+    for (const arr of arrs) {
+      eq(path.extname(arr[0]), getExtName(arr[0]), arr[0]);
+      eq(arr[1], getExtName(arr[0]), arr[0]);
+    }
+  });
+
+  test("getDirName", () => {
+    const arrs = [
+      ["./project/package.json", "./project"],
+      ["./project/", "."],
+      ["./", "."],
+    ];
+
+    for (const arr of arrs) {
+      eq(path.dirname(arr[0]), getDirName(arr[0]), arr[0]);
+      eq(arr[1], getDirName(arr[0]), arr[0]);
     }
   });
 
   test("getRelativePath", () => {
-    const strs = [
+    const arrs = [
       ["./project/", "./package.json"],
       ["./project/", "../package.json"],
       ["./project/", "."],
@@ -107,13 +85,13 @@ describe(path.basename(import.meta.filename), () => {
       ["abc", "package.json"],
     ];
 
-    for (const str of strs) {
-      eq(path.relative(str[0], str[1]), getRelativePath(str[0], str[1]));
+    for (const arr of arrs) {
+      eq(path.relative(arr[0], arr[1]), getRelativePath(arr[0], arr[1]));
     }
   });
 
   test("getRootPath", () => {
-    let strs = [
+    let arrs = [
       "./project/abc/package.json",
       "./project/abc/def",
       "./project/abc/def/package.json",
@@ -122,9 +100,9 @@ describe(path.basename(import.meta.filename), () => {
       "project/abc/def/ghi/package.json",
     ];
 
-    eq("project/abc", getRootPath(...strs));
+    eq("project/abc", getRootPath(...arrs));
 
-    strs = [
+    arrs = [
       "./project/abc/def/package.json",
       "./project/abc/def/ab",
       "./project/abc/def/package.json",
@@ -133,9 +111,9 @@ describe(path.basename(import.meta.filename), () => {
       "project/abc/def/",
     ];
 
-    eq("project/abc/def", getRootPath(...strs));
+    eq("project/abc/def", getRootPath(...arrs));
 
-    strs = [
+    arrs = [
       "/project/abc/def/package.json",
       "/project/abc/def/ab",
       "/project/abc/def/package.json",
@@ -144,7 +122,7 @@ describe(path.basename(import.meta.filename), () => {
       "/project/abc/def/",
     ];
 
-    eq("/project/abc/def", getRootPath(...strs));
+    eq("/project/abc/def", getRootPath(...arrs));
   });
 
 });
