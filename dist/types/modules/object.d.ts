@@ -16,7 +16,7 @@ export declare function getObjectValue(obj: Record<string, any>, key: string): a
  * equals: undefined, null, boolean, number, string, Date,
  *
  * @example
- * const result = compareObject({
+ * const result = matchObject({
  *   str: "abc",
  *   num: 1
  * }, {
@@ -24,5 +24,5 @@ export declare function getObjectValue(obj: Record<string, any>, key: string): a
  * });
  * // true
  */
-export declare function compareObject(a: any, b: any): boolean;
+export declare function matchObject(obj: any, query: any): boolean;
 //# sourceMappingURL=object.d.ts.map

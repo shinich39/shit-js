@@ -64,7 +64,7 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  * equals: undefined, null, boolean, number, string, Date,
  * 
  * @example
- * const result = compareObject({
+ * const result = matchObject({
  *   str: "abc",
  *   num: 1
  * }, {
@@ -72,42 +72,42 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  * });
  * // true
  */
-export function compareObject(a: any, b: any) {
-  const func = function (m: any, n: any, seen = new WeakMap()) {
+export function matchObject(obj: any, query: any) {
+  const func = function (a: any, b: any, seen = new WeakMap()) {
     // same address
-    if (Object.is(m, n)) {
+    if (Object.is(a, b)) {
       return true;
     }
 
     // type mismatch
-    if (typeof m !== typeof n) {
+    if (typeof a !== typeof b) {
       return false;
     }
 
     // boolean, number, string, undefined
-    if (typeof n !== "object") {
-      return m === n;
+    if (typeof b !== "object") {
+      return a === b;
     }
 
     // null
-    if (n === null) {
-      return m === null;
+    if (b === null) {
+      return a === null;
     }
 
     // handle circular references
-    if (seen.has(n)) {
-      return seen.get(n) === m;
+    if (seen.has(b)) {
+      return seen.get(b) === a;
     }
-    seen.set(n, m);
+    seen.set(b, a);
 
     // include
-    if (Array.isArray(n)) {
-      if (!Array.isArray(m) || m.length < n.length) {
+    if (Array.isArray(b)) {
+      if (!Array.isArray(a) || a.length < b.length) {
         return false;
       }
-      for (const j of n) {
+      for (const j of b) {
         let isExists = false;
-        for (const i of m) {
+        for (const i of a) {
           if (func(i, j, seen)) {
             isExists = true;
             break;
@@ -120,48 +120,48 @@ export function compareObject(a: any, b: any) {
       return true;
     }
 
-    if (n instanceof Date) {
-      if (!(m instanceof Date)) {
+    if (b instanceof Date) {
+      if (!(a instanceof Date)) {
         return false;
       }
-      return m.valueOf() === n.valueOf();
+      return a.valueOf() === b.valueOf();
     }
 
     // include
-    if (n instanceof Set) {
-      if (!(m instanceof Set) || m.size < n.size) {
+    if (b instanceof Set) {
+      if (!(a instanceof Set) || a.size < b.size) {
         return false;
       }
-      return func(Array.from(m), Array.from(n), seen);
+      return func(Array.from(a), Array.from(b), seen);
     }
 
     // include
-    if (n instanceof Map) {
-      if (!(m instanceof Map) || m.size < n.size) {
+    if (b instanceof Map) {
+      if (!(a instanceof Map) || a.size < b.size) {
         return false;
       }
-      for (const [key, value] of n) {
-        if (!m.has(key) || !func(m.get(key), value, seen)) {
+      for (const [key, value] of b) {
+        if (!a.has(key) || !func(a.get(key), value, seen)) {
           return false;
         }
       }
       return true;
     }
 
-    if (Object.getPrototypeOf(m) !== Object.getPrototypeOf(n)) {
+    if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
       return false;
     }
 
     // plain object
-    const keysA = Object.keys(m);
-    const keysB = Object.keys(n);
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
 
     if (keysA.length < keysB.length) {
       return false;
     }
 
     for (const key of keysB) {
-      if (keysA.indexOf(key) === -1 || !func(m[key], n[key], seen)) {
+      if (keysA.indexOf(key) === -1 || !func(a[key], b[key], seen)) {
         return false;
       }
     }
@@ -169,5 +169,5 @@ export function compareObject(a: any, b: any) {
     return true;
   };
 
-  return func(a, b);
+  return func(obj, query);
 }

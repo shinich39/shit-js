@@ -16,7 +16,7 @@ export function getRandomFloat(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 /**
- * Use mulberry32 PRNG
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
  * 
  * @returns min <= n < max
  */
@@ -30,7 +30,7 @@ export function getRandomInt(min: number, max: number) {
   return Math.floor(getRandomFloat(min, max));
 }
 /**
- * Use mulberry32 PRNG
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
  * 
  * @returns min <= n < max
  */

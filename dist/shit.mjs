@@ -316,31 +316,31 @@ function getObjectValue(obj, key) {
   }
   return cur;
 }
-function compareObject(a, b) {
-  const func = function(m, n, seen = /* @__PURE__ */ new WeakMap()) {
-    if (Object.is(m, n)) {
+function matchObject(obj, query) {
+  const func = function(a, b, seen = /* @__PURE__ */ new WeakMap()) {
+    if (Object.is(a, b)) {
       return true;
     }
-    if (typeof m !== typeof n) {
+    if (typeof a !== typeof b) {
       return false;
     }
-    if (typeof n !== "object") {
-      return m === n;
+    if (typeof b !== "object") {
+      return a === b;
     }
-    if (n === null) {
-      return m === null;
+    if (b === null) {
+      return a === null;
     }
-    if (seen.has(n)) {
-      return seen.get(n) === m;
+    if (seen.has(b)) {
+      return seen.get(b) === a;
     }
-    seen.set(n, m);
-    if (Array.isArray(n)) {
-      if (!Array.isArray(m) || m.length < n.length) {
+    seen.set(b, a);
+    if (Array.isArray(b)) {
+      if (!Array.isArray(a) || a.length < b.length) {
         return false;
       }
-      for (const j of n) {
+      for (const j of b) {
         let isExists = false;
-        for (const i of m) {
+        for (const i of a) {
           if (func(i, j, seen)) {
             isExists = true;
             break;
@@ -352,45 +352,45 @@ function compareObject(a, b) {
       }
       return true;
     }
-    if (n instanceof Date) {
-      if (!(m instanceof Date)) {
+    if (b instanceof Date) {
+      if (!(a instanceof Date)) {
         return false;
       }
-      return m.valueOf() === n.valueOf();
+      return a.valueOf() === b.valueOf();
     }
-    if (n instanceof Set) {
-      if (!(m instanceof Set) || m.size < n.size) {
+    if (b instanceof Set) {
+      if (!(a instanceof Set) || a.size < b.size) {
         return false;
       }
-      return func(Array.from(m), Array.from(n), seen);
+      return func(Array.from(a), Array.from(b), seen);
     }
-    if (n instanceof Map) {
-      if (!(m instanceof Map) || m.size < n.size) {
+    if (b instanceof Map) {
+      if (!(a instanceof Map) || a.size < b.size) {
         return false;
       }
-      for (const [key, value] of n) {
-        if (!m.has(key) || !func(m.get(key), value, seen)) {
+      for (const [key, value] of b) {
+        if (!a.has(key) || !func(a.get(key), value, seen)) {
           return false;
         }
       }
       return true;
     }
-    if (Object.getPrototypeOf(m) !== Object.getPrototypeOf(n)) {
+    if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
       return false;
     }
-    const keysA = Object.keys(m);
-    const keysB = Object.keys(n);
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
     if (keysA.length < keysB.length) {
       return false;
     }
     for (const key of keysB) {
-      if (keysA.indexOf(key) === -1 || !func(m[key], n[key], seen)) {
+      if (keysA.indexOf(key) === -1 || !func(a[key], b[key], seen)) {
         return false;
       }
     }
     return true;
   };
-  return func(a, b);
+  return func(obj, query);
 }
 
 // src/modules/path.ts
@@ -543,7 +543,7 @@ var Quotes = {
   "\u201E": "\u201C",
   "\xAB": "\xBB"
 };
-function getUUID() {
+function getUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
     const v = c === "x" ? r : r & 3 | 8;
@@ -566,7 +566,7 @@ function getInts(str) {
 function getFloats(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
-function getXORString(str, salt) {
+function getXorString(str, salt) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
@@ -589,7 +589,7 @@ function toRegExp(str) {
   const pattern = parts.slice(1).join("/");
   return new RegExp(pattern, flags);
 }
-function compareString(from, to) {
+function getDiffs(from, to) {
   const backtrack = function(from2, to2, trace2, d) {
     const result = [];
     let x = from2.length;
@@ -666,7 +666,7 @@ function compareString(from, to) {
   return [];
 }
 function matchStrings(from, to) {
-  const diff = compareString(from, to);
+  const diff = getDiffs(from, to);
   let matches = 0;
   let insertions = 0;
   let deletions = 0;
@@ -774,8 +774,6 @@ export {
   checkBit,
   clearBit,
   clone,
-  compareObject,
-  compareString,
   debounce,
   getAdjustedSize,
   getAllCombinations,
@@ -783,6 +781,7 @@ export {
   getClampedNumber,
   getContainedSize,
   getCoveredSize,
+  getDiffs,
   getDirName,
   getExtName,
   getFloats,
@@ -807,12 +806,13 @@ export {
   getRootPath,
   getSumValue,
   getType,
-  getUUID,
-  getXORString,
+  getUuid,
+  getXorString,
   groupBy,
   humanizeFileSize,
   isNumeric,
   joinPaths,
+  matchObject,
   matchStrings,
   normalizeString,
   plotBy,

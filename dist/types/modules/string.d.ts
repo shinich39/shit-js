@@ -1,3 +1,12 @@
+/**
+ * @example
+ * new RegExp(
+ *   Object.entries(Brackets)
+ *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
+ *     .map((e) => `\\${e}`)
+ *     .join("|")
+ * )
+ */
 export declare const Brackets: {
     readonly "(": ")";
     readonly "[": "]";
@@ -26,6 +35,15 @@ export declare const Brackets: {
     readonly "\u27E8": "⟩";
     readonly "\u2770": "❱";
 };
+/**
+ * @example
+ * new RegExp(
+ *   Object.entries(Quotes)
+ *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
+ *     .map((e) => `\\${e}`)
+ *     .join("|")
+ * )
+ */
 export declare const Quotes: {
     readonly "'": "'";
     readonly "\"": "\"";
@@ -39,9 +57,9 @@ export declare const Quotes: {
 };
 /**
  * @example
- * const uuid = getUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
+ * const uuid = getUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export declare function getUUID(): string;
+export declare function getUuid(): string;
 /**
  * @example
  * const result = getRandomChar("abc"); // "a"
@@ -56,10 +74,10 @@ export declare function getInts(str: string): number[];
 export declare function getFloats(str: string): number[];
 /**
  * @example
- * const encrypted = getXORString("text", "this is salt!");
- * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
+ * const encrypted = getXorString("text", "this is salt!");
+ * const decrypted = getXorString(encrypted, "this is salt!"); // "text"
  */
-export declare function getXORString(str: string, salt: string): string;
+export declare function getXorString(str: string, salt: string): string;
 /**
  * 1. Change full-width characters to half-width characters
  * 2. Change all type of whitespaces to " "
@@ -71,7 +89,7 @@ export declare function normalizeString(str: string): string;
  */
 export declare function toRegExp(str: string): RegExp;
 /**
- * myers Algorithm
+ * myers algorithm
  *
  * \-1: number of deleted characters
  *
@@ -80,9 +98,9 @@ export declare function toRegExp(str: string): RegExp;
  * 1: number of inserted characters
  *
  * @example
- * const result = compareString("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export declare function compareString(from: string, to: string): [0 | 1 | -1, string][];
+export declare function getDiffs(from: string, to: string): [0 | 1 | -1, string][];
 /**
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";

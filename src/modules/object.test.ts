@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import { clone, compareObject, getObjectValue } from "./object";
+import { clone, matchObject, getObjectValue } from "./object";
 
 describe(path.basename(import.meta.filename), () => {
 
@@ -24,7 +24,7 @@ describe(path.basename(import.meta.filename), () => {
     eq(getObjectValue(a, "obj.j"), 3);
   });
 
-  test("compareObject", () => {
+  test("matchObject", () => {
     const a = {
       str: "abc",
       num: 1,
@@ -44,77 +44,77 @@ describe(path.basename(import.meta.filename), () => {
     };
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         str: "abc",
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         str: "ac",
       }),
       false
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         num: 1,
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         num: 2,
       }),
       false
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         undefined: undefined,
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         undefined: null,
       }),
       false
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         null: null,
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         null: undefined,
       }),
       false
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         arr: [1, 2, 3],
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         arr: [1, 2, 4],
       }),
       false
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         obj: {
           key: "value",
         },
@@ -123,7 +123,7 @@ describe(path.basename(import.meta.filename), () => {
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         obj: {
           key: "val",
         },
@@ -132,7 +132,7 @@ describe(path.basename(import.meta.filename), () => {
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         obj: {
           key: 1,
         },
@@ -141,21 +141,21 @@ describe(path.basename(import.meta.filename), () => {
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         set: new Set([1, 3]),
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         set: new Set([1, 3, 4]),
       }),
       false
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         map: new Map([
           [1, "one"],
           [2, "two"],
@@ -166,14 +166,14 @@ describe(path.basename(import.meta.filename), () => {
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         map: new Map([[3, "three"]]),
       }),
       true
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         map: new Map([
           [1, "one"],
           [3, "three"],
@@ -184,7 +184,7 @@ describe(path.basename(import.meta.filename), () => {
     );
 
     eq(
-      compareObject(a, {
+      matchObject(a, {
         map: new Map([[4, "four"]]),
       }),
       false

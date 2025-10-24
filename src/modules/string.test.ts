@@ -4,13 +4,13 @@ import path from "node:path";
 import fs from "node:fs";
 import {
   Brackets,
-  compareString,
+  getDiffs,
   getFloats,
   getInts,
   getRandomChar,
   getRandomString,
-  getUUID,
-  getXORString,
+  getUuid,
+  getXorString,
   matchStrings,
   normalizeString,
   Quotes,
@@ -19,8 +19,8 @@ import {
 
 describe(path.basename(import.meta.filename), () => {
 
-  test("getUUID", () => {
-    eq(getUUID().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
+  test("getUuid", () => {
+    eq(getUuid().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
   });
 
   test("getRandomChar", () => {
@@ -42,11 +42,11 @@ describe(path.basename(import.meta.filename), () => {
     eq(getFloats("abc 39 39.39 miku"), [39, 39.39]);
   });
 
-  test("getXORString", () => {
+  test("getXorString", () => {
     const orig = "Hello, world!";
-    const encrypted = getXORString(orig, "this is salt!");
+    const encrypted = getXorString(orig, "this is salt!");
     eq(encrypted !== orig, true);
-    const decrypted = getXORString(encrypted, "this is salt!");
+    const decrypted = getXorString(encrypted, "this is salt!");
     eq(decrypted, orig);
   });
 
@@ -60,10 +60,10 @@ describe(path.basename(import.meta.filename), () => {
     eq(toRegExp("/a[\\\\\/]c/gi"), /a[\\/]c/gi);
   });
 
-  test("compareString", () => {
+  test("getDiffs", () => {
     const b = "sit amet, adipiscing";
     const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-    const result = compareString(a, b);
+    const result = getDiffs(a, b);
 
     eq(result, [
       [ -1, 'Lorem ip' ],
@@ -95,11 +95,18 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("Brackets", () => {
-    const result = "( )[ ]{ }< >〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(toRegExp(
-      "/" + [...Object.values(Brackets), ...Object.keys(Brackets)].map((e) => "\\" + e).join("|") + "/"
-    ));
+    const result = "( )[ ]{ }< >〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(
+      new RegExp(
+        Object.entries(Brackets)
+          .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
+          .map((e) => `\\${e}`)
+          .join("|")
+      )
+    )
+    .join("")
+    .trim();
 
-    eq(result.join("").trim(), "");
+    eq(result, "");
   })
 });
 

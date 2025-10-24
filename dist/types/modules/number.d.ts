@@ -3,7 +3,7 @@
  */
 export declare function getRandomFloat(min: number, max: number): number;
 /**
- * Use mulberry32 PRNG
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
  *
  * @returns min <= n < max
  */
@@ -13,7 +13,7 @@ export declare function getRandomFloatWithSeed(min: number, max: number, seed: n
  */
 export declare function getRandomInt(min: number, max: number): number;
 /**
- * Use mulberry32 PRNG
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
  *
  * @returns min <= n < max
  */

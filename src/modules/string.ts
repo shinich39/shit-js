@@ -1,3 +1,12 @@
+/**
+ * @example
+ * new RegExp(
+ *   Object.entries(Brackets)
+ *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
+ *     .map((e) => `\\${e}`)
+ *     .join("|")
+ * )
+ */
 export const Brackets = {
   "(": ")",
   "[": "]",
@@ -26,7 +35,15 @@ export const Brackets = {
   "⟨": "⟩",
   "❰": "❱",
 } as const;
-
+/**
+ * @example
+ * new RegExp(
+ *   Object.entries(Quotes)
+ *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
+ *     .map((e) => `\\${e}`)
+ *     .join("|")
+ * )
+ */
 export const Quotes = {
   "'": "'",
   "\"": "\"",
@@ -38,12 +55,11 @@ export const Quotes = {
   "„": "“",
   "«": "»",
 } as const;
-
 /**
  * @example
- * const uuid = getUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
+ * const uuid = getUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export function getUUID() {
+export function getUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -78,10 +94,10 @@ export function getFloats(str: string) {
 }
 /**
  * @example
- * const encrypted = getXORString("text", "this is salt!");
- * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
+ * const encrypted = getXorString("text", "this is salt!");
+ * const decrypted = getXorString(encrypted, "this is salt!"); // "text"
  */
-export function getXORString(str: string, salt: string) {
+export function getXorString(str: string, salt: string) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
@@ -117,7 +133,7 @@ export function toRegExp(str: string) {
   return new RegExp(pattern, flags);
 }
 /**
- * myers Algorithm
+ * myers algorithm
  *
  * \-1: number of deleted characters
  *
@@ -126,9 +142,9 @@ export function toRegExp(str: string) {
  * 1: number of inserted characters
  * 
  * @example
- * const result = compareString("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export function compareString(from: string, to: string) {
+export function getDiffs(from: string, to: string) {
 
   const backtrack = function(
     from: string,
@@ -264,7 +280,7 @@ export function compareString(from: string, to: string) {
  * // }
  */
 export function matchStrings(from: string, to: string) {
-  const diff = compareString(from, to);
+  const diff = getDiffs(from, to);
   
   let matches = 0;
   let insertions = 0;
