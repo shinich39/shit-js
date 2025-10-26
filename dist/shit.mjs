@@ -217,22 +217,6 @@ function getLoopedNumber(num, min, max) {
   }
   return num + min;
 }
-function calcStringSize(str) {
-  let result = 0;
-  for (let i = 0; i < str.length; i++) {
-    const code = str.charCodeAt(i);
-    if (code <= 127) {
-      result += 1;
-    } else if (code <= 2047) {
-      result += 2;
-    } else if (code <= 65535) {
-      result += 3;
-    } else {
-      result += 4;
-    }
-  }
-  return result;
-}
 function toBytes(bytes, format) {
   if (format === "Bytes") {
     return bytes;
@@ -706,6 +690,22 @@ function matchStrings(from, to) {
     deletions
   };
 }
+function getStringSize(str) {
+  let result = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code <= 127) {
+      result += 1;
+    } else if (code <= 2047) {
+      result += 2;
+    } else if (code <= 65535) {
+      result += 3;
+    } else {
+      result += 4;
+    }
+  }
+  return result;
+}
 
 // src/modules/type.ts
 function getType(e) {
@@ -776,7 +776,6 @@ export {
   Brackets,
   QueueWorker,
   Quotes,
-  calcStringSize,
   checkBit,
   clearBit,
   clone,
@@ -811,6 +810,7 @@ export {
   getRandomString,
   getRelativePath,
   getRootPath,
+  getStringSize,
   getSumValue,
   getType,
   getUuid,

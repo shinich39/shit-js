@@ -5,7 +5,6 @@ import fs from "node:fs";
 import {
   getClampedNumber,
   getLoopedNumber,
-  calcStringSize,
   getContainedSize,
   getCoveredSize,
   getAdjustedSize,
@@ -77,12 +76,6 @@ describe(path.basename(import.meta.filename), () => {
     eq(getLoopedNumber(10, 5, 10), 5);
   });
 
-  test("calcStringSize", () => {
-    eq(calcStringSize("abc"), 3);
-    eq(calcStringSize("ㄱㄴㄷ"), 9);
-    eq(calcStringSize("가나다"), 9);
-  });
-
   test("toBytes", () => {
     eq(toBytes(1, "MB"), 1024 * 1024);
     eq(toBytes(1, "GB"), 1024 * 1024 * 1024);
@@ -104,10 +97,12 @@ describe(path.basename(import.meta.filename), () => {
 
   test("getContainedSize", () => {
     eq(getContainedSize(1, 1, 2, 1), [1, 1]);
+    eq(getContainedSize(100, 100, 200, 100), [100, 100]);
   });
 
   test("getCoveredSize", () => {
     eq(getCoveredSize(1, 1, 2, 1), [2, 2]);
+    eq(getCoveredSize(100, 100, 200, 100), [200, 200]);
   });
 
   test("getAdjustedSize", () => {

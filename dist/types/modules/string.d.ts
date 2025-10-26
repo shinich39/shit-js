@@ -129,4 +129,11 @@ export declare function matchStrings(from: string, to: string): {
     insertions: number;
     deletions: number;
 };
+/**
+ * @returns bytes
+ * @example
+ * const bytes = getStringSize("abc"); // 3
+ * const bytes = getStringSize("ㄱㄴㄷ"); // 9
+ */
+export declare function getStringSize(str: string): number;
 //# sourceMappingURL=string.d.ts.map

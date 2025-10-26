@@ -9,6 +9,7 @@ import {
   getInts,
   getRandomChar,
   getRandomString,
+  getStringSize,
   getUuid,
   getXorString,
   matchStrings,
@@ -107,7 +108,14 @@ describe(path.basename(import.meta.filename), () => {
     .trim();
 
     eq(result, "");
-  })
+  });
+
+  test("getStringSize", () => {
+    eq(getStringSize("abc"), 3);
+    eq(getStringSize("ㄱㄴㄷ"), 9);
+    eq(getStringSize("가나다"), 9);
+  });
+
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

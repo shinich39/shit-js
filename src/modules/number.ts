@@ -69,29 +69,9 @@ export function getLoopedNumber(num: number, min: number, max: number) {
   return num + min;
 }
 /**
- * @returns bytes
+ * @example
+ * const result = toBytes(1, "MB"); // 1024 * 1024
  */
-export function calcStringSize(str: string) {
-  let result = 0;
-  for (let i = 0; i < str.length; i++) {
-    const code = str.charCodeAt(i);
-    if (code <= 0x7f) {
-      // 1 byte for ASCII
-      result += 1;
-    } else if (code <= 0x7ff) {
-      // 2 bytes for characters in range U+0080 to U+07FF
-      result += 2;
-    } else if (code <= 0xffff) {
-      // 3 bytes for characters in range U+0800 to U+FFFF
-      result += 3;
-    } else {
-      // 4 bytes for characters in range U+10000 to U+10FFFF
-      result += 4;
-    }
-  }
-  return result;
-}
-
 export function toBytes(
   bytes: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
@@ -108,7 +88,10 @@ export function toBytes(
 
   return bytes * Math.pow(1024, i + 1);
 }
-
+/**
+ * @example
+ * const result = toFileSize(1024 * 1024, "MB"); // 1
+ */
 export function toFileSize(
   bytes: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
@@ -125,7 +108,10 @@ export function toFileSize(
 
   return bytes * Math.pow(1024, -(i + 1));
 }
-
+/**
+ * @example
+ * const result = humanizeFileSize(1024 * 1024, "Bytes"); // "1.00 MB"
+ */
 export function humanizeFileSize(
   num: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
@@ -145,7 +131,10 @@ export function humanizeFileSize(
     size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i]
   );
 }
-
+/**
+ * @example
+ * const result = getContainedSize(100, 100, 200, 100); // [100, 100]
+ */
 export function getContainedSize(
   srcWidth: number,
   srcHeight: number,
@@ -157,7 +146,10 @@ export function getContainedSize(
     ? [dstHeight * aspectRatio, dstHeight]
     : [dstWidth, dstWidth / aspectRatio];
 }
-
+/**
+ * @example
+ * const result = getCoveredSize(100, 100, 200, 100); // [200, 200]
+ */
 export function getCoveredSize(
   srcWidth: number,
   srcHeight: number,
@@ -169,7 +161,10 @@ export function getCoveredSize(
     ? [dstWidth, dstWidth / aspectRatio]
     : [dstHeight * aspectRatio, dstHeight];
 }
-
+/**
+ * @example
+ * const result = getAdjustedSize(175, 175, 200, 200, 100, 100); // [175, 175]
+ */
 export function getAdjustedSize(
   srcWidth: number,
   srcHeight: number,

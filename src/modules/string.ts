@@ -333,3 +333,29 @@ export function matchStrings(from: string, to: string) {
     deletions,
   };
 }
+/**
+ * @returns bytes
+ * @example
+ * const bytes = getStringSize("abc"); // 3
+ * const bytes = getStringSize("ㄱㄴㄷ"); // 9
+ */
+export function getStringSize(str: string) {
+  let result = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code <= 0x7f) {
+      // 1 byte for ASCII
+      result += 1;
+    } else if (code <= 0x7ff) {
+      // 2 bytes for characters in range U+0080 to U+07FF
+      result += 2;
+    } else if (code <= 0xffff) {
+      // 3 bytes for characters in range U+0800 to U+FFFF
+      result += 3;
+    } else {
+      // 4 bytes for characters in range U+10000 to U+10FFFF
+      result += 4;
+    }
+  }
+  return result;
+}

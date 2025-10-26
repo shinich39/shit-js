@@ -24,7 +24,6 @@ var Shit = (() => {
     Brackets: () => Brackets,
     QueueWorker: () => QueueWorker,
     Quotes: () => Quotes,
-    calcStringSize: () => calcStringSize,
     checkBit: () => checkBit,
     clearBit: () => clearBit,
     clone: () => clone,
@@ -59,6 +58,7 @@ var Shit = (() => {
     getRandomString: () => getRandomString,
     getRelativePath: () => getRelativePath,
     getRootPath: () => getRootPath,
+    getStringSize: () => getStringSize,
     getSumValue: () => getSumValue,
     getType: () => getType,
     getUuid: () => getUuid,
@@ -301,22 +301,6 @@ var Shit = (() => {
       num = num % max;
     }
     return num + min;
-  }
-  function calcStringSize(str) {
-    let result = 0;
-    for (let i = 0; i < str.length; i++) {
-      const code = str.charCodeAt(i);
-      if (code <= 127) {
-        result += 1;
-      } else if (code <= 2047) {
-        result += 2;
-      } else if (code <= 65535) {
-        result += 3;
-      } else {
-        result += 4;
-      }
-    }
-    return result;
   }
   function toBytes(bytes, format) {
     if (format === "Bytes") {
@@ -790,6 +774,22 @@ var Shit = (() => {
       insertions,
       deletions
     };
+  }
+  function getStringSize(str) {
+    let result = 0;
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      if (code <= 127) {
+        result += 1;
+      } else if (code <= 2047) {
+        result += 2;
+      } else if (code <= 65535) {
+        result += 3;
+      } else {
+        result += 4;
+      }
+    }
+    return result;
   }
 
   // src/modules/type.ts
