@@ -19,17 +19,19 @@ export declare function debounce(func: (...args: any[]) => any, delay: number): 
 /**
  * @example
  * const worker = new QueueWorker();
- * worker.add(() => console.log('Task 1'));
- * worker.add(async () => {
+ * worker.add((index) => console.log(`Task ${index}`));
+ * worker.add(async (index) => {
  *   await fetch('/api/data');
- *   console.log('Task 2');
+ *   console.log(`Task ${index}`);
  * });
  */
 export declare class QueueWorker {
     inProgress: boolean;
-    queue: (() => void | Promise<void>)[];
+    queue: ((index: number) => void | Promise<void>)[];
+    _n: number;
     constructor();
-    add(func: () => void | Promise<void>): void;
+    add(func: (index: number) => void | Promise<void>): void;
     run(): Promise<void>;
+    stop(): Promise<void>;
 }
 //# sourceMappingURL=async.d.ts.map

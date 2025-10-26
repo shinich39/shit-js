@@ -53,23 +53,26 @@ export function debounce(
 /**
  * @example
  * const worker = new QueueWorker();
- * worker.add(() => console.log('Task 1'));
- * worker.add(async () => {
+ * worker.add((index) => console.log(`Task ${index}`));
+ * worker.add(async (index) => {
  *   await fetch('/api/data');
- *   console.log('Task 2');
+ *   console.log(`Task ${index}`);
  * });
  */
 export class QueueWorker {
   inProgress: boolean;
-  queue: (() => void | Promise<void>)[];
+  queue: ((index: number) => void | Promise<void>)[];
+  _n: number;
 
   constructor() {
     this.inProgress = false;
     this.queue = [];
+    this._n = 0;
   }
 
-  add(func: () => void | Promise<void>): void {
+  add(func: (index: number) => void | Promise<void>): void {
     this.queue.push(func);
+    this._n++;
     if (!this.inProgress) {
       this.run();
     }
@@ -78,8 +81,13 @@ export class QueueWorker {
   async run(): Promise<void> {
     this.inProgress = true;
     while(this.queue.length > 0) {
-      await this.queue.shift()!();
+      await this.queue.shift()!(this._n - this.queue.length - 1);
     }
+    this.inProgress = false;
+  }
+
+  async stop() {
+    this.queue = [];
     this.inProgress = false;
   }
 }

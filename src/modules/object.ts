@@ -64,13 +64,10 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  * equals: undefined, null, boolean, number, string, Date,
  * 
  * @example
- * const result = matchObject({
- *   str: "abc",
- *   num: 1
- * }, {
- *   num: 1,
- * });
- * // true
+ * const result = matchObject(
+ *   { str: "abc", num: 1 }, 
+ *   { num: 1 }
+ * ); // true
  */
 export function matchObject(obj: any, query: any) {
   const func = function (a: any, b: any, seen = new WeakMap()) {

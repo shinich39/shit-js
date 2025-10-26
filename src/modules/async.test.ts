@@ -31,10 +31,9 @@ describe(path.basename(import.meta.filename), () => {
   // test("QueueWorker", async () => {
   //   const worker = new QueueWorker();
   //   for (let i = 0; i < 3; i++) {
-  //     worker.add(async () => {
+  //     worker.add(async function (index) {
   //       await sleep(1000);
-  //       const isEnd = worker.queue.length === 0;
-  //       console.log(`Task ${i}, isEnd: ${isEnd}`);
+  //       console.log(`Task ${i}, Index: ${index}, Queue: ${worker.queue.length}`);
   //     });
   //   }
   // });

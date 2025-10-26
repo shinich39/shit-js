@@ -38,29 +38,34 @@ export declare function getModeCount<T>(arr: T[]): number;
 export declare function getModeValue<T>(arr: T[]): T | undefined;
 /**
  * @example
- * const result = getAllCombinations([1,2]); // [[1], [2], [1,2]]
+ * const result = getAllCombinations([1, 2]);
+ * // [[1], [2], [1, 2]]
  */
 export declare function getAllCombinations<T>(arr: T[]): T[][];
+/**
+ * @example
+ * const result = getAllCases(["a", "b", "c"], [1]);
+ * // [["a", 1],["b", 1],["c", 1]]
+ */
+export declare function getAllCases<T>(...args: T[][]): T[][];
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  *
  * @example
- * const result = shuffleArray([1,2,3]); // [2, 1, 3]
+ * const result = shuffleArray([1, 2, 3]);
+ * // [2, 1, 3]
  */
 export declare function shuffleArray<T>(arr: T[]): T[];
 /**
  * @example
- * const result = uniqueBy([1,2,2,3], (item) => item); // [1,2,3]
+ * const result = uniqueBy([1, 2, 2, 3], (item) => item);
+ * // [1, 2, 3]
  */
 export declare function uniqueBy<T>(arr: T[], func: (item: T, index: number, array: T[]) => any): T[];
 /**
  * @example
- * const result = groupBy([1,2,2,3], (item) => item); // { 1: [1], 2: [2,2], 3: [3,3]}
+ * const result = groupBy([1, 2, 2, 3], (item) => item);
+ * // { 1: [1], 2: [2, 2], 3: [3]}
  */
 export declare function groupBy<T>(arr: T[], func: (item: T, index: number, array: T[]) => string): Record<string, T[]>;
-/**
- * @example
- * const result = plotBy(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
- */
-export declare function plotBy<T>(...args: T[][]): T[][];
 //# sourceMappingURL=array.d.ts.map

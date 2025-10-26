@@ -51,6 +51,34 @@ function getAllCombinations(arr) {
   }
   return result;
 }
+function getAllCases(...args) {
+  if (args.length === 0) {
+    return [];
+  }
+  const indexes = Array(args.length).fill(0);
+  const result = [[]];
+  for (let i2 = 0; i2 < args.length; i2++) {
+    if (args[i2].length === 0) {
+      throw new Error(`Invalid argument: argument cannot be empty`);
+    }
+    const item = args[i2][indexes[i2]];
+    result[0].push(item);
+  }
+  let i = args.length - 1;
+  while (true) {
+    if (indexes[i] < args[i].length - 1) {
+      indexes[i] += 1;
+      result.push(args.map((arg, idx) => arg[indexes[idx]]));
+      i = args.length - 1;
+    } else {
+      indexes[i] = 0;
+      i--;
+      if (i < 0) {
+        return result;
+      }
+    }
+  }
+}
 function shuffleArray(arr) {
   let i = arr.length;
   while (i > 0) {
@@ -81,34 +109,6 @@ function groupBy(arr, func) {
     }
   }
   return group;
-}
-function plotBy(...args) {
-  if (args.length === 0) {
-    return [];
-  }
-  const indexes = Array(args.length).fill(0);
-  const result = [[]];
-  for (let i2 = 0; i2 < args.length; i2++) {
-    if (args[i2].length === 0) {
-      throw new Error(`Invalid argument: argument cannot be empty`);
-    }
-    const item = args[i2][indexes[i2]];
-    result[0].push(item);
-  }
-  let i = args.length - 1;
-  while (true) {
-    if (indexes[i] < args[i].length - 1) {
-      indexes[i] += 1;
-      result.push(args.map((arg, idx) => arg[indexes[idx]]));
-      i = args.length - 1;
-    } else {
-      indexes[i] = 0;
-      i--;
-      if (i < 0) {
-        return result;
-      }
-    }
-  }
 }
 
 // src/modules/async.ts
@@ -142,9 +142,11 @@ var QueueWorker = class {
   constructor() {
     this.inProgress = false;
     this.queue = [];
+    this._n = 0;
   }
   add(func) {
     this.queue.push(func);
+    this._n++;
     if (!this.inProgress) {
       this.run();
     }
@@ -152,8 +154,12 @@ var QueueWorker = class {
   async run() {
     this.inProgress = true;
     while (this.queue.length > 0) {
-      await this.queue.shift()();
+      await this.queue.shift()(this._n - this.queue.length - 1);
     }
+    this.inProgress = false;
+  }
+  async stop() {
+    this.queue = [];
     this.inProgress = false;
   }
 };
@@ -776,6 +782,7 @@ export {
   clone,
   debounce,
   getAdjustedSize,
+  getAllCases,
   getAllCombinations,
   getBaseName,
   getClampedNumber,
@@ -815,7 +822,6 @@ export {
   matchObject,
   matchStrings,
   normalizeString,
-  plotBy,
   retry,
   setBit,
   shuffleArray,

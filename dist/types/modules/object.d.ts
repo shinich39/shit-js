@@ -16,13 +16,10 @@ export declare function getObjectValue(obj: Record<string, any>, key: string): a
  * equals: undefined, null, boolean, number, string, Date,
  *
  * @example
- * const result = matchObject({
- *   str: "abc",
- *   num: 1
- * }, {
- *   num: 1,
- * });
- * // true
+ * const result = matchObject(
+ *   { str: "abc", num: 1 },
+ *   { num: 1 }
+ * ); // true
  */
 export declare function matchObject(obj: any, query: any): boolean;
 //# sourceMappingURL=object.d.ts.map

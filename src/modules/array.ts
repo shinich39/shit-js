@@ -71,7 +71,8 @@ export function getModeValue<T>(arr: T[]) {
 }
 /**
  * @example
- * const result = getAllCombinations([1,2]); // [[1], [2], [1,2]]
+ * const result = getAllCombinations([1, 2]);
+ * // [[1], [2], [1, 2]]
  */
 export function getAllCombinations<T>(arr: T[]) {
   const result: T[][] = [];
@@ -88,69 +89,11 @@ export function getAllCombinations<T>(arr: T[]) {
   return result;
 }
 /**
- * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
- * 
  * @example
- * const result = shuffleArray([1,2,3]); // [2, 1, 3]
+ * const result = getAllCases(["a", "b", "c"], [1]);
+ * // [["a", 1],["b", 1],["c", 1]]
  */
-export function shuffleArray<T>(arr: T[]) {
-  let i = arr.length;
-
-  while (i > 0) {
-    const j = Math.floor(Math.random() * i);
-
-    i--;
-
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-
-  return arr;
-}
-/**
- * @example
- * const result = uniqueBy([1,2,2,3], (item) => item); // [1,2,3]
- */
-export function uniqueBy<T>(
-  arr: T[],
-  func: (item: T, index: number, array: T[]) => any
-): T[] {
-  const map = new Map();
-
-  for (let i = 0; i < arr.length; i++) {
-    const key = func(arr[i], i, arr);
-
-    if (!map.has(key)) {
-      map.set(key, arr[i]);
-    }
-  }
-
-  return Array.from(map.values()) as T[];
-}
-/**
- * @example
- * const result = groupBy([1,2,2,3], (item) => item); // { 1: [1], 2: [2,2], 3: [3,3]}
- */
-export function groupBy<T>(
-  arr: T[],
-  func: (item: T, index: number, array: T[]) => string
-) {
-  const group: Record<string, T[]> = {};
-  for (let i = 0; i < arr.length; i++) {
-    const item = arr[i],
-      key = func(item, i, arr);
-    if (!group[key]) {
-      group[key] = [item];
-    } else {
-      group[key].push(item);
-    }
-  }
-  return group;
-}
-/**
- * @example
- * const result = plotBy(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
- */
-export function plotBy<T>(...args: T[][]): T[][] {
+export function getAllCases<T>(...args: T[][]): T[][] {
   if (args.length === 0) {
     return [];
   }
@@ -191,4 +134,66 @@ export function plotBy<T>(...args: T[][]): T[][] {
       }
     }
   }
+}
+/**
+ * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * 
+ * @example
+ * const result = shuffleArray([1, 2, 3]);
+ * // [2, 1, 3]
+ */
+export function shuffleArray<T>(arr: T[]) {
+  let i = arr.length;
+
+  while (i > 0) {
+    const j = Math.floor(Math.random() * i);
+
+    i--;
+
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  return arr;
+}
+/**
+ * @example
+ * const result = uniqueBy([1, 2, 2, 3], (item) => item);
+ * // [1, 2, 3]
+ */
+export function uniqueBy<T>(
+  arr: T[],
+  func: (item: T, index: number, array: T[]) => any
+): T[] {
+  const map = new Map();
+
+  for (let i = 0; i < arr.length; i++) {
+    const key = func(arr[i], i, arr);
+
+    if (!map.has(key)) {
+      map.set(key, arr[i]);
+    }
+  }
+
+  return Array.from(map.values()) as T[];
+}
+/**
+ * @example
+ * const result = groupBy([1, 2, 2, 3], (item) => item);
+ * // { 1: [1], 2: [2, 2], 3: [3]}
+ */
+export function groupBy<T>(
+  arr: T[],
+  func: (item: T, index: number, array: T[]) => string
+) {
+  const group: Record<string, T[]> = {};
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i],
+      key = func(item, i, arr);
+    if (!group[key]) {
+      group[key] = [item];
+    } else {
+      group[key].push(item);
+    }
+  }
+  return group;
 }

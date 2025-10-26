@@ -12,7 +12,7 @@ import {
   getModeValueWithCount,
   getSumValue,
   groupBy,
-  plotBy,
+  getAllCases,
   shuffleArray,
   uniqueBy,
 } from "./array";
@@ -51,6 +51,26 @@ describe(path.basename(import.meta.filename), () => {
 
   test("getAllCombinations", () => {
     eq(getAllCombinations([1,2]), [[1], [2], [1,2]]);
+  });
+
+  test("getAllCases", () => {
+    eq(getAllCases<string|number>(["a", "b", "c"], [1]), [
+      ["a", 1],
+      ["b", 1],
+      ["c", 1],
+    ]);
+
+    eq(getAllCases(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
+      [ 'a', 'a', 'a' ], [ 'a', 'a', 'b' ],
+      [ 'a', 'a', 'c' ], [ 'a', 'c', 'a' ],
+      [ 'a', 'c', 'b' ], [ 'a', 'c', 'c' ],
+      [ 'b', 'a', 'a' ], [ 'b', 'a', 'b' ],
+      [ 'b', 'a', 'c' ], [ 'b', 'c', 'a' ],
+      [ 'b', 'c', 'b' ], [ 'b', 'c', 'c' ],
+      [ 'c', 'a', 'a' ], [ 'c', 'a', 'b' ],
+      [ 'c', 'a', 'c' ], [ 'c', 'c', 'a' ],
+      [ 'c', 'c', 'b' ], [ 'c', 'c', 'c' ]
+    ]);
   });
 
   test("shuffleArray", () => {
@@ -97,26 +117,6 @@ describe(path.basename(import.meta.filename), () => {
       "0": [0, 1, 2, 3, 4],
       "10": [5, 6, 7, 8, 9],
     });
-  });
-
-  test("plotBy", () => {
-    eq(plotBy<string|number>(["a", "b", "c"], [1]), [
-      ["a", 1],
-      ["b", 1],
-      ["c", 1],
-    ]);
-
-    eq(plotBy(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
-      [ 'a', 'a', 'a' ], [ 'a', 'a', 'b' ],
-      [ 'a', 'a', 'c' ], [ 'a', 'c', 'a' ],
-      [ 'a', 'c', 'b' ], [ 'a', 'c', 'c' ],
-      [ 'b', 'a', 'a' ], [ 'b', 'a', 'b' ],
-      [ 'b', 'a', 'c' ], [ 'b', 'c', 'a' ],
-      [ 'b', 'c', 'b' ], [ 'b', 'c', 'c' ],
-      [ 'c', 'a', 'a' ], [ 'c', 'a', 'b' ],
-      [ 'c', 'a', 'c' ], [ 'c', 'c', 'a' ],
-      [ 'c', 'c', 'b' ], [ 'c', 'c', 'c' ]
-    ]);
   });
 
 });
