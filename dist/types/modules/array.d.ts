@@ -38,16 +38,16 @@ export declare function getModeCount<T>(arr: T[]): number;
 export declare function getModeValue<T>(arr: T[]): T | undefined;
 /**
  * @example
- * const result = getAllCombinations([1, 2]);
+ * const result = getCombinations([1, 2]);
  * // [[1], [2], [1, 2]]
  */
-export declare function getAllCombinations<T>(arr: T[]): T[][];
+export declare function getCombinations<T>(arr: T[]): T[][];
 /**
  * @example
- * const result = getAllCases(["a", "b", "c"], [1]);
+ * const result = getCases(["a", "b", "c"], [1]);
  * // [["a", 1],["b", 1],["c", 1]]
  */
-export declare function getAllCases<T>(...args: T[][]): T[][];
+export declare function getCases<T>(...args: T[][]): T[][];
 /**
  * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  *

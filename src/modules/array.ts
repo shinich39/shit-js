@@ -71,10 +71,10 @@ export function getModeValue<T>(arr: T[]) {
 }
 /**
  * @example
- * const result = getAllCombinations([1, 2]);
+ * const result = getCombinations([1, 2]);
  * // [[1], [2], [1, 2]]
  */
-export function getAllCombinations<T>(arr: T[]) {
+export function getCombinations<T>(arr: T[]) {
   const result: T[][] = [];
   const n = arr.length;
   for (let i = 1; i < (1 << n); i++) {
@@ -90,10 +90,10 @@ export function getAllCombinations<T>(arr: T[]) {
 }
 /**
  * @example
- * const result = getAllCases(["a", "b", "c"], [1]);
+ * const result = getCases(["a", "b", "c"], [1]);
  * // [["a", 1],["b", 1],["c", 1]]
  */
-export function getAllCases<T>(...args: T[][]): T[][] {
+export function getCases<T>(...args: T[][]): T[][] {
   if (args.length === 0) {
     return [];
   }

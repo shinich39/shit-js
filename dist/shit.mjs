@@ -37,7 +37,7 @@ function getModeCount(arr) {
 function getModeValue(arr) {
   return getModeValueWithCount(arr)?.value;
 }
-function getAllCombinations(arr) {
+function getCombinations(arr) {
   const result = [];
   const n = arr.length;
   for (let i = 1; i < 1 << n; i++) {
@@ -51,7 +51,7 @@ function getAllCombinations(arr) {
   }
   return result;
 }
-function getAllCases(...args) {
+function getCases(...args) {
   if (args.length === 0) {
     return [];
   }
@@ -782,10 +782,10 @@ export {
   clone,
   debounce,
   getAdjustedSize,
-  getAllCases,
-  getAllCombinations,
   getBaseName,
+  getCases,
   getClampedNumber,
+  getCombinations,
   getContainedSize,
   getCoveredSize,
   getDiffs,

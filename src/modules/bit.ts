@@ -1,5 +1,5 @@
 /**
- * and !== 0
+ * and
  */
 export function checkBit(a: number, b: number) {
   return (a & b) !== 0;

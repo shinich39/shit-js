@@ -1,5 +1,5 @@
 /**
- * and !== 0
+ * and
  */
 export declare function checkBit(a: number, b: number): boolean;
 /**

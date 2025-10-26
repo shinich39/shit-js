@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import { QueueWorker, sleep } from "./async";
+import { QueueWorker, sleep, retry } from "./async";
 
 describe(path.basename(import.meta.filename), () => {
 

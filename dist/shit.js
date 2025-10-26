@@ -30,10 +30,10 @@ var Shit = (() => {
     clone: () => clone,
     debounce: () => debounce,
     getAdjustedSize: () => getAdjustedSize,
-    getAllCases: () => getAllCases,
-    getAllCombinations: () => getAllCombinations,
     getBaseName: () => getBaseName,
+    getCases: () => getCases,
     getClampedNumber: () => getClampedNumber,
+    getCombinations: () => getCombinations,
     getContainedSize: () => getContainedSize,
     getCoveredSize: () => getCoveredSize,
     getDiffs: () => getDiffs,
@@ -122,7 +122,7 @@ var Shit = (() => {
   function getModeValue(arr) {
     return getModeValueWithCount(arr)?.value;
   }
-  function getAllCombinations(arr) {
+  function getCombinations(arr) {
     const result = [];
     const n = arr.length;
     for (let i = 1; i < 1 << n; i++) {
@@ -136,7 +136,7 @@ var Shit = (() => {
     }
     return result;
   }
-  function getAllCases(...args) {
+  function getCases(...args) {
     if (args.length === 0) {
       return [];
     }

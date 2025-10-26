@@ -3,7 +3,7 @@ import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
 import {
-  getAllCombinations,
+  getCombinations,
   getMaxValue,
   getMeanValue,
   getMinValue,
@@ -11,9 +11,9 @@ import {
   getModeValue,
   getModeValueWithCount,
   getSumValue,
-  groupBy,
-  getAllCases,
+  getCases,
   shuffleArray,
+  groupBy,
   uniqueBy,
 } from "./array";
 
@@ -49,18 +49,18 @@ describe(path.basename(import.meta.filename), () => {
     eq(getModeCount(arr), 2);
   });
 
-  test("getAllCombinations", () => {
-    eq(getAllCombinations([1,2]), [[1], [2], [1,2]]);
+  test("getCombinations", () => {
+    eq(getCombinations([1,2]), [[1], [2], [1,2]]);
   });
 
-  test("getAllCases", () => {
-    eq(getAllCases<string|number>(["a", "b", "c"], [1]), [
+  test("getCases", () => {
+    eq(getCases<string|number>(["a", "b", "c"], [1]), [
       ["a", 1],
       ["b", 1],
       ["c", 1],
     ]);
 
-    eq(getAllCases(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
+    eq(getCases(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
       [ 'a', 'a', 'a' ], [ 'a', 'a', 'b' ],
       [ 'a', 'a', 'c' ], [ 'a', 'c', 'a' ],
       [ 'a', 'c', 'b' ], [ 'a', 'c', 'c' ],
