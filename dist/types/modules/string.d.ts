@@ -57,6 +57,21 @@ export declare const Quotes: {
 };
 /**
  * @example
+ * const result = capitalize("lorem ipsum"); // "Lorem ipsum"
+ */
+export declare function capitalize(str: string): string;
+/**
+ * @example
+ * const result = slugify("Lorem ipsum"); // "lorem-ipsum"
+ */
+export declare function slugify(str: string): string;
+/**
+ * @example
+ * const result = camelize("Lorem ipsum"); // "loremIpsum"
+ */
+export declare function camelize(str: string): string;
+/**
+ * @example
  * const uuid = getUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export declare function getUuid(): string;

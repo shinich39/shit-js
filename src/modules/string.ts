@@ -57,6 +57,31 @@ export const Quotes = {
 } as const;
 /**
  * @example
+ * const result = capitalize("lorem ipsum"); // "Lorem ipsum"
+ */
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+/**
+ * @example
+ * const result = slugify("Lorem ipsum"); // "lorem-ipsum"
+ */
+export function slugify(str: string): string {
+  return str.toLowerCase().replace(/\s+/g, '-');
+}
+/**
+ * @example
+ * const result = camelize("Lorem ipsum"); // "loremIpsum"
+ */
+export function camelize(str: string): string {
+  return str
+    // remove separators and capitalize next letter
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')) 
+    // ensure first letter is lowercase
+    .replace(/^(.)/, (m) => m.toLowerCase()); 
+}
+/**
+ * @example
  * const uuid = getUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export function getUuid() {

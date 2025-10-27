@@ -4,6 +4,8 @@ import path from "node:path";
 import fs from "node:fs";
 import {
   Brackets,
+  camelize,
+  capitalize,
   getDiffs,
   getFloats,
   getInts,
@@ -15,10 +17,26 @@ import {
   matchStrings,
   normalizeString,
   Quotes,
+  slugify,
   toRegExp,
 } from "./string";
 
 describe(path.basename(import.meta.filename), () => {
+
+  test("capitalize", () => {
+    const result = capitalize("lorem ipsum");
+    eq(result, "Lorem ipsum");
+  });
+
+  test("slugify", () => {
+    const result = slugify("Lorem ipsum");
+    eq(result, "lorem-ipsum");
+  });
+
+  test("camelize", () => {
+    const result = camelize("Lorem ipsum");
+    eq(result, "loremIpsum");
+  });
 
   test("getUuid", () => {
     eq(getUuid().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9

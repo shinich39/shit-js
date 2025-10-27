@@ -24,6 +24,8 @@ var Shit = (() => {
     Brackets: () => Brackets,
     QueueWorker: () => QueueWorker,
     Quotes: () => Quotes,
+    camelize: () => camelize,
+    capitalize: () => capitalize,
     checkBit: () => checkBit,
     clearBit: () => clearBit,
     clone: () => clone,
@@ -74,6 +76,7 @@ var Shit = (() => {
     setBit: () => setBit,
     shuffleArray: () => shuffleArray,
     sleep: () => sleep,
+    slugify: () => slugify,
     toBytes: () => toBytes,
     toError: () => toError,
     toFileSize: () => toFileSize,
@@ -618,6 +621,15 @@ var Shit = (() => {
     "\u201E": "\u201C",
     "\xAB": "\xBB"
   };
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+  function slugify(str) {
+    return str.toLowerCase().replace(/\s+/g, "-");
+  }
+  function camelize(str) {
+    return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
+  }
   function getUuid() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0;
