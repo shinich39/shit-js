@@ -22,6 +22,7 @@ var Shit = (() => {
   var shit_exports = {};
   __export(shit_exports, {
     Brackets: () => Brackets,
+    DOMElement: () => DOMElement,
     QueueWorker: () => QueueWorker,
     Quotes: () => Quotes,
     camelize: () => camelize,
@@ -29,7 +30,9 @@ var Shit = (() => {
     checkBit: () => checkBit,
     clearBit: () => clearBit,
     clone: () => clone,
+    compressLZW: () => compressLZW,
     debounce: () => debounce,
+    decompressLZW: () => decompressLZW,
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
     getCases: () => getCases,
@@ -72,6 +75,7 @@ var Shit = (() => {
     matchObject: () => matchObject,
     matchStrings: () => matchStrings,
     normalizeString: () => normalizeString,
+    parseDate: () => parseDate,
     retry: () => retry,
     setBit: () => setBit,
     shuffleArray: () => shuffleArray,
@@ -264,6 +268,645 @@ var Shit = (() => {
   }
   function toggleBit(a, b) {
     return a ^ b;
+  }
+
+  // src/modules/date.ts
+  function parseDate(date) {
+    let ensuredDate;
+    if (date instanceof Date) {
+      ensuredDate = date;
+    } else {
+      ensuredDate = new Date(date);
+    }
+    if (isNaN(ensuredDate.getTime())) {
+      throw new Error(`Invalid date: ${date}`);
+    }
+    const YYYY = String(ensuredDate.getFullYear());
+    const YY = YYYY.slice(-2);
+    const M = String(ensuredDate.getMonth() + 1);
+    const MM = M.padStart(2, "0");
+    const D = String(ensuredDate.getDate());
+    const DD = D.padStart(2, "0");
+    const d = String(ensuredDate.getDay());
+    const E = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][ensuredDate.getDay()];
+    const EEEE = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][ensuredDate.getDay()];
+    const H = String(ensuredDate.getHours());
+    const HH = H.padStart(2, "0");
+    const h = String(ensuredDate.getHours() % 12 || 12);
+    const hh = h.padStart(2, "0");
+    const m = String(ensuredDate.getMinutes());
+    const mm = m.padStart(2, "0");
+    const s = String(ensuredDate.getSeconds());
+    const ss = s.padStart(2, "0");
+    const SSS = String(ensuredDate.getMilliseconds()).padStart(3, "0");
+    const A = ensuredDate.getHours() < 12 ? "AM" : "PM";
+    const a = A.toLowerCase();
+    const Q = String(Math.floor((ensuredDate.getMonth() + 3) / 3));
+    const tzOffset = -ensuredDate.getTimezoneOffset();
+    const tzSign = tzOffset >= 0 ? "+" : "-";
+    const tzHour = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, "0");
+    const tzMin = String(Math.abs(tzOffset) % 60).padStart(2, "0");
+    const Z = `${tzSign}${tzHour}:${tzMin}`;
+    const ZZ = `${tzSign}${tzHour}${tzMin}`;
+    const startOfYear = new Date(ensuredDate.getFullYear(), 0, 1);
+    const diffMs = ensuredDate.getTime() - startOfYear.getTime();
+    const diffDays = diffMs / 864e5;
+    const week = Math.ceil((diffDays + startOfYear.getDay() + 1) / 7);
+    const W = String(week);
+    const WW = W.padStart(2, "0");
+    return {
+      YYYY,
+      YY,
+      M,
+      MM,
+      D,
+      DD,
+      d,
+      E,
+      EEEE,
+      H,
+      HH,
+      h,
+      hh,
+      m,
+      mm,
+      s,
+      ss,
+      SSS,
+      A,
+      a,
+      Q,
+      Z,
+      ZZ,
+      W,
+      WW
+    };
+  }
+
+  // src/modules/dom.ts
+  function splitTags(str) {
+    const result = [];
+    let i = 0, buffer = "", head = false, tail = null, quotes = null;
+    const flush = () => {
+      if (buffer !== "") {
+        result.push(buffer);
+        buffer = "";
+      }
+    };
+    const join = () => {
+      if (buffer !== "") {
+        if (result.length > 0) {
+          result[result.length - 1] += buffer;
+        } else {
+          result.push(buffer);
+        }
+        buffer = "";
+      }
+    };
+    while (i < str.length) {
+      const ch = str[i];
+      if (!head) {
+        if (ch === "<") {
+          flush();
+          buffer += ch;
+          head = true;
+        } else {
+          buffer += ch;
+        }
+      } else {
+        if (ch === "\\") {
+          buffer += ch;
+        } else if (!quotes) {
+          if (ch === "<") {
+            if (!tail) {
+              join();
+            }
+            buffer += ch;
+          } else if (ch === ">") {
+            buffer += ch;
+            if (tail) {
+              if (!buffer.endsWith(tail)) {
+                i++;
+                continue;
+              }
+            }
+            flush();
+            head = false;
+            tail = null;
+          } else if (tail) {
+            buffer += ch;
+          } else {
+            buffer += ch;
+            if (ch === `"` || ch === `'`) {
+              quotes = ch;
+            } else if (buffer === "<!--") {
+              tail = "-->";
+            } else if (buffer === "<script") {
+              tail = "<\/script>";
+            } else if (buffer === "<style") {
+              tail = "</style>";
+            }
+          }
+        } else if (ch === quotes) {
+          buffer += ch;
+          quotes = null;
+        } else {
+          buffer += ch;
+        }
+      }
+      i++;
+    }
+    flush();
+    return result;
+  }
+  function parseTag(str) {
+    const parts = [];
+    let isClosing = str[1] === "/", i = isClosing ? 2 : 1, tag = "", buffer = "", quotes = null, closer;
+    const flush = function() {
+      if (buffer !== "") {
+        parts.push(buffer);
+        buffer = "";
+      }
+    };
+    const re = /\s|>|\//;
+    while (i < str.length) {
+      const ch = str[i];
+      if (re.test(ch)) {
+        break;
+      }
+      buffer += ch;
+      i++;
+    }
+    tag = buffer;
+    buffer = "";
+    while (i < str.length) {
+      const ch = str[i];
+      if (ch === "\\") {
+        buffer += ch;
+      } else if (!quotes) {
+        if (ch === ">") {
+          if (buffer === "/" || buffer === "?") {
+            closer = buffer;
+          } else {
+            flush();
+          }
+          break;
+        } else if (ch === " " || ch === "\n") {
+          flush();
+        } else if (ch === `"` || ch === `'`) {
+          quotes = ch;
+          buffer += ch;
+        } else {
+          buffer += ch;
+        }
+      } else if (ch === quotes) {
+        quotes = null;
+        buffer += ch;
+        flush();
+      } else {
+        buffer += ch;
+      }
+      i++;
+    }
+    const attributes = {};
+    for (const part of parts) {
+      const [key, ...values] = part.split("=");
+      if (values.length === 0) {
+        attributes[key] = null;
+      } else {
+        let value = values.join("=");
+        attributes[key] = value.substring(1, value.length - 1);
+      }
+    }
+    const endIndex = i + 1;
+    return {
+      endIndex,
+      isClosing,
+      tag,
+      closer,
+      attributes
+    };
+  }
+  var DOMElement = class _DOMElement {
+    constructor(src, parent) {
+      this.type = "root";
+      this.attributes = {};
+      this.children = [];
+      if (src) {
+        this.init(src, parent);
+      }
+    }
+    init(src, parent) {
+      if (typeof src === "string") {
+        const { children } = _DOMElement.parse(src);
+        this.children = children.map((child) => new _DOMElement(child, this));
+      } else {
+        this.parent = parent;
+        this.type = src.type;
+        this.tag = src.tag;
+        this.closer = src.closer;
+        this.content = src.content;
+        this.attributes = src.attributes;
+        this.children = src.children.map((child) => new _DOMElement(child, this));
+      }
+    }
+    createChildren(args) {
+      const result = [];
+      for (const arg of args) {
+        if (typeof arg === "string") {
+          const { children } = _DOMElement.parse(arg);
+          result.push(...children.map((child) => new _DOMElement(child, this)));
+        } else if (arg.type === "root") {
+          result.push(...new _DOMElement(arg, this).children);
+        } else {
+          result.push(new _DOMElement(arg, this));
+        }
+      }
+      return result;
+    }
+    isSelfClosed() {
+      return typeof this.closer === "string";
+    }
+    isRoot() {
+      return this.type === "root";
+    }
+    isComment() {
+      return this.type === "comment";
+    }
+    isStyle() {
+      return this.type === "style";
+    }
+    isScript() {
+      return this.type === "script";
+    }
+    isText() {
+      return this.type === "text";
+    }
+    isTag() {
+      return this.type === "tag";
+    }
+    getRoot() {
+      let root = this;
+      while (root.parent) {
+        root = root.parent;
+      }
+      return root;
+    }
+    getDepth() {
+      let el = this, depth = 0;
+      while (el.parent) {
+        el = el.parent;
+        depth++;
+      }
+      return depth;
+    }
+    getIndex() {
+    }
+    getId() {
+      return this.attributes.id || "";
+    }
+    getClass() {
+      return this.attributes.class || "";
+    }
+    getClasses() {
+      return this.attributes.class?.split(" ").filter(Boolean) || [];
+    }
+    getContent() {
+      return this.content || "";
+    }
+    getAttributes() {
+      const result = [];
+      for (const k of Object.keys(this.attributes)) {
+        const v = this.attributes[k];
+        if (typeof v === "string") {
+          result.push(`${k}="${v}"`);
+        } else if (v === null) {
+          result.push(k);
+        }
+      }
+      return result;
+    }
+    append(...args) {
+      const elements = this.createChildren(args);
+      for (const el of elements) {
+        this.children.push(el);
+      }
+    }
+    prepend(...args) {
+      const elements = this.createChildren(args);
+      this.children.splice(0, 0, ...elements);
+    }
+    before(...args) {
+      if (!this.parent) {
+        throw new Error("Parent not found");
+      }
+      const index = this.parent.children.findIndex((child) => child == this);
+      if (index === -1) {
+        throw new Error("This element not included in its parent");
+      }
+      const elements = this.parent.createChildren(args);
+      this.parent.children.splice(index, 0, ...elements);
+    }
+    after(...args) {
+      if (!this.parent) {
+        throw new Error("Parent not found");
+      }
+      const index = this.parent.children.findIndex((child) => child == this);
+      if (index === -1) {
+        throw new Error("This element not included in its parent");
+      }
+      const elements = this.parent.createChildren(args);
+      this.parent.children.splice(index + 1, 0, ...elements);
+    }
+    forEach(callback) {
+      let index = 0;
+      const func = function(parent, depth) {
+        for (let i = 0; i < parent.children.length; i++) {
+          const child = parent.children[i];
+          callback(child, index++, depth);
+          if (child.type === "tag") {
+            func(child, depth + 1);
+          }
+        }
+      };
+      func(this, 1);
+    }
+    find(callback) {
+      let index = 0;
+      const func = function(parent, depth) {
+        for (let i = 0; i < parent.children.length; i++) {
+          const child = parent.children[i];
+          if (callback(child, index++, depth)) {
+            return child;
+          }
+          if (child.type === "tag") {
+            const grandchild = func(child, depth + 1);
+            if (grandchild) {
+              return grandchild;
+            }
+          }
+        }
+      };
+      return func(this, 1);
+    }
+    findLast(callback) {
+      let index = 0;
+      const func = function(child, depth) {
+        if (child.parent) {
+          if (callback(child.parent, index++, depth)) {
+            return child.parent;
+          }
+          func(child.parent, depth + 1);
+        }
+      };
+      return func(this, 1);
+    }
+    filter(callback) {
+      const result = [];
+      let index = 0;
+      const func = function(parent, depth) {
+        for (let i = 0; i < parent.children.length; i++) {
+          const child = parent.children[i];
+          if (callback(child, index++, depth)) {
+            result.push(child);
+          }
+          if (child.type === "tag") {
+            func(child, depth + 1);
+          }
+        }
+      };
+      func(this, 1);
+      return result;
+    }
+    map(callback) {
+      const result = [];
+      let index = 0;
+      const func = function(parent, depth) {
+        for (let i = 0; i < parent.children.length; i++) {
+          const child = parent.children[i];
+          result.push(callback(child, index++, depth));
+          if (child.type === "tag") {
+            func(child, depth + 1);
+          }
+        }
+      };
+      func(this, 1);
+      return result;
+    }
+    reduce(callback, initialValue) {
+      let result = initialValue, index = 0;
+      const func = function(parent, depth) {
+        for (let i = 0; i < parent.children.length; i++) {
+          const child = parent.children[i];
+          result = callback(result, child, index++, depth);
+          if (child.type === "tag") {
+            func(child, depth + 1);
+          }
+        }
+      };
+      func(this, 1);
+      return result;
+    }
+    toContents() {
+      return this.filter((child) => child.type === "text").map((child) => child.getContent());
+    }
+    toString() {
+      switch (this.type) {
+        case "root":
+          return this.children.map((child) => child.toString()).join("");
+        case "comment":
+          return `<!--${this.getContent()}-->`;
+        case "text":
+          return this.getContent();
+      }
+      if (!this.tag) {
+        throw new Error("Element must have a value of tag attribute");
+      }
+      let attrs = this.getAttributes().join(" ");
+      if (attrs) {
+        attrs = " " + attrs;
+      }
+      switch (this.type) {
+        case "script":
+          return `<script${attrs}>${this.getContent()}<\/script>`;
+        case "style":
+          return `<style${attrs}>${this.getContent()}</style>`;
+        case "tag":
+          return this.isSelfClosed() ? `<${this.tag}${attrs} ${this.closer}>` : `<${this.tag}${attrs}>${this.children.map((child) => child.toString()).join("")}</${this.tag}>`;
+      }
+    }
+    toArray() {
+      return [this, ...this.map((child) => child)];
+    }
+    static {
+      this.parse = function(str) {
+        const stacks = [
+          {
+            isClosed: false,
+            depth: 0,
+            type: "root",
+            attributes: {},
+            children: []
+          }
+        ];
+        const root = stacks[0];
+        const parts = splitTags(str);
+        let depth = 1;
+        for (const part of parts) {
+          const isTag = part.startsWith("<") && part.endsWith(">");
+          if (!isTag) {
+            stacks.push({
+              isClosed: true,
+              depth,
+              type: "text",
+              content: part,
+              attributes: {},
+              children: []
+            });
+            continue;
+          }
+          const isComment = part.startsWith("<!--") && part.endsWith("-->");
+          if (isComment) {
+            stacks.push({
+              isClosed: true,
+              depth,
+              type: "comment",
+              content: part.substring(4, part.length - 3),
+              attributes: {},
+              children: []
+            });
+            continue;
+          }
+          const isScript = part.startsWith("<script") && part.endsWith("<\/script>");
+          if (isScript) {
+            const { endIndex, attributes: attributes2 } = parseTag(part);
+            const content = part.substring(endIndex, part.length - 9);
+            stacks.push({
+              isClosed: true,
+              depth,
+              type: "script",
+              tag: "script",
+              content,
+              attributes: attributes2,
+              children: []
+            });
+            continue;
+          }
+          const isStyle = part.startsWith("<style") && part.endsWith("</style>");
+          if (isStyle) {
+            const { endIndex, attributes: attributes2 } = parseTag(part);
+            const content = part.substring(endIndex, part.length - 8);
+            stacks.push({
+              isClosed: false,
+              depth,
+              type: "style",
+              tag: "style",
+              content,
+              attributes: attributes2,
+              children: []
+            });
+            continue;
+          }
+          const { tag, isClosing, closer, attributes } = parseTag(part);
+          if (isClosing) {
+            const children = [];
+            for (let i = stacks.length - 1; i >= 0; i--) {
+              const stack = stacks[i];
+              if (!stack.isClosed) {
+                stack.isClosed = true;
+                if (stack.tag === tag) {
+                  stack.children = children.reverse();
+                  for (const child of children) {
+                    child.parent = stack;
+                  }
+                  break;
+                }
+                if (stack.type === "tag") {
+                  stack.closer = "";
+                }
+              }
+              if (stack.depth === depth) {
+                children.push(stack);
+              }
+            }
+            depth--;
+            continue;
+          }
+          const isClosed = typeof closer === "string";
+          stacks.push({
+            isClosed,
+            depth,
+            type: "tag",
+            tag,
+            closer,
+            attributes,
+            children: []
+          });
+          if (!isClosed) {
+            depth++;
+          }
+        }
+        for (const stack of stacks) {
+          if (stack.depth === 1) {
+            stack.parent = root;
+            root.children.push(stack);
+          }
+          delete stack.isClosed;
+          delete stack.depth;
+        }
+        delete root.isClosed;
+        delete root.depth;
+        return root;
+      };
+    }
+  };
+
+  // src/modules/lzw.ts
+  function compressLZW(input) {
+    const dict = {};
+    const data = input.split("");
+    const result = [];
+    let dictSize = 256;
+    for (let i = 0; i < 256; i++) {
+      dict[String.fromCharCode(i)] = i;
+    }
+    let w = "";
+    for (const c of data) {
+      const wc = w + c;
+      if (dict[wc]) {
+        w = wc;
+      } else {
+        result.push(dict[w]);
+        dict[wc] = dictSize++;
+        w = String(c);
+      }
+    }
+    if (w !== "") result.push(dict[w]);
+    return result;
+  }
+  function decompressLZW(compressed) {
+    const dict = [];
+    let dictSize = 256;
+    for (let i = 0; i < 256; i++) {
+      dict[i] = String.fromCharCode(i);
+    }
+    let w = String.fromCharCode(compressed[0]);
+    let result = w;
+    for (let i = 1; i < compressed.length; i++) {
+      const k = compressed[i];
+      let entry;
+      if (dict[k]) {
+        entry = dict[k];
+      } else if (k === dictSize) {
+        entry = w + w[0];
+      } else {
+        throw new Error("Invalid LZW code: " + k);
+      }
+      result += entry;
+      dict[dictSize++] = w + entry[0];
+      w = entry;
+    }
+    return result;
   }
 
   // src/modules/number.ts
