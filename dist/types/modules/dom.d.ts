@@ -1,24 +1,25 @@
-export type DOMType = "root" | "tag" | "text" | "comment" | "script" | "style";
-export type IDOMElement = {
-    parent?: IDOMElement;
-    type: DOMType;
+export type DOMElemType = "root" | "tag" | "text" | "comment" | "script" | "style";
+export type DOMElemAttrs = Record<string, string | null>;
+export type DOMElemImpl = {
+    parent?: DOMElemImpl;
+    type: DOMElemType;
     tag?: string;
     closer?: string;
     content?: string;
-    attributes: Record<string, string | null>;
-    children: IDOMElement[];
+    attributes: DOMElemAttrs;
+    children: DOMElemImpl[];
 };
-export declare class DOMElement implements IDOMElement {
-    parent?: DOMElement;
-    type: DOMType;
+export declare class DOMElem implements DOMElemImpl {
+    parent?: DOMElem;
+    type: DOMElemType;
     tag?: string;
     closer?: string;
     content?: string;
-    attributes: Record<string, string | null>;
-    children: DOMElement[];
-    constructor(src?: string | IDOMElement | DOMElement, parent?: DOMElement);
-    init(src: string | IDOMElement | DOMElement, parent?: DOMElement): void;
-    createChildren(args: (string | IDOMElement | DOMElement)[]): DOMElement[];
+    attributes: DOMElemAttrs;
+    children: DOMElem[];
+    constructor(src?: string | DOMElemImpl | DOMElem, parent?: DOMElem);
+    init(src: string | DOMElemImpl | DOMElem, parent?: DOMElem): void;
+    createChildren(args: (string | DOMElemImpl | DOMElem)[]): DOMElem[];
     isSelfClosed(): boolean;
     isRoot(): boolean;
     isComment(): boolean;
@@ -26,27 +27,27 @@ export declare class DOMElement implements IDOMElement {
     isScript(): boolean;
     isText(): boolean;
     isTag(): boolean;
-    getRoot(this: DOMElement): DOMElement;
-    getDepth(this: DOMElement): number;
+    getRoot(this: DOMElem): DOMElem;
+    getDepth(this: DOMElem): number;
     getIndex(): void;
     getId(): string;
     getClass(): string;
     getClasses(): string[];
     getContent(): string;
     getAttributes(): string[];
-    append(...args: (string | IDOMElement | DOMElement)[]): void;
-    prepend(...args: (string | IDOMElement | DOMElement)[]): void;
-    before(...args: (string | IDOMElement | DOMElement)[]): void;
-    after(...args: (string | IDOMElement | DOMElement)[]): void;
-    forEach(callback: (child: DOMElement, index: number, depth: number) => void): void;
-    find(callback: (child: DOMElement, index: number, depth: number) => any): DOMElement | undefined;
-    findLast(callback: (parent: DOMElement, index: number, depth: number) => any): DOMElement | undefined;
-    filter(callback: (child: DOMElement, index: number, depth: number) => any): DOMElement[];
-    map<T>(callback: (child: DOMElement, index: number, depth: number) => T): T[];
-    reduce<T>(callback: (accumulator: T, child: DOMElement, index: number, depth: number) => T, initialValue: T): T;
+    append(...args: (string | DOMElemImpl | DOMElem)[]): void;
+    prepend(...args: (string | DOMElemImpl | DOMElem)[]): void;
+    before(...args: (string | DOMElemImpl | DOMElem)[]): void;
+    after(...args: (string | DOMElemImpl | DOMElem)[]): void;
+    forEach(callback: (child: DOMElem, index: number, depth: number) => void): void;
+    find(callback: (child: DOMElem, index: number, depth: number) => any): DOMElem | undefined;
+    findLast(callback: (parent: DOMElem, index: number, depth: number) => any): DOMElem | undefined;
+    filter(callback: (child: DOMElem, index: number, depth: number) => any): DOMElem[];
+    map<T>(callback: (child: DOMElem, index: number, depth: number) => T): T[];
+    reduce<T>(callback: (accumulator: T, child: DOMElem, index: number, depth: number) => T, initialValue: T): T;
     toContents(): string[];
     toString(): string;
-    toArray(): DOMElement[];
-    static parse: (str: string) => IDOMElement;
+    toArray(): DOMElem[];
+    static parse: (str: string) => DOMElemImpl;
 }
 //# sourceMappingURL=dom.d.ts.map

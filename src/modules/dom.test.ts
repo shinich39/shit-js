@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import { DOMElement } from "./dom";
+import { DOMElem } from "./dom";
 
 describe(path.basename(import.meta.filename), () => {
 
@@ -45,9 +45,9 @@ describe(path.basename(import.meta.filename), () => {
 `.trim();
 
   test("toString", () => {
-    const root = new DOMElement(html);
+    const root = new DOMElem(html);
     eq(html, root.toString());
-    const root2 = new DOMElement(root.toString());
+    const root2 = new DOMElem(root.toString());
     eq(html, root2.toString());
   });
 

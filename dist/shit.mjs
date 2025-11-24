@@ -395,7 +395,7 @@ function parseTag(str) {
     attributes
   };
 }
-var DOMElement = class _DOMElement {
+var DOMElem = class _DOMElem {
   constructor(src, parent) {
     this.type = "root";
     this.attributes = {};
@@ -406,8 +406,8 @@ var DOMElement = class _DOMElement {
   }
   init(src, parent) {
     if (typeof src === "string") {
-      const { children } = _DOMElement.parse(src);
-      this.children = children.map((child) => new _DOMElement(child, this));
+      const { children } = _DOMElem.parse(src);
+      this.children = children.map((child) => new _DOMElem(child, this));
     } else {
       this.parent = parent;
       this.type = src.type;
@@ -415,19 +415,19 @@ var DOMElement = class _DOMElement {
       this.closer = src.closer;
       this.content = src.content;
       this.attributes = src.attributes;
-      this.children = src.children.map((child) => new _DOMElement(child, this));
+      this.children = src.children.map((child) => new _DOMElem(child, this));
     }
   }
   createChildren(args) {
     const result = [];
     for (const arg of args) {
       if (typeof arg === "string") {
-        const { children } = _DOMElement.parse(arg);
-        result.push(...children.map((child) => new _DOMElement(child, this)));
+        const { children } = _DOMElem.parse(arg);
+        result.push(...children.map((child) => new _DOMElem(child, this)));
       } else if (arg.type === "root") {
-        result.push(...new _DOMElement(arg, this).children);
+        result.push(...new _DOMElem(arg, this).children);
       } else {
-        result.push(new _DOMElement(arg, this));
+        result.push(new _DOMElem(arg, this));
       }
     }
     return result;
@@ -1412,7 +1412,7 @@ function toError(e) {
 }
 export {
   Brackets,
-  DOMElement,
+  DOMElem,
   QueueWorker,
   Quotes,
   camelize,

@@ -1,16 +1,17 @@
-export type DOMType = "root" | "tag" | "text" | "comment" | "script" | "style";
 
-export type IDOMElement = {
-  parent?: IDOMElement;
-  type: DOMType;
+export type DOMElemType = "root" | "tag" | "text" | "comment" | "script" | "style";
+export type DOMElemAttrs = Record<string, string | null>;
+export type DOMElemImpl = {
+  parent?: DOMElemImpl;
+  type: DOMElemType;
   tag?: string;
   closer?: string;
   content?: string;
-  attributes: Record<string, string | null>;
-  children: IDOMElement[];
+  attributes: DOMElemAttrs;
+  children: DOMElemImpl[];
 }
 
-type Stack = IDOMElement & {
+type Stack = DOMElemImpl & {
   isClosed: boolean;
   depth: number;
 }
@@ -180,7 +181,7 @@ function parseTag(str: string) {
     i++;
   }
 
-  const attributes: Record<string, string | null> = {};
+  const attributes: DOMElemAttrs = {};
 
   for (const part of parts) {
     const [key, ...values] = part.split("=");
@@ -204,16 +205,16 @@ function parseTag(str: string) {
   }
 }
 
-export class DOMElement implements IDOMElement {
-  parent?: DOMElement;
-  type: DOMType;
+export class DOMElem implements DOMElemImpl {
+  parent?: DOMElem;
+  type: DOMElemType;
   tag?: string;
   closer?: string;
   content?: string;
-  attributes: Record<string, string | null>;
-  children: DOMElement[];
+  attributes: DOMElemAttrs;
+  children: DOMElem[];
 
-  constructor(src?: string | IDOMElement | DOMElement, parent?: DOMElement) {
+  constructor(src?: string | DOMElemImpl | DOMElem, parent?: DOMElem) {
     this.type = "root";
     this.attributes = {};
     this.children = [];
@@ -222,10 +223,10 @@ export class DOMElement implements IDOMElement {
     }
   }
 
-  init(src: string | IDOMElement | DOMElement, parent?: DOMElement) {
+  init(src: string | DOMElemImpl | DOMElem, parent?: DOMElem) {
     if (typeof src === "string") {
-      const { children } = DOMElement.parse(src);
-      this.children = children.map((child) => new DOMElement(child, this));
+      const { children } = DOMElem.parse(src);
+      this.children = children.map((child) => new DOMElem(child, this));
     } else {
       this.parent = parent;
       this.type = src.type;
@@ -233,20 +234,20 @@ export class DOMElement implements IDOMElement {
       this.closer = src.closer;
       this.content = src.content;
       this.attributes = src.attributes;
-      this.children = src.children.map((child) => new DOMElement(child, this));
+      this.children = src.children.map((child) => new DOMElem(child, this));
     }
   }
 
-  createChildren(args: (string | IDOMElement | DOMElement)[]) {
-    const result: DOMElement[] = [];
+  createChildren(args: (string | DOMElemImpl | DOMElem)[]) {
+    const result: DOMElem[] = [];
     for (const arg of args) {
       if (typeof arg === "string") {
-        const { children } = DOMElement.parse(arg);
-        result.push(...children.map((child) => new DOMElement(child, this)));
+        const { children } = DOMElem.parse(arg);
+        result.push(...children.map((child) => new DOMElem(child, this)));
       } else if (arg.type === "root") {
-        result.push(...(new DOMElement(arg, this)).children);
+        result.push(...(new DOMElem(arg, this)).children);
       } else {
-        result.push(new DOMElement(arg, this));
+        result.push(new DOMElem(arg, this));
       }
     }
     return result;
@@ -260,18 +261,18 @@ export class DOMElement implements IDOMElement {
   isText() { return this.type === "text"; }
   isTag() { return this.type === "tag"; }
 
-  getRoot(this: DOMElement) {
+  getRoot(this: DOMElem) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: DOMElement = this;
+    let root: DOMElem = this;
     while(root.parent) {
       root = root.parent;
     }
     return root;
   }
 
-  getDepth(this: DOMElement) {
+  getDepth(this: DOMElem) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let el: DOMElement = this,
+    let el: DOMElem = this,
         depth = 0;
     while(el.parent) {
       el = el.parent;
@@ -302,19 +303,19 @@ export class DOMElement implements IDOMElement {
     return result;
   }
  
-  append(...args: (string | IDOMElement | DOMElement)[]) {
+  append(...args: (string | DOMElemImpl | DOMElem)[]) {
     const elements = this.createChildren(args);
     for (const el of elements) {
       this.children.push(el);
     }
   }
 
-  prepend(...args: (string | IDOMElement | DOMElement)[]) {
+  prepend(...args: (string | DOMElemImpl | DOMElem)[]) {
     const elements = this.createChildren(args);
     this.children.splice(0, 0, ...elements);
   }
 
-  before(...args: (string | IDOMElement | DOMElement)[]) {
+  before(...args: (string | DOMElemImpl | DOMElem)[]) {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
@@ -328,7 +329,7 @@ export class DOMElement implements IDOMElement {
     this.parent.children.splice(index, 0, ...elements);
   }
 
-  after(...args: (string | IDOMElement | DOMElement)[]) {
+  after(...args: (string | DOMElemImpl | DOMElem)[]) {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
@@ -343,11 +344,11 @@ export class DOMElement implements IDOMElement {
   }
 
   forEach(
-    callback: (child: DOMElement, index: number, depth: number) => void
+    callback: (child: DOMElem, index: number, depth: number) => void
   ): void {
     let index = 0;
 
-    const func = function (parent: DOMElement, depth: number) {
+    const func = function (parent: DOMElem, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         callback(child, index++, depth);
@@ -361,11 +362,11 @@ export class DOMElement implements IDOMElement {
   }
 
   find(
-    callback: (child: DOMElement, index: number, depth: number) => any
-  ): DOMElement | undefined {
+    callback: (child: DOMElem, index: number, depth: number) => any
+  ): DOMElem | undefined {
     let index = 0;
 
-    const func = function (parent: DOMElement, depth: number): DOMElement | undefined {
+    const func = function (parent: DOMElem, depth: number): DOMElem | undefined {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         if (callback(child, index++, depth)) {
@@ -384,11 +385,11 @@ export class DOMElement implements IDOMElement {
   }
 
   findLast(
-    callback: (parent: DOMElement, index: number, depth: number) => any
-  ): DOMElement | undefined {
+    callback: (parent: DOMElem, index: number, depth: number) => any
+  ): DOMElem | undefined {
     let index = 0;
 
-    const func = function (child: DOMElement, depth: number): DOMElement | undefined {
+    const func = function (child: DOMElem, depth: number): DOMElem | undefined {
       if (child.parent) {
         if (callback(child.parent, index++, depth)) {
           return child.parent;
@@ -401,13 +402,13 @@ export class DOMElement implements IDOMElement {
   }
 
   filter(
-    callback: (child: DOMElement, index: number, depth: number) => any
+    callback: (child: DOMElem, index: number, depth: number) => any
   ) {
-    const result: DOMElement[] = [];
+    const result: DOMElem[] = [];
 
     let index = 0;
 
-    const func = function (parent: DOMElement, depth: number) {
+    const func = function (parent: DOMElem, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         if (callback(child, index++, depth)) {
@@ -426,7 +427,7 @@ export class DOMElement implements IDOMElement {
 
   map<T>(
     callback: (
-      child: DOMElement,
+      child: DOMElem,
       index: number,
       depth: number,
     ) => T
@@ -434,7 +435,7 @@ export class DOMElement implements IDOMElement {
     const result: T[] = [];
     let index = 0;
 
-    const func = function (parent: DOMElement, depth: number) {
+    const func = function (parent: DOMElem, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         result.push(callback(child, index++, depth));
@@ -452,7 +453,7 @@ export class DOMElement implements IDOMElement {
   reduce<T>(
     callback: (
       accumulator: T,
-      child: DOMElement,
+      child: DOMElem,
       index: number,
       depth: number,
     ) => T,
@@ -461,7 +462,7 @@ export class DOMElement implements IDOMElement {
     let result = initialValue,
         index = 0;
 
-    const func = function (parent: DOMElement, depth: number) {
+    const func = function (parent: DOMElem, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         result = callback(result, child, index++, depth);
@@ -594,7 +595,7 @@ export class DOMElement implements IDOMElement {
       const { tag, isClosing, closer, attributes } = parseTag(part);
 
       if (isClosing) {
-        const children: IDOMElement[] = [];
+        const children: DOMElemImpl[] = [];
         for (let i = stacks.length - 1; i >= 0; i--) {
           const stack = stacks[i];
 
@@ -667,7 +668,7 @@ export class DOMElement implements IDOMElement {
     delete root.depth;
 
     // return stacks[0] as RootElement;
-    return root as IDOMElement;
+    return root as DOMElemImpl;
   };
 
 }
