@@ -1,3 +1,10 @@
+/**
+ * @example
+ * const a = {};
+ * const b = clone(a);
+ * const result = a == b;
+ * // false
+ */
 export declare function clone<T>(obj: T): T;
 /**
  * @param key use dot natation.

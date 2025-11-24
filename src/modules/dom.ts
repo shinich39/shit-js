@@ -260,7 +260,8 @@ export class DOMElement implements IDOMElement {
   isText() { return this.type === "text"; }
   isTag() { return this.type === "tag"; }
 
-  getRoot() {
+  getRoot(this: DOMElement) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let root: DOMElement = this;
     while(root.parent) {
       root = root.parent;
@@ -268,7 +269,8 @@ export class DOMElement implements IDOMElement {
     return root;
   }
 
-  getDepth() {
+  getDepth(this: DOMElement) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let el: DOMElement = this,
         depth = 0;
     while(el.parent) {

@@ -1,0 +1,52 @@
+export type DOMType = "root" | "tag" | "text" | "comment" | "script" | "style";
+export type IDOMElement = {
+    parent?: IDOMElement;
+    type: DOMType;
+    tag?: string;
+    closer?: string;
+    content?: string;
+    attributes: Record<string, string | null>;
+    children: IDOMElement[];
+};
+export declare class DOMElement implements IDOMElement {
+    parent?: DOMElement;
+    type: DOMType;
+    tag?: string;
+    closer?: string;
+    content?: string;
+    attributes: Record<string, string | null>;
+    children: DOMElement[];
+    constructor(src?: string | IDOMElement | DOMElement, parent?: DOMElement);
+    init(src: string | IDOMElement | DOMElement, parent?: DOMElement): void;
+    createChildren(args: (string | IDOMElement | DOMElement)[]): DOMElement[];
+    isSelfClosed(): boolean;
+    isRoot(): boolean;
+    isComment(): boolean;
+    isStyle(): boolean;
+    isScript(): boolean;
+    isText(): boolean;
+    isTag(): boolean;
+    getRoot(this: DOMElement): DOMElement;
+    getDepth(this: DOMElement): number;
+    getIndex(): void;
+    getId(): string;
+    getClass(): string;
+    getClasses(): string[];
+    getContent(): string;
+    getAttributes(): string[];
+    append(...args: (string | IDOMElement | DOMElement)[]): void;
+    prepend(...args: (string | IDOMElement | DOMElement)[]): void;
+    before(...args: (string | IDOMElement | DOMElement)[]): void;
+    after(...args: (string | IDOMElement | DOMElement)[]): void;
+    forEach(callback: (child: DOMElement, index: number, depth: number) => void): void;
+    find(callback: (child: DOMElement, index: number, depth: number) => any): DOMElement | undefined;
+    findLast(callback: (parent: DOMElement, index: number, depth: number) => any): DOMElement | undefined;
+    filter(callback: (child: DOMElement, index: number, depth: number) => any): DOMElement[];
+    map<T>(callback: (child: DOMElement, index: number, depth: number) => T): T[];
+    reduce<T>(callback: (accumulator: T, child: DOMElement, index: number, depth: number) => T, initialValue: T): T;
+    toContents(): string[];
+    toString(): string;
+    toArray(): DOMElement[];
+    static parse: (str: string) => IDOMElement;
+}
+//# sourceMappingURL=dom.d.ts.map

@@ -720,20 +720,17 @@ function getStringSize(str) {
 function getType(e) {
   if (e === void 0) {
     return "undefined";
-  }
-  if (e === null) {
+  } else if (e === null) {
     return "null";
-  }
-  if (Array.isArray(e)) {
+  } else if (Array.isArray(e)) {
     return "array";
-  }
-  if (e instanceof Date) {
+  } else if (e instanceof Date) {
     return "date";
-  }
-  if (e instanceof RegExp) {
+  } else if (e instanceof RegExp) {
     return "regexp";
+  } else {
+    return typeof e;
   }
-  return typeof e;
 }
 function isNumeric(e) {
   return typeof e === "string" && !Number.isNaN(parseFloat(e)) && Number.isFinite(parseFloat(e));
@@ -741,14 +738,11 @@ function isNumeric(e) {
 function toNumber(e) {
   if (isNumeric(e)) {
     return parseFloat(e);
-  }
-  if (typeof e === "number") {
+  } else if (typeof e === "number") {
     return e;
-  }
-  if (typeof e === "boolean") {
+  } else if (typeof e === "boolean") {
     return e ? 1 : 0;
-  }
-  if (!e) {
+  } else if (!e) {
     return 0;
   }
   throw new Error(`Invalid argument type: ${typeof e}`);
@@ -756,17 +750,13 @@ function toNumber(e) {
 function toError(e) {
   if (e instanceof Error) {
     return e;
-  }
-  if (typeof e === "string") {
+  } else if (typeof e === "string") {
     return new Error(e);
-  }
-  if (typeof e !== "object") {
+  } else if (typeof e !== "object") {
     return new Error("Unknown Error");
-  }
-  if (Array.isArray(e)) {
+  } else if (Array.isArray(e)) {
     return new Error("Unknown Error");
-  }
-  if (!e.name || !e.message) {
+  } else if (!e.name || !e.message) {
     return new Error("Unknown Error");
   }
   const err = new Error();
