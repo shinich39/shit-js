@@ -395,6 +395,25 @@ function parseTag(str) {
     attributes
   };
 }
+function stringifyAttrs(attrs) {
+  let result = "";
+  for (const k of Object.keys(attrs)) {
+    const v = attrs[k];
+    if (typeof v === "string") {
+      result += ` ${k}="${v}"`;
+    } else if (v === null) {
+      result += ` ${k}`;
+    }
+  }
+  return result;
+}
+function setAttrValue(attrs, key, value) {
+  if (typeof value === "undefined") {
+    delete attrs[key];
+  } else {
+    attrs[key] = value;
+  }
+}
 var DOMElem = class _DOMElem {
   constructor(src, parent) {
     this.type = "root";
@@ -468,8 +487,6 @@ var DOMElem = class _DOMElem {
     }
     return depth;
   }
-  getIndex() {
-  }
   getId() {
     return this.attributes.id || "";
   }
@@ -482,17 +499,23 @@ var DOMElem = class _DOMElem {
   getContent() {
     return this.content || "";
   }
-  getAttributes() {
-    const result = [];
-    for (const k of Object.keys(this.attributes)) {
-      const v = this.attributes[k];
-      if (typeof v === "string") {
-        result.push(`${k}="${v}"`);
-      } else if (v === null) {
-        result.push(k);
-      }
-    }
-    return result;
+  getAttribute(key) {
+    return this.attributes[key];
+  }
+  setId(str) {
+    setAttrValue(this.attributes, "id", str);
+  }
+  setClass(str) {
+    setAttrValue(this.attributes, "class", str);
+  }
+  setClasses(arr) {
+    setAttrValue(this.attributes, "class", arr.join(" "));
+  }
+  setContent(str) {
+    this.content = str;
+  }
+  setAttribute(key, value) {
+    setAttrValue(this.attributes, key, value);
   }
   append(...args) {
     const elements = this.createChildren(args);
@@ -630,10 +653,7 @@ var DOMElem = class _DOMElem {
     if (!this.tag) {
       throw new Error("Element must have a value of tag attribute");
     }
-    let attrs = this.getAttributes().join(" ");
-    if (attrs) {
-      attrs = " " + attrs;
-    }
+    const attrs = stringifyAttrs(this.attributes);
     switch (this.type) {
       case "script":
         return `<script${attrs}>${this.getContent()}<\/script>`;

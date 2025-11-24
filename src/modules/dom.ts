@@ -205,6 +205,27 @@ function parseTag(str: string) {
   }
 }
 
+function stringifyAttrs(attrs: DOMElemAttrs) {
+  let result = "";
+  for (const k of Object.keys(attrs)) {
+    const v = attrs[k];
+    if (typeof v === "string") {
+      result += ` ${k}="${v}"`;
+    } else if (v === null) {
+      result += ` ${k}`;
+    }
+  }
+  return result;
+}
+
+function setAttrValue(attrs: DOMElemAttrs, key: string, value: string | null | undefined) {
+  if (typeof value === "undefined") {
+    delete attrs[key];
+  } else {
+    attrs[key] = value;
+  }
+}
+
 export class DOMElem implements DOMElemImpl {
   parent?: DOMElem;
   type: DOMElemType;
@@ -281,28 +302,18 @@ export class DOMElem implements DOMElemImpl {
     return depth;
   }
 
-  getIndex() {
-
-  }
-
   getId() { return this.attributes.id || ""; }
   getClass() { return this.attributes.class || ""; }
   getClasses() { return this.attributes.class?.split(" ").filter(Boolean) || []; }
   getContent() { return this.content || ""; }
-
-  getAttributes() {
-    const result: string[] = [];
-    for (const k of Object.keys(this.attributes)) {
-      const v = this.attributes[k];
-      if (typeof v === "string") {
-        result.push(`${k}="${v}"`);
-      } else if (v === null) {
-        result.push(k);
-      }
-    }
-    return result;
-  }
+  getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
  
+  setId(str: string | undefined) { setAttrValue(this.attributes, "id", str); }
+  setClass(str: string | undefined) { setAttrValue(this.attributes, "class", str); }
+  setClasses(arr: string[]) { setAttrValue(this.attributes, "class", arr.join(" ")); }
+  setContent(str: string | undefined) { this.content = str; }
+  setAttribute(key: string, value: string | null | undefined) { setAttrValue(this.attributes, key, value); }
+
   append(...args: (string | DOMElemImpl | DOMElem)[]) {
     const elements = this.createChildren(args);
     for (const el of elements) {
@@ -494,10 +505,7 @@ export class DOMElem implements DOMElemImpl {
       throw new Error("Element must have a value of tag attribute");
     }
 
-    let attrs = this.getAttributes().join(" ");
-    if (attrs) {
-      attrs = " " + attrs;
-    }
+    const attrs = stringifyAttrs(this.attributes);
 
     switch(this.type) {
       case "script": return `<script${attrs}>${this.getContent()}</script>`;
