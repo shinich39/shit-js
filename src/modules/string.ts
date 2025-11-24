@@ -170,7 +170,6 @@ export function toRegExp(str: string) {
  * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
 export function getDiffs(from: string, to: string) {
-
   const backtrack = function(
     from: string,
     to: string,

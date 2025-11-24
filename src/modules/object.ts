@@ -1,3 +1,10 @@
+/**
+ * @example
+ * const a = {};
+ * const b = clone(a);
+ * const result = a == b;
+ * // false
+ */
 export function clone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") {
     return obj;

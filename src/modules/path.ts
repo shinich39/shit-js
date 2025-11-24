@@ -5,7 +5,6 @@
  */
 export function joinPaths(...args: string[]) {
   const parts = args.join("/").split(/[\\/]+/);
-
   const resolved: string[] = [];
 
   for (const part of parts) {
