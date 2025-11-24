@@ -4,9 +4,9 @@ export type DOMElemAttrs = Record<string, string | null>;
 export type DOMElemImpl = {
   parent?: DOMElemImpl;
   type: DOMElemType;
-  tag?: string;
+  tag: string;
   closer?: string;
-  content?: string;
+  content: string;
   attributes: DOMElemAttrs;
   children: DOMElemImpl[];
 }
@@ -229,14 +229,16 @@ function setAttrValue(attrs: DOMElemAttrs, key: string, value: string | null | u
 export class DOMElem implements DOMElemImpl {
   parent?: DOMElem;
   type: DOMElemType;
-  tag?: string;
+  tag: string;
   closer?: string;
-  content?: string;
+  content: string;
   attributes: DOMElemAttrs;
   children: DOMElem[];
 
   constructor(src?: string | DOMElemImpl | DOMElem, parent?: DOMElem) {
     this.type = "root";
+    this.tag = "";
+    this.content = "";
     this.attributes = {};
     this.children = [];
     if (src) {
@@ -282,6 +284,29 @@ export class DOMElem implements DOMElemImpl {
   isText() { return this.type === "text"; }
   isTag() { return this.type === "tag"; }
 
+  getTag() { return this.tag; }
+  getCloser() { return this.closer; }
+  getId() { return this.attributes.id || ""; }
+  getClass() { return this.attributes.class || ""; }
+  getClasses() { return this.attributes.class?.split(" ").filter(Boolean) || []; }
+  getContent() { return this.content || ""; }
+  getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
+ 
+  setTag(value: string) { this.tag = value; }
+  setCloser(value: string | null | undefined) {
+    if (typeof value === "string") {
+      this.closer = value;
+    } else {
+      delete this.closer;
+    }
+  }
+  setId(value: string | undefined) { setAttrValue(this.attributes, "id", value); }
+  setClass(value: string | undefined) { setAttrValue(this.attributes, "class", value); }
+  setClasses(value: string[]) { setAttrValue(this.attributes, "class", value.join(" ")); }
+  setContent(value: string) { this.content = value; }
+  setAttribute(key: string, value: string | null | undefined) { setAttrValue(this.attributes, key, value); }
+
+
   getRoot(this: DOMElem) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let root: DOMElem = this;
@@ -301,18 +326,6 @@ export class DOMElem implements DOMElemImpl {
     }
     return depth;
   }
-
-  getId() { return this.attributes.id || ""; }
-  getClass() { return this.attributes.class || ""; }
-  getClasses() { return this.attributes.class?.split(" ").filter(Boolean) || []; }
-  getContent() { return this.content || ""; }
-  getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
- 
-  setId(str: string | undefined) { setAttrValue(this.attributes, "id", str); }
-  setClass(str: string | undefined) { setAttrValue(this.attributes, "class", str); }
-  setClasses(arr: string[]) { setAttrValue(this.attributes, "class", arr.join(" ")); }
-  setContent(str: string | undefined) { this.content = str; }
-  setAttribute(key: string, value: string | null | undefined) { setAttrValue(this.attributes, key, value); }
 
   append(...args: (string | DOMElemImpl | DOMElem)[]) {
     const elements = this.createChildren(args);
@@ -526,6 +539,8 @@ export class DOMElem implements DOMElemImpl {
         isClosed: false,
         depth: 0,
         type: "root",
+        tag: "",
+        content: "",
         attributes: {},
         children: [],
       }
@@ -544,6 +559,7 @@ export class DOMElem implements DOMElemImpl {
           isClosed: true,
           depth,
           type: "text",
+          tag: "",
           content: part,
           attributes: {},
           children: [],
@@ -558,6 +574,7 @@ export class DOMElem implements DOMElemImpl {
           isClosed: true,
           depth,
           type: "comment",
+          tag: "",
           content: part.substring(4, part.length - 3),
           attributes: {},
           children: [],
@@ -645,6 +662,7 @@ export class DOMElem implements DOMElemImpl {
         depth,
         type: "tag",
         tag,
+        content: "",
         closer,
         attributes,
         children: [],

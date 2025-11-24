@@ -417,6 +417,8 @@ function setAttrValue(attrs, key, value) {
 var DOMElem = class _DOMElem {
   constructor(src, parent) {
     this.type = "root";
+    this.tag = "";
+    this.content = "";
     this.attributes = {};
     this.children = [];
     if (src) {
@@ -472,20 +474,11 @@ var DOMElem = class _DOMElem {
   isTag() {
     return this.type === "tag";
   }
-  getRoot() {
-    let root = this;
-    while (root.parent) {
-      root = root.parent;
-    }
-    return root;
+  getTag() {
+    return this.tag;
   }
-  getDepth() {
-    let el = this, depth = 0;
-    while (el.parent) {
-      el = el.parent;
-      depth++;
-    }
-    return depth;
+  getCloser() {
+    return this.closer;
   }
   getId() {
     return this.attributes.id || "";
@@ -502,20 +495,45 @@ var DOMElem = class _DOMElem {
   getAttribute(key) {
     return this.attributes[key];
   }
-  setId(str) {
-    setAttrValue(this.attributes, "id", str);
+  setTag(value) {
+    this.tag = value;
   }
-  setClass(str) {
-    setAttrValue(this.attributes, "class", str);
+  setCloser(value) {
+    if (typeof value === "string") {
+      this.closer = value;
+    } else {
+      delete this.closer;
+    }
   }
-  setClasses(arr) {
-    setAttrValue(this.attributes, "class", arr.join(" "));
+  setId(value) {
+    setAttrValue(this.attributes, "id", value);
   }
-  setContent(str) {
-    this.content = str;
+  setClass(value) {
+    setAttrValue(this.attributes, "class", value);
+  }
+  setClasses(value) {
+    setAttrValue(this.attributes, "class", value.join(" "));
+  }
+  setContent(value) {
+    this.content = value;
   }
   setAttribute(key, value) {
     setAttrValue(this.attributes, key, value);
+  }
+  getRoot() {
+    let root = this;
+    while (root.parent) {
+      root = root.parent;
+    }
+    return root;
+  }
+  getDepth() {
+    let el = this, depth = 0;
+    while (el.parent) {
+      el = el.parent;
+      depth++;
+    }
+    return depth;
   }
   append(...args) {
     const elements = this.createChildren(args);
@@ -673,6 +691,8 @@ var DOMElem = class _DOMElem {
           isClosed: false,
           depth: 0,
           type: "root",
+          tag: "",
+          content: "",
           attributes: {},
           children: []
         }
@@ -687,6 +707,7 @@ var DOMElem = class _DOMElem {
             isClosed: true,
             depth,
             type: "text",
+            tag: "",
             content: part,
             attributes: {},
             children: []
@@ -699,6 +720,7 @@ var DOMElem = class _DOMElem {
             isClosed: true,
             depth,
             type: "comment",
+            tag: "",
             content: part.substring(4, part.length - 3),
             attributes: {},
             children: []
@@ -766,6 +788,7 @@ var DOMElem = class _DOMElem {
           depth,
           type: "tag",
           tag,
+          content: "",
           closer,
           attributes,
           children: []
