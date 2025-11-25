@@ -286,7 +286,14 @@ export class DOMElem implements DOMElemImpl {
 
   getTag() { return this.tag; }
   getCloser() { return this.closer; }
-  getContent() { return this.content || ""; }
+  getContent(deep?: boolean): string {
+    return deep
+      ? this
+          .filter((child) => child.type === "text")
+          .map((child) => child.getContent())
+          .join("")
+      : this.content || "";
+  }
   getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
  
   setTag(value: string) { this.tag = value; }
@@ -493,12 +500,6 @@ export class DOMElem implements DOMElemImpl {
     func(this, 1);
 
     return result;
-  }
-
-  toContents() {
-    return this
-      .filter((child) => child.type === "text")
-      .map((child) => child.getContent());
   }
 
   toString(): string {

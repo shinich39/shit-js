@@ -29,7 +29,7 @@ export declare class DOMElem implements DOMElemImpl {
     isTag(): boolean;
     getTag(): string;
     getCloser(): string | undefined;
-    getContent(): string;
+    getContent(deep?: boolean): string;
     getAttribute(key: string): string | null | undefined;
     setTag(value: string): void;
     setCloser(value: string | null | undefined): void;
@@ -47,7 +47,6 @@ export declare class DOMElem implements DOMElemImpl {
     filter(callback: (child: DOMElem, index: number, depth: number) => any): DOMElem[];
     map<T>(callback: (child: DOMElem, index: number, depth: number) => T): T[];
     reduce<T>(callback: (accumulator: T, child: DOMElem, index: number, depth: number) => T, initialValue: T): T;
-    toContents(): string[];
     toString(): string;
     toArray(): DOMElem[];
     static parse: (str: string) => DOMElemImpl;

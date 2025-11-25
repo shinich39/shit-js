@@ -480,8 +480,8 @@ var DOMElem = class _DOMElem {
   getCloser() {
     return this.closer;
   }
-  getContent() {
-    return this.content || "";
+  getContent(deep) {
+    return deep ? this.filter((child) => child.type === "text").map((child) => child.getContent()).join("") : this.content || "";
   }
   getAttribute(key) {
     return this.attributes[key];
@@ -637,9 +637,6 @@ var DOMElem = class _DOMElem {
     };
     func(this, 1);
     return result;
-  }
-  toContents() {
-    return this.filter((child) => child.type === "text").map((child) => child.getContent());
   }
   toString() {
     switch (this.type) {
