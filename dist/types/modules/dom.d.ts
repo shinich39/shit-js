@@ -28,12 +28,13 @@ export declare class DOMElem implements DOMElemImpl {
     isText(): boolean;
     isTag(): boolean;
     getTag(): string;
-    getCloser(): string | undefined;
-    getContent(deep?: boolean): string;
-    getAttribute(key: string): string | null | undefined;
     setTag(value: string): void;
+    getCloser(): string | undefined;
     setCloser(value: string | null | undefined): void;
+    getContent(deep?: boolean): string;
     setContent(value: string): void;
+    getAttribute(key: string): string | null | undefined;
+    hasAttribute(key: string): boolean;
     setAttribute(key: string, value: string | null | undefined): void;
     getRoot(this: DOMElem): DOMElem;
     getDepth(this: DOMElem): number;

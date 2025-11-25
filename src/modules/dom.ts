@@ -286,7 +286,17 @@ export class DOMElem implements DOMElemImpl {
   isTag() { return this.type === "tag"; }
 
   getTag() { return this.tag; }
+  setTag(value: string) { this.tag = value; }
+  
   getCloser() { return this.closer; }
+  setCloser(value: string | null | undefined) {
+    if (typeof value === "string") {
+      this.closer = value;
+    } else {
+      delete this.closer;
+    }
+  }
+
   getContent(deep?: boolean): string {
     return deep
       ? this
@@ -295,19 +305,11 @@ export class DOMElem implements DOMElemImpl {
           .join("")
       : this.content || "";
   }
-  getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
- 
-  setTag(value: string) { this.tag = value; }
-  setCloser(value: string | null | undefined) {
-    if (typeof value === "string") {
-      this.closer = value;
-    } else {
-      delete this.closer;
-    }
-  }
   setContent(value: string) { this.content = value; }
-  setAttribute(key: string, value: string | null | undefined) { setAttrValue(this.attributes, key, value); }
 
+  getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
+  hasAttribute(key: string) { return typeof this.attributes[key] !== "undefined"; }
+  setAttribute(key: string, value: string | null | undefined) { setAttrValue(this.attributes, key, value); }
 
   getRoot(this: DOMElem) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias

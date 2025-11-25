@@ -477,17 +477,11 @@ var DOMElem = class _DOMElem {
   getTag() {
     return this.tag;
   }
-  getCloser() {
-    return this.closer;
-  }
-  getContent(deep) {
-    return deep ? this.filter((child) => child.type === "text").map((child) => child.getContent()).join("") : this.content || "";
-  }
-  getAttribute(key) {
-    return this.attributes[key];
-  }
   setTag(value) {
     this.tag = value;
+  }
+  getCloser() {
+    return this.closer;
   }
   setCloser(value) {
     if (typeof value === "string") {
@@ -496,8 +490,17 @@ var DOMElem = class _DOMElem {
       delete this.closer;
     }
   }
+  getContent(deep) {
+    return deep ? this.filter((child) => child.type === "text").map((child) => child.getContent()).join("") : this.content || "";
+  }
   setContent(value) {
     this.content = value;
+  }
+  getAttribute(key) {
+    return this.attributes[key];
+  }
+  hasAttribute(key) {
+    return typeof this.attributes[key] !== "undefined";
   }
   setAttribute(key, value) {
     setAttrValue(this.attributes, key, value);
