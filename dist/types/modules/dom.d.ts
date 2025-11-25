@@ -29,16 +29,10 @@ export declare class DOMElem implements DOMElemImpl {
     isTag(): boolean;
     getTag(): string;
     getCloser(): string | undefined;
-    getId(): string;
-    getClass(): string;
-    getClasses(): string[];
     getContent(): string;
     getAttribute(key: string): string | null | undefined;
     setTag(value: string): void;
     setCloser(value: string | null | undefined): void;
-    setId(value: string | undefined): void;
-    setClass(value: string | undefined): void;
-    setClasses(value: string[]): void;
     setContent(value: string): void;
     setAttribute(key: string, value: string | null | undefined): void;
     getRoot(this: DOMElem): DOMElem;

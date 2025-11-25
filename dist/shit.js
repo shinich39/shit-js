@@ -572,15 +572,6 @@ var Shit = (() => {
     getCloser() {
       return this.closer;
     }
-    getId() {
-      return this.attributes.id || "";
-    }
-    getClass() {
-      return this.attributes.class || "";
-    }
-    getClasses() {
-      return this.attributes.class?.split(" ").filter(Boolean) || [];
-    }
     getContent() {
       return this.content || "";
     }
@@ -596,15 +587,6 @@ var Shit = (() => {
       } else {
         delete this.closer;
       }
-    }
-    setId(value) {
-      setAttrValue(this.attributes, "id", value);
-    }
-    setClass(value) {
-      setAttrValue(this.attributes, "class", value);
-    }
-    setClasses(value) {
-      setAttrValue(this.attributes, "class", value.join(" "));
     }
     setContent(value) {
       this.content = value;
