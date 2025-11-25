@@ -61,6 +61,18 @@ describe(path.basename(import.meta.filename), () => {
     eq(html, root2.toString());
   });
 
+  test("tag with content", () => {
+    const root = new DOMElem({
+      type: "tag",
+      tag: "div",
+      content: "CONVERT TO TEXT",
+      attributes: {},
+      children: [],
+    });
+
+    eq("<div>CONVERT TO TEXT</div>", root.toString());
+  });
+
 });
 
 function eq(a: any, b: any, msg?: string | Error) {

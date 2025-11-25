@@ -256,9 +256,26 @@ export class DOMElem implements DOMElemImpl {
       this.type = src.type;
       this.tag = src.tag;
       this.closer = src.closer;
-      this.content = src.content;
       this.attributes = src.attributes;
-      this.children = src.children.map((child) => new DOMElem(child, this));
+
+      if (
+        src.type === "tag" && 
+        src.content.length > 0 &&
+        src.children.length === 0
+      ) {
+        this.children = [
+          new DOMElem({
+            type: "text",
+            tag: "",
+            content: src.content,
+            attributes: {},
+            children: [],
+          }, this)
+        ];
+      } else {
+        this.content = src.content;
+        this.children = src.children.map((child) => new DOMElem(child, this));
+      }
     }
   }
 
