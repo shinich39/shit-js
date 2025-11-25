@@ -354,7 +354,7 @@ function parseTag(str) {
     } else if (!quotes) {
       if (ch === ">") {
         if (buffer === "/" || buffer === "?") {
-          closer = buffer;
+          closer = /\s/.test(str[i - 2]) ? " " + buffer : buffer;
         } else {
           flush();
         }
@@ -639,25 +639,26 @@ var DOMElem = class _DOMElem {
     return result;
   }
   toString() {
-    switch (this.type) {
+    const { type, tag, closer, children } = this;
+    switch (type) {
       case "root":
-        return this.children.map((child) => child.toString()).join("");
+        return children.map((child) => child.toString()).join("");
       case "comment":
         return `<!--${this.getContent()}-->`;
       case "text":
         return this.getContent();
     }
-    if (!this.tag) {
-      throw new Error("Element must have a value of tag attribute");
+    if (!tag) {
+      throw new Error("DOMElem must have a value of tag attribute");
     }
     const attrs = stringifyAttrs(this.attributes);
-    switch (this.type) {
+    switch (type) {
       case "script":
         return `<script${attrs}>${this.getContent()}<\/script>`;
       case "style":
         return `<style${attrs}>${this.getContent()}</style>`;
       case "tag":
-        return this.isSelfClosed() ? `<${this.tag}${attrs} ${this.closer}>` : `<${this.tag}${attrs}>${this.children.map((child) => child.toString()).join("")}</${this.tag}>`;
+        return this.isSelfClosed() ? `<${tag}${attrs}${closer}>` : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
     }
   }
   toArray() {
@@ -668,7 +669,6 @@ var DOMElem = class _DOMElem {
       const stacks = [
         {
           isClosed: false,
-          depth: 0,
           type: "root",
           tag: "",
           content: "",
@@ -678,13 +678,11 @@ var DOMElem = class _DOMElem {
       ];
       const root = stacks[0];
       const parts = splitTags(str);
-      let depth = 1;
       for (const part of parts) {
         const isTag = part.startsWith("<") && part.endsWith(">");
         if (!isTag) {
           stacks.push({
             isClosed: true,
-            depth,
             type: "text",
             tag: "",
             content: part,
@@ -693,11 +691,24 @@ var DOMElem = class _DOMElem {
           });
           continue;
         }
+        const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
+        if (isXMLDeclaration) {
+          const { attributes: attributes2 } = parseTag(part);
+          stacks.push({
+            isClosed: true,
+            type: "tag",
+            tag: "?xml",
+            closer: "?",
+            content: "",
+            attributes: attributes2,
+            children: []
+          });
+          continue;
+        }
         const isComment = part.startsWith("<!--") && part.endsWith("-->");
         if (isComment) {
           stacks.push({
             isClosed: true,
-            depth,
             type: "comment",
             tag: "",
             content: part.substring(4, part.length - 3),
@@ -712,7 +723,6 @@ var DOMElem = class _DOMElem {
           const content = part.substring(endIndex, part.length - 9);
           stacks.push({
             isClosed: true,
-            depth,
             type: "script",
             tag: "script",
             content,
@@ -727,7 +737,6 @@ var DOMElem = class _DOMElem {
           const content = part.substring(endIndex, part.length - 8);
           stacks.push({
             isClosed: false,
-            depth,
             type: "style",
             tag: "style",
             content,
@@ -750,21 +759,17 @@ var DOMElem = class _DOMElem {
                 }
                 break;
               }
-              if (stack.type === "tag") {
-                stack.closer = "";
-              }
+              stack.closer = "";
             }
-            if (stack.depth === depth) {
+            if (!stack.parent) {
               children.push(stack);
             }
           }
-          depth--;
           continue;
         }
         const isClosed = typeof closer === "string";
         stacks.push({
           isClosed,
-          depth,
           type: "tag",
           tag,
           content: "",
@@ -772,14 +777,14 @@ var DOMElem = class _DOMElem {
           attributes,
           children: []
         });
-        if (!isClosed) {
-          depth++;
-        }
       }
       for (const stack of stacks) {
-        if (stack.depth === 1) {
+        if (stack.type !== "root" && !stack.parent) {
           stack.parent = root;
           root.children.push(stack);
+        }
+        if (stack.type === "tag" && !stack.isClosed) {
+          stack.closer = "";
         }
         delete stack.isClosed;
         delete stack.depth;
