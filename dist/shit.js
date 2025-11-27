@@ -75,6 +75,7 @@ var Shit = (() => {
     matchObject: () => matchObject,
     matchStrings: () => matchStrings,
     normalizeString: () => normalizeString,
+    parseDOM: () => parseDOM,
     parseDate: () => parseDate,
     retry: () => retry,
     setBit: () => setBit,
@@ -624,13 +625,7 @@ var Shit = (() => {
     }
     return result;
   }
-  function setAttrValue(attrs, key, value) {
-    if (typeof value === "undefined") {
-      delete attrs[key];
-    } else {
-      attrs[key] = value;
-    }
-  }
+  var parseDOM = (arg, parent) => new DOMElem(arg, parent);
   var DOMElem = class _DOMElem {
     constructor(src, parent) {
       this.type = "root";
@@ -682,9 +677,6 @@ var Shit = (() => {
       }
       return result;
     }
-    isSelfClosed() {
-      return typeof this.closer === "string";
-    }
     isRoot() {
       return this.type === "root";
     }
@@ -703,11 +695,32 @@ var Shit = (() => {
     isTag() {
       return this.type === "tag";
     }
+    getParent() {
+      return this.parent;
+    }
+    hasParent() {
+      return !!this.parent;
+    }
+    getChildren() {
+      return this.children;
+    }
+    hasChildren() {
+      return this.children.length > 1;
+    }
+    getSiblings() {
+      return (this.parent?.children || []).filter((sibling) => sibling != this);
+    }
+    hasSiblings() {
+      return (this.parent?.children || []).length > 1;
+    }
     getTag() {
       return this.tag;
     }
     setTag(value) {
       this.tag = value;
+    }
+    hasTag() {
+      return this.tag !== "";
     }
     getCloser() {
       return this.closer;
@@ -719,20 +732,54 @@ var Shit = (() => {
         delete this.closer;
       }
     }
-    getContent(deep) {
-      return deep ? this.filter((child) => child.type === "text").map((child) => child.getContent()).join("") : this.content || "";
+    hasCloser() {
+      return typeof this.closer === "string";
+    }
+    getContent() {
+      return this.content || "";
+    }
+    getContents() {
+      const result = [];
+      for (const child of this.children) {
+        switch (child.type) {
+          case "text":
+            result.push(child.content || "");
+            break;
+          case "tag":
+            result.push(...child.getContents());
+            break;
+        }
+      }
+      return result;
     }
     setContent(value) {
       this.content = value;
     }
+    hasContent() {
+      return this.content !== "";
+    }
     getAttribute(key) {
       return this.attributes[key];
+    }
+    setAttribute(key, value) {
+      this.attributes[key] = value;
     }
     hasAttribute(key) {
       return typeof this.attributes[key] !== "undefined";
     }
-    setAttribute(key, value) {
-      setAttrValue(this.attributes, key, value);
+    getAttributes() {
+      return this.attributes;
+    }
+    setAttributes(attrs) {
+      Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k]));
+    }
+    hasAttributes(attrs) {
+      for (const k of Object.keys(attrs)) {
+        if (this.getAttribute(k) !== attrs[k]) {
+          return false;
+        }
+      }
+      return true;
     }
     getRoot() {
       let root = this;
@@ -750,14 +797,14 @@ var Shit = (() => {
       return depth;
     }
     append(...args) {
-      const elements = this.createChildren(args);
-      for (const el of elements) {
+      const newChildren = this.createChildren(args);
+      for (const el of newChildren) {
         this.children.push(el);
       }
     }
     prepend(...args) {
-      const elements = this.createChildren(args);
-      this.children.splice(0, 0, ...elements);
+      const newChildren = this.createChildren(args);
+      this.children.splice(0, 0, ...newChildren);
     }
     before(...args) {
       if (!this.parent) {
@@ -767,8 +814,8 @@ var Shit = (() => {
       if (index === -1) {
         throw new Error("This element not included in its parent");
       }
-      const elements = this.parent.createChildren(args);
-      this.parent.children.splice(index, 0, ...elements);
+      const newSiblings = this.parent.createChildren(args);
+      this.parent.children.splice(index, 0, ...newSiblings);
     }
     after(...args) {
       if (!this.parent) {
@@ -778,8 +825,8 @@ var Shit = (() => {
       if (index === -1) {
         throw new Error("This element not included in its parent");
       }
-      const elements = this.parent.createChildren(args);
-      this.parent.children.splice(index + 1, 0, ...elements);
+      const newSiblings = this.parent.createChildren(args);
+      this.parent.children.splice(index + 1, 0, ...newSiblings);
     }
     forEach(callback) {
       let index = 0;
@@ -873,20 +920,19 @@ var Shit = (() => {
     remove() {
       this.parent?.removeChild(this);
     }
-    removeChild(element) {
-      this.removeChildren(element);
+    removeChild(arg) {
+      this.removeChildren(arg);
     }
-    removeChildren(...elements) {
-      const origChildren = this.children;
-      this.children = [];
-      for (const child of origChildren) {
-        const exists = elements.find((el) => el == child);
-        if (!exists) {
-          this.children.push(child);
+    removeChildren(...args) {
+      const set = new Set(args);
+      this.children = this.children.filter((child) => {
+        if (set.has(child)) {
+          delete child.parent;
+          return false;
         } else {
-          delete exists.parent;
+          return true;
         }
-      }
+      });
     }
     toString() {
       const { type, tag, closer, children } = this;
@@ -908,7 +954,7 @@ var Shit = (() => {
         case "style":
           return `<style${attrs}>${this.getContent()}</style>`;
         case "tag":
-          return this.isSelfClosed() ? `<${tag}${attrs}${closer}>` : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
+          return this.hasCloser() ? `<${tag}${attrs}${closer}>` : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
       }
     }
     toArray() {

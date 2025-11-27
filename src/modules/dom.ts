@@ -568,8 +568,8 @@ export class DOMElem implements DOMElemImpl {
       throw new Error("This element not included in its parent");
     }
     
-    const newChildren = this.parent.createChildren(args);
-    this.parent.children.splice(index, 0, ...newChildren);
+    const newSiblings = this.parent.createChildren(args);
+    this.parent.children.splice(index, 0, ...newSiblings);
   }
 
   after(...args: (string | DOMElemImpl | DOMElem)[]) {
@@ -582,8 +582,8 @@ export class DOMElem implements DOMElemImpl {
       throw new Error("This element not included in its parent");
     }
 
-    const newChildren = this.parent.createChildren(args);
-    this.parent.children.splice(index + 1, 0, ...newChildren);
+    const newSiblings = this.parent.createChildren(args);
+    this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
 
   forEach(

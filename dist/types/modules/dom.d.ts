@@ -1,5 +1,5 @@
 export type DOMElemType = "root" | "tag" | "text" | "comment" | "script" | "style";
-export type DOMElemAttrs = Record<string, string | null>;
+export type DOMElemAttrs = Record<string, string | null | undefined>;
 export type DOMElemImpl = {
     parent?: DOMElemImpl;
     type: DOMElemType;
@@ -13,6 +13,7 @@ declare function parseStr(str: string): {
     type: "root";
     children: DOMElemImpl[];
 };
+export declare const parseDOM: (arg: string | DOMElemImpl | DOMElem, parent?: DOMElem) => DOMElem;
 export declare class DOMElem implements DOMElemImpl {
     parent?: DOMElem;
     type: DOMElemType;
@@ -24,22 +25,34 @@ export declare class DOMElem implements DOMElemImpl {
     constructor(src?: string | DOMElemImpl | DOMElem, parent?: DOMElem);
     init(src: string | DOMElemImpl | DOMElem, parent?: DOMElem): void;
     createChildren(args: (string | DOMElemImpl | DOMElem)[]): DOMElem[];
-    isSelfClosed(): boolean;
     isRoot(): boolean;
     isComment(): boolean;
     isStyle(): boolean;
     isScript(): boolean;
     isText(): boolean;
     isTag(): boolean;
+    getParent(): DOMElem | undefined;
+    hasParent(): boolean;
+    getChildren(): DOMElem[];
+    hasChildren(): boolean;
+    getSiblings(): DOMElem[];
+    hasSiblings(): boolean;
     getTag(): string;
     setTag(value: string): void;
+    hasTag(): boolean;
     getCloser(): string | undefined;
     setCloser(value: string | null | undefined): void;
-    getContent(deep?: boolean): string;
+    hasCloser(): boolean;
+    getContent(): string;
+    getContents(): string[];
     setContent(value: string): void;
+    hasContent(): boolean;
     getAttribute(key: string): string | null | undefined;
-    hasAttribute(key: string): boolean;
     setAttribute(key: string, value: string | null | undefined): void;
+    hasAttribute(key: string): boolean;
+    getAttributes(): DOMElemAttrs;
+    setAttributes(attrs: DOMElemAttrs): void;
+    hasAttributes(attrs: DOMElemAttrs): boolean;
     getRoot(this: DOMElem): DOMElem;
     getDepth(this: DOMElem): number;
     append(...args: (string | DOMElemImpl | DOMElem)[]): void;
@@ -53,8 +66,8 @@ export declare class DOMElem implements DOMElemImpl {
     map<T>(callback: (child: DOMElem, index: number, depth: number) => T): T[];
     reduce<T>(callback: (accumulator: T, child: DOMElem, index: number, depth: number) => T, initialValue: T): T;
     remove(): void;
-    removeChild(element: DOMElem): void;
-    removeChildren(...elements: DOMElem[]): void;
+    removeChild(arg: DOMElem): void;
+    removeChildren(...args: DOMElem[]): void;
     toString(): string;
     toArray(): DOMElem[];
     static parse: typeof parseStr;
