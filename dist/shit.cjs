@@ -487,6 +487,131 @@ function parseTag(str) {
     attributes
   };
 }
+function parseStr(str) {
+  const stacks = [
+    {
+      isClosed: false,
+      type: "root",
+      children: []
+    }
+  ];
+  const root = stacks[0];
+  const parts = splitTags(str);
+  for (const part of parts) {
+    const isTag = part.startsWith("<") && part.endsWith(">");
+    if (!isTag) {
+      stacks.push({
+        isClosed: true,
+        type: "text",
+        tag: "",
+        content: part,
+        attributes: {},
+        children: []
+      });
+      continue;
+    }
+    const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
+    if (isXMLDeclaration) {
+      const { attributes: attributes2 } = parseTag(part);
+      stacks.push({
+        isClosed: true,
+        type: "tag",
+        tag: "?xml",
+        closer: "?",
+        content: "",
+        attributes: attributes2,
+        children: []
+      });
+      continue;
+    }
+    const isComment = part.startsWith("<!--") && part.endsWith("-->");
+    if (isComment) {
+      stacks.push({
+        isClosed: true,
+        type: "comment",
+        tag: "",
+        content: part.substring(4, part.length - 3),
+        attributes: {},
+        children: []
+      });
+      continue;
+    }
+    const isScript = part.startsWith("<script") && part.endsWith("<\/script>");
+    if (isScript) {
+      const { endIndex, attributes: attributes2 } = parseTag(part);
+      const content = part.substring(endIndex, part.length - 9);
+      stacks.push({
+        isClosed: true,
+        type: "script",
+        tag: "script",
+        content,
+        attributes: attributes2,
+        children: []
+      });
+      continue;
+    }
+    const isStyle = part.startsWith("<style") && part.endsWith("</style>");
+    if (isStyle) {
+      const { endIndex, attributes: attributes2 } = parseTag(part);
+      const content = part.substring(endIndex, part.length - 8);
+      stacks.push({
+        isClosed: false,
+        type: "style",
+        tag: "style",
+        content,
+        attributes: attributes2,
+        children: []
+      });
+      continue;
+    }
+    const { tag, isClosing, closer, attributes } = parseTag(part);
+    if (isClosing) {
+      const children = [];
+      for (let i = stacks.length - 1; i >= 0; i--) {
+        const stack = stacks[i];
+        if (!stack.isClosed) {
+          stack.isClosed = true;
+          if (stack.tag === tag) {
+            stack.children = children.reverse();
+            for (const child of children) {
+              child.parent = stack;
+            }
+            break;
+          }
+          stack.closer = "";
+        }
+        if (!stack.parent) {
+          children.push(stack);
+        }
+      }
+      continue;
+    }
+    const isClosed = typeof closer === "string";
+    stacks.push({
+      isClosed,
+      type: "tag",
+      tag,
+      content: "",
+      closer,
+      attributes,
+      children: []
+    });
+  }
+  for (const stack of stacks) {
+    if (stack.type !== "root" && !stack.parent) {
+      stack.parent = root;
+      root.children.push(stack);
+    }
+    if (stack.type === "tag" && !stack.isClosed) {
+      stack.closer = "";
+    }
+    delete stack.isClosed;
+    delete stack.depth;
+  }
+  delete root.isClosed;
+  delete root.depth;
+  return root;
+}
 function stringifyAttrs(attrs) {
   let result = "";
   for (const k of Object.keys(attrs)) {
@@ -524,10 +649,11 @@ var DOMElem = class _DOMElem {
     } else {
       this.parent = parent;
       this.type = src.type;
-      this.tag = src.tag;
+      this.tag = src.tag || "";
       this.closer = src.closer;
-      this.attributes = src.attributes;
-      if (src.type === "tag" && src.content.length > 0 && src.children.length === 0) {
+      this.content = src.content || "";
+      this.attributes = src.attributes || {};
+      if (this.type === "tag" && this.content.length > 0) {
         this.children = [
           new _DOMElem({
             type: "text",
@@ -537,8 +663,7 @@ var DOMElem = class _DOMElem {
             children: []
           }, this)
         ];
-      } else {
-        this.content = src.content;
+      } else if (src.children) {
         this.children = src.children.map((child) => new _DOMElem(child, this));
       }
     }
@@ -772,134 +897,7 @@ var DOMElem = class _DOMElem {
     return [this, ...this.map((child) => child)];
   }
   static {
-    this.parse = function(str) {
-      const stacks = [
-        {
-          isClosed: false,
-          type: "root",
-          tag: "",
-          content: "",
-          attributes: {},
-          children: []
-        }
-      ];
-      const root = stacks[0];
-      const parts = splitTags(str);
-      for (const part of parts) {
-        const isTag = part.startsWith("<") && part.endsWith(">");
-        if (!isTag) {
-          stacks.push({
-            isClosed: true,
-            type: "text",
-            tag: "",
-            content: part,
-            attributes: {},
-            children: []
-          });
-          continue;
-        }
-        const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
-        if (isXMLDeclaration) {
-          const { attributes: attributes2 } = parseTag(part);
-          stacks.push({
-            isClosed: true,
-            type: "tag",
-            tag: "?xml",
-            closer: "?",
-            content: "",
-            attributes: attributes2,
-            children: []
-          });
-          continue;
-        }
-        const isComment = part.startsWith("<!--") && part.endsWith("-->");
-        if (isComment) {
-          stacks.push({
-            isClosed: true,
-            type: "comment",
-            tag: "",
-            content: part.substring(4, part.length - 3),
-            attributes: {},
-            children: []
-          });
-          continue;
-        }
-        const isScript = part.startsWith("<script") && part.endsWith("<\/script>");
-        if (isScript) {
-          const { endIndex, attributes: attributes2 } = parseTag(part);
-          const content = part.substring(endIndex, part.length - 9);
-          stacks.push({
-            isClosed: true,
-            type: "script",
-            tag: "script",
-            content,
-            attributes: attributes2,
-            children: []
-          });
-          continue;
-        }
-        const isStyle = part.startsWith("<style") && part.endsWith("</style>");
-        if (isStyle) {
-          const { endIndex, attributes: attributes2 } = parseTag(part);
-          const content = part.substring(endIndex, part.length - 8);
-          stacks.push({
-            isClosed: false,
-            type: "style",
-            tag: "style",
-            content,
-            attributes: attributes2,
-            children: []
-          });
-          continue;
-        }
-        const { tag, isClosing, closer, attributes } = parseTag(part);
-        if (isClosing) {
-          const children = [];
-          for (let i = stacks.length - 1; i >= 0; i--) {
-            const stack = stacks[i];
-            if (!stack.isClosed) {
-              stack.isClosed = true;
-              if (stack.tag === tag) {
-                stack.children = children.reverse();
-                for (const child of children) {
-                  child.parent = stack;
-                }
-                break;
-              }
-              stack.closer = "";
-            }
-            if (!stack.parent) {
-              children.push(stack);
-            }
-          }
-          continue;
-        }
-        const isClosed = typeof closer === "string";
-        stacks.push({
-          isClosed,
-          type: "tag",
-          tag,
-          content: "",
-          closer,
-          attributes,
-          children: []
-        });
-      }
-      for (const stack of stacks) {
-        if (stack.type !== "root" && !stack.parent) {
-          stack.parent = root;
-          root.children.push(stack);
-        }
-        if (stack.type === "tag" && !stack.isClosed) {
-          stack.closer = "";
-        }
-        delete stack.isClosed;
-        delete stack.depth;
-      }
-      delete root.isClosed;
-      delete root.depth;
-      return root;
-    };
+    this.parse = parseStr;
   }
 };
 

@@ -3,10 +3,14 @@ export type DOMElemAttrs = Record<string, string | null>;
 export type DOMElemImpl = {
     parent?: DOMElemImpl;
     type: DOMElemType;
-    tag: string;
+    tag?: string;
     closer?: string;
-    content: string;
-    attributes: DOMElemAttrs;
+    content?: string;
+    attributes?: DOMElemAttrs;
+    children?: DOMElemImpl[];
+};
+declare function parseStr(str: string): {
+    type: "root";
     children: DOMElemImpl[];
 };
 export declare class DOMElem implements DOMElemImpl {
@@ -50,6 +54,7 @@ export declare class DOMElem implements DOMElemImpl {
     reduce<T>(callback: (accumulator: T, child: DOMElem, index: number, depth: number) => T, initialValue: T): T;
     toString(): string;
     toArray(): DOMElem[];
-    static parse: (str: string) => DOMElemImpl;
+    static parse: typeof parseStr;
 }
+export {};
 //# sourceMappingURL=dom.d.ts.map

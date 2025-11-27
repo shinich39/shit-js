@@ -4,15 +4,22 @@ export type DOMElemAttrs = Record<string, string | null>;
 export type DOMElemImpl = {
   parent?: DOMElemImpl;
   type: DOMElemType;
-  tag: string;
+  tag?: string;
   closer?: string;
-  content: string;
-  attributes: DOMElemAttrs;
-  children: DOMElemImpl[];
+  content?: string;
+  attributes?: DOMElemAttrs;
+  children?: DOMElemImpl[];
 }
 
-type Stack = DOMElemImpl & {
+type Stack = {
   isClosed: boolean;
+  parent?: DOMElemImpl;
+  type: DOMElemType;
+  tag?: string;
+  closer?: string;
+  content?: string;
+  attributes?: DOMElemAttrs;
+  children?: DOMElemImpl[];
 }
 
 function splitTags(str: string) {
@@ -206,6 +213,176 @@ function parseTag(str: string) {
   }
 }
 
+function parseStr(str: string) {
+  const stacks: Stack[] = [
+    {
+      isClosed: false,
+      type: "root",
+      children: [],
+    }
+  ];
+
+  const root = stacks[0] as Stack & { children: DOMElemImpl[], };
+  const parts = splitTags(str);
+
+  for (const part of parts) {
+
+    // text
+    const isTag = part.startsWith("<") && part.endsWith(">");
+    if (!isTag) {
+      stacks.push({
+        isClosed: true,
+        type: "text",
+        tag: "",
+        content: part,
+        attributes: {},
+        children: [],
+      });
+      continue;
+    }
+
+    // xml declaration, xml prolog
+    const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
+    if (isXMLDeclaration) {
+      const { attributes } = parseTag(part);
+      stacks.push({
+        isClosed: true,
+        type: "tag",
+        tag: "?xml",
+        closer: "?",
+        content: "",
+        attributes,
+        children: [],
+      });
+      continue;
+    }
+
+    // comment
+    const isComment = part.startsWith("<!--") && part.endsWith("-->");
+    if (isComment) {
+      stacks.push({
+        isClosed: true,
+        type: "comment",
+        tag: "",
+        content: part.substring(4, part.length - 3),
+        attributes: {},
+        children: [],
+      });
+      continue;
+    }
+
+    // script
+    const isScript = part.startsWith("<script") && part.endsWith("</script>");
+    if (isScript) {
+      const { endIndex, attributes } = parseTag(part);
+      const content = part.substring(endIndex, part.length - 9);
+      stacks.push({
+        isClosed: true,
+        type: "script",
+        tag: "script",
+        content,
+        attributes,
+        children: [],
+      });
+      continue;
+    }
+
+    // style
+    const isStyle = part.startsWith("<style") && part.endsWith("</style>");
+    if (isStyle) {
+      const { endIndex, attributes } = parseTag(part);
+      const content = part.substring(endIndex, part.length - 8); // "</style>"
+      stacks.push({
+        isClosed: false,
+        type: "style",
+        tag: "style",
+        content,
+        attributes,
+        children: [],
+      });
+      continue;
+    }
+
+    // tags
+    const { tag, isClosing, closer, attributes } = parseTag(part);
+
+    if (isClosing) {
+      const children: DOMElemImpl[] = [];
+      for (let i = stacks.length - 1; i >= 0; i--) {
+        const stack = stacks[i];
+
+        if (!stack.isClosed) {
+          stack.isClosed = true;
+
+          if (stack.tag === tag) {
+            stack.children = children.reverse();
+
+            // set children parent
+            for (const child of children) {
+              child.parent = stack;
+            }
+            
+            break;
+          }
+
+          // close self-closing tag
+          stack.closer = "";
+        }
+
+        // current element included in same parent
+        if (!stack.parent) {
+          children.push(stack);
+        }
+      }
+
+      continue;
+    }
+
+    const isClosed = typeof closer === "string";
+
+    stacks.push({
+      isClosed,
+      type: "tag",
+      tag,
+      content: "",
+      closer,
+      attributes,
+      children: [],
+    });
+  }
+
+  for (const stack of stacks) {
+    // add root children
+    if (stack.type !== "root" && !stack.parent) {
+      stack.parent = root;
+      root.children.push(stack);
+    }
+
+    // set closer to self-closing tag
+    if (stack.type === "tag" && !stack.isClosed) {
+      stack.closer = "";
+    }
+
+    // @ts-expect-error: remove unused property
+    delete stack.isClosed;
+
+    // @ts-expect-error: remove unused property
+    delete stack.depth;
+  }
+
+  // @ts-expect-error: remove unused property
+  delete root.isClosed;
+
+  // @ts-expect-error: remove unused property
+  delete root.depth;
+
+  // return stacks[0] as RootElement;
+  return root as {
+    type: "root",
+    children: DOMElemImpl[],
+  };
+}
+
 function stringifyAttrs(attrs: DOMElemAttrs) {
   let result = "";
   for (const k of Object.keys(attrs)) {
@@ -254,15 +431,13 @@ export class DOMElem implements DOMElemImpl {
     } else {
       this.parent = parent;
       this.type = src.type;
-      this.tag = src.tag;
+      this.tag = src.tag || "";
       this.closer = src.closer;
-      this.attributes = src.attributes;
+      this.content = src.content || "";
+      this.attributes = src.attributes || {};
 
-      if (
-        src.type === "tag" && 
-        src.content.length > 0 &&
-        src.children.length === 0
-      ) {
+      // src has content
+      if (this.type === "tag" && this.content.length > 0) {
         this.children = [
           new DOMElem({
             type: "text",
@@ -272,8 +447,8 @@ export class DOMElem implements DOMElemImpl {
             children: [],
           }, this)
         ];
-      } else {
-        this.content = src.content;
+      } // src has children
+      else if (src.children) {
         this.children = src.children.map((child) => new DOMElem(child, this));
       }
     }
@@ -550,174 +725,5 @@ export class DOMElem implements DOMElemImpl {
     return [this, ...this.map((child) => child)];
   }
 
-  static parse = function(str: string) {
-    const stacks: Stack[] = [
-      {
-        isClosed: false,
-        type: "root",
-        tag: "",
-        content: "",
-        attributes: {},
-        children: [],
-      }
-    ];
-
-    const root = stacks[0];
-    const parts = splitTags(str);
-
-    for (const part of parts) {
-
-      // text
-      const isTag = part.startsWith("<") && part.endsWith(">");
-      if (!isTag) {
-        stacks.push({
-          isClosed: true,
-          type: "text",
-          tag: "",
-          content: part,
-          attributes: {},
-          children: [],
-        });
-        continue;
-      }
-  
-      // xml declaration, xml prolog
-      const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
-      if (isXMLDeclaration) {
-        const { attributes } = parseTag(part);
-        stacks.push({
-          isClosed: true,
-          type: "tag",
-          tag: "?xml",
-          closer: "?",
-          content: "",
-          attributes,
-          children: [],
-        });
-        continue;
-      }
-
-      // comment
-      const isComment = part.startsWith("<!--") && part.endsWith("-->");
-      if (isComment) {
-        stacks.push({
-          isClosed: true,
-          type: "comment",
-          tag: "",
-          content: part.substring(4, part.length - 3),
-          attributes: {},
-          children: [],
-        });
-        continue;
-      }
-
-      // script
-      const isScript = part.startsWith("<script") && part.endsWith("</script>");
-      if (isScript) {
-        const { endIndex, attributes } = parseTag(part);
-        const content = part.substring(endIndex, part.length - 9);
-        stacks.push({
-          isClosed: true,
-          type: "script",
-          tag: "script",
-          content,
-          attributes,
-          children: [],
-        });
-        continue;
-      }
-
-      // style
-      const isStyle = part.startsWith("<style") && part.endsWith("</style>");
-      if (isStyle) {
-        const { endIndex, attributes } = parseTag(part);
-        const content = part.substring(endIndex, part.length - 8); // "</style>"
-        stacks.push({
-          isClosed: false,
-          type: "style",
-          tag: "style",
-          content,
-          attributes,
-          children: [],
-        });
-        continue;
-      }
-
-      // tags
-      const { tag, isClosing, closer, attributes } = parseTag(part);
-
-      if (isClosing) {
-        const children: DOMElemImpl[] = [];
-        for (let i = stacks.length - 1; i >= 0; i--) {
-          const stack = stacks[i];
-
-          if (!stack.isClosed) {
-            stack.isClosed = true;
-
-            if (stack.tag === tag) {
-              stack.children = children.reverse();
-
-              // set children parent
-              for (const child of children) {
-                child.parent = stack;
-              }
-              
-              break;
-            }
-
-            // close self-closing tag
-            stack.closer = "";
-          }
-
-          // current element included in same parent
-          if (!stack.parent) {
-            children.push(stack);
-          }
-        }
-
-        continue;
-      }
-
-      const isClosed = typeof closer === "string";
-
-      stacks.push({
-        isClosed,
-        type: "tag",
-        tag,
-        content: "",
-        closer,
-        attributes,
-        children: [],
-      });
-    }
-
-    for (const stack of stacks) {
-      // add root children
-      if (stack.type !== "root" && !stack.parent) {
-        stack.parent = root;
-        root.children.push(stack);
-      }
-
-      // set closer to self-closing tag
-      if (stack.type === "tag" && !stack.isClosed) {
-        stack.closer = "";
-      }
-
-      // @ts-expect-error: remove unused property
-      delete stack.isClosed;
-
-      // @ts-expect-error: remove unused property
-      delete stack.depth;
-    }
-
-    // @ts-expect-error: remove unused property
-    delete root.isClosed;
-
-    // @ts-expect-error: remove unused property
-    delete root.depth;
-
-    // return stacks[0] as RootElement;
-    return root as DOMElemImpl;
-  };
-
+  static parse = parseStr;
 }
