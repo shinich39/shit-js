@@ -870,6 +870,24 @@ var Shit = (() => {
       func(this, 1);
       return result;
     }
+    remove() {
+      this.parent?.removeChild(this);
+    }
+    removeChild(element) {
+      this.removeChildren(element);
+    }
+    removeChildren(...elements) {
+      const origChildren = this.children;
+      this.children = [];
+      for (const child of origChildren) {
+        const exists = elements.find((el) => el == child);
+        if (!exists) {
+          this.children.push(child);
+        } else {
+          delete exists.parent;
+        }
+      }
+    }
     toString() {
       const { type, tag, closer, children } = this;
       switch (type) {

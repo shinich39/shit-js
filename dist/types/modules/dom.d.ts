@@ -52,6 +52,9 @@ export declare class DOMElem implements DOMElemImpl {
     filter(callback: (child: DOMElem, index: number, depth: number) => any): DOMElem[];
     map<T>(callback: (child: DOMElem, index: number, depth: number) => T): T[];
     reduce<T>(callback: (accumulator: T, child: DOMElem, index: number, depth: number) => T, initialValue: T): T;
+    remove(): void;
+    removeChild(element: DOMElem): void;
+    removeChildren(...elements: DOMElem[]): void;
     toString(): string;
     toArray(): DOMElem[];
     static parse: typeof parseStr;

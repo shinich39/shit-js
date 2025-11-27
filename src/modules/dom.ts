@@ -697,6 +697,30 @@ export class DOMElem implements DOMElemImpl {
     return result;
   }
 
+  remove() {
+    this.parent?.removeChild(this);
+  }
+
+  removeChild(element: DOMElem) {
+    this.removeChildren(element);
+  }
+
+  removeChildren(...elements: DOMElem[]) {
+    const origChildren = this.children;
+    
+    this.children = [];
+
+    for (const child of origChildren) {
+      const exists = elements.find((el) => el == child);
+
+      if (!exists) {
+        this.children.push(child);
+      } else {
+        delete exists.parent;
+      }
+    }
+  }
+
   toString(): string {
     const { type, tag, closer, children } = this;
 

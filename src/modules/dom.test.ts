@@ -54,11 +54,24 @@ describe(path.basename(import.meta.filename), () => {
 </body>
 </html>`;
 
+  const html2 = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+  <meta charset="utf-8" />
+  <title>Untitled</title>
+</head>
+<body>
+</body>
+</html>`;
+
+  
+
   test("toString", () => {
     const root = new DOMElem(html);
-    eq(html, root.toString());
+    eq(root.toString(), html);
     const root2 = new DOMElem(root.toString());
-    eq(html, root2.toString());
+    eq(root2.toString(), html);
   });
 
   test("tag with content", () => {
@@ -68,7 +81,29 @@ describe(path.basename(import.meta.filename), () => {
       content: "CONVERT TO TEXT",
     });
 
-    eq("<div>CONVERT TO TEXT</div>", root.toString());
+    eq(root.toString(), "<div>CONVERT TO TEXT</div>");
+  });
+
+  test("remove", () => {
+    const root = new DOMElem(html2);
+
+    root.find((c) => c.tag === "title")?.remove();
+
+
+
+    eq(
+      root.toString(),
+`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+  <meta charset="utf-8" />
+  
+</head>
+<body>
+</body>
+</html>`
+    );
   });
 
 });
