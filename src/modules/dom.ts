@@ -1,6 +1,6 @@
 
 export type DOMElemType = "root" | "tag" | "text" | "comment" | "script" | "style";
-export type DOMElemAttrs = Record<string, string | null>;
+export type DOMElemAttrs = Record<string, string | null | undefined>;
 export type DOMElemImpl = {
   parent?: DOMElemImpl;
   type: DOMElemType;
@@ -385,24 +385,22 @@ function parseStr(str: string) {
 
 function stringifyAttrs(attrs: DOMElemAttrs) {
   let result = "";
+
+  // "undefined" will be skip
+  // "null" is empty attribute (e.g., <div hidden>...</div>)
   for (const k of Object.keys(attrs)) {
     const v = attrs[k];
     if (typeof v === "string") {
       result += ` ${k}="${v}"`;
     } else if (v === null) {
       result += ` ${k}`;
-    }
+    } 
   }
+  
   return result;
 }
 
-function setAttrValue(attrs: DOMElemAttrs, key: string, value: string | null | undefined) {
-  if (typeof value === "undefined") {
-    delete attrs[key];
-  } else {
-    attrs[key] = value;
-  }
-}
+export const parseDOM = (arg: string | DOMElemImpl | DOMElem, parent?: DOMElem) => new DOMElem(arg, parent);
 
 export class DOMElem implements DOMElemImpl {
   parent?: DOMElem;
@@ -436,7 +434,7 @@ export class DOMElem implements DOMElemImpl {
       this.content = src.content || "";
       this.attributes = src.attributes || {};
 
-      // src has content
+      // tag with content
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
           new DOMElem({
@@ -447,7 +445,7 @@ export class DOMElem implements DOMElemImpl {
             children: [],
           }, this)
         ];
-      } // src has children
+      } // with children
       else if (src.children) {
         this.children = src.children.map((child) => new DOMElem(child, this));
       }
@@ -469,7 +467,6 @@ export class DOMElem implements DOMElemImpl {
     return result;
   }
 
-  isSelfClosed() { return typeof this.closer === "string"; }
   isRoot() { return this.type === "root"; }
   isComment() { return this.type === "comment"; }
   isStyle() { return this.type === "style"; }
@@ -477,8 +474,18 @@ export class DOMElem implements DOMElemImpl {
   isText() { return this.type === "text"; }
   isTag() { return this.type === "tag"; }
 
+  getParent() { return this.parent; }
+  hasParent() { return !!this.parent; }
+
+  getChildren() { return this.children; }
+  hasChildren() { return this.children.length > 1; }
+
+  getSiblings() { return (this.parent?.children || []).filter((sibling) => sibling != this); }
+  hasSiblings() { return (this.parent?.children || []).length > 1; }
+
   getTag() { return this.tag; }
   setTag(value: string) { this.tag = value; }
+  hasTag(): boolean { return this.tag !== ""; }
   
   getCloser() { return this.closer; }
   setCloser(value: string | null | undefined) {
@@ -488,20 +495,36 @@ export class DOMElem implements DOMElemImpl {
       delete this.closer;
     }
   }
+  hasCloser(): boolean { return typeof this.closer === "string"; }
 
-  getContent(deep?: boolean): string {
-    return deep
-      ? this
-          .filter((child) => child.type === "text")
-          .map((child) => child.getContent())
-          .join("")
-      : this.content || "";
+  getContent(): string { return this.content || ""; }
+  getContents(): string[] {
+    const result: string[] = [];
+    for (const child of this.children) {
+      switch(child.type) {
+        case "text": result.push(child.content || ""); break;
+        case "tag": result.push(...child.getContents()); break;
+      }
+    }
+    return result;
   }
   setContent(value: string) { this.content = value; }
+  hasContent(): boolean { return this.content !== ""; }
 
   getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
+  setAttribute(key: string, value: string | null | undefined) { this.attributes[key] = value; }
   hasAttribute(key: string) { return typeof this.attributes[key] !== "undefined"; }
-  setAttribute(key: string, value: string | null | undefined) { setAttrValue(this.attributes, key, value); }
+
+  getAttributes(): DOMElemAttrs { return this.attributes; }
+  setAttributes(attrs: DOMElemAttrs) { Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k])); };
+  hasAttributes(attrs: DOMElemAttrs): boolean {
+    for (const k of Object.keys(attrs)) {
+      if (this.getAttribute(k) !== attrs[k]) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   getRoot(this: DOMElem) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -524,15 +547,15 @@ export class DOMElem implements DOMElemImpl {
   }
 
   append(...args: (string | DOMElemImpl | DOMElem)[]) {
-    const elements = this.createChildren(args);
-    for (const el of elements) {
+    const newChildren = this.createChildren(args);
+    for (const el of newChildren) {
       this.children.push(el);
     }
   }
 
   prepend(...args: (string | DOMElemImpl | DOMElem)[]) {
-    const elements = this.createChildren(args);
-    this.children.splice(0, 0, ...elements);
+    const newChildren = this.createChildren(args);
+    this.children.splice(0, 0, ...newChildren);
   }
 
   before(...args: (string | DOMElemImpl | DOMElem)[]) {
@@ -545,8 +568,8 @@ export class DOMElem implements DOMElemImpl {
       throw new Error("This element not included in its parent");
     }
     
-    const elements = this.parent.createChildren(args);
-    this.parent.children.splice(index, 0, ...elements);
+    const newChildren = this.parent.createChildren(args);
+    this.parent.children.splice(index, 0, ...newChildren);
   }
 
   after(...args: (string | DOMElemImpl | DOMElem)[]) {
@@ -559,8 +582,8 @@ export class DOMElem implements DOMElemImpl {
       throw new Error("This element not included in its parent");
     }
 
-    const elements = this.parent.createChildren(args);
-    this.parent.children.splice(index + 1, 0, ...elements);
+    const newChildren = this.parent.createChildren(args);
+    this.parent.children.splice(index + 1, 0, ...newChildren);
   }
 
   forEach(
@@ -701,24 +724,21 @@ export class DOMElem implements DOMElemImpl {
     this.parent?.removeChild(this);
   }
 
-  removeChild(element: DOMElem) {
-    this.removeChildren(element);
+  removeChild(arg: DOMElem) {
+    this.removeChildren(arg);
   }
 
-  removeChildren(...elements: DOMElem[]) {
-    const origChildren = this.children;
-    
-    this.children = [];
+  removeChildren(...args: DOMElem[]) {
+    const set = new Set(args);
 
-    for (const child of origChildren) {
-      const exists = elements.find((el) => el == child);
-
-      if (!exists) {
-        this.children.push(child);
+    this.children = this.children.filter((child) => {
+      if (set.has(child)) {
+        delete child.parent;
+        return false;
       } else {
-        delete exists.parent;
+        return true;
       }
-    }
+    });
   }
 
   toString(): string {
@@ -739,7 +759,7 @@ export class DOMElem implements DOMElemImpl {
     switch(type) {
       case "script": return `<script${attrs}>${this.getContent()}</script>`;
       case "style": return `<style${attrs}>${this.getContent()}</style>`;
-      case "tag": return this.isSelfClosed()
+      case "tag": return this.hasCloser()
         ? `<${tag}${attrs}${closer}>`
         : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
     }

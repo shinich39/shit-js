@@ -84,6 +84,27 @@ describe(path.basename(import.meta.filename), () => {
     eq(root.toString(), "<div>CONVERT TO TEXT</div>");
   });
 
+  test("getContents", () => {
+    const root = new DOMElem(
+`
+<div>
+  Level 1
+  <div>
+    Level 2
+    <div>
+      Level 3
+    </div>
+  </div>  
+</div>
+`
+    );
+
+    eq(
+      root.getContents().map((c) => c.trim()).join(""),
+      `Level 1Level 2Level 3`
+    );
+  });
+
   test("remove", () => {
     const root = new DOMElem(html2);
 
