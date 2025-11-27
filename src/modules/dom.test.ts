@@ -66,8 +66,6 @@ describe(path.basename(import.meta.filename), () => {
       type: "tag",
       tag: "div",
       content: "CONVERT TO TEXT",
-      attributes: {},
-      children: [],
     });
 
     eq("<div>CONVERT TO TEXT</div>", root.toString());
