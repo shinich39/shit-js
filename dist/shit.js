@@ -625,7 +625,7 @@ var Shit = (() => {
     }
     return result;
   }
-  var parseDOM = (arg, parent) => new DOMElem(arg, parent);
+  var parseDOM = (src, parent) => new DOMElem(src, parent);
   var DOMElem = class _DOMElem {
     constructor(src, parent) {
       this.type = "root";

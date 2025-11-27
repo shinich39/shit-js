@@ -400,7 +400,7 @@ function stringifyAttrs(attrs: DOMElemAttrs) {
   return result;
 }
 
-export const parseDOM = (arg: string | DOMElemImpl | DOMElem, parent?: DOMElem) => new DOMElem(arg, parent);
+export const parseDOM = (src: string | DOMElemImpl | DOMElem, parent?: DOMElem) => new DOMElem(src, parent);
 
 export class DOMElem implements DOMElemImpl {
   parent?: DOMElem;
