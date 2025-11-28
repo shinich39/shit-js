@@ -1,6 +1,6 @@
 /**
  * @example
- * const compressed = LZW.compress("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+ * const compressed = compressLZW("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
  * // [
  * //    76, 111, 114, 101, 109,  32, 105, 112, 115,
  * //   117, 260, 100, 111, 108, 257,  32, 115, 105,
@@ -38,7 +38,7 @@ export function compressLZW(input: string): number[] {
 }
 /**
  * @example
- * const decompressed = LZW.decompress([76, 111, 114, 101, 109, ...]);
+ * const decompressed = decompressLZW([76, 111, 114, 101, 109, ...]);
  * // "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
  */
 export function decompressLZW(compressed: number[]): string {

@@ -10,49 +10,71 @@ function mulberry32(seed: number) {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 /**
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
+ * 
  * @returns min <= n < max
+ * 
+ * @example
+ * const result = generateFloat(0, 1); // 0.12451251251251
+ * const result = generateFloat(0, 1, 0); // 0.26642920868471265
+ * const result = generateFloat(0, 1, 10); // 0.5019920116756111
+ * const result = generateFloat(0, 1, 100); // 0.2043598669115454
  */
-export function getRandomFloat(min: number, max: number) {
-  return Math.random() * (max - min) + min;
+export function generateFloat(min: number, max: number, seed?: number | null | undefined) {
+  return typeof seed === "number"
+    ? mulberry32(seed) * (max - min) + min
+    : Math.random() * (max - min) + min;
 }
 /**
  * Mulberry32 PRNG (Pseudo Random Number Generator)
  * 
  * @returns min <= n < max
- */
-export function getRandomFloatWithSeed(min: number, max: number, seed: number) {
-  return mulberry32(seed) * (max - min) + min;
-}
-/**
- * @returns min <= n < max
- */
-export function getRandomInt(min: number, max: number) {
-  return Math.floor(getRandomFloat(min, max));
-}
-/**
- * Mulberry32 PRNG (Pseudo Random Number Generator)
  * 
- * @returns min <= n < max
+ * @example
+ * const result = generateInt(0, 10); // 5
+ * const result = generateInt(0, 10, 0); // 2
+ * const result = generateInt(0, 10, 10); // 5
+ * const result = generateInt(0, 10, 100); // 2
  */
-export function getRandomIntWithSeed(min: number, max: number, seed: number) {
-  return Math.floor(getRandomFloatWithSeed(min, max, seed));
+export function generateInt(min: number, max: number, seed?: number | null | undefined) {
+  return Math.floor(generateFloat(min, max, seed));
 }
-
+/**
+ * @example
+ * const result = getLengthFromInt(10); // 2
+ * const result = getLengthFromInt(100); // 3
+ */
 export function getLengthFromInt(num: number) {
   return Math.log(num) * Math.LOG10E + 1 | 0;
 }
-
+/**
+ * @example
+ * const result = getLengthFromFloat(1.2); // 2
+ * const result = getLengthFromFloat(1.23); // 3
+ */
 export function getLengthFromFloat(num: number) {
   return ("" + num).replace(".", "").length;
 }
 /**
  * @returns min <= n <= max
+ * 
+ * @example
+ * const result = getClampedNumber(5, 0, 10); // 5
+ * const result = getClampedNumber(10, 0, 10), 1; // 10
  */
 export function getClampedNumber(num: number, min: number, max: number) {
   return Math.min(max, Math.max(num, min));
 }
 /**
  * @returns min <= n < max
+ * 
+ * @example
+ * const result = getLoopedNumber(-5, 0, 10); // 5
+ * const result = getLoopedNumber(-2.5, 0, 10); // 7.5
+ * const result = getLoopedNumber(0, 0, 10); // 0
+ * const result = getLoopedNumber(5, 0, 10); // 5
+ * const result = getLoopedNumber(10, 0, 10); // 0
+ * const result = getLoopedNumber(20, 0, 10); // 0
  */
 export function getLoopedNumber(num: number, min: number, max: number) {
   num -= min;
@@ -70,7 +92,7 @@ export function getLoopedNumber(num: number, min: number, max: number) {
 }
 /**
  * @example
- * const result = toBytes(1, "MB"); // 1024 * 1024
+ * const result = toBytes(1, "MB"); // 1048576
  */
 export function toBytes(
   bytes: number,

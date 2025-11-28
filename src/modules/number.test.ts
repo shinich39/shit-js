@@ -11,42 +11,32 @@ import {
   humanizeFileSize,
   toFileSize,
   toBytes,
-  getRandomInt,
-  getRandomIntWithSeed,
-  getRandomFloat,
-  getRandomFloatWithSeed,
+  generateInt,
+  generateFloat,
   getLengthFromInt,
   getLengthFromFloat,
 } from "./number";
 
 describe(path.basename(import.meta.filename), () => {
 
-  test("getRandomFloat", () => {
-    eq(getRandomFloat(0, 1) < 1, true);
-    eq(getRandomFloat(0, 1) >= 0, true);
+  test("generateFloat", () => {
+    eq(generateFloat(0, 1) < 1, true);
+    eq(generateFloat(0, 1) >= 0, true);
   });
 
-  test("getRandomFloatWithSeed", () => {
-    eq(getRandomFloatWithSeed(0, 1, 0), 0.26642920868471265);
-    eq(getRandomFloatWithSeed(0, 1, 10), 0.5019920116756111);
-    eq(getRandomFloatWithSeed(0, 1, 100), 0.2043598669115454);
-  });
 
-  test("getRandomInt", () => {
-    eq(getRandomInt(0, 1) < 1, true);
-    eq(getRandomInt(0, 1) >= 0, true);
-  });
-
-  test("getRandomIntWithSeed", () => {
-    eq(getRandomIntWithSeed(0, 10, 0), 2);
-    eq(getRandomIntWithSeed(0, 10, 10), 5);
-    eq(getRandomIntWithSeed(0, 10, 100), 2);
+  test("generateInt", () => {
+    eq(generateInt(0, 1) < 1, true);
+    eq(generateInt(0, 1) >= 0, true);
   });
 
   test("getLengthFromInt", () => {
     eq(getLengthFromInt(1), 1);
     eq(getLengthFromInt(10), 2);
     eq(getLengthFromInt(100), 3);
+  });
+
+  test("getLengthFromInt", () => {
     eq(getLengthFromFloat(1), 1);
     eq(getLengthFromFloat(10), 2);
     eq(getLengthFromFloat(100), 3);
@@ -54,14 +44,16 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("getClampedNumber", () => {
-    eq(getClampedNumber(0.5, 0, 1), 0.5);
-    eq(getClampedNumber(2, 0, 1), 1);
-    eq(getClampedNumber(-1, 0, 1), 0);
-    eq(getClampedNumber(1, 0, 1), 1);
-    eq(getClampedNumber(0, 0, 1), 0);
+    eq(getClampedNumber(5, 0, 10), 5);
+    eq(getClampedNumber(10, 0, 10), 10);
+    eq(getClampedNumber(-1, 0, 10), 0);
+    eq(getClampedNumber(20, 0, 10), 10);
+    eq(getClampedNumber(0, 0, 10), 0);
   });
 
   test("getLoopedNumber", () => {
+    eq(getLoopedNumber(-5, 0, 10), 5);
+    eq(getLoopedNumber(-2.5, 0, 10), 7.5);
     eq(getLoopedNumber(0, 0, 10), 0);
     eq(getLoopedNumber(5, 0, 10), 5);
     eq(getLoopedNumber(10, 0, 10), 0);

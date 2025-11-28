@@ -82,9 +82,9 @@ export function camelize(str: string): string {
 }
 /**
  * @example
- * const uuid = getUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
+ * const uuid = generateUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export function getUuid() {
+export function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -93,19 +93,19 @@ export function getUuid() {
 }
 /**
  * @example
- * const result = getRandomChar("abc"); // "a"
+ * const result = generateChar("abc"); // "a"
  */
-export function getRandomChar(charset: string) {
+export function generateChar(charset: string) {
   return charset.charAt(Math.floor(Math.random() * charset.length));
 }
 /**
  * @example
- * const result = getRandomString("abc", 1); // "a"
+ * const result = generateString("abc", 1); // "a"
  */
-export function getRandomString(charset: string, size: number) {
+export function generateString(charset: string, size: number) {
   let result = "";
   for (let i = 0; i < size; i++) {
-    result += getRandomChar(charset);
+    result += generateChar(charset);
   }
   return result;
 }

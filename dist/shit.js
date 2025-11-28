@@ -33,6 +33,11 @@ var Shit = (() => {
     compressLZW: () => compressLZW,
     debounce: () => debounce,
     decompressLZW: () => decompressLZW,
+    generateChar: () => generateChar,
+    generateFloat: () => generateFloat,
+    generateInt: () => generateInt,
+    generateString: () => generateString,
+    generateUUID: () => generateUUID,
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
     getCases: () => getCases,
@@ -55,18 +60,11 @@ var Shit = (() => {
     getModeValue: () => getModeValue,
     getModeValueWithCount: () => getModeValueWithCount,
     getObjectValue: () => getObjectValue,
-    getRandomChar: () => getRandomChar,
-    getRandomFloat: () => getRandomFloat,
-    getRandomFloatWithSeed: () => getRandomFloatWithSeed,
-    getRandomInt: () => getRandomInt,
-    getRandomIntWithSeed: () => getRandomIntWithSeed,
-    getRandomString: () => getRandomString,
     getRelativePath: () => getRelativePath,
     getRootPath: () => getRootPath,
     getStringSize: () => getStringSize,
     getSumValue: () => getSumValue,
     getType: () => getType,
-    getUuid: () => getUuid,
     getXorString: () => getXorString,
     groupBy: () => groupBy,
     humanizeFileSize: () => humanizeFileSize,
@@ -1020,17 +1018,11 @@ var Shit = (() => {
     t ^= t + Math.imul(t ^ t >>> 7, t | 61);
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   }
-  function getRandomFloat(min, max) {
-    return Math.random() * (max - min) + min;
+  function generateFloat(min, max, seed) {
+    return typeof seed === "number" ? mulberry32(seed) * (max - min) + min : Math.random() * (max - min) + min;
   }
-  function getRandomFloatWithSeed(min, max, seed) {
-    return mulberry32(seed) * (max - min) + min;
-  }
-  function getRandomInt(min, max) {
-    return Math.floor(getRandomFloat(min, max));
-  }
-  function getRandomIntWithSeed(min, max, seed) {
-    return Math.floor(getRandomFloatWithSeed(min, max, seed));
+  function generateInt(min, max, seed) {
+    return Math.floor(generateFloat(min, max, seed));
   }
   function getLengthFromInt(num) {
     return Math.log(num) * Math.LOG10E + 1 | 0;
@@ -1377,20 +1369,20 @@ var Shit = (() => {
   function camelize(str) {
     return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
   }
-  function getUuid() {
+  function generateUUID() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0;
       const v = c === "x" ? r : r & 3 | 8;
       return v.toString(16);
     });
   }
-  function getRandomChar(charset) {
+  function generateChar(charset) {
     return charset.charAt(Math.floor(Math.random() * charset.length));
   }
-  function getRandomString(charset, size) {
+  function generateString(charset, size) {
     let result = "";
     for (let i = 0; i < size; i++) {
-      result += getRandomChar(charset);
+      result += generateChar(charset);
     }
     return result;
   }

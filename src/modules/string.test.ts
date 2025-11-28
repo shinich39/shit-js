@@ -9,10 +9,10 @@ import {
   getDiffs,
   getFloats,
   getInts,
-  getRandomChar,
-  getRandomString,
+  generateChar,
+  generateString,
   getStringSize,
-  getUuid,
+  generateUUID,
   getXorString,
   matchStrings,
   normalizeString,
@@ -38,16 +38,16 @@ describe(path.basename(import.meta.filename), () => {
     eq(result, "loremIpsum");
   });
 
-  test("getUuid", () => {
-    eq(getUuid().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
+  test("generateUUID", () => {
+    eq(generateUUID().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
   });
 
-  test("getRandomChar", () => {
-    eq(/[abc]/.test(getRandomChar("abc")), true);
+  test("generateChar", () => {
+    eq(/[abc]/.test(generateChar("abc")), true);
   });
 
-  test("getRandomString", () => {
-    eq(/^[abc]+$/.test(getRandomString("abc", 100)), true);
+  test("generateString", () => {
+    eq(/^[abc]+$/.test(generateString("abc", 100)), true);
   });
 
   test("getInts", () => {

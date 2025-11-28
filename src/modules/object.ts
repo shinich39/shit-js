@@ -66,9 +66,9 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
       ]),
     };
 /**
- * includes: Array, object, Set, Map
+ * Includes: Array, object, Set, Map
  *
- * equals: undefined, null, boolean, number, string, Date,
+ * Equals: undefined, null, boolean, number, string, Date,
  * 
  * @example
  * const result = matchObject(

@@ -72,19 +72,19 @@ export declare function slugify(str: string): string;
 export declare function camelize(str: string): string;
 /**
  * @example
- * const uuid = getUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
+ * const uuid = generateUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export declare function getUuid(): string;
+export declare function generateUUID(): string;
 /**
  * @example
- * const result = getRandomChar("abc"); // "a"
+ * const result = generateChar("abc"); // "a"
  */
-export declare function getRandomChar(charset: string): string;
+export declare function generateChar(charset: string): string;
 /**
  * @example
- * const result = getRandomString("abc", 1); // "a"
+ * const result = generateString("abc", 1); // "a"
  */
-export declare function getRandomString(charset: string, size: number): string;
+export declare function generateString(charset: string, size: number): string;
 export declare function getInts(str: string): number[];
 export declare function getFloats(str: string): number[];
 /**
