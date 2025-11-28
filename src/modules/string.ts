@@ -109,20 +109,12 @@ export function generateString(charset: string, size: number) {
   }
   return result;
 }
-
-export function getInts(str: string) {
-  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
-}
-
-export function getFloats(str: string) {
-  return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
-}
 /**
  * @example
- * const encrypted = getXORString("text", "this is salt!");
- * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
+ * const encrypted = generateXOR("text", "this is salt!");
+ * const decrypted = generateXOR(encrypted, "this is salt!"); // "text"
  */
-export function getXORString(str: string, salt: string) {
+export function generateXOR(str: string, salt: string) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
@@ -134,6 +126,20 @@ export function getXORString(str: string, salt: string) {
   }
 
   return result;
+}
+/**
+ * @example
+ * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
+ */
+export function getInts(str: string) {
+  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+}
+/**
+ * @example
+ * const result = getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
+ */
+export function getFloats(str: string) {
+  return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
 /**
  * 1. Change full-width characters to half-width characters

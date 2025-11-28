@@ -85,14 +85,22 @@ export declare function generateChar(charset: string): string;
  * const result = generateString("abc", 1); // "a"
  */
 export declare function generateString(charset: string, size: number): string;
-export declare function getInts(str: string): number[];
-export declare function getFloats(str: string): number[];
 /**
  * @example
- * const encrypted = getXORString("text", "this is salt!");
- * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
+ * const encrypted = generateXOR("text", "this is salt!");
+ * const decrypted = generateXOR(encrypted, "this is salt!"); // "text"
  */
-export declare function getXORString(str: string, salt: string): string;
+export declare function generateXOR(str: string, salt: string): string;
+/**
+ * @example
+ * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
+ */
+export declare function getInts(str: string): number[];
+/**
+ * @example
+ * const result = getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
+ */
+export declare function getFloats(str: string): number[];
 /**
  * 1. Change full-width characters to half-width characters
  * 2. Change all type of whitespaces to " "

@@ -13,7 +13,7 @@ import {
   generateString,
   getStringSize,
   generateUUID,
-  getXORString,
+  generateXOR,
   matchStrings,
   normalizeString,
   Quotes,
@@ -50,6 +50,14 @@ describe(path.basename(import.meta.filename), () => {
     eq(/^[abc]+$/.test(generateString("abc", 100)), true);
   });
 
+  test("generateXOR", () => {
+    const orig = "Hello, world!";
+    const encrypted = generateXOR(orig, "this is salt!");
+    eq(encrypted !== orig, true);
+    const decrypted = generateXOR(encrypted, "this is salt!");
+    eq(decrypted, orig);
+  });
+
   test("getInts", () => {
     eq(getInts("ftp://192.168.0.1"), [192, 168, 0, 1]);
   });
@@ -59,14 +67,6 @@ describe(path.basename(import.meta.filename), () => {
     eq(getFloats("abc 39.39 miku"), [39.39]);
     eq(getFloats("abc 39 miku 39"), [39, 39]);
     eq(getFloats("abc 39 39.39 miku"), [39, 39.39]);
-  });
-
-  test("getXORString", () => {
-    const orig = "Hello, world!";
-    const encrypted = getXORString(orig, "this is salt!");
-    eq(encrypted !== orig, true);
-    const decrypted = getXORString(encrypted, "this is salt!");
-    eq(decrypted, orig);
   });
 
   test("normalizeString", () => {

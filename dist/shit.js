@@ -38,6 +38,7 @@ var Shit = (() => {
     generateInt: () => generateInt,
     generateString: () => generateString,
     generateUUID: () => generateUUID,
+    generateXOR: () => generateXOR,
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
     getCases: () => getCases,
@@ -65,7 +66,6 @@ var Shit = (() => {
     getStringSize: () => getStringSize,
     getSumValue: () => getSumValue,
     getType: () => getType,
-    getXORString: () => getXORString,
     groupBy: () => groupBy,
     humanizeFileSize: () => humanizeFileSize,
     isNumeric: () => isNumeric,
@@ -1386,13 +1386,7 @@ var Shit = (() => {
     }
     return result;
   }
-  function getInts(str) {
-    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
-  }
-  function getFloats(str) {
-    return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
-  }
-  function getXORString(str, salt) {
+  function generateXOR(str, salt) {
     const l = salt.length;
     if (l === 0) {
       throw new Error(`Invalid argument: salt.length === 0`);
@@ -1402,6 +1396,12 @@ var Shit = (() => {
       result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
     }
     return result;
+  }
+  function getInts(str) {
+    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+  }
+  function getFloats(str) {
+    return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
   }
   function normalizeString(str) {
     return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
