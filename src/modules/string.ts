@@ -119,10 +119,10 @@ export function getFloats(str: string) {
 }
 /**
  * @example
- * const encrypted = getXorString("text", "this is salt!");
- * const decrypted = getXorString(encrypted, "this is salt!"); // "text"
+ * const encrypted = getXORString("text", "this is salt!");
+ * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
  */
-export function getXorString(str: string, salt: string) {
+export function getXORString(str: string, salt: string) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);

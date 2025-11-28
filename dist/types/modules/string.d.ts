@@ -89,10 +89,10 @@ export declare function getInts(str: string): number[];
 export declare function getFloats(str: string): number[];
 /**
  * @example
- * const encrypted = getXorString("text", "this is salt!");
- * const decrypted = getXorString(encrypted, "this is salt!"); // "text"
+ * const encrypted = getXORString("text", "this is salt!");
+ * const decrypted = getXORString(encrypted, "this is salt!"); // "text"
  */
-export declare function getXorString(str: string, salt: string): string;
+export declare function getXORString(str: string, salt: string): string;
 /**
  * 1. Change full-width characters to half-width characters
  * 2. Change all type of whitespaces to " "

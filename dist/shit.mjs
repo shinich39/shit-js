@@ -1301,7 +1301,7 @@ function getInts(str) {
 function getFloats(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
-function getXorString(str, salt) {
+function getXORString(str, salt) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
@@ -1552,7 +1552,7 @@ export {
   getStringSize,
   getSumValue,
   getType,
-  getXorString,
+  getXORString,
   groupBy,
   humanizeFileSize,
   isNumeric,

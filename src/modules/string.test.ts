@@ -13,7 +13,7 @@ import {
   generateString,
   getStringSize,
   generateUUID,
-  getXorString,
+  getXORString,
   matchStrings,
   normalizeString,
   Quotes,
@@ -61,11 +61,11 @@ describe(path.basename(import.meta.filename), () => {
     eq(getFloats("abc 39 39.39 miku"), [39, 39.39]);
   });
 
-  test("getXorString", () => {
+  test("getXORString", () => {
     const orig = "Hello, world!";
-    const encrypted = getXorString(orig, "this is salt!");
+    const encrypted = getXORString(orig, "this is salt!");
     eq(encrypted !== orig, true);
-    const decrypted = getXorString(encrypted, "this is salt!");
+    const decrypted = getXORString(encrypted, "this is salt!");
     eq(decrypted, orig);
   });
 
