@@ -9,7 +9,6 @@ import {
   getDiffs,
   getFloats,
   getInts,
-  generateChar,
   generateString,
   getStringSize,
   generateUUID,
@@ -40,10 +39,6 @@ describe(path.basename(import.meta.filename), () => {
 
   test("generateUUID", () => {
     eq(generateUUID().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
-  });
-
-  test("generateChar", () => {
-    eq(/[abc]/.test(generateChar("abc")), true);
   });
 
   test("generateString", () => {

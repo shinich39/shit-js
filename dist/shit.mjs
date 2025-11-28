@@ -1285,13 +1285,11 @@ function generateUUID() {
     return v.toString(16);
   });
 }
-function generateChar(charset) {
-  return charset.charAt(Math.floor(Math.random() * charset.length));
-}
-function generateString(charset, size) {
+function generateString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
+  const len = charset.length;
   let result = "";
   for (let i = 0; i < size; i++) {
-    result += generateChar(charset);
+    result += charset.charAt(Math.floor(Math.random() * len));
   }
   return result;
 }
@@ -1520,7 +1518,6 @@ export {
   compressLZW,
   debounce,
   decompressLZW,
-  generateChar,
   generateFloat,
   generateInt,
   generateString,

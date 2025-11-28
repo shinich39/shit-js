@@ -93,19 +93,14 @@ export function generateUUID() {
 }
 /**
  * @example
- * const result = generateChar("abc"); // "a"
+ * const result = generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
+ * const result = generateString(); // "a"
  */
-export function generateChar(charset: string) {
-  return charset.charAt(Math.floor(Math.random() * charset.length));
-}
-/**
- * @example
- * const result = generateString("abc", 1); // "a"
- */
-export function generateString(charset: string, size: number) {
+export function generateString(charset: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size: number = 1) {
+  const len = charset.length;
   let result = "";
   for (let i = 0; i < size; i++) {
-    result += generateChar(charset);
+    result += charset.charAt(Math.floor(Math.random() * len));
   }
   return result;
 }

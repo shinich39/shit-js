@@ -77,14 +77,10 @@ export declare function camelize(str: string): string;
 export declare function generateUUID(): string;
 /**
  * @example
- * const result = generateChar("abc"); // "a"
+ * const result = generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
+ * const result = generateString(); // "a"
  */
-export declare function generateChar(charset: string): string;
-/**
- * @example
- * const result = generateString("abc", 1); // "a"
- */
-export declare function generateString(charset: string, size: number): string;
+export declare function generateString(charset?: string, size?: number): string;
 /**
  * @example
  * const encrypted = generateXOR("text", "this is salt!");
