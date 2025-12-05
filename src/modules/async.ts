@@ -73,20 +73,25 @@ export class QueueWorker {
   }
 
   async start(): Promise<void> {
-    this.inProgress = true;
-    while(this.inProgress && this.queue.length > 0) {
-      const func = this.queue.shift()!;
-      await func();
+    if (this.inProgress) {
+      return;
     }
+
+    this.inProgress = true;
+
+    while(this.inProgress && this.queue.length > 0) {
+      await this.queue.shift()!();
+    }
+
     this.inProgress = false;
   }
-
+  
+  pause(): void {
+    this.inProgress = false;
+  }
+  
   stop(): void {
     this.queue = [];
-    this.inProgress = false;
-  }
-
-  pause(): void {
     this.inProgress = false;
   }
 }

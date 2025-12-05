@@ -238,18 +238,20 @@ var QueueWorker = class {
     this.queue.push(func);
   }
   async start() {
+    if (this.inProgress) {
+      return;
+    }
     this.inProgress = true;
     while (this.inProgress && this.queue.length > 0) {
-      const func = this.queue.shift();
-      await func();
+      await this.queue.shift()();
     }
+    this.inProgress = false;
+  }
+  pause() {
     this.inProgress = false;
   }
   stop() {
     this.queue = [];
-    this.inProgress = false;
-  }
-  pause() {
     this.inProgress = false;
   }
 };

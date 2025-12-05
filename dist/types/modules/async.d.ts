@@ -31,7 +31,7 @@ export declare class QueueWorker {
     constructor();
     add(func: () => void | Promise<void>): void;
     start(): Promise<void>;
-    stop(): void;
     pause(): void;
+    stop(): void;
 }
 //# sourceMappingURL=async.d.ts.map
