@@ -150,7 +150,7 @@ export function toHalfWidthString(str: string) {
 }
 /**
  * @example
- * const result = toHalfWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ * const result = toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
  */
 export function toFullWidthString(str: string) {
   return str

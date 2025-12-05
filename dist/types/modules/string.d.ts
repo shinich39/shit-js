@@ -107,7 +107,7 @@ export declare function getFloats(str: string): number[];
 export declare function toHalfWidthString(str: string): string;
 /**
  * @example
- * const result = toHalfWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ * const result = toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
  */
 export declare function toFullWidthString(str: string): string;
 /**
