@@ -2,7 +2,7 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import { DOMElem } from "./dom";
+import { Dom } from "./dom";
 
 describe(path.basename(import.meta.filename), () => {
 
@@ -68,14 +68,14 @@ describe(path.basename(import.meta.filename), () => {
   
 
   test("toString", () => {
-    const root = new DOMElem(html);
+    const root = new Dom(html);
     eq(root.toString(), html);
-    const root2 = new DOMElem(root.toString());
+    const root2 = new Dom(root.toString());
     eq(root2.toString(), html);
   });
 
   test("tag with content", () => {
-    const root = new DOMElem({
+    const root = new Dom({
       type: "tag",
       tag: "div",
       content: "CONVERT TO TEXT",
@@ -85,7 +85,7 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("getContents", () => {
-    const root = new DOMElem(
+    const root = new Dom(
 `
 <div>
   Level 1
@@ -106,7 +106,7 @@ describe(path.basename(import.meta.filename), () => {
   });
 
   test("remove", () => {
-    const root = new DOMElem(html2);
+    const root = new Dom(html2);
 
     root.find((c) => c.tag === "title")?.remove();
 

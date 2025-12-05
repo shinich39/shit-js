@@ -532,8 +532,8 @@ function stringifyAttrs(attrs) {
   }
   return result;
 }
-var parseDOM = (src, parent) => new DOMElem(src, parent);
-var DOMElem = class _DOMElem {
+var parseDom = (src, parent) => new Dom(src, parent);
+var Dom = class _Dom {
   constructor(src, parent) {
     this.type = "root";
     this.tag = "";
@@ -546,8 +546,8 @@ var DOMElem = class _DOMElem {
   }
   init(src, parent) {
     if (typeof src === "string") {
-      const { children } = _DOMElem.parse(src);
-      this.children = children.map((child) => new _DOMElem(child, this));
+      const { children } = _Dom.parse(src);
+      this.children = children.map((child) => new _Dom(child, this));
     } else {
       this.parent = parent;
       this.type = src.type;
@@ -557,7 +557,7 @@ var DOMElem = class _DOMElem {
       this.attributes = src.attributes || {};
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
-          new _DOMElem({
+          new _Dom({
             type: "text",
             tag: "",
             content: src.content,
@@ -566,7 +566,7 @@ var DOMElem = class _DOMElem {
           }, this)
         ];
       } else if (src.children) {
-        this.children = src.children.map((child) => new _DOMElem(child, this));
+        this.children = src.children.map((child) => new _Dom(child, this));
       }
     }
   }
@@ -574,12 +574,12 @@ var DOMElem = class _DOMElem {
     const result = [];
     for (const arg of args) {
       if (typeof arg === "string") {
-        const { children } = _DOMElem.parse(arg);
-        result.push(...children.map((child) => new _DOMElem(child, this)));
+        const { children } = _Dom.parse(arg);
+        result.push(...children.map((child) => new _Dom(child, this)));
       } else if (arg.type === "root") {
-        result.push(...new _DOMElem(arg, this).children);
+        result.push(...new _Dom(arg, this).children);
       } else {
-        result.push(new _DOMElem(arg, this));
+        result.push(new _Dom(arg, this));
       }
     }
     return result;
@@ -873,7 +873,7 @@ var DOMElem = class _DOMElem {
 };
 
 // src/modules/lzw.ts
-function compressLZW(input) {
+function compressLzw(input) {
   const dict = {};
   const data = input.split("");
   const result = [];
@@ -895,7 +895,7 @@ function compressLZW(input) {
   if (w !== "") result.push(dict[w]);
   return result;
 }
-function decompressLZW(compressed) {
+function decompressLzw(compressed) {
   const dict = [];
   let dictSize = 256;
   for (let i = 0; i < 256; i++) {
@@ -1310,8 +1310,11 @@ function getInts(str) {
 function getFloats(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
-function normalizeString(str) {
+function toHalfWidthString(str) {
   return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+}
+function toFullWidthString(str) {
+  return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
 }
 function toRegExp(str) {
   const parts = str.split("/");
@@ -1507,7 +1510,7 @@ function toError(e) {
 }
 export {
   Brackets,
-  DOMElem,
+  Dom,
   QueueWorker,
   Quotes,
   camelize,
@@ -1515,9 +1518,9 @@ export {
   checkBit,
   clearBit,
   clone,
-  compressLZW,
+  compressLzw,
   debounce,
-  decompressLZW,
+  decompressLzw,
   generateFloat,
   generateInt,
   generateString,
@@ -1556,9 +1559,8 @@ export {
   joinPaths,
   matchObject,
   matchStrings,
-  normalizeString,
-  parseDOM,
   parseDate,
+  parseDom,
   retry,
   setBit,
   shuffleArray,
@@ -1567,6 +1569,8 @@ export {
   toBytes,
   toError,
   toFileSize,
+  toFullWidthString,
+  toHalfWidthString,
   toNumber,
   toRegExp,
   toggleBit,

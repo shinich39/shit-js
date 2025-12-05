@@ -10,11 +10,11 @@
  * //    32, 101, 108, 273,  46
  * // ]
  */
-export declare function compressLZW(input: string): number[];
+export declare function compressLzw(input: string): number[];
 /**
  * @example
  * const decompressed = decompressLZW([76, 111, 114, 101, 109, ...]);
  * // "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
  */
-export declare function decompressLZW(compressed: number[]): string;
+export declare function decompressLzw(compressed: number[]): string;
 //# sourceMappingURL=lzw.d.ts.map

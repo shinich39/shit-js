@@ -10,7 +10,7 @@
  * //    32, 101, 108, 273,  46
  * // ]
  */
-export function compressLZW(input: string): number[] {
+export function compressLzw(input: string): number[] {
   const dict: Record<string, number> = {};
   const data = input.split("");
   const result: number[] = [];
@@ -41,7 +41,7 @@ export function compressLZW(input: string): number[] {
  * const decompressed = decompressLZW([76, 111, 114, 101, 109, ...]);
  * // "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
  */
-export function decompressLZW(compressed: number[]): string {
+export function decompressLzw(compressed: number[]): string {
   const dict: string[] = [];
   let dictSize = 256;
 

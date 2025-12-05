@@ -2,14 +2,14 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import { compressLZW, decompressLZW } from "./lzw";
+import { compressLzw, decompressLzw } from "./lzw";
 
 describe(path.basename(import.meta.filename), () => {
 
   test("LZW", () => {
     const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-    const compressed = compressLZW(str);
-    const decompressed = decompressLZW(compressed);
+    const compressed = compressLzw(str);
+    const decompressed = decompressLzw(compressed);
     eq(str, decompressed);
   });
 

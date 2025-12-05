@@ -14,10 +14,11 @@ import {
   generateUUID,
   generateXOR,
   matchStrings,
-  normalizeString,
+  toHalfWidthString,
   Quotes,
   slugify,
   toRegExp,
+  toFullWidthString,
 } from "./string";
 
 describe(path.basename(import.meta.filename), () => {
@@ -64,8 +65,12 @@ describe(path.basename(import.meta.filename), () => {
     eq(getFloats("abc 39 39.39 miku"), [39, 39.39]);
   });
 
-  test("normalizeString", () => {
-    eq(normalizeString("Ｈｅｌｌｏ，　ｗｏｒｌｄ！"), "Hello, world!");
+  test("toHalfWidthString", () => {
+    eq(toHalfWidthString("Ｈｅｌｌｏ，　ｗｏｒｌｄ！"), "Hello, world!");
+  });
+
+  test("toFullWidthString", () => {
+    eq(toFullWidthString("Hello, world!"), "Ｈｅｌｌｏ，　ｗｏｒｌｄ！");
   });
 
   test("toRegExp", () => {

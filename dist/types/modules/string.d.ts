@@ -100,8 +100,16 @@ export declare function getFloats(str: string): number[];
 /**
  * 1. Change full-width characters to half-width characters
  * 2. Change all type of whitespaces to " "
+ *
+ * @example
+ * const result = toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
  */
-export declare function normalizeString(str: string): string;
+export declare function toHalfWidthString(str: string): string;
+/**
+ * @example
+ * const result = toHalfWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ */
+export declare function toFullWidthString(str: string): string;
 /**
  * @example
  * const result = toRegExp("/abc/gi"); // /abc/gi

@@ -1,25 +1,25 @@
 
-export type DOMElemType = "root" | "tag" | "text" | "comment" | "script" | "style";
-export type DOMElemAttrs = Record<string, string | null | undefined>;
-export type DOMElemImpl = {
-  parent?: DOMElemImpl;
-  type: DOMElemType;
+export type DomType = "root" | "tag" | "text" | "comment" | "script" | "style";
+export type DomAttrs = Record<string, string | null | undefined>;
+export type DomImpl = {
+  parent?: DomImpl;
+  type: DomType;
   tag?: string;
   closer?: string;
   content?: string;
-  attributes?: DOMElemAttrs;
-  children?: DOMElemImpl[];
+  attributes?: DomAttrs;
+  children?: DomImpl[];
 }
 
 type Stack = {
   isClosed: boolean;
-  parent?: DOMElemImpl;
-  type: DOMElemType;
+  parent?: DomImpl;
+  type: DomType;
   tag?: string;
   closer?: string;
   content?: string;
-  attributes?: DOMElemAttrs;
-  children?: DOMElemImpl[];
+  attributes?: DomAttrs;
+  children?: DomImpl[];
 }
 
 function splitTags(str: string) {
@@ -189,7 +189,7 @@ function parseTag(str: string) {
     i++;
   }
 
-  const attributes: DOMElemAttrs = {};
+  const attributes: DomAttrs = {};
 
   for (const part of parts) {
     const [key, ...values] = part.split("=");
@@ -222,7 +222,7 @@ function parseStr(str: string) {
     }
   ];
 
-  const root = stacks[0] as Stack & { children: DOMElemImpl[], };
+  const root = stacks[0] as Stack & { children: DomImpl[], };
   const parts = splitTags(str);
 
   for (const part of parts) {
@@ -307,7 +307,7 @@ function parseStr(str: string) {
     const { tag, isClosing, closer, attributes } = parseTag(part);
 
     if (isClosing) {
-      const children: DOMElemImpl[] = [];
+      const children: DomImpl[] = [];
       for (let i = stacks.length - 1; i >= 0; i--) {
         const stack = stacks[i];
 
@@ -379,11 +379,11 @@ function parseStr(str: string) {
   // return stacks[0] as RootElement;
   return root as {
     type: "root",
-    children: DOMElemImpl[],
+    children: DomImpl[],
   };
 }
 
-function stringifyAttrs(attrs: DOMElemAttrs) {
+function stringifyAttrs(attrs: DomAttrs) {
   let result = "";
 
   // "undefined" will be skip
@@ -400,18 +400,18 @@ function stringifyAttrs(attrs: DOMElemAttrs) {
   return result;
 }
 
-export const parseDOM = (src: string | DOMElemImpl | DOMElem, parent?: DOMElem) => new DOMElem(src, parent);
+export const parseDom = (src: string | DomImpl | Dom, parent?: Dom) => new Dom(src, parent);
 
-export class DOMElem implements DOMElemImpl {
-  parent?: DOMElem;
-  type: DOMElemType;
+export class Dom implements DomImpl {
+  parent?: Dom;
+  type: DomType;
   tag: string;
   closer?: string;
   content: string;
-  attributes: DOMElemAttrs;
-  children: DOMElem[];
+  attributes: DomAttrs;
+  children: Dom[];
 
-  constructor(src?: string | DOMElemImpl | DOMElem, parent?: DOMElem) {
+  constructor(src?: string | DomImpl | Dom, parent?: Dom) {
     this.type = "root";
     this.tag = "";
     this.content = "";
@@ -422,10 +422,10 @@ export class DOMElem implements DOMElemImpl {
     }
   }
 
-  init(src: string | DOMElemImpl | DOMElem, parent?: DOMElem) {
+  init(src: string | DomImpl | Dom, parent?: Dom) {
     if (typeof src === "string") {
-      const { children } = DOMElem.parse(src);
-      this.children = children.map((child) => new DOMElem(child, this));
+      const { children } = Dom.parse(src);
+      this.children = children.map((child) => new Dom(child, this));
     } else {
       this.parent = parent;
       this.type = src.type;
@@ -437,7 +437,7 @@ export class DOMElem implements DOMElemImpl {
       // tag with content
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
-          new DOMElem({
+          new Dom({
             type: "text",
             tag: "",
             content: src.content,
@@ -447,21 +447,21 @@ export class DOMElem implements DOMElemImpl {
         ];
       } // with children
       else if (src.children) {
-        this.children = src.children.map((child) => new DOMElem(child, this));
+        this.children = src.children.map((child) => new Dom(child, this));
       }
     }
   }
 
-  createChildren(args: (string | DOMElemImpl | DOMElem)[]) {
-    const result: DOMElem[] = [];
+  createChildren(args: (string | DomImpl | Dom)[]) {
+    const result: Dom[] = [];
     for (const arg of args) {
       if (typeof arg === "string") {
-        const { children } = DOMElem.parse(arg);
-        result.push(...children.map((child) => new DOMElem(child, this)));
+        const { children } = Dom.parse(arg);
+        result.push(...children.map((child) => new Dom(child, this)));
       } else if (arg.type === "root") {
-        result.push(...(new DOMElem(arg, this)).children);
+        result.push(...(new Dom(arg, this)).children);
       } else {
-        result.push(new DOMElem(arg, this));
+        result.push(new Dom(arg, this));
       }
     }
     return result;
@@ -515,9 +515,9 @@ export class DOMElem implements DOMElemImpl {
   setAttribute(key: string, value: string | null | undefined) { this.attributes[key] = value; }
   hasAttribute(key: string) { return typeof this.attributes[key] !== "undefined"; }
 
-  getAttributes(): DOMElemAttrs { return this.attributes; }
-  setAttributes(attrs: DOMElemAttrs) { Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k])); };
-  hasAttributes(attrs: DOMElemAttrs): boolean {
+  getAttributes(): DomAttrs { return this.attributes; }
+  setAttributes(attrs: DomAttrs) { Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k])); };
+  hasAttributes(attrs: DomAttrs): boolean {
     for (const k of Object.keys(attrs)) {
       if (this.getAttribute(k) !== attrs[k]) {
         return false;
@@ -526,18 +526,18 @@ export class DOMElem implements DOMElemImpl {
     return true;
   }
 
-  getRoot(this: DOMElem) {
+  getRoot(this: Dom) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: DOMElem = this;
+    let root: Dom = this;
     while(root.parent) {
       root = root.parent;
     }
     return root;
   }
 
-  getDepth(this: DOMElem) {
+  getDepth(this: Dom) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let el: DOMElem = this,
+    let el: Dom = this,
         depth = 0;
     while(el.parent) {
       el = el.parent;
@@ -546,19 +546,19 @@ export class DOMElem implements DOMElemImpl {
     return depth;
   }
 
-  append(...args: (string | DOMElemImpl | DOMElem)[]) {
+  append(...args: (string | DomImpl | Dom)[]) {
     const newChildren = this.createChildren(args);
     for (const el of newChildren) {
       this.children.push(el);
     }
   }
 
-  prepend(...args: (string | DOMElemImpl | DOMElem)[]) {
+  prepend(...args: (string | DomImpl | Dom)[]) {
     const newChildren = this.createChildren(args);
     this.children.splice(0, 0, ...newChildren);
   }
 
-  before(...args: (string | DOMElemImpl | DOMElem)[]) {
+  before(...args: (string | DomImpl | Dom)[]) {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
@@ -572,7 +572,7 @@ export class DOMElem implements DOMElemImpl {
     this.parent.children.splice(index, 0, ...newSiblings);
   }
 
-  after(...args: (string | DOMElemImpl | DOMElem)[]) {
+  after(...args: (string | DomImpl | Dom)[]) {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
@@ -587,11 +587,11 @@ export class DOMElem implements DOMElemImpl {
   }
 
   forEach(
-    callback: (child: DOMElem, index: number, depth: number) => void
+    callback: (child: Dom, index: number, depth: number) => void
   ): void {
     let index = 0;
 
-    const func = function (parent: DOMElem, depth: number) {
+    const func = function (parent: Dom, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         callback(child, index++, depth);
@@ -605,11 +605,11 @@ export class DOMElem implements DOMElemImpl {
   }
 
   find(
-    callback: (child: DOMElem, index: number, depth: number) => any
-  ): DOMElem | undefined {
+    callback: (child: Dom, index: number, depth: number) => any
+  ): Dom | undefined {
     let index = 0;
 
-    const func = function (parent: DOMElem, depth: number): DOMElem | undefined {
+    const func = function (parent: Dom, depth: number): Dom | undefined {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         if (callback(child, index++, depth)) {
@@ -628,11 +628,11 @@ export class DOMElem implements DOMElemImpl {
   }
 
   findLast(
-    callback: (parent: DOMElem, index: number, depth: number) => any
-  ): DOMElem | undefined {
+    callback: (parent: Dom, index: number, depth: number) => any
+  ): Dom | undefined {
     let index = 0;
 
-    const func = function (child: DOMElem, depth: number): DOMElem | undefined {
+    const func = function (child: Dom, depth: number): Dom | undefined {
       if (child.parent) {
         if (callback(child.parent, index++, depth)) {
           return child.parent;
@@ -645,13 +645,13 @@ export class DOMElem implements DOMElemImpl {
   }
 
   filter(
-    callback: (child: DOMElem, index: number, depth: number) => any
+    callback: (child: Dom, index: number, depth: number) => any
   ) {
-    const result: DOMElem[] = [];
+    const result: Dom[] = [];
 
     let index = 0;
 
-    const func = function (parent: DOMElem, depth: number) {
+    const func = function (parent: Dom, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         if (callback(child, index++, depth)) {
@@ -670,7 +670,7 @@ export class DOMElem implements DOMElemImpl {
 
   map<T>(
     callback: (
-      child: DOMElem,
+      child: Dom,
       index: number,
       depth: number,
     ) => T
@@ -678,7 +678,7 @@ export class DOMElem implements DOMElemImpl {
     const result: T[] = [];
     let index = 0;
 
-    const func = function (parent: DOMElem, depth: number) {
+    const func = function (parent: Dom, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         result.push(callback(child, index++, depth));
@@ -696,7 +696,7 @@ export class DOMElem implements DOMElemImpl {
   reduce<T>(
     callback: (
       accumulator: T,
-      child: DOMElem,
+      child: Dom,
       index: number,
       depth: number,
     ) => T,
@@ -705,7 +705,7 @@ export class DOMElem implements DOMElemImpl {
     let result = initialValue,
         index = 0;
 
-    const func = function (parent: DOMElem, depth: number) {
+    const func = function (parent: Dom, depth: number) {
       for (let i = 0; i < parent.children.length; i++) {
         const child = parent.children[i];
         result = callback(result, child, index++, depth);
@@ -724,11 +724,11 @@ export class DOMElem implements DOMElemImpl {
     this.parent?.removeChild(this);
   }
 
-  removeChild(arg: DOMElem) {
+  removeChild(arg: Dom) {
     this.removeChildren(arg);
   }
 
-  removeChildren(...args: DOMElem[]) {
+  removeChildren(...args: Dom[]) {
     const set = new Set(args);
 
     this.children = this.children.filter((child) => {

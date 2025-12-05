@@ -139,11 +139,23 @@ export function getFloats(str: string) {
 /**
  * 1. Change full-width characters to half-width characters
  * 2. Change all type of whitespaces to " "
+ * 
+ * @example
+ * const result = toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
  */
-export function normalizeString(str: string) {
+export function toHalfWidthString(str: string) {
   return str
-    .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+    .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
     .replace(/[^\S\r\n]/g, " ");
+}
+/**
+ * @example
+ * const result = toHalfWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ */
+export function toFullWidthString(str: string) {
+  return str
+    .replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0xFEE0))
+    .replace(/ /g, "　");
 }
 /**
  * @example
