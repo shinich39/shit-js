@@ -62,32 +62,35 @@ export function debounce(
 export class QueueWorker {
   inProgress: boolean;
   queue: ((index: number) => void | Promise<void>)[];
-  _n: number;
+  index: number;
 
   constructor() {
     this.inProgress = false;
     this.queue = [];
-    this._n = 0;
+    this.index = 0;
   }
 
   add(func: (index: number) => void | Promise<void>): void {
     this.queue.push(func);
-    this._n++;
-    if (!this.inProgress) {
-      this.run();
-    }
+    this.index++;
   }
 
-  async run(): Promise<void> {
+  async start(): Promise<void> {
     this.inProgress = true;
-    while(this.queue.length > 0) {
-      await this.queue.shift()!(this._n - this.queue.length - 1);
+    while(this.inProgress && this.queue.length > 0) {
+      const index = this.index - this.queue.length - 1;
+      const func = this.queue.shift()!;
+      await func(index);
     }
     this.inProgress = false;
   }
 
-  async stop() {
+  stop(): void {
     this.queue = [];
+    this.inProgress = false;
+  }
+
+  pause(): void {
     this.inProgress = false;
   }
 }

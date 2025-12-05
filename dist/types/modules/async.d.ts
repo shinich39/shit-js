@@ -28,10 +28,11 @@ export declare function debounce(func: (...args: any[]) => any, delay: number): 
 export declare class QueueWorker {
     inProgress: boolean;
     queue: ((index: number) => void | Promise<void>)[];
-    _n: number;
+    index: number;
     constructor();
     add(func: (index: number) => void | Promise<void>): void;
-    run(): Promise<void>;
-    stop(): Promise<void>;
+    start(): Promise<void>;
+    stop(): void;
+    pause(): void;
 }
 //# sourceMappingURL=async.d.ts.map
