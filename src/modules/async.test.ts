@@ -30,12 +30,26 @@ describe(path.basename(import.meta.filename), () => {
 
   // test("QueueWorker", async () => {
   //   const worker = new QueueWorker();
+
+  //   const startedAt = Date.now();
+
   //   for (let i = 0; i < 3; i++) {
-  //     worker.add(async function (index) {
+  //     const index = i;
+  //     worker.add(async function () {
   //       await sleep(1000);
-  //       console.log(`Task ${i}, Index: ${index}, Queue: ${worker.queue.length}`);
+  //       console.log(`Task ${index}, Queue: ${worker.queue.length}, Time: ${Date.now() - startedAt}ms`);
   //     });
   //   }
+
+  //   worker.start();
+
+  //   setTimeout(() => {
+  //     worker.pause();
+  //   }, 1500);
+
+  //   setTimeout(() => {
+  //     worker.start();
+  //   }, 3000);
   // });
 });
 
