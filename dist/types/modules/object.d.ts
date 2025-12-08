@@ -6,7 +6,7 @@
  */
 export declare function clone<T>(obj: T): T;
 /**
- * @param key Suppots dot-notation.
+ * @param key Supports dot-notation.
  *
  * @example
  * const result = getObjectValue({ arr: [1, 2, 3] }, "arr.0"); // 1

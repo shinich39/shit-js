@@ -65,11 +65,15 @@ export function parseDate(date: Date|number|string) {
   const h = String((ensuredDate.getHours() % 12) || 12); // 1 ~ 12
   const hh = h.padStart(2, "0"); // 01 ~ 12
 
-  // Minute, Second, Millisecond
+  // Minute
   const m = String(ensuredDate.getMinutes()); // 0 ~ 59
   const mm = m.padStart(2, "0"); // 00 ~ 59
+
+  // Second
   const s = String(ensuredDate.getSeconds()); // 0 ~ 59
   const ss = s.padStart(2, "0"); // 00 ~ 59
+
+  // Millisecond
   const SSS = String(ensuredDate.getMilliseconds()).padStart(3, "0"); // 000 ~ 999
 
   // AM / PM

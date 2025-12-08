@@ -33,7 +33,7 @@ var ShitJs = (() => {
     generateFloat: () => generateFloat,
     generateInt: () => generateInt,
     generateString: () => generateString,
-    generateUUID: () => generateUUID,
+    generateUuid: () => generateUuid,
     generateXor: () => generateXor,
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
@@ -76,16 +76,12 @@ var ShitJs = (() => {
     shuffleArray: () => shuffleArray,
     sleep: () => sleep,
     toBytes: () => toBytes,
-    toCamelCase: () => toCamelCase,
     toError: () => toError,
     toFileSize: () => toFileSize,
     toFullWidthString: () => toFullWidthString,
     toHalfWidthString: () => toHalfWidthString,
     toNumber: () => toNumber,
-    toPascalCase: () => toPascalCase,
     toRegExp: () => toRegExp,
-    toSentenceCase: () => toSentenceCase,
-    toSlug: () => toSlug,
     toggleBit: () => toggleBit,
     uniqueBy: () => uniqueBy
   });
@@ -1355,19 +1351,7 @@ var ShitJs = (() => {
     "\u201E": "\u201C",
     "\xAB": "\xBB"
   };
-  function toSentenceCase(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-  function toSlug(str) {
-    return str.toLowerCase().replace(/\s+/g, "-");
-  }
-  function toCamelCase(str) {
-    return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
-  }
-  function toPascalCase(str) {
-    return toSentenceCase(toCamelCase(str));
-  }
-  function generateUUID() {
+  function generateUuid() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
       const r = Math.random() * 16 | 0;
       const v = c === "x" ? r : r & 3 | 8;

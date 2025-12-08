@@ -27,7 +27,7 @@ export function clone<T>(obj: T): T {
   }, {}) as T;
 }
 /**
- * @param key Suppots dot-notation.
+ * @param key Supports dot-notation.
  * 
  * @example
  * const result = getObjectValue({ arr: [1, 2, 3] }, "arr.0"); // 1
@@ -64,7 +64,7 @@ export function matchObject(obj: any, query: any) {
       return true;
     }
 
-    // Type mismatch
+    // Different type
     if (typeof a !== typeof b) {
       return false;
     }

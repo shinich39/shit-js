@@ -1,11 +1,6 @@
 /**
  * @example
- * new RegExp(
- *   Object.entries(Brackets)
- *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
- *     .map((e) => `\\${e}`)
- *     .join("|")
- * );
+ * const result = Brackets["("]; // ")"
  */
 export const Brackets = {
   "(": ")",
@@ -37,12 +32,7 @@ export const Brackets = {
 } as const;
 /**
  * @example
- * new RegExp(
- *   Object.entries(Quotes)
- *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
- *     .map((e) => `\\${e}`)
- *     .join("|")
- * );
+ * const result = Quotes['"']; // '"'
  */
 export const Quotes = {
   "'": "'",
@@ -57,41 +47,9 @@ export const Quotes = {
 } as const;
 /**
  * @example
- * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
+ * const uuid = generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export function toSentenceCase(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-/**
- * @example
- * const result = toSlug("Lorem ipsum"); // "lorem-ipsum"
- */
-export function toSlug(str: string): string {
-  return str.toLowerCase().replace(/\s+/g, '-');
-}
-/**
- * @example
- * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
- */
-export function toCamelCase(str: string): string {
-  return str
-    // Remove separators and capitalize next letter
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')) 
-    // Ensure first letter is lowercase
-    .replace(/^(.)/, (m) => m.toLowerCase()); 
-}
-/**
- * @example
- * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
- */
-export function toPascalCase(str: string): string {
-  return toSentenceCase(toCamelCase(str));
-}
-/**
- * @example
- * const uuid = generateUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
- */
-export function generateUUID() {
+export function generateUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;

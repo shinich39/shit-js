@@ -1,11 +1,6 @@
 /**
  * @example
- * new RegExp(
- *   Object.entries(Brackets)
- *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
- *     .map((e) => `\\${e}`)
- *     .join("|")
- * );
+ * const result = Brackets["("]; // ")"
  */
 export declare const Brackets: {
     readonly "(": ")";
@@ -37,12 +32,7 @@ export declare const Brackets: {
 };
 /**
  * @example
- * new RegExp(
- *   Object.entries(Quotes)
- *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
- *     .map((e) => `\\${e}`)
- *     .join("|")
- * );
+ * const result = Quotes['"']; // '"'
  */
 export declare const Quotes: {
     readonly "'": "'";
@@ -57,29 +47,9 @@ export declare const Quotes: {
 };
 /**
  * @example
- * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
+ * const uuid = generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export declare function toSentenceCase(str: string): string;
-/**
- * @example
- * const result = toSlug("Lorem ipsum"); // "lorem-ipsum"
- */
-export declare function toSlug(str: string): string;
-/**
- * @example
- * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
- */
-export declare function toCamelCase(str: string): string;
-/**
- * @example
- * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
- */
-export declare function toPascalCase(str: string): string;
-/**
- * @example
- * const uuid = generateUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
- */
-export declare function generateUUID(): string;
+export declare function generateUuid(): string;
 /**
  * @example
  * const result = generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
