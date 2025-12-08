@@ -3,6 +3,8 @@ import { deepStrictEqual as eq, throws, doesNotThrow, rejects } from "node:asser
 import {
   Brackets,
   Quotes,
+  toCamelCase,
+  toSentenceCase,
   getDiffs,
   getFloats,
   getInts,
@@ -12,9 +14,31 @@ import {
   generateXor,
   matchStrings,
   toHalfWidthString,
+  toSlug,
   toRegExp,
   toFullWidthString,
+  toPascalCase,
 } from "./string";
+
+test("toSentenceCase", () => {
+  const result = toSentenceCase("lorem ipsum");
+  eq(result, "Lorem ipsum");
+});
+
+test("toSlug", () => {
+  const result = toSlug("  Lorem  ipsum  ");
+  eq(result, "lorem-ipsum");
+});
+
+test("toCamelCase", () => {
+  const result = toCamelCase("Lorem ipsum");
+  eq(result, "loremIpsum");
+});
+
+test("toPascalCase", () => {
+  const result = toPascalCase("lorem ipsum");
+  eq(result, "LoremIpsum");
+});
 
 test("generateUuid", () => {
   eq(generateUuid().length, 36); // ce0e915d-0b16-473c-bd89-d3d7492bb1b9
@@ -92,7 +116,7 @@ test("matchStrings", () => {
 });
 
 test("Brackets", () => {
-  const result = "()[]{}<>〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(
+  const result = "( )[ ]{ }< >〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(
     new RegExp(
       Object.entries(Brackets)
         .reduce<string[]>((acc, cur) => [...acc, ...cur], [])

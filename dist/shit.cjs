@@ -75,12 +75,16 @@ __export(shit_exports, {
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
   toBytes: () => toBytes,
+  toCamelCase: () => toCamelCase,
   toError: () => toError,
   toFileSize: () => toFileSize,
   toFullWidthString: () => toFullWidthString,
   toHalfWidthString: () => toHalfWidthString,
   toNumber: () => toNumber,
+  toPascalCase: () => toPascalCase,
   toRegExp: () => toRegExp,
+  toSentenceCase: () => toSentenceCase,
+  toSlug: () => toSlug,
   toggleBit: () => toggleBit,
   uniqueBy: () => uniqueBy
 });
@@ -1351,6 +1355,18 @@ var Quotes = {
   "\u201E": "\u201C",
   "\xAB": "\xBB"
 };
+function toSentenceCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function toSlug(str) {
+  return str.trim().toLowerCase().replace(/\s+/g, "-");
+}
+function toCamelCase(str) {
+  return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
+}
+function toPascalCase(str) {
+  return toSentenceCase(toCamelCase(str));
+}
 function generateUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;

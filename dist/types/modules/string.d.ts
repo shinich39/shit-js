@@ -32,7 +32,7 @@ export declare const Brackets: {
 };
 /**
  * @example
- * const result = Quotes['"']; // '"'
+ * const result = Quotes["'"]; // "'"
  */
 export declare const Quotes: {
     readonly "'": "'";
@@ -45,6 +45,26 @@ export declare const Quotes: {
     readonly "\u201E": "“";
     readonly "\u00AB": "»";
 };
+/**
+ * @example
+ * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
+ */
+export declare function toSentenceCase(str: string): string;
+/**
+ * @example
+ * const result = toSlug("  Lorem  ipsum  "); // "lorem-ipsum"
+ */
+export declare function toSlug(str: string): string;
+/**
+ * @example
+ * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
+ */
+export declare function toCamelCase(str: string): string;
+/**
+ * @example
+ * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
+ */
+export declare function toPascalCase(str: string): string;
 /**
  * @example
  * const uuid = generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
