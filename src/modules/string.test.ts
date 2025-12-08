@@ -11,7 +11,7 @@ import {
   generateString,
   getStringSize,
   generateUUID,
-  generateXOR,
+  generateXor,
   matchStrings,
   toHalfWidthString,
   toSlug,
@@ -48,11 +48,11 @@ test("generateString", () => {
   eq(/^[abc]+$/.test(generateString("abc", 100)), true);
 });
 
-test("generateXOR", () => {
+test("generateXor", () => {
   const orig = "Hello, world!";
-  const encrypted = generateXOR(orig, "this is salt!");
+  const encrypted = generateXor(orig, "this is salt!");
   eq(encrypted !== orig, true);
-  const decrypted = generateXOR(encrypted, "this is salt!");
+  const decrypted = generateXor(encrypted, "this is salt!");
   eq(decrypted, orig);
 });
 

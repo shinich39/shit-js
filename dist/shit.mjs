@@ -1297,7 +1297,7 @@ function generateString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefgh
   }
   return result;
 }
-function generateXOR(str, salt) {
+function generateXor(str, salt) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
@@ -1523,7 +1523,7 @@ export {
   generateInt,
   generateString,
   generateUUID,
-  generateXOR,
+  generateXor,
   getAdjustedSize,
   getBaseName,
   getCases,

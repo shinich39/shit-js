@@ -88,10 +88,10 @@ export declare function generateUUID(): string;
 export declare function generateString(charset?: string, size?: number): string;
 /**
  * @example
- * const encrypted = generateXOR("text", "this is salt!");
- * const decrypted = generateXOR(encrypted, "this is salt!"); // "text"
+ * const encrypted = generateXor("text", "this is salt!");
+ * const decrypted = generateXor(encrypted, "this is salt!"); // "text"
  */
-export declare function generateXOR(str: string, salt: string): string;
+export declare function generateXor(str: string, salt: string): string;
 /**
  * @example
  * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]

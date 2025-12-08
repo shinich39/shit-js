@@ -113,10 +113,10 @@ export function generateString(charset: string = "0123456789ABCDEFGHIJKLMNOPQRST
 }
 /**
  * @example
- * const encrypted = generateXOR("text", "this is salt!");
- * const decrypted = generateXOR(encrypted, "this is salt!"); // "text"
+ * const encrypted = generateXor("text", "this is salt!");
+ * const decrypted = generateXor(encrypted, "this is salt!"); // "text"
  */
-export function generateXOR(str: string, salt: string) {
+export function generateXor(str: string, salt: string) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);

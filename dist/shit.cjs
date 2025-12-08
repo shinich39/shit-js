@@ -34,7 +34,7 @@ __export(shit_exports, {
   generateInt: () => generateInt,
   generateString: () => generateString,
   generateUUID: () => generateUUID,
-  generateXOR: () => generateXOR,
+  generateXor: () => generateXor,
   getAdjustedSize: () => getAdjustedSize,
   getBaseName: () => getBaseName,
   getCases: () => getCases,
@@ -1389,7 +1389,7 @@ function generateString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefgh
   }
   return result;
 }
-function generateXOR(str, salt) {
+function generateXor(str, salt) {
   const l = salt.length;
   if (l === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);

@@ -35,7 +35,7 @@ var ShitJs = (() => {
     generateInt: () => generateInt,
     generateString: () => generateString,
     generateUUID: () => generateUUID,
-    generateXOR: () => generateXOR,
+    generateXor: () => generateXor,
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
     getCases: () => getCases,
@@ -1389,7 +1389,7 @@ var ShitJs = (() => {
     }
     return result;
   }
-  function generateXOR(str, salt) {
+  function generateXor(str, salt) {
     const l = salt.length;
     if (l === 0) {
       throw new Error(`Invalid argument: salt.length === 0`);
