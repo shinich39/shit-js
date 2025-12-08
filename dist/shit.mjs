@@ -1267,13 +1267,13 @@ function toSentenceCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 function toSlug(str) {
-  return str.trim().toLowerCase().replace(/\s+/g, "-");
+  return str.toLowerCase().replace(/\s+/g, "-");
 }
 function toCamelCase(str) {
   return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
 }
 function toPascalCase(str) {
-  return toSentenceCase(toCamelCase(str));
+  return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toUpperCase());
 }
 function generateUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {

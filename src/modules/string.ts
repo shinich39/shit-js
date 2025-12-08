@@ -54,10 +54,10 @@ export function toSentenceCase(str: string): string {
 }
 /**
  * @example
- * const result = toSlug("  Lorem  ipsum  "); // "lorem-ipsum"
+ * const result = toSlug("Lorem  ipsum"); // "lorem-ipsum"
  */
 export function toSlug(str: string): string {
-  return str.trim().toLowerCase().replace(/\s+/g, '-');
+  return str.toLowerCase().replace(/\s+/g, '-');
 }
 /**
  * @example
@@ -75,7 +75,11 @@ export function toCamelCase(str: string): string {
  * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
  */
 export function toPascalCase(str: string): string {
-  return toSentenceCase(toCamelCase(str));
+  return str
+    // Remove separators and capitalize next letter
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')) 
+    // Ensure first letter is uppercase
+    .replace(/^(.)/, (m) => m.toUpperCase()); 
 }
 /**
  * @example

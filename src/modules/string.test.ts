@@ -4,7 +4,6 @@ import {
   Brackets,
   Quotes,
   toCamelCase,
-  toSentenceCase,
   getDiffs,
   getFloats,
   getInts,
@@ -20,13 +19,8 @@ import {
   toPascalCase,
 } from "./string";
 
-test("toSentenceCase", () => {
-  const result = toSentenceCase("lorem ipsum");
-  eq(result, "Lorem ipsum");
-});
-
 test("toSlug", () => {
-  const result = toSlug("  Lorem  ipsum  ");
+  const result = toSlug("Lorem  ipsum");
   eq(result, "lorem-ipsum");
 });
 

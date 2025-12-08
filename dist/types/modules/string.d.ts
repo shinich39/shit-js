@@ -52,7 +52,7 @@ export declare const Quotes: {
 export declare function toSentenceCase(str: string): string;
 /**
  * @example
- * const result = toSlug("  Lorem  ipsum  "); // "lorem-ipsum"
+ * const result = toSlug("Lorem  ipsum"); // "lorem-ipsum"
  */
 export declare function toSlug(str: string): string;
 /**
