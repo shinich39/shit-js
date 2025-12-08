@@ -28,4 +28,4 @@ export declare class QueueWorker {
     pause(): void;
     stop(): void;
 }
-//# sourceMappingURL=async.d.ts.map
+//# sourceMappingURL=promise.d.ts.map

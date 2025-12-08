@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual as eq, throws, doesNotThrow, rejects } from "node:assert";
-import { QueueWorker, sleep, retry } from "./async";
+import { QueueWorker, sleep, retry } from "./promise";
 
 test("sleep", async () => {
   const a = Date.now();

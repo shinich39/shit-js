@@ -203,7 +203,7 @@ function groupBy(arr, func) {
   return group;
 }
 
-// src/modules/async.ts
+// src/modules/promise.ts
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -216,7 +216,7 @@ function retry(func, count, delay) {
       } catch (err) {
         error = err;
         if (i < count) {
-          await new Promise((res) => setTimeout(res, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }

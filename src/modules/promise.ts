@@ -14,7 +14,7 @@ export function sleep(ms: number) {
 export function retry<T extends (...args: any[]) => any>(
   func: T,
   count: number,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   return async function wrapped(
     ...args: Parameters<T>
@@ -27,7 +27,7 @@ export function retry<T extends (...args: any[]) => any>(
       } catch (err) {
         error = err;
         if (i < count) {
-          await new Promise((res) => setTimeout(res, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
