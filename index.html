@@ -7,11 +7,13 @@
   </head>
 
   <body>
+    <h1>shit-js</h1>
+    <h3>Methods</h3>
     <div id="result"></div>
-    <script src="../dist/index.js"></script>
+    <script src="dist/shit.js"></script>
     <script>
       for (const key of Object.keys(window.ShitJs)) {
-        document.getElementById("result").innerHTML += key + "<br>";
+        document.getElementById("result").innerHTML += key + "()" + "<br>";
       }
     </script>
   </body>

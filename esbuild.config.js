@@ -9,7 +9,7 @@ const FILENAME = "shit";
 const ESM = true;
 const CJS = true;
 const BROWSER = true;
-const BROWSER_GLOBAL_NAME = "Shit";
+const BROWSER_GLOBAL_NAME = "ShitJs";
 
 const ENTRY_POINT = `./src/${FILENAME}.ts`;
 

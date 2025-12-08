@@ -49,7 +49,7 @@ export declare function getCombinations<T>(arr: T[]): T[][];
  */
 export declare function getCases<T>(...args: T[][]): T[][];
 /**
- * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * @see https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  *
  * @example
  * const result = shuffleArray([1, 2, 3]);

@@ -1,6 +1,6 @@
 # shit-js
 
-God breathe on me
+God breathe on me.
 
 ## Getting Started
 
@@ -14,28 +14,21 @@ npm install github:shinich39/shit-js
 
 ### Usage
 
-- node
-
 ```js
 import * as shit from "shit-js";
 ```
 
-- browser
-
 ```html
-<script src="./dist/index.js"></script>
+<script src="dist/shit.js"></script>
 <script>
-  const { ... } = window.Shit;
+  const { ... } = window.ShitJs;
 </script>
 ```
 
-## References
+## Acknowledgements
 
 - [nodejs](https://nodejs.org/)
 - [tsconfig](https://www.typescriptlang.org/tsconfig/)
-
-## Acknowledgements
-
 - [esbuild](https://esbuild.github.io/)
 - [eslint](https://eslint.org/)
 - [tsx](https://tsx.is/)

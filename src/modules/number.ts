@@ -10,8 +10,6 @@ function mulberry32(seed: number) {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 /**
- * Mulberry32 PRNG (Pseudo Random Number Generator)
- * 
  * @returns min <= n < max
  * 
  * @example
@@ -26,8 +24,6 @@ export function generateFloat(min: number, max: number, seed?: number | null | u
     : Math.random() * (max - min) + min;
 }
 /**
- * Mulberry32 PRNG (Pseudo Random Number Generator)
- * 
  * @returns min <= n < max
  * 
  * @example
@@ -146,7 +142,7 @@ export function humanizeFileSize(
 
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
-  // keep 2 decimal places
+  // Keep 2 decimal places
   const size = (bytes / Math.pow(1024, i)).toFixed(2);
 
   return (

@@ -16,7 +16,7 @@ export function compressLzw(input: string): number[] {
   const result: number[] = [];
   let dictSize = 256;
 
-  // initialization (ASCII)
+  // Initialization (ASCII)
   for (let i = 0; i < 256; i++) {
     dict[String.fromCharCode(i)] = i;
   }
@@ -45,7 +45,7 @@ export function decompressLzw(compressed: number[]): string {
   const dict: string[] = [];
   let dictSize = 256;
 
-  // initialization (ASCII)
+  // Initialization (ASCII)
   for (let i = 0; i < 256; i++) {
     dict[i] = String.fromCharCode(i);
   }

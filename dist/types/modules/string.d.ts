@@ -5,7 +5,7 @@
  *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
  *     .map((e) => `\\${e}`)
  *     .join("|")
- * )
+ * );
  */
 export declare const Brackets: {
     readonly "(": ")";
@@ -42,7 +42,7 @@ export declare const Brackets: {
  *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
  *     .map((e) => `\\${e}`)
  *     .join("|")
- * )
+ * );
  */
 export declare const Quotes: {
     readonly "'": "'";
@@ -57,19 +57,24 @@ export declare const Quotes: {
 };
 /**
  * @example
- * const result = capitalize("lorem ipsum"); // "Lorem ipsum"
+ * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
  */
-export declare function capitalize(str: string): string;
+export declare function toSentenceCase(str: string): string;
 /**
  * @example
- * const result = slugify("Lorem ipsum"); // "lorem-ipsum"
+ * const result = toSlug("Lorem ipsum"); // "lorem-ipsum"
  */
-export declare function slugify(str: string): string;
+export declare function toSlug(str: string): string;
 /**
  * @example
- * const result = camelize("Lorem ipsum"); // "loremIpsum"
+ * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
  */
-export declare function camelize(str: string): string;
+export declare function toCamelCase(str: string): string;
+/**
+ * @example
+ * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
+ */
+export declare function toPascalCase(str: string): string;
 /**
  * @example
  * const uuid = generateUUID(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
@@ -116,13 +121,13 @@ export declare function toFullWidthString(str: string): string;
  */
 export declare function toRegExp(str: string): RegExp;
 /**
- * myers algorithm
+ * Myers algorithm
  *
- * \-1: number of deleted characters
+ * \-1: Number of deleted characters
  *
- * 0: number of matched characters
+ * 0: Number of matched characters
  *
- * 1: number of inserted characters
+ * 1: Number of inserted characters
  *
  * @example
  * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]

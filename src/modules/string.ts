@@ -5,7 +5,7 @@
  *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
  *     .map((e) => `\\${e}`)
  *     .join("|")
- * )
+ * );
  */
 export const Brackets = {
   "(": ")",
@@ -42,7 +42,7 @@ export const Brackets = {
  *     .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
  *     .map((e) => `\\${e}`)
  *     .join("|")
- * )
+ * );
  */
 export const Quotes = {
   "'": "'",
@@ -57,28 +57,35 @@ export const Quotes = {
 } as const;
 /**
  * @example
- * const result = capitalize("lorem ipsum"); // "Lorem ipsum"
+ * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
  */
-export function capitalize(str: string): string {
+export function toSentenceCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 /**
  * @example
- * const result = slugify("Lorem ipsum"); // "lorem-ipsum"
+ * const result = toSlug("Lorem ipsum"); // "lorem-ipsum"
  */
-export function slugify(str: string): string {
+export function toSlug(str: string): string {
   return str.toLowerCase().replace(/\s+/g, '-');
 }
 /**
  * @example
- * const result = camelize("Lorem ipsum"); // "loremIpsum"
+ * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
  */
-export function camelize(str: string): string {
+export function toCamelCase(str: string): string {
   return str
-    // remove separators and capitalize next letter
+    // Remove separators and capitalize next letter
     .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')) 
-    // ensure first letter is lowercase
+    // Ensure first letter is lowercase
     .replace(/^(.)/, (m) => m.toLowerCase()); 
+}
+/**
+ * @example
+ * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
+ */
+export function toPascalCase(str: string): string {
+  return toSentenceCase(toCamelCase(str));
 }
 /**
  * @example
@@ -171,13 +178,13 @@ export function toRegExp(str: string) {
   return new RegExp(pattern, flags);
 }
 /**
- * myers algorithm
+ * Myers algorithm
  *
- * \-1: number of deleted characters
+ * \-1: Number of deleted characters
  *
- * 0: number of matched characters
+ * 0: Number of matched characters
  *
- * 1: number of inserted characters
+ * 1: Number of inserted characters
  * 
  * @example
  * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
@@ -195,16 +202,16 @@ export function getDiffs(from: string, to: string) {
     let y = to.length;
     const max = from.length + to.length;
     
-    // current operation being accumulated
+    // Current operation being accumulated
     let currentOp: -1 | 0 | 1 | null = null;
     let currentStr = '';
     
     const push = (op: -1 | 0 | 1, char: string) => {
       if (currentOp === op) {
-        // if same operation, prepend character
+        // If same operation, prepend character
         currentStr = char + currentStr;
       } else {
-        // if different operation, push previous to result and start new
+        // If different operation, push previous to result and start new
         if (currentOp !== null && currentStr) {
           result.push([currentOp, currentStr]);
         }
@@ -213,7 +220,7 @@ export function getDiffs(from: string, to: string) {
       }
     };
     
-    // trace path in reverse
+    // Trace path in reverse
     for (let depth = d; depth >= 0; depth--) {
       const v = trace[depth];
       const k = x - y;
@@ -229,7 +236,7 @@ export function getDiffs(from: string, to: string) {
       const prevX = v[prevK + max];
       const prevY = prevX - prevK;
       
-      // diagonal move (match)
+      // Diagonal move (match)
       while (x > prevX && y > prevY) {
         x--;
         y--;
@@ -238,19 +245,18 @@ export function getDiffs(from: string, to: string) {
       
       if (depth === 0) break;
       
-      // vertical move (insertion)
+      // Vertical move (insertion)
       if (x === prevX) {
         y--;
         push(1, to[y]);
-      }
-      // horizontal move (deletion)
+      } // Horizontal move (deletion)
       else {
         x--;
         push(-1, from[x]);
       }
     }
     
-    // add last accumulated operation
+    // Add last accumulated operation
     if (currentOp !== null && currentStr) {
       result.push([currentOp, currentStr]);
     }
@@ -265,10 +271,10 @@ export function getDiffs(from: string, to: string) {
   // V array: maximum x coordinate reachable on each k-line
   const v: number[] = Array(2 * max + 1).fill(0);
   
-  // array for path tracing
+  // Array for path tracing
   const trace: number[][] = [];
   
-  // find shortest edit path
+  // Find shortest edit path
   for (let d = 0; d <= max; d++) {
     trace.push([...v]);
     
@@ -296,7 +302,7 @@ export function getDiffs(from: string, to: string) {
     }
   }
   
-  // in theory, does not reach here.
+  // In theory, does not reach here.
   return [];
 }
 /**
@@ -336,27 +342,27 @@ export function matchStrings(from: string, to: string) {
   
   const totalOperations = matches + insertions + deletions;
   
-  // various similarity metrics
+  // Various similarity metrics
   return {
-    // proportion of matching characters
+    // Proportion of matching characters
     matchRate: totalOperations > 0 ? matches / totalOperations : 1,
     
-    // similarity based on longer string
+    // Similarity based on longer string
     similarity: Math.max(from.length, to.length) > 0 
       ? matches / Math.max(from.length, to.length) 
       : 1,
 
-    // sørensen-dice similarity coefficient
+    // Sørensen-dice similarity coefficient
     diceSimilarity: (from.length + to.length) > 0
       ? (2 * matches) / (from.length + to.length)
       : 1,
     
-    // jaccard similarity coefficient
+    // Jaccard similarity coefficient
     jaccardSimilarity: (from.length + to.length - matches) > 0
       ? matches / (from.length + to.length - matches)
       : 1,
     
-    // levenshtein distance (edit distance)
+    // Levenshtein distance (edit distance)
     distance: insertions + deletions,
     
     // Normalized edit distance (0 = identical, 1 = completely different)
@@ -364,7 +370,7 @@ export function matchStrings(from: string, to: string) {
       ? (insertions + deletions) / Math.max(from.length, to.length)
       : 0,
     
-    // detailed counts
+    // Detailed counts
     matches,
     insertions,
     deletions,

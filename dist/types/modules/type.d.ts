@@ -22,5 +22,5 @@ export declare function toNumber(e: any): number;
  * @example
  * const result = toError("MESSAGE"); // == new Error("MESSAGE");
  */
-export declare function toError(e: any): Error;
+export declare function toError(err: any): Error;
 //# sourceMappingURL=type.d.ts.map

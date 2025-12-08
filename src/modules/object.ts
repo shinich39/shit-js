@@ -2,8 +2,7 @@
  * @example
  * const a = {};
  * const b = clone(a);
- * const result = a == b;
- * // false
+ * const result = a == b; // false
  */
 export function clone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") {
@@ -28,14 +27,11 @@ export function clone<T>(obj: T): T {
   }, {}) as T;
 }
 /**
- * @param key use dot natation.
+ * @param key Suppots dot-notation.
  * 
  * @example
- * const result = getObjectValue({ arr: [1, 2, 3] }, "arr.0");
- * // 1
- * 
- * const result = getObjectValue({ obj: { o: 1, b: 2, j: 3 } }, "obj.o");
- * // 1
+ * const result = getObjectValue({ arr: [1, 2, 3] }, "arr.0"); // 1
+ * const result = getObjectValue({ obj: { o: 1, b: 2, j: 3 } }, "obj.o"); // 1
  */
 export function getObjectValue(obj: Record<string, any>, key: string): any {
   let cur = obj;
@@ -50,21 +46,6 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
 
   return cur;
 }
-    const a = {
-      str: "abc",
-      num: 1,
-      obj: {
-        key: "value",
-      },
-      arr: [1, 2, 3],
-      date: new Date(),
-      set: new Set([1, 2, 3]),
-      map: new Map([
-        [1, "one"],
-        [2, "two"],
-        [3, "three"],
-      ]),
-    };
 /**
  * Includes: Array, object, Set, Map
  *
@@ -78,17 +59,17 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  */
 export function matchObject(obj: any, query: any) {
   const func = function (a: any, b: any, seen = new WeakMap()) {
-    // same address
+    // Same address
     if (Object.is(a, b)) {
       return true;
     }
 
-    // type mismatch
+    // Type mismatch
     if (typeof a !== typeof b) {
       return false;
     }
 
-    // boolean, number, string, undefined
+    // Boolean, Number, String, undefined
     if (typeof b !== "object") {
       return a === b;
     }
@@ -98,13 +79,13 @@ export function matchObject(obj: any, query: any) {
       return a === null;
     }
 
-    // handle circular references
+    // Handle circular references
     if (seen.has(b)) {
       return seen.get(b) === a;
     }
     seen.set(b, a);
 
-    // include
+    // Include
     if (Array.isArray(b)) {
       if (!Array.isArray(a) || a.length < b.length) {
         return false;
@@ -131,7 +112,7 @@ export function matchObject(obj: any, query: any) {
       return a.valueOf() === b.valueOf();
     }
 
-    // include
+    // Include
     if (b instanceof Set) {
       if (!(a instanceof Set) || a.size < b.size) {
         return false;
@@ -139,7 +120,7 @@ export function matchObject(obj: any, query: any) {
       return func(Array.from(a), Array.from(b), seen);
     }
 
-    // include
+    // Include
     if (b instanceof Map) {
       if (!(a instanceof Map) || a.size < b.size) {
         return false;
@@ -156,7 +137,7 @@ export function matchObject(obj: any, query: any) {
       return false;
     }
 
-    // plain object
+    // Plain object
     const keysA = Object.keys(a);
     const keysB = Object.keys(b);
 

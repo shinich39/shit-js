@@ -1,12 +1,8 @@
 import { describe, test } from "node:test";
-import assert from "node:assert";
-import path from "node:path";
-import fs from "node:fs";
+import { eq } from "../../test/assert.js";
 import { Dom } from "./dom";
 
-describe(path.basename(import.meta.filename), () => {
-
-  const html = `<?xml version="1.0" encoding="UTF-8"?>
+const html = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
 <head>
@@ -54,7 +50,7 @@ describe(path.basename(import.meta.filename), () => {
 </body>
 </html>`;
 
-  const html2 = `<?xml version="1.0" encoding="UTF-8"?>
+const html2 = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
 <head>
@@ -67,25 +63,25 @@ describe(path.basename(import.meta.filename), () => {
 
   
 
-  test("toString", () => {
-    const root = new Dom(html);
-    eq(root.toString(), html);
-    const root2 = new Dom(root.toString());
-    eq(root2.toString(), html);
+test("toString", () => {
+  const root = new Dom(html);
+  eq(root.toString(), html);
+  const root2 = new Dom(root.toString());
+  eq(root2.toString(), html);
+});
+
+test("tag with content", () => {
+  const root = new Dom({
+    type: "tag",
+    tag: "div",
+    content: "CONVERT TO TEXT",
   });
 
-  test("tag with content", () => {
-    const root = new Dom({
-      type: "tag",
-      tag: "div",
-      content: "CONVERT TO TEXT",
-    });
+  eq(root.toString(), "<div>CONVERT TO TEXT</div>");
+});
 
-    eq(root.toString(), "<div>CONVERT TO TEXT</div>");
-  });
-
-  test("getContents", () => {
-    const root = new Dom(
+test("getContents", () => {
+  const root = new Dom(
 `
 <div>
   Level 1
@@ -97,23 +93,23 @@ describe(path.basename(import.meta.filename), () => {
   </div>  
 </div>
 `
-    );
+  );
 
-    eq(
-      root.getContents().map((c) => c.trim()).join(""),
-      `Level 1Level 2Level 3`
-    );
-  });
+  eq(
+    root.getContents().map((c) => c.trim()).join(""),
+    `Level 1Level 2Level 3`
+  );
+});
 
-  test("remove", () => {
-    const root = new Dom(html2);
+test("remove", () => {
+  const root = new Dom(html2);
 
-    root.find((c) => c.tag === "title")?.remove();
+  root.find((c) => c.tag === "title")?.remove();
 
 
 
-    eq(
-      root.toString(),
+  eq(
+    root.toString(),
 `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
@@ -124,13 +120,5 @@ describe(path.basename(import.meta.filename), () => {
 <body>
 </body>
 </html>`
-    );
-  });
-
+  );
 });
-
-function eq(a: any, b: any, msg?: string | Error) {
-  return typeof a === "object"
-    ? assert.deepStrictEqual(a, b, msg)
-    : assert.strictEqual(a, b, msg);
-}

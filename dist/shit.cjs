@@ -24,8 +24,6 @@ __export(shit_exports, {
   Dom: () => Dom,
   QueueWorker: () => QueueWorker,
   Quotes: () => Quotes,
-  camelize: () => camelize,
-  capitalize: () => capitalize,
   checkBit: () => checkBit,
   clearBit: () => clearBit,
   clone: () => clone,
@@ -76,14 +74,17 @@ __export(shit_exports, {
   setBit: () => setBit,
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
-  slugify: () => slugify,
   toBytes: () => toBytes,
+  toCamelCase: () => toCamelCase,
   toError: () => toError,
   toFileSize: () => toFileSize,
   toFullWidthString: () => toFullWidthString,
   toHalfWidthString: () => toHalfWidthString,
   toNumber: () => toNumber,
+  toPascalCase: () => toPascalCase,
   toRegExp: () => toRegExp,
+  toSentenceCase: () => toSentenceCase,
+  toSlug: () => toSlug,
   toggleBit: () => toggleBit,
   uniqueBy: () => uniqueBy
 });
@@ -811,7 +812,7 @@ var Dom = class _Dom {
     }
     const index = this.parent.children.findIndex((child) => child == this);
     if (index === -1) {
-      throw new Error("This element not included in its parent");
+      throw new Error("This element not included in it's parent");
     }
     const newSiblings = this.parent.createChildren(args);
     this.parent.children.splice(index, 0, ...newSiblings);
@@ -1361,14 +1362,17 @@ var Quotes = {
   "\u201E": "\u201C",
   "\xAB": "\xBB"
 };
-function capitalize(str) {
+function toSentenceCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
-function slugify(str) {
+function toSlug(str) {
   return str.toLowerCase().replace(/\s+/g, "-");
 }
-function camelize(str) {
+function toCamelCase(str) {
   return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
+}
+function toPascalCase(str) {
+  return toSentenceCase(toCamelCase(str));
 }
 function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -1510,19 +1514,19 @@ function matchStrings(from, to) {
   }
   const totalOperations = matches + insertions + deletions;
   return {
-    // proportion of matching characters
+    // Proportion of matching characters
     matchRate: totalOperations > 0 ? matches / totalOperations : 1,
-    // similarity based on longer string
+    // Similarity based on longer string
     similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
-    // sørensen-dice similarity coefficient
+    // Sørensen-dice similarity coefficient
     diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
-    // jaccard similarity coefficient
+    // Jaccard similarity coefficient
     jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
-    // levenshtein distance (edit distance)
+    // Levenshtein distance (edit distance)
     distance: insertions + deletions,
     // Normalized edit distance (0 = identical, 1 = completely different)
     normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
-    // detailed counts
+    // Detailed counts
     matches,
     insertions,
     deletions
@@ -1576,27 +1580,23 @@ function toNumber(e) {
   }
   throw new Error(`Invalid argument type: ${typeof e}`);
 }
-function toError(e) {
-  if (e instanceof Error) {
-    return e;
-  } else if (typeof e === "string") {
-    return new Error(e);
-  } else if (typeof e !== "object") {
-    return new Error("Unknown Error");
-  } else if (Array.isArray(e)) {
-    return new Error("Unknown Error");
-  } else if (!e.name || !e.message) {
-    return new Error("Unknown Error");
+function toError(err) {
+  if (err instanceof Error) {
+    return err;
   }
-  const err = new Error();
-  if (typeof e.name === "string") {
-    err.name = e.name;
+  const error = new Error("An error occurred");
+  if (typeof err === "string") {
+    error.message = err;
+  } else if (typeof err === "object") {
+    if (typeof err.name === "string") {
+      error.name = err.name;
+    }
+    if (typeof err.message === "string") {
+      error.message = err.message;
+    }
+    if (typeof err.stack === "string") {
+      error.stack = err.stack;
+    }
   }
-  if (typeof e.message === "string") {
-    err.message = e.message;
-  }
-  if (typeof e.stack === "string") {
-    err.stack = e.stack;
-  }
-  return err;
+  return error;
 }

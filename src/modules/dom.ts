@@ -1,4 +1,3 @@
-
 export type DomType = "root" | "tag" | "text" | "comment" | "script" | "style";
 export type DomAttrs = Record<string, string | null | undefined>;
 export type DomImpl = {
@@ -52,7 +51,7 @@ function splitTags(str: string) {
   while(i < str.length) {
     const ch = str[i];
 
-    // find opening bracket: "<"
+    // Find "<"
     if (!head) {
       if (ch === "<") {
         flush();
@@ -61,7 +60,7 @@ function splitTags(str: string) {
       } else {
         buffer += ch;
       }
-    } // find closing bracket: ">"
+    } // Find ">"
     else {
       if (ch === "\\") {
         buffer += ch;
@@ -75,8 +74,8 @@ function splitTags(str: string) {
         } else if (ch === ">") {
           buffer += ch;
 
+          // If tail does exists and buffer does not close with tail, do not stop accumulate
           if (tail) {
-            // do not stop accumulate
             if (!buffer.endsWith(tail)) {
               i++;
               continue;
@@ -101,11 +100,11 @@ function splitTags(str: string) {
             tail = "</style>";
           }
         }
-      } // end of quotes
+      } // End of quotes
       else if (ch === quotes) {
         buffer += ch;
         quotes = null;
-      } // in quotes
+      } // In quotes
       else {
         buffer += ch;
       }
@@ -123,7 +122,7 @@ function parseTag(str: string) {
   const parts: string[] = [];
 
   let isClosing = str[1] === "/",
-    i = isClosing ? 2 : 1, // pass "</"
+    i = isClosing ? 2 : 1, // Skip "</"
     tag = "",
     buffer = "",
     quotes: string | null = null,
@@ -138,7 +137,7 @@ function parseTag(str: string) {
 
   const re = /\s|>|\//;
 
-  // find tag name
+  // Find tag name
   while (i < str.length) {
     const ch = str[i];
 
@@ -153,7 +152,7 @@ function parseTag(str: string) {
   tag = buffer;
   buffer = "";
 
-  // find attributes
+  // Find attributes
   while (i < str.length) {
     const ch = str[i];
 
@@ -163,12 +162,12 @@ function parseTag(str: string) {
       if (ch === ">") {
         if (buffer === "/" || buffer === "?") {
           closer = /\s/.test(str[i - 2])
-            ? " " + buffer // with space
+            ? " " + buffer // With space
             : buffer;
         } else {
           flush();
         }
-        break; // end task
+        break; // End task
       } else if (ch === " " || ch === "\n") {
         flush();
       } else if (ch === `"` || ch === `'`) {
@@ -177,12 +176,12 @@ function parseTag(str: string) {
       } else {
         buffer += ch;
       }
-    } // end of quotes
+    } // End of quotes
     else if (ch === quotes) {
       quotes = null;
       buffer += ch;
       flush();
-    } // in quotes
+    } // In quotes
     else {
       buffer += ch;
     }
@@ -197,7 +196,7 @@ function parseTag(str: string) {
       attributes[key] = null;
     } else {
       let value = values.join("=");
-      // remove quotes
+      // Remove quotes
       attributes[key] = value.substring(1, value.length - 1);
     }
   }
@@ -227,7 +226,7 @@ function parseStr(str: string) {
 
   for (const part of parts) {
 
-    // text
+    // Text
     const isTag = part.startsWith("<") && part.endsWith(">");
     if (!isTag) {
       stacks.push({
@@ -241,7 +240,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // xml declaration, xml prolog
+    // XML declaration or XML prolog
     const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
     if (isXMLDeclaration) {
       const { attributes } = parseTag(part);
@@ -257,7 +256,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // comment
+    // Comment
     const isComment = part.startsWith("<!--") && part.endsWith("-->");
     if (isComment) {
       stacks.push({
@@ -271,7 +270,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // script
+    // Script
     const isScript = part.startsWith("<script") && part.endsWith("</script>");
     if (isScript) {
       const { endIndex, attributes } = parseTag(part);
@@ -287,7 +286,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // style
+    // Style
     const isStyle = part.startsWith("<style") && part.endsWith("</style>");
     if (isStyle) {
       const { endIndex, attributes } = parseTag(part);
@@ -303,7 +302,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // tags
+    // Tags
     const { tag, isClosing, closer, attributes } = parseTag(part);
 
     if (isClosing) {
@@ -317,7 +316,7 @@ function parseStr(str: string) {
           if (stack.tag === tag) {
             stack.children = children.reverse();
 
-            // set children parent
+            // Set children parent
             for (const child of children) {
               child.parent = stack;
             }
@@ -325,11 +324,11 @@ function parseStr(str: string) {
             break;
           }
 
-          // close self-closing tag
+          // Close self-closing tag
           stack.closer = "";
         }
 
-        // current element included in same parent
+        // Current element included in same parent
         if (!stack.parent) {
           children.push(stack);
         }
@@ -352,31 +351,30 @@ function parseStr(str: string) {
   }
 
   for (const stack of stacks) {
-    // add root children
+    // Add root children
     if (stack.type !== "root" && !stack.parent) {
       stack.parent = root;
       root.children.push(stack);
     }
 
-    // set closer to self-closing tag
+    // Set closer to self-closing tag
     if (stack.type === "tag" && !stack.isClosed) {
       stack.closer = "";
     }
 
-    // @ts-expect-error: remove unused property
+    // @ts-expect-error: Remove unused property
     delete stack.isClosed;
 
-    // @ts-expect-error: remove unused property
+    // @ts-expect-error: Remove unused property
     delete stack.depth;
   }
 
-  // @ts-expect-error: remove unused property
+  // @ts-expect-error: Remove unused property
   delete root.isClosed;
 
-  // @ts-expect-error: remove unused property
+  // @ts-expect-error: Remove unused property
   delete root.depth;
 
-  // return stacks[0] as RootElement;
   return root as {
     type: "root",
     children: DomImpl[],
@@ -434,7 +432,7 @@ export class Dom implements DomImpl {
       this.content = src.content || "";
       this.attributes = src.attributes || {};
 
-      // tag with content
+      // Tag with content
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
           new Dom({
@@ -445,7 +443,7 @@ export class Dom implements DomImpl {
             children: [],
           }, this)
         ];
-      } // with children
+      } // Tag with children
       else if (src.children) {
         this.children = src.children.map((child) => new Dom(child, this));
       }
@@ -565,7 +563,7 @@ export class Dom implements DomImpl {
 
     const index = this.parent.children.findIndex((child) => child == this);
     if (index === -1) {
-      throw new Error("This element not included in its parent");
+      throw new Error("This element not included in it's parent");
     }
     
     const newSiblings = this.parent.createChildren(args);

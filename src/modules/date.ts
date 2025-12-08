@@ -42,30 +42,30 @@ export function parseDate(date: Date|number|string) {
     throw new Error(`Invalid date: ${date}`);
   }
 
-  // year
+  // Year
   const YYYY = String(ensuredDate.getFullYear()); // 2025
   const YY = YYYY.slice(-2); // 25
 
-  // month
+  // Month
   const M = String(ensuredDate.getMonth() + 1); // 1 ~ 12
   const MM = M.padStart(2, "0"); // 01 ~ 12
 
-  // day
+  // Day
   const D = String(ensuredDate.getDate()); // 1 ~ 31
   const DD = D.padStart(2, "0"); // 01 ~ 31
 
-  // weekday (0: Sunday)
+  // Weekday (0: Sunday)
   const d = String(ensuredDate.getDay()); // 0 ~ 6
   const E = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][ensuredDate.getDay()];
   const EEEE = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][ensuredDate.getDay()];
 
-  // hour
+  // Hour
   const H = String(ensuredDate.getHours()); // 0 ~ 23
   const HH = H.padStart(2, "0"); // 00 ~ 23
   const h = String((ensuredDate.getHours() % 12) || 12); // 1 ~ 12
   const hh = h.padStart(2, "0"); // 01 ~ 12
 
-  // minute, second, millisecond
+  // Minute, Second, Millisecond
   const m = String(ensuredDate.getMinutes()); // 0 ~ 59
   const mm = m.padStart(2, "0"); // 00 ~ 59
   const s = String(ensuredDate.getSeconds()); // 0 ~ 59
@@ -76,10 +76,10 @@ export function parseDate(date: Date|number|string) {
   const A = ensuredDate.getHours() < 12 ? "AM" : "PM";
   const a = A.toLowerCase(); // am / pm
 
-  // quarter
+  // Quarter
   const Q = String(Math.floor((ensuredDate.getMonth() + 3) / 3)); // 1 ~ 4
 
-  // timezone offset
+  // Timezone offset
   const tzOffset = -ensuredDate.getTimezoneOffset(); // in minutes
   const tzSign = tzOffset >= 0 ? "+" : "-";
   const tzHour = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, "0");

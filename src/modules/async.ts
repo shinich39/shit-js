@@ -9,8 +9,7 @@ export function sleep(ms: number) {
  * @example
  * const func = await (arg: any) => arg;
  * const wrappedFunc = retry(func, 10, 1000);
- * const result = await wrappedFunc(1);
- * console.log(result); // 1
+ * const result = await wrappedFunc(1); // 1
  */
 export function retry<T extends (...args: any[]) => any>(
   func: T,

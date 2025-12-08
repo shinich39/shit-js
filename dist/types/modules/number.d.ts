@@ -1,6 +1,4 @@
 /**
- * Mulberry32 PRNG (Pseudo Random Number Generator)
- *
  * @returns min <= n < max
  *
  * @example
@@ -11,8 +9,6 @@
  */
 export declare function generateFloat(min: number, max: number, seed?: number | null | undefined): number;
 /**
- * Mulberry32 PRNG (Pseudo Random Number Generator)
- *
  * @returns min <= n < max
  *
  * @example

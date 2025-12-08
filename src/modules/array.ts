@@ -101,13 +101,13 @@ export function getCases<T>(...args: T[][]): T[][] {
   const indexes: number[] = Array(args.length).fill(0);
   const result: T[][] = [[]];
 
-  // create first plot
+  // Create first plot
   for (let i = 0; i < args.length; i++) {
     if (args[i].length === 0) {
       throw new Error(`Invalid argument: argument cannot be empty`);
     }
 
-    // append first item of arrays
+    // Append first item of arrays
     const item = args[i][indexes[i]];
     result[0].push(item);
   }
@@ -115,18 +115,18 @@ export function getCases<T>(...args: T[][]): T[][] {
   let i = args.length - 1;
   while (true) {
     if (indexes[i] < args[i].length - 1) {
-      // increase index
+      // Increase index
       indexes[i] += 1;
 
-      // store values
+      // Store values
       result.push(args.map((arg, idx) => arg[indexes[idx]]));
 
       i = args.length - 1;
     } else {
-      // reset index
+      // Reset index
       indexes[i] = 0;
 
-      // change place
+      // Change place
       i--;
 
       if (i < 0) {
@@ -136,7 +136,7 @@ export function getCases<T>(...args: T[][]): T[][] {
   }
 }
 /**
- * https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+ * @see https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  * 
  * @example
  * const result = shuffleArray([1, 2, 3]);

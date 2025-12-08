@@ -47,39 +47,33 @@ export function toNumber(e: any) {
   } else if (!e) {
     return 0; // undefined, null
   }
-  // invalid string, object, Array, function
+  // Invalid string, object, Array, function
   throw new Error(`Invalid argument type: ${typeof e}`);
 }
 /**
  * @example
  * const result = toError("MESSAGE"); // == new Error("MESSAGE");
  */
-export function toError(e: any): Error {
-  if (e instanceof Error) {
-    return e;
-  } else if (typeof e === "string") {
-    return new Error(e);
-  } else if (typeof e !== "object") {
-    return new Error("Unknown Error");
-  } else if (Array.isArray(e)) {
-    return new Error("Unknown Error");
-  } else if (!e.name || !e.message) {
-    return new Error("Unknown Error");
+export function toError(err: any): Error {
+  if (err instanceof Error) {
+    return err;
   }
 
-  const err = new Error();
+  const error = new Error("An error occurred");
 
-  if (typeof e.name === "string") {
-    err.name = e.name;
+  if (typeof err === "string") {
+    error.message = err;
+  } else if (typeof err === "object") {
+    if (typeof err.name === "string") {
+      error.name = err.name;
+    }
+    if (typeof err.message === "string") {
+      error.message = err.message;
+    }
+    if (typeof err.stack === "string") {
+      error.stack = err.stack;
+    }
   }
 
-  if (typeof e.message === "string") {
-    err.message = e.message;
-  }
-
-  if (typeof e.stack === "string") {
-    err.stack = e.stack;
-  }
-
-  return err;
+  return error;
 }
