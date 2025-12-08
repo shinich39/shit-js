@@ -1,5 +1,5 @@
 import { describe, test } from "node:test";
-import { eq } from "../../test/assert.js";
+import { deepStrictEqual as eq, throws, doesNotThrow, rejects } from "node:assert";
 import { QueueWorker, sleep, retry } from "./async";
 
 test("sleep", async () => {
@@ -9,41 +9,34 @@ test("sleep", async () => {
   eq(b - a >= 38, true);
 });
 
-// test("retry", async () => {
-//   const failure = (message: string) => {
-//     return new Promise((resolve, reject) => {
-//       console.log(message);
-//       reject(new Error("An error occurred"));
-//     });
-//   }
-//   const promise = retry(failure, 3, 256);
-//   try {
-//     await promise("GG");
-//   } catch(err) {
-//     console.error(err);
-//   }
-// });
+test("retry", async () => {
+  const func = retry(async () => {
+    throw new Error("An error occurred");
+  }, 3, 256);
 
-// test("QueueWorker", async () => {
-//   const worker = new QueueWorker();
+  rejects(() => func());
+});
 
-//   const startedAt = Date.now();
+test("QueueWorker", async () => {
+  const worker = new QueueWorker();
 
-//   for (let i = 0; i < 3; i++) {
-//     const index = i;
-//     worker.add(async function () {
-//       await sleep(1000);
-//       console.log(`Task ${index}, Queue: ${worker.queue.length}, Time: ${Date.now() - startedAt}ms`);
-//     });
-//   }
+  const startedAt = Date.now();
 
-//   worker.start();
+  for (let i = 0; i < 3; i++) {
+    const index = i;
+    worker.add(async function () {
+      await sleep(100);
+      console.log(`Task ${index}, Queue: ${worker.queue.length}, Time: ${Date.now() - startedAt}ms`);
+    });
+  }
 
-//   setTimeout(() => {
-//     worker.pause();
-//   }, 1500);
+  worker.start();
 
-//   setTimeout(() => {
-//     worker.start();
-//   }, 3000);
-// });
+  setTimeout(() => {
+    worker.pause();
+  }, 150);
+
+  setTimeout(() => {
+    worker.start();
+  }, 300);
+});

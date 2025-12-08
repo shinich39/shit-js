@@ -1469,6 +1469,9 @@ function getType(e) {
 function isNumeric(e) {
   return typeof e === "string" && !Number.isNaN(parseFloat(e)) && Number.isFinite(parseFloat(e));
 }
+function isNumber(e) {
+  return typeof e === "number" || isNumeric(e);
+}
 function toNumber(e) {
   if (isNumeric(e)) {
     return parseFloat(e);
@@ -1545,6 +1548,7 @@ export {
   getType,
   groupBy,
   humanizeFileSize,
+  isNumber,
   isNumeric,
   joinPaths,
   matchObject,

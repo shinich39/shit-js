@@ -1,5 +1,5 @@
 import { describe, test } from "node:test";
-import { eq } from "../../test/assert.js";
+import { deepStrictEqual as eq, throws, doesNotThrow, rejects } from "node:assert";
 import { clone, matchObject, getObjectValue } from "./object";
 
 test("clone", () => {

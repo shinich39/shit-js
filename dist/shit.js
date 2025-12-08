@@ -64,6 +64,7 @@ var ShitJs = (() => {
     getType: () => getType,
     groupBy: () => groupBy,
     humanizeFileSize: () => humanizeFileSize,
+    isNumber: () => isNumber,
     isNumeric: () => isNumeric,
     joinPaths: () => joinPaths,
     matchObject: () => matchObject,
@@ -1559,6 +1560,9 @@ var ShitJs = (() => {
   }
   function isNumeric(e) {
     return typeof e === "string" && !Number.isNaN(parseFloat(e)) && Number.isFinite(parseFloat(e));
+  }
+  function isNumber(e) {
+    return typeof e === "number" || isNumeric(e);
   }
   function toNumber(e) {
     if (isNumeric(e)) {

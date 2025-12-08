@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
-import { eq } from "../../test/assert.js";
-import { getType, isNumeric, toNumber } from "./type";
+import { deepStrictEqual as eq, throws, doesNotThrow, rejects } from "node:assert";
+import { getType, isNumber, isNumeric, toNumber } from "./type";
 
 test("getType", () => {
   eq(getType(undefined), "undefined");
@@ -16,7 +16,14 @@ test("getType", () => {
 
 test("isNumeric", () => {
   eq(isNumeric("1"), true);
+  eq(isNumeric(1), false);
   eq(isNumeric("a"), false);
+});
+
+test("isNumber", () => {
+  eq(isNumber("1"), true);
+  eq(isNumber(1), true);
+  eq(isNumber("a"), false);
 });
 
 test("toNumber", () => {
@@ -28,12 +35,6 @@ test("toNumber", () => {
   eq(toNumber(false), 0);
   eq(toNumber(null), 0);
   eq(toNumber(undefined), 0);
-  try {
-    toNumber({});
-    eq(true, false);
-  } catch (err) {}
-  try {
-    toNumber([]);
-    eq(true, false);
-  } catch (err) {}
+  throws(() => { toNumber({}); });
+  throws(() => { toNumber([]); });
 });

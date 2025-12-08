@@ -7,7 +7,7 @@
  * const result = getType(new RegExp()); // "regexp"
  * const result = getType(new RegExp()); // "regexp"
  */
-export function getType(e: any) {
+export function getType(e: unknown) {
   if (e === undefined) {
     return "undefined";
   } else if (e === null) {
@@ -25,17 +25,25 @@ export function getType(e: any) {
 /**
  * @example
  * const result = isNumeric("1"); // true
+ * const result = isNumeric(1); // false
  */
 export function isNumeric(e: any): e is string {
-  return (
-    typeof e === "string" &&
-    !Number.isNaN(parseFloat(e)) &&
-    Number.isFinite(parseFloat(e))
-  );
+  return typeof e === "string"
+    && !Number.isNaN(parseFloat(e))
+    && Number.isFinite(parseFloat(e));
+}
+/**
+ * @example
+ * const result = isNumber("1"); // true
+ * const result = isNumber(1); // true
+ */
+export function isNumber(e: any): e is number | string {
+  return typeof e === "number" || isNumeric(e);
 }
 /**
  * @example
  * const result = toNumber("1.1"); // 1.1
+ * const result = toNumber(1.1); // 1.1
  */
 export function toNumber(e: any) {
   if (isNumeric(e)) {
