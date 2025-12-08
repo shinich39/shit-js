@@ -37,20 +37,6 @@ export function retry<T extends (...args: any[]) => any>(
 }
 /**
  * @example
- * input.addEventListener("input", debounce((e) => { ... }, 100));
- */
-export function debounce(
-  func: (...args: any[]) => any,
-  delay: number
-) {
-  let timer: ReturnType<typeof setTimeout>;
-  return (...args: any[]) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func(...args), delay);
-  };
-}
-/**
- * @example
  * const worker = new QueueWorker();
  * worker.add(() => console.log(`Task 0`));
  * worker.add(async () => {

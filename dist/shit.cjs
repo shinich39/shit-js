@@ -28,7 +28,6 @@ __export(shit_exports, {
   clearBit: () => clearBit,
   clone: () => clone,
   compressLzw: () => compressLzw,
-  debounce: () => debounce,
   decompressLzw: () => decompressLzw,
   generateFloat: () => generateFloat,
   generateInt: () => generateInt,
@@ -221,13 +220,6 @@ function retry(func, count, delay) {
       }
     }
     throw error;
-  };
-}
-function debounce(func, delay) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func(...args), delay);
   };
 }
 var QueueWorker = class {

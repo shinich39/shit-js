@@ -131,13 +131,6 @@ function retry(func, count, delay) {
     throw error;
   };
 }
-function debounce(func, delay) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func(...args), delay);
-  };
-}
 var QueueWorker = class {
   constructor() {
     this.inProgress = false;
@@ -1517,7 +1510,6 @@ export {
   clearBit,
   clone,
   compressLzw,
-  debounce,
   decompressLzw,
   generateFloat,
   generateInt,

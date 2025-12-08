@@ -29,7 +29,6 @@ var ShitJs = (() => {
     clearBit: () => clearBit,
     clone: () => clone,
     compressLzw: () => compressLzw,
-    debounce: () => debounce,
     decompressLzw: () => decompressLzw,
     generateFloat: () => generateFloat,
     generateInt: () => generateInt,
@@ -221,13 +220,6 @@ var ShitJs = (() => {
         }
       }
       throw error;
-    };
-  }
-  function debounce(func, delay) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => func(...args), delay);
     };
   }
   var QueueWorker = class {
