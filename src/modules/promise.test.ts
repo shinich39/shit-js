@@ -26,7 +26,7 @@ test("QueueWorker", async () => {
     const index = i;
     worker.add(async function () {
       await sleep(10);
-      console.log(`Task ${index}, Queue: ${worker.length}, Time: ${Date.now() - startedAt}ms`);
+      // console.log(`Task ${index}, Queue: ${worker.length}, Time: ${Date.now() - startedAt}ms`);
     });
   }
 
