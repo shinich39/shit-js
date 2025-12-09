@@ -25,18 +25,19 @@ test("QueueWorker", async () => {
   for (let i = 0; i < 3; i++) {
     const index = i;
     worker.add(async function () {
-      await sleep(100);
-      console.log(`Task ${index}, Queue: ${worker.queue.length}, Time: ${Date.now() - startedAt}ms`);
+      await sleep(10);
+      console.log(`Task ${index}, Queue: ${worker.length}, Time: ${Date.now() - startedAt}ms`);
     });
   }
+
+  eq(worker.length, 3);
 
   worker.start();
 
   setTimeout(() => {
     worker.pause();
-  }, 150);
-
-  setTimeout(() => {
-    worker.start();
-  }, 300);
+    setTimeout(() => {
+      worker.start();
+    }, 15);
+  }, 15);
 });

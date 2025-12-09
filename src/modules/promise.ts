@@ -39,10 +39,7 @@ export function retry<T extends (...args: any[]) => any>(
  * @example
  * const worker = new QueueWorker();
  * worker.add(() => console.log(`Task 0`));
- * worker.add(async () => {
- *   await fetch('/api/data');
- *   console.log(`Task 1`);
- * });
+ * worker.add(async () => { await fetch('/api/data'); });
  */
 export class QueueWorker {
   inProgress: boolean;
@@ -53,10 +50,25 @@ export class QueueWorker {
     this.queue = [];
   }
 
+  get length(): number { return this.queue.length; }
+  set length(newValue) { console.warn(`Access to the "length" property is restricted.`); }
+
+  /**
+   * @example
+   * worker.add(() => console.log(`Task 0`));
+   * worker.add(async () => { await fetch(`/api/data`); })
+   */
   add(func: () => void | Promise<void>): void {
     this.queue.push(func);
   }
-
+  /**
+   * @example
+   * const isFirst = !worker.inProgress;
+   * await worker.start();
+   * if (isFirst) {
+   *   // Write code here to running after end of task.
+   * }
+   */
   async start(): Promise<void> {
     if (this.inProgress) {
       return;
@@ -64,19 +76,36 @@ export class QueueWorker {
 
     this.inProgress = true;
 
-    while(this.inProgress && this.queue.length > 0) {
-      await this.queue.shift()!();
+    while(this.inProgress) {
+      const queue = this.queue.shift();
+      
+      if (!queue) {
+        break;
+      }
+
+      await queue();
     }
 
     this.inProgress = false;
   }
-  
+  /**
+   * worker.inProgress = false;
+   */
   pause(): void {
     this.inProgress = false;
   }
-  
-  stop(): void {
+  /**
+   * worker.queue = [];
+   */
+  clear(): void {
     this.queue = [];
-    this.inProgress = false;
+  }
+  /**
+   * worker.queue = [];
+   * worker.inProgress = false;
+   */
+  stop(): void {
+    this.clear();
+    this.pause();
   }
 }
