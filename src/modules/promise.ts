@@ -49,10 +49,6 @@ export class QueueWorker {
     this.inProgress = false;
     this.queue = [];
   }
-
-  get length(): number { return this.queue.length; }
-  set length(newValue) { console.warn(`Access to the "length" property is restricted.`); }
-
   /**
    * @example
    * worker.add(() => console.log(`Task 0`));

@@ -136,25 +136,55 @@ var QueueWorker = class {
     this.inProgress = false;
     this.queue = [];
   }
+  /**
+   * @example
+   * worker.add(() => console.log(`Task 0`));
+   * worker.add(async () => { await fetch(`/api/data`); })
+   */
   add(func) {
     this.queue.push(func);
   }
+  /**
+   * @example
+   * const isFirst = !worker.inProgress;
+   * await worker.start();
+   * if (isFirst) {
+   *   // Write code here to running after end of task.
+   * }
+   */
   async start() {
     if (this.inProgress) {
       return;
     }
     this.inProgress = true;
-    while (this.inProgress && this.queue.length > 0) {
-      await this.queue.shift()();
+    while (this.inProgress) {
+      const queue = this.queue.shift();
+      if (!queue) {
+        break;
+      }
+      await queue();
     }
     this.inProgress = false;
   }
+  /**
+   * worker.inProgress = false;
+   */
   pause() {
     this.inProgress = false;
   }
-  stop() {
+  /**
+   * worker.queue = [];
+   */
+  clear() {
     this.queue = [];
-    this.inProgress = false;
+  }
+  /**
+   * worker.queue = [];
+   * worker.inProgress = false;
+   */
+  stop() {
+    this.clear();
+    this.pause();
   }
 };
 
