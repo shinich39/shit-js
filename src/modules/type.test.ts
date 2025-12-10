@@ -1,5 +1,5 @@
 import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, rejects } from "node:assert";
+import { deepStrictEqual as eq, notDeepEqual as neq, throws, rejects, doesNotThrow, doesNotReject } from "node:assert";
 import { getType, isNumber, isNumeric, toNumber } from "./type";
 
 test("getType", () => {
