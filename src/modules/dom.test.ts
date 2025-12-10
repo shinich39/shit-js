@@ -1,5 +1,5 @@
 import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, rejects, doesNotThrow, doesNotReject } from "node:assert";
+import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
 import { Dom } from "./dom";
 
 const html = `<?xml version="1.0" encoding="UTF-8"?>
