@@ -122,7 +122,7 @@ export declare function toRegExp(str: string): RegExp;
  * @example
  * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export declare function getDiffs(from: string, to: string): [0 | 1 | -1, string][];
+export declare function getDiffs(from: string, to: string): [number, string][];
 /**
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";

@@ -53,7 +53,7 @@ export declare class Dom implements DomImpl {
     getAttributes(): DomAttrs;
     setAttributes(attrs: DomAttrs): void;
     hasAttributes(attrs: DomAttrs): boolean;
-    getRoot(this: Dom): Dom;
+    getRoot(this: Dom): Dom | undefined;
     getDepth(this: Dom): number;
     append(...args: (string | DomImpl | Dom)[]): void;
     prepend(...args: (string | DomImpl | Dom)[]): void;

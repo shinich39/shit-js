@@ -29,8 +29,33 @@
  * //   WW: '44'
  * // }
  */
-export function parseDate(date: Date|number|string) {
-
+export function parseDate(date: Date|number|string): {
+  YYYY: string,
+  YY: string,
+  M: string,
+  MM: string,
+  D: string,
+  DD: string,
+  d: string,
+  E: string,
+  EEEE: string,
+  H: string,
+  HH: string,
+  h: string,
+  hh: string,
+  m: string,
+  mm: string,
+  s: string,
+  ss: string,
+  SSS: string,
+  A: string,
+  a: string,
+  Q: string,
+  Z: string,
+  ZZ: string,
+  W: string,
+  WW: string,
+} {
   let ensuredDate;
   if (date instanceof Date) {
     ensuredDate = date;

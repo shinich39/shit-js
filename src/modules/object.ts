@@ -57,8 +57,8 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  *   { num: 1 }
  * ); // true
  */
-export function matchObject(obj: any, query: any) {
-  const func = function (a: any, b: any, seen = new WeakMap()) {
+export function matchObject(obj: any, query: any): boolean {
+  const func = function(a: any, b: any, seen = new WeakMap()) {
     // Same address
     if (Object.is(a, b)) {
       return true;
@@ -152,7 +152,7 @@ export function matchObject(obj: any, query: any) {
     }
 
     return true;
-  };
+  }
 
   return func(obj, query);
 }

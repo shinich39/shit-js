@@ -2,7 +2,7 @@
  * @example
  * await sleep(1000); // 1s
  */
-export declare function sleep(ms: number): Promise<unknown>;
+export declare function sleep(ms: number): Promise<void>;
 /**
  * @example
  * const func = await (arg: any) => arg;

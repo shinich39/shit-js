@@ -7,7 +7,7 @@
  * const result = getType(new RegExp()); // "regexp"
  * const result = getType(new RegExp()); // "regexp"
  */
-export function getType(e: unknown) {
+export function getType(e: unknown): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function" | "null" | "array" | "date" | "regexp" {
   if (e === undefined) {
     return "undefined";
   } else if (e === null) {
@@ -45,7 +45,7 @@ export function isNumber(e: any): e is number | string {
  * const result = toNumber("1.1"); // 1.1
  * const result = toNumber(1.1); // 1.1
  */
-export function toNumber(e: any) {
+export function toNumber(e: any): number {
   if (isNumeric(e)) {
     return parseFloat(e);
   } else if (typeof e === "number") {

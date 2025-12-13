@@ -8,6 +8,9 @@
   "license": "MIT",
   "author": "shinich39 <shinich39@gmail.com>",
   "type": "module",
+  "main": "./dist/shit.min.mjs",
+  "module": "./dist/shit.min.mjs",
+  "types": "./dist/types/shit.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/shit.d.ts",
@@ -15,21 +18,20 @@
       "require": "./dist/shit.min.cjs"
     }
   },
-  "main": "./dist/shit.min.mjs",
-  "types": "./dist/types/shit.d.ts",
   "scripts": {
     "test": "tsx --test \"**/*.test.{js,jsx,ts,tsx}\"",
-    "dev": "tsc-watch --noClear",
-    "build": "npm run lint && node esbuild.config.js && tsc",
-    "lint": "eslint \"src/**/*\""
+    "dev": "nodemon --config nodemon.config.json",
+    "build": "node esbuild.config.js && tsc",
+    "lint": "eslint \"src/**/*\"",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@types/node": "^22.14.0",
     "esbuild": "^0.25.2",
     "eslint": "^9.24.0",
-    "rimraf": "^6.0.1",
-    "tsc-watch": "^7.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.0"

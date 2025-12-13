@@ -3,7 +3,7 @@
  * const result = joinPaths("./project/", "abc", "./package.json");
  * // "project/abc/package.json"
  */
-export function joinPaths(...args: string[]) {
+export function joinPaths(...args: string[]): string {
   const parts = args.join("/").split(/[\\/]+/);
   const resolved: string[] = [];
 
@@ -37,7 +37,7 @@ export function joinPaths(...args: string[]) {
  * const result = getBaseName("./project/package.json", ".json");
  * // "package"
  */
-export function getBaseName(str: string, suffix?: string) {
+export function getBaseName(str: string, suffix?: string): string {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 1;
@@ -63,7 +63,7 @@ export function getBaseName(str: string, suffix?: string) {
  * const result = getExtName("./project/package.json");
  * // ".json"
  */
-export function getExtName(str: string) {
+export function getExtName(str: string): string {
   let i = str.length - 1;
 
   while (i >= 0) {
@@ -86,7 +86,7 @@ export function getExtName(str: string) {
  * const result = getDirName("./project/package.json");
  * // "./project"
  */
-export function getDirName(str: string) {
+export function getDirName(str: string): string {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 1;
@@ -107,7 +107,7 @@ export function getDirName(str: string) {
  * const result = getRelativePath("./project/", "./package.json");
  * // "../package.json"
  */
-export function getRelativePath(from: string, to: string) {
+export function getRelativePath(from: string, to: string): string {
   const normalize = (str: string) => {
     str = str.replace(/[\\]/g, "/").replace(/\/$/, "");
 
@@ -158,7 +158,7 @@ export function getRelativePath(from: string, to: string) {
  * );
  * // "project/abc"
  */
-export function getRootPath(...args: string[]) {
+export function getRootPath(...args: string[]): string {
   if (args.length === 0) {
     return "";
   }

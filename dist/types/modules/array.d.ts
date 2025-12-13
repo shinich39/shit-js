@@ -25,7 +25,7 @@ export declare function getMeanValue(arr: number[]): number;
 export declare function getModeValueWithCount<T>(arr: T[]): {
     count: number;
     value: T | undefined;
-} | undefined;
+};
 /**
  * @example
  * const result = getModeCount(["a", "a", "b"]); // 2

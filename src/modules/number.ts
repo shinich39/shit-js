@@ -3,7 +3,7 @@
  * 
  * https://github.com/cprosche/mulberry32
  */
-function mulberry32(seed: number) {
+function mulberry32(seed: number): number {
   let t = seed += 0x6D2B79F5;
   t = Math.imul(t ^ (t >>> 15), t | 1);
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
@@ -18,7 +18,7 @@ function mulberry32(seed: number) {
  * const result = generateFloat(0, 1, 10); // 0.5019920116756111
  * const result = generateFloat(0, 1, 100); // 0.2043598669115454
  */
-export function generateFloat(min: number, max: number, seed?: number | null | undefined) {
+export function generateFloat(min: number, max: number, seed?: number | null | undefined): number {
   return typeof seed === "number"
     ? mulberry32(seed) * (max - min) + min
     : Math.random() * (max - min) + min;
@@ -32,7 +32,7 @@ export function generateFloat(min: number, max: number, seed?: number | null | u
  * const result = generateInt(0, 10, 10); // 5
  * const result = generateInt(0, 10, 100); // 2
  */
-export function generateInt(min: number, max: number, seed?: number | null | undefined) {
+export function generateInt(min: number, max: number, seed?: number | null | undefined): number {
   return Math.floor(generateFloat(min, max, seed));
 }
 /**
@@ -40,7 +40,7 @@ export function generateInt(min: number, max: number, seed?: number | null | und
  * const result = getLengthFromInt(10); // 2
  * const result = getLengthFromInt(100); // 3
  */
-export function getLengthFromInt(num: number) {
+export function getLengthFromInt(num: number): number {
   return Math.log(num) * Math.LOG10E + 1 | 0;
 }
 /**
@@ -48,7 +48,7 @@ export function getLengthFromInt(num: number) {
  * const result = getLengthFromFloat(1.2); // 2
  * const result = getLengthFromFloat(1.23); // 3
  */
-export function getLengthFromFloat(num: number) {
+export function getLengthFromFloat(num: number): number {
   return ("" + num).replace(".", "").length;
 }
 /**
@@ -58,7 +58,7 @@ export function getLengthFromFloat(num: number) {
  * const result = getClampedNumber(5, 0, 10); // 5
  * const result = getClampedNumber(10, 0, 10), 1; // 10
  */
-export function getClampedNumber(num: number, min: number, max: number) {
+export function getClampedNumber(num: number, min: number, max: number): number {
   return Math.min(max, Math.max(num, min));
 }
 /**
@@ -72,7 +72,7 @@ export function getClampedNumber(num: number, min: number, max: number) {
  * const result = getLoopedNumber(10, 0, 10); // 0
  * const result = getLoopedNumber(20, 0, 10); // 0
  */
-export function getLoopedNumber(num: number, min: number, max: number) {
+export function getLoopedNumber(num: number, min: number, max: number): number {
   num -= min;
   max -= min;
 
@@ -93,7 +93,7 @@ export function getLoopedNumber(num: number, min: number, max: number) {
 export function toBytes(
   bytes: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-) {
+): number {
   if (format === "Bytes") {
     return bytes;
   }
@@ -113,7 +113,7 @@ export function toBytes(
 export function toFileSize(
   bytes: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-) {
+): number {
   if (format === "Bytes") {
     return bytes;
   }
@@ -133,7 +133,7 @@ export function toFileSize(
 export function humanizeFileSize(
   num: number,
   format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-) {
+): string {
   const bytes = toBytes(num, format);
 
   if (bytes === 0) {
@@ -145,9 +145,7 @@ export function humanizeFileSize(
   // Keep 2 decimal places
   const size = (bytes / Math.pow(1024, i)).toFixed(2);
 
-  return (
-    size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i]
-  );
+  return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
 }
 /**
  * @example

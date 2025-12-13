@@ -398,7 +398,7 @@ function stringifyAttrs(attrs: DomAttrs) {
   return result;
 }
 
-export const parseDom = (src: string | DomImpl | Dom, parent?: Dom) => new Dom(src, parent);
+export const parseDom = (src: string | DomImpl | Dom, parent?: Dom): Dom => new Dom(src, parent);
 
 export class Dom implements DomImpl {
   parent?: Dom;
@@ -420,7 +420,7 @@ export class Dom implements DomImpl {
     }
   }
 
-  init(src: string | DomImpl | Dom, parent?: Dom) {
+  init(src: string | DomImpl | Dom, parent?: Dom): void {
     if (typeof src === "string") {
       const { children } = Dom.parse(src);
       this.children = children.map((child) => new Dom(child, this));
@@ -450,8 +450,9 @@ export class Dom implements DomImpl {
     }
   }
 
-  createChildren(args: (string | DomImpl | Dom)[]) {
+  createChildren(args: (string | DomImpl | Dom)[]): Dom[] {
     const result: Dom[] = [];
+
     for (const arg of args) {
       if (typeof arg === "string") {
         const { children } = Dom.parse(arg);
@@ -462,31 +463,32 @@ export class Dom implements DomImpl {
         result.push(new Dom(arg, this));
       }
     }
+
     return result;
   }
 
-  isRoot() { return this.type === "root"; }
-  isComment() { return this.type === "comment"; }
-  isStyle() { return this.type === "style"; }
-  isScript() { return this.type === "script"; }
-  isText() { return this.type === "text"; }
-  isTag() { return this.type === "tag"; }
+  isRoot(): boolean { return this.type === "root"; }
+  isComment(): boolean { return this.type === "comment"; }
+  isStyle(): boolean { return this.type === "style"; }
+  isScript(): boolean { return this.type === "script"; }
+  isText(): boolean { return this.type === "text"; }
+  isTag(): boolean { return this.type === "tag"; }
 
-  getParent() { return this.parent; }
-  hasParent() { return !!this.parent; }
+  getParent(): Dom | undefined { return this.parent; }
+  hasParent(): boolean { return !!this.parent; }
 
-  getChildren() { return this.children; }
-  hasChildren() { return this.children.length > 1; }
+  getChildren(): Dom[] { return this.children; }
+  hasChildren(): boolean { return this.children.length > 1; }
 
-  getSiblings() { return (this.parent?.children || []).filter((sibling) => sibling != this); }
-  hasSiblings() { return (this.parent?.children || []).length > 1; }
+  getSiblings(): Dom[] { return (this.parent?.children || []).filter((sibling) => sibling != this); }
+  hasSiblings(): boolean { return (this.parent?.children || []).length > 1; }
 
-  getTag() { return this.tag; }
-  setTag(value: string) { this.tag = value; }
+  getTag(): string { return this.tag; }
+  setTag(value: string): void { this.tag = value; }
   hasTag(): boolean { return this.tag !== ""; }
   
-  getCloser() { return this.closer; }
-  setCloser(value: string | null | undefined) {
+  getCloser(): string | undefined { return this.closer; }
+  setCloser(value: string | null | undefined): void {
     if (typeof value === "string") {
       this.closer = value;
     } else {
@@ -506,15 +508,15 @@ export class Dom implements DomImpl {
     }
     return result;
   }
-  setContent(value: string) { this.content = value; }
+  setContent(value: string): void { this.content = value; }
   hasContent(): boolean { return this.content !== ""; }
 
   getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
-  setAttribute(key: string, value: string | null | undefined) { this.attributes[key] = value; }
-  hasAttribute(key: string) { return typeof this.attributes[key] !== "undefined"; }
+  setAttribute(key: string, value: string | null | undefined): void { this.attributes[key] = value; }
+  hasAttribute(key: string): boolean { return typeof this.attributes[key] !== "undefined"; }
 
   getAttributes(): DomAttrs { return this.attributes; }
-  setAttributes(attrs: DomAttrs) { Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k])); };
+  setAttributes(attrs: DomAttrs): void { Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k])); };
   hasAttributes(attrs: DomAttrs): boolean {
     for (const k of Object.keys(attrs)) {
       if (this.getAttribute(k) !== attrs[k]) {
@@ -524,39 +526,51 @@ export class Dom implements DomImpl {
     return true;
   }
 
-  getRoot(this: Dom) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: Dom = this;
-    while(root.parent) {
-      root = root.parent;
+  getRoot(this: Dom): Dom | undefined {
+    if (this.type === "root") {
+      return this;
     }
-    return root;
+
+    let parent = this.parent;
+    
+    while(parent) {
+      if (parent.type === "root") {
+        return parent;
+      }
+
+      parent = parent.parent;
+    }
   }
 
-  getDepth(this: Dom) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let el: Dom = this,
-        depth = 0;
-    while(el.parent) {
-      el = el.parent;
-      depth++;
+  getDepth(this: Dom): number {
+    if (!this.parent) {
+      return 0;
     }
+
+    let parent: Dom | undefined = this.parent;
+    let depth = 0;
+
+    while(parent) {
+      depth++;
+      parent = parent.parent;
+    }
+
     return depth;
   }
 
-  append(...args: (string | DomImpl | Dom)[]) {
+  append(...args: (string | DomImpl | Dom)[]): void {
     const newChildren = this.createChildren(args);
     for (const el of newChildren) {
       this.children.push(el);
     }
   }
 
-  prepend(...args: (string | DomImpl | Dom)[]) {
+  prepend(...args: (string | DomImpl | Dom)[]): void {
     const newChildren = this.createChildren(args);
     this.children.splice(0, 0, ...newChildren);
   }
 
-  before(...args: (string | DomImpl | Dom)[]) {
+  before(...args: (string | DomImpl | Dom)[]): void {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
@@ -570,7 +584,7 @@ export class Dom implements DomImpl {
     this.parent.children.splice(index, 0, ...newSiblings);
   }
 
-  after(...args: (string | DomImpl | Dom)[]) {
+  after(...args: (string | DomImpl | Dom)[]): void {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
@@ -644,7 +658,7 @@ export class Dom implements DomImpl {
 
   filter(
     callback: (child: Dom, index: number, depth: number) => any
-  ) {
+  ): Dom[] {
     const result: Dom[] = [];
 
     let index = 0;
@@ -672,7 +686,7 @@ export class Dom implements DomImpl {
       index: number,
       depth: number,
     ) => T
-  ) {
+  ): T[] {
     const result: T[] = [];
     let index = 0;
 
@@ -699,7 +713,7 @@ export class Dom implements DomImpl {
       depth: number,
     ) => T,
     initialValue: T
-  ) {
+  ): T {
     let result = initialValue,
         index = 0;
 
@@ -718,15 +732,15 @@ export class Dom implements DomImpl {
     return result;
   }
 
-  remove() {
+  remove(): void {
     this.parent?.removeChild(this);
   }
 
-  removeChild(arg: Dom) {
+  removeChild(arg: Dom): void {
     this.removeChildren(arg);
   }
 
-  removeChildren(...args: Dom[]) {
+  removeChildren(...args: Dom[]): void {
     const set = new Set(args);
 
     this.children = this.children.filter((child) => {
@@ -763,9 +777,9 @@ export class Dom implements DomImpl {
     }
   }
 
-  toArray() {
+  toArray(): Dom[] {
     return [this, ...this.map((child) => child)];
   }
 
-  static parse = parseStr;
+  static parse = parseStr as typeof parseStr;
 }

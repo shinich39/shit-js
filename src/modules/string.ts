@@ -85,7 +85,7 @@ export function toPascalCase(str: string): string {
  * @example
  * const uuid = generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
-export function generateUuid() {
+export function generateUuid(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -97,12 +97,18 @@ export function generateUuid() {
  * const result = generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
  * const result = generateString(); // "a"
  */
-export function generateString(charset: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size: number = 1) {
-  const len = charset.length;
+export function generateString(
+  charset: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-",
+  size: number = 1,
+): string {
   let result = "";
+  
+  const charsetSize = charset.length;
+
   for (let i = 0; i < size; i++) {
-    result += charset.charAt(Math.floor(Math.random() * len));
+    result += charset.charAt(Math.floor(Math.random() * charsetSize));
   }
+
   return result;
 }
 /**
@@ -110,15 +116,17 @@ export function generateString(charset: string = "0123456789ABCDEFGHIJKLMNOPQRST
  * const encrypted = generateXor("text", "this is salt!");
  * const decrypted = generateXor(encrypted, "this is salt!"); // "text"
  */
-export function generateXor(str: string, salt: string) {
-  const l = salt.length;
-  if (l === 0) {
+export function generateXor(str: string, salt: string): string {
+  const saltSize = salt.length;
+
+  if (saltSize === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
   }
 
   let result = "";
+
   for (let i = 0; i < str.length; i++) {
-    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % saltSize));
   }
 
   return result;
@@ -127,14 +135,14 @@ export function generateXor(str: string, salt: string) {
  * @example
  * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
  */
-export function getInts(str: string) {
+export function getInts(str: string): number[] {
   return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
 }
 /**
  * @example
  * const result = getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
  */
-export function getFloats(str: string) {
+export function getFloats(str: string): number[] {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
 /**
@@ -144,7 +152,7 @@ export function getFloats(str: string) {
  * @example
  * const result = toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
  */
-export function toHalfWidthString(str: string) {
+export function toHalfWidthString(str: string): string {
   return str
     .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
     .replace(/[^\S\r\n]/g, " ");
@@ -153,7 +161,7 @@ export function toHalfWidthString(str: string) {
  * @example
  * const result = toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
  */
-export function toFullWidthString(str: string) {
+export function toFullWidthString(str: string): string {
   return str
     .replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0xFEE0))
     .replace(/ /g, "　");
@@ -162,13 +170,16 @@ export function toFullWidthString(str: string) {
  * @example
  * const result = toRegExp("/abc/gi"); // /abc/gi
  */
-export function toRegExp(str: string) {
+export function toRegExp(str: string): RegExp {
   const parts = str.split("/");
+
   if (parts.length < 3) {
     throw new Error(`Invalid argument: ${str}`);
   }
+
   const flags = parts.pop();
   const pattern = parts.slice(1).join("/");
+
   return new RegExp(pattern, flags);
 }
 /**
@@ -183,7 +194,7 @@ export function toRegExp(str: string) {
  * @example
  * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export function getDiffs(from: string, to: string) {
+export function getDiffs(from: string, to: string): [number, string][] {
   const backtrack = function(
     from: string,
     to: string,
@@ -316,7 +327,17 @@ export function getDiffs(from: string, to: string) {
  * //   deletions: 36
  * // }
  */
-export function matchStrings(from: string, to: string) {
+export function matchStrings(from: string, to: string): {
+  matchRate: number,
+  similarity: number,
+  diceSimilarity: number,
+  jaccardSimilarity: number,
+  distance: number,
+  normalizedDistance: number,
+  matches: number,
+  insertions: number,
+  deletions: number,
+} {
   const diff = getDiffs(from, to);
   
   let matches = 0;
@@ -376,8 +397,9 @@ export function matchStrings(from: string, to: string) {
  * const bytes = getStringSize("abc"); // 3
  * const bytes = getStringSize("ㄱㄴㄷ"); // 9
  */
-export function getStringSize(str: string) {
+export function getStringSize(str: string): number {
   let result = 0;
+
   for (let i = 0; i < str.length; i++) {
     const code = str.charCodeAt(i);
     if (code <= 0x7f) {
@@ -394,5 +416,6 @@ export function getStringSize(str: string) {
       result += 4;
     }
   }
+  
   return result;
 }

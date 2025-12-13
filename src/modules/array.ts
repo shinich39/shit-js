@@ -2,7 +2,7 @@
  * @example
  * const result = getMaxValue([1,2,3]); // 3
  */
-export function getMaxValue(arr: number[]) {
+export function getMaxValue(arr: number[]): number {
   return arr.reduce((acc, cur) => {
     return acc > cur ? acc : cur;
   }, Number.MIN_SAFE_INTEGER);
@@ -11,7 +11,7 @@ export function getMaxValue(arr: number[]) {
  * @example
  * const result = getMinValue([1,2,3]); // 1
  */
-export function getMinValue(arr: number[]) {
+export function getMinValue(arr: number[]): number {
   return arr.reduce((acc, cur) => {
     return acc < cur ? acc : cur;
   }, Number.MAX_SAFE_INTEGER);
@@ -20,31 +20,29 @@ export function getMinValue(arr: number[]) {
  * @example
  * const result = getSumValue([1,2,3]); // 6
  */
-export function getSumValue(arr: number[]) {
+export function getSumValue(arr: number[]): number {
   return arr.reduce((acc, cur) => acc + cur, 0);
 }
 /**
  * @example
  * const result = getMeanValue([1,2,3]); // 2
  */
-export function getMeanValue(arr: number[]) {
+export function getMeanValue(arr: number[]): number {
   return arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
 }
 /**
  * @example
  * const result = getModeValueWithCount(["a", "a", "b"]); // { count: 2, value: "a" }
  */
-export function getModeValueWithCount<T>(arr: T[]) {
-  if (arr.length === 0) {
-    return;
-  }
-
+export function getModeValueWithCount<T>(arr: T[]): { count: number, value: T | undefined } {
   const seen = new Map<T, number>();
 
-  let maxValue, maxCount = 0;
+  let maxValue;
+  let maxCount = 0;
 
   for (const v of arr) {
     const c = (seen.get(v) || 0) + 1;
+
     seen.set(v, c);
 
     if (maxCount < c) {
@@ -59,22 +57,22 @@ export function getModeValueWithCount<T>(arr: T[]) {
  * @example
  * const result = getModeCount(["a", "a", "b"]); // 2
  */
-export function getModeCount<T>(arr: T[]) {
-  return getModeValueWithCount(arr)?.count || 0;
+export function getModeCount<T>(arr: T[]): number {
+  return getModeValueWithCount(arr).count;
 }
 /**
  * @example
  * const result = getModeValue(["a", "a", "b"]); // "a"
  */
-export function getModeValue<T>(arr: T[]) {
-  return getModeValueWithCount(arr)?.value;
+export function getModeValue<T>(arr: T[]): T | undefined {
+  return getModeValueWithCount(arr).value;
 }
 /**
  * @example
  * const result = getCombinations([1, 2]);
  * // [[1], [2], [1, 2]]
  */
-export function getCombinations<T>(arr: T[]) {
+export function getCombinations<T>(arr: T[]): T[][] {
   const result: T[][] = [];
   const n = arr.length;
   for (let i = 1; i < (1 << n); i++) {
@@ -142,7 +140,7 @@ export function getCases<T>(...args: T[][]): T[][] {
  * const result = shuffleArray([1, 2, 3]);
  * // [2, 1, 3]
  */
-export function shuffleArray<T>(arr: T[]) {
+export function shuffleArray<T>(arr: T[]): T[] {
   let i = arr.length;
 
   while (i > 0) {
@@ -162,7 +160,7 @@ export function shuffleArray<T>(arr: T[]) {
  */
 export function uniqueBy<T>(
   arr: T[],
-  func: (item: T, index: number, array: T[]) => any
+  func: (item: T, index: number, array: T[]) => any,
 ): T[] {
   const map = new Map();
 
@@ -184,16 +182,19 @@ export function uniqueBy<T>(
 export function groupBy<T>(
   arr: T[],
   func: (item: T, index: number, array: T[]) => string
-) {
-  const group: Record<string, T[]> = {};
+): Record<string, T[]> {
+  const result: Record<string, T[]> = {};
+
   for (let i = 0; i < arr.length; i++) {
-    const item = arr[i],
-      key = func(item, i, arr);
-    if (!group[key]) {
-      group[key] = [item];
+    const item = arr[i];
+    const key = func(item, i, arr);
+
+    if (!result[key]) {
+      result[key] = [item];
     } else {
-      group[key].push(item);
+      result[key].push(item);
     }
   }
-  return group;
+
+  return result;
 }

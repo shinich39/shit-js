@@ -16,11 +16,9 @@ function getMeanValue(arr) {
   return arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
 }
 function getModeValueWithCount(arr) {
-  if (arr.length === 0) {
-    return;
-  }
   const seen = /* @__PURE__ */ new Map();
-  let maxValue, maxCount = 0;
+  let maxValue;
+  let maxCount = 0;
   for (const v of arr) {
     const c = (seen.get(v) || 0) + 1;
     seen.set(v, c);
@@ -32,10 +30,10 @@ function getModeValueWithCount(arr) {
   return { count: maxCount, value: maxValue };
 }
 function getModeCount(arr) {
-  return getModeValueWithCount(arr)?.count || 0;
+  return getModeValueWithCount(arr).count;
 }
 function getModeValue(arr) {
-  return getModeValueWithCount(arr)?.value;
+  return getModeValueWithCount(arr).value;
 }
 function getCombinations(arr) {
   const result = [];
@@ -99,94 +97,18 @@ function uniqueBy(arr, func) {
   return Array.from(map.values());
 }
 function groupBy(arr, func) {
-  const group = {};
+  const result = {};
   for (let i = 0; i < arr.length; i++) {
-    const item = arr[i], key = func(item, i, arr);
-    if (!group[key]) {
-      group[key] = [item];
+    const item = arr[i];
+    const key = func(item, i, arr);
+    if (!result[key]) {
+      result[key] = [item];
     } else {
-      group[key].push(item);
+      result[key].push(item);
     }
   }
-  return group;
+  return result;
 }
-
-// src/modules/promise.ts
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function retry(func, count, delay) {
-  return async function wrapped(...args) {
-    let error;
-    for (let i = 1; i <= count; i++) {
-      try {
-        return await func(...args);
-      } catch (err) {
-        error = err;
-        if (i < count) {
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      }
-    }
-    throw error;
-  };
-}
-var QueueWorker = class {
-  constructor() {
-    this.inProgress = false;
-    this.queue = [];
-  }
-  /**
-   * @example
-   * worker.add(() => console.log(`Task 0`));
-   * worker.add(async () => { await fetch(`/api/data`); })
-   */
-  add(func) {
-    this.queue.push(func);
-  }
-  /**
-   * @example
-   * const isFirst = !worker.inProgress;
-   * await worker.start();
-   * if (isFirst) {
-   *   // Write code here to running after end of task.
-   * }
-   */
-  async start() {
-    if (this.inProgress) {
-      return;
-    }
-    this.inProgress = true;
-    while (this.inProgress) {
-      const queue = this.queue.shift();
-      if (!queue) {
-        break;
-      }
-      await queue();
-    }
-    this.inProgress = false;
-  }
-  /**
-   * worker.inProgress = false;
-   */
-  pause() {
-    this.inProgress = false;
-  }
-  /**
-   * worker.queue = [];
-   */
-  clear() {
-    this.queue = [];
-  }
-  /**
-   * worker.queue = [];
-   * worker.inProgress = false;
-   */
-  stop() {
-    this.clear();
-    this.pause();
-  }
-};
 
 // src/modules/bit.ts
 function checkBit(a, b) {
@@ -334,7 +256,7 @@ function splitTags(str) {
           } else if (buffer === "<!--") {
             tail = "-->";
           } else if (buffer === "<script") {
-            tail = "<\/script>";
+            tail = "</script>";
           } else if (buffer === "<style") {
             tail = "</style>";
           }
@@ -468,7 +390,7 @@ function parseStr(str) {
       });
       continue;
     }
-    const isScript = part.startsWith("<script") && part.endsWith("<\/script>");
+    const isScript = part.startsWith("<script") && part.endsWith("</script>");
     if (isScript) {
       const { endIndex, attributes: attributes2 } = parseTag(part);
       const content = part.substring(endIndex, part.length - 9);
@@ -558,6 +480,13 @@ function stringifyAttrs(attrs) {
 }
 var parseDom = (src, parent) => new Dom(src, parent);
 var Dom = class _Dom {
+  parent;
+  type;
+  tag;
+  closer;
+  content;
+  attributes;
+  children;
   constructor(src, parent) {
     this.type = "root";
     this.tag = "";
@@ -713,17 +642,26 @@ var Dom = class _Dom {
     return true;
   }
   getRoot() {
-    let root = this;
-    while (root.parent) {
-      root = root.parent;
+    if (this.type === "root") {
+      return this;
     }
-    return root;
+    let parent = this.parent;
+    while (parent) {
+      if (parent.type === "root") {
+        return parent;
+      }
+      parent = parent.parent;
+    }
   }
   getDepth() {
-    let el = this, depth = 0;
-    while (el.parent) {
-      el = el.parent;
+    if (!this.parent) {
+      return 0;
+    }
+    let parent = this.parent;
+    let depth = 0;
+    while (parent) {
       depth++;
+      parent = parent.parent;
     }
     return depth;
   }
@@ -881,7 +819,7 @@ var Dom = class _Dom {
     const attrs = stringifyAttrs(this.attributes);
     switch (type) {
       case "script":
-        return `<script${attrs}>${this.getContent()}<\/script>`;
+        return `<script${attrs}>${this.getContent()}</script>`;
       case "style":
         return `<style${attrs}>${this.getContent()}</style>`;
       case "tag":
@@ -891,9 +829,7 @@ var Dom = class _Dom {
   toArray() {
     return [this, ...this.map((child) => child)];
   }
-  static {
-    this.parse = parseStr;
-  }
+  static parse = parseStr;
 };
 
 // src/modules/lzw.ts
@@ -1253,6 +1189,85 @@ function getRootPath(...args) {
   return resolved.join("/");
 }
 
+// src/modules/promise.ts
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+function retry(func, count, delay) {
+  return async function wrapped(...args) {
+    let error;
+    for (let i = 1; i <= count; i++) {
+      try {
+        return await func(...args);
+      } catch (err) {
+        error = err;
+        if (i < count) {
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+    throw error;
+  };
+}
+var QueueWorker = class {
+  inProgress;
+  queue;
+  constructor() {
+    this.inProgress = false;
+    this.queue = [];
+  }
+  /**
+   * @example
+   * worker.add(() => console.log(`Task 0`));
+   * worker.add(async () => { await fetch(`/api/data`); })
+   */
+  add(func) {
+    this.queue.push(func);
+  }
+  /**
+   * @example
+   * const isFirst = !worker.inProgress;
+   * await worker.start();
+   * if (isFirst) {
+   *   // Write code here to running after end of task.
+   * }
+   */
+  async start() {
+    if (this.inProgress) {
+      return;
+    }
+    this.inProgress = true;
+    while (this.inProgress) {
+      const queue = this.queue.shift();
+      if (!queue) {
+        break;
+      }
+      await queue();
+    }
+    this.inProgress = false;
+  }
+  /**
+   * worker.inProgress = false;
+   */
+  pause() {
+    this.inProgress = false;
+  }
+  /**
+   * worker.queue = [];
+   */
+  clear() {
+    this.queue = [];
+  }
+  /**
+   * worker.queue = [];
+   * worker.inProgress = false;
+   */
+  stop() {
+    this.clear();
+    this.pause();
+  }
+};
+
 // src/modules/string.ts
 var Brackets = {
   "(": ")",
@@ -1313,21 +1328,21 @@ function generateUuid() {
   });
 }
 function generateString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
-  const len = charset.length;
   let result = "";
+  const charsetSize = charset.length;
   for (let i = 0; i < size; i++) {
-    result += charset.charAt(Math.floor(Math.random() * len));
+    result += charset.charAt(Math.floor(Math.random() * charsetSize));
   }
   return result;
 }
 function generateXor(str, salt) {
-  const l = salt.length;
-  if (l === 0) {
+  const saltSize = salt.length;
+  if (saltSize === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
   }
   let result = "";
   for (let i = 0; i < str.length; i++) {
-    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % l));
+    result += String.fromCharCode(str.charCodeAt(i) ^ salt.charCodeAt(i % saltSize));
   }
   return result;
 }
