@@ -7,9 +7,9 @@ export declare function sleep(ms: number): Promise<void>;
  * @example
  * const func = await (arg: any) => arg;
  * const wrappedFunc = retry(func, 10, 1000);
- * const result = await wrappedFunc(1); // 1
+ * const result = await wrappedFn(1); // 1
  */
-export declare function retry<T extends (...args: any[]) => any>(func: T, count: number, delay: number): (...args: Parameters<T>) => Promise<ReturnType<T>>;
+export declare function retry<T extends (...args: any[]) => any>(fn: T, count: number, delay: number): (...args: Parameters<T>) => Promise<ReturnType<T>>;
 /**
  * @example
  * const worker = new QueueWorker();

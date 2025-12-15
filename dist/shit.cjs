@@ -178,21 +178,21 @@ function shuffleArray(arr) {
   }
   return arr;
 }
-function uniqueBy(arr, func) {
+function uniqueBy(arr, fn) {
   const map = /* @__PURE__ */ new Map();
   for (let i = 0; i < arr.length; i++) {
-    const key = func(arr[i], i, arr);
+    const key = fn(arr[i], i, arr);
     if (!map.has(key)) {
       map.set(key, arr[i]);
     }
   }
   return Array.from(map.values());
 }
-function groupBy(arr, func) {
+function groupBy(arr, fn) {
   const result = {};
   for (let i = 0; i < arr.length; i++) {
     const item = arr[i];
-    const key = func(item, i, arr);
+    const key = fn(item, i, arr);
     if (!result[key]) {
       result[key] = [item];
     } else {
@@ -653,8 +653,36 @@ var Dom = class _Dom {
   hasParent() {
     return !!this.parent;
   }
+  /**
+   * Get all parent elements from target to root
+   */
+  getParents() {
+    const result = [];
+    const fn = function(child) {
+      if (!child.parent) {
+        return;
+      }
+      result.push(child.parent);
+      fn(child.parent);
+    };
+    fn(this);
+    return result;
+  }
+  /**
+   * Get all children regardless of depth
+   */
   getChildren() {
-    return this.children;
+    const result = [];
+    const fn = function(parent) {
+      for (const child of parent.children) {
+        result.push(child);
+        if (child.type === "tag") {
+          fn(child);
+        }
+      }
+    };
+    fn(this);
+    return result;
   }
   hasChildren() {
     return this.children.length > 1;
@@ -690,25 +718,25 @@ var Dom = class _Dom {
   getContent() {
     return this.content || "";
   }
-  getContents() {
-    const result = [];
-    for (const child of this.children) {
-      switch (child.type) {
-        case "text":
-          result.push(child.content || "");
-          break;
-        case "tag":
-          result.push(...child.getContents());
-          break;
-      }
-    }
-    return result;
-  }
   setContent(value) {
     this.content = value;
   }
   hasContent() {
     return this.content !== "";
+  }
+  getContents() {
+    const result = [];
+    for (const child of this.children) {
+      if (child.type === "text") {
+        result.push(child.content || "");
+        continue;
+      }
+      if (child.type === "tag") {
+        result.push(...child.getContents());
+        continue;
+      }
+    }
+    return result;
   }
   getAttribute(key) {
     return this.attributes[key];
@@ -734,28 +762,12 @@ var Dom = class _Dom {
     return true;
   }
   getRoot() {
-    if (this.type === "root") {
-      return this;
-    }
-    let parent = this.parent;
-    while (parent) {
-      if (parent.type === "root") {
-        return parent;
-      }
-      parent = parent.parent;
-    }
+    const parents = this.getParents();
+    const root = parents.pop();
+    return root && root.type === "root" ? root : void 0;
   }
   getDepth() {
-    if (!this.parent) {
-      return 0;
-    }
-    let parent = this.parent;
-    let depth = 0;
-    while (parent) {
-      depth++;
-      parent = parent.parent;
-    }
-    return depth;
+    return this.getParents().length;
   }
   append(...args) {
     const newChildren = this.createChildren(args);
@@ -790,93 +802,25 @@ var Dom = class _Dom {
     this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
   forEach(callback) {
-    let index = 0;
-    const func = function(parent, depth) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        callback(child, index++, depth);
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(this, 1);
+    this.getChildren().forEach(callback);
   }
   find(callback) {
-    let index = 0;
-    const func = function(parent, depth) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        if (callback(child, index++, depth)) {
-          return child;
-        }
-        if (child.type === "tag") {
-          const grandchild = func(child, depth + 1);
-          if (grandchild) {
-            return grandchild;
-          }
-        }
-      }
-    };
-    return func(this, 1);
+    return this.getChildren().find(callback);
   }
   findLast(callback) {
-    let index = 0;
-    const func = function(child, depth) {
-      if (child.parent) {
-        if (callback(child.parent, index++, depth)) {
-          return child.parent;
-        }
-        func(child.parent, depth + 1);
-      }
-    };
-    return func(this, 1);
+    return this.getParents().find(callback);
   }
   filter(callback) {
-    const result = [];
-    let index = 0;
-    const func = function(parent, depth) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        if (callback(child, index++, depth)) {
-          result.push(child);
-        }
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(this, 1);
-    return result;
+    return this.getChildren().filter(callback);
   }
   map(callback) {
-    const result = [];
-    let index = 0;
-    const func = function(parent, depth) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        result.push(callback(child, index++, depth));
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(this, 1);
-    return result;
+    return this.children.map(callback);
   }
   reduce(callback, initialValue) {
-    let result = initialValue, index = 0;
-    const func = function(parent, depth) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        result = callback(result, child, index++, depth);
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-    func(this, 1);
-    return result;
+    return this.children.reduce(callback, initialValue);
+  }
+  reduceRight(callback, initialValue) {
+    return this.children.reduceRight(callback, initialValue);
   }
   remove() {
     this.parent?.removeChild(this);
@@ -895,31 +839,37 @@ var Dom = class _Dom {
       }
     });
   }
+  /**
+   * Get html string
+   */
   toString() {
     const { type, tag, closer, children } = this;
-    switch (type) {
-      case "root":
-        return children.map((child) => child.toString()).join("");
-      case "comment":
-        return `<!--${this.getContent()}-->`;
-      case "text":
-        return this.getContent();
+    if (type === "root") {
+      return children.map((child) => child.toString()).join("");
     }
-    if (!tag) {
-      throw new Error("DOMElem must have a value of tag attribute");
+    if (type === "comment") {
+      return `<!--${this.getContent()}-->`;
+    }
+    if (type === "text") {
+      return this.getContent();
     }
     const attrs = stringifyAttrs(this.attributes);
-    switch (type) {
-      case "script":
-        return `<script${attrs}>${this.getContent()}</script>`;
-      case "style":
-        return `<style${attrs}>${this.getContent()}</style>`;
-      case "tag":
-        return this.hasCloser() ? `<${tag}${attrs}${closer}>` : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
+    if (type === "script") {
+      return `<script${attrs}>${this.getContent()}</script>`;
     }
+    if (type === "style") {
+      return `<style${attrs}>${this.getContent()}</style>`;
+    }
+    if (!tag) {
+      throw new Error("This element must have a value of tag attribute");
+    }
+    return this.hasCloser() ? `<${tag}${attrs}${closer}>` : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
   }
+  /**
+   * Get children array contains this element
+   */
   toArray() {
-    return [this, ...this.map((child) => child)];
+    return [this, ...this.getChildren()];
   }
   static parse = parseStr;
 };
@@ -1095,7 +1045,7 @@ function getObjectValue(obj, key) {
   return cur;
 }
 function matchObject(obj, query) {
-  const func = function(a, b, seen = /* @__PURE__ */ new WeakMap()) {
+  const fn = function(a, b, seen = /* @__PURE__ */ new WeakMap()) {
     if (Object.is(a, b)) {
       return true;
     }
@@ -1119,7 +1069,7 @@ function matchObject(obj, query) {
       for (const j of b) {
         let isExists = false;
         for (const i of a) {
-          if (func(i, j, seen)) {
+          if (fn(i, j, seen)) {
             isExists = true;
             break;
           }
@@ -1140,14 +1090,14 @@ function matchObject(obj, query) {
       if (!(a instanceof Set) || a.size < b.size) {
         return false;
       }
-      return func(Array.from(a), Array.from(b), seen);
+      return fn(Array.from(a), Array.from(b), seen);
     }
     if (b instanceof Map) {
       if (!(a instanceof Map) || a.size < b.size) {
         return false;
       }
       for (const [key, value] of b) {
-        if (!a.has(key) || !func(a.get(key), value, seen)) {
+        if (!a.has(key) || !fn(a.get(key), value, seen)) {
           return false;
         }
       }
@@ -1162,13 +1112,13 @@ function matchObject(obj, query) {
       return false;
     }
     for (const key of keysB) {
-      if (keysA.indexOf(key) === -1 || !func(a[key], b[key], seen)) {
+      if (keysA.indexOf(key) === -1 || !fn(a[key], b[key], seen)) {
         return false;
       }
     }
     return true;
   };
-  return func(obj, query);
+  return fn(obj, query);
 }
 
 // src/modules/path.ts
@@ -1285,12 +1235,12 @@ function getRootPath(...args) {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-function retry(func, count, delay) {
+function retry(fn, count, delay) {
   return async function wrapped(...args) {
     let error;
     for (let i = 1; i <= count; i++) {
       try {
-        return await func(...args);
+        return await fn(...args);
       } catch (err) {
         error = err;
         if (i < count) {

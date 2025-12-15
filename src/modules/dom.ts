@@ -477,7 +477,46 @@ export class Dom implements DomImpl {
   getParent(): Dom | undefined { return this.parent; }
   hasParent(): boolean { return !!this.parent; }
 
-  getChildren(): Dom[] { return this.children; }
+  /**
+   * Get all parent elements from target to root
+   */
+  getParents(): Dom[] {
+    const result: Dom[] = [];
+    
+    const fn = function (child: Dom) {
+      if (!child.parent) {
+        return;
+      }
+
+      result.push(child.parent);
+
+      fn(child.parent);
+    };
+
+    fn(this);
+
+    return result;
+  }
+
+  /**
+   * Get all children regardless of depth
+   */
+  getChildren(): Dom[] {
+    const result: Dom[] = [];
+
+    const fn = function (parent: Dom) {
+      for (const child of parent.children) {
+        result.push(child);
+        if (child.type === "tag") {
+          fn(child);
+        }
+      }
+    };
+
+    fn(this);
+
+    return result;
+  }
   hasChildren(): boolean { return this.children.length > 1; }
 
   getSiblings(): Dom[] { return (this.parent?.children || []).filter((sibling) => sibling != this); }
@@ -498,18 +537,26 @@ export class Dom implements DomImpl {
   hasCloser(): boolean { return typeof this.closer === "string"; }
 
   getContent(): string { return this.content || ""; }
-  getContents(): string[] {
-    const result: string[] = [];
-    for (const child of this.children) {
-      switch(child.type) {
-        case "text": result.push(child.content || ""); break;
-        case "tag": result.push(...child.getContents()); break;
-      }
-    }
-    return result;
-  }
   setContent(value: string): void { this.content = value; }
   hasContent(): boolean { return this.content !== ""; }
+
+  getContents(): string[] {
+    const result: string[] = [];
+
+    for (const child of this.children) {
+      if (child.type === "text") {
+        result.push(child.content || "");
+        continue;
+      }
+      
+      if (child.type === "tag") {
+        result.push(...child.getContents());
+        continue;
+      }
+    }
+    
+    return result;
+  }
 
   getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
   setAttribute(key: string, value: string | null | undefined): void { this.attributes[key] = value; }
@@ -527,35 +574,15 @@ export class Dom implements DomImpl {
   }
 
   getRoot(this: Dom): Dom | undefined {
-    if (this.type === "root") {
-      return this;
-    }
-
-    let parent = this.parent;
-    
-    while(parent) {
-      if (parent.type === "root") {
-        return parent;
-      }
-
-      parent = parent.parent;
-    }
+    const parents = this.getParents();
+    const root = parents.pop();
+    return root && root.type === "root"
+      ? root 
+      : undefined;
   }
 
   getDepth(this: Dom): number {
-    if (!this.parent) {
-      return 0;
-    }
-
-    let parent: Dom | undefined = this.parent;
-    let depth = 0;
-
-    while(parent) {
-      depth++;
-      parent = parent.parent;
-    }
-
-    return depth;
+    return this.getParents().length;
   }
 
   append(...args: (string | DomImpl | Dom)[]): void {
@@ -599,137 +626,61 @@ export class Dom implements DomImpl {
   }
 
   forEach(
-    callback: (child: Dom, index: number, depth: number) => void
+    callback: (child: Dom, index: number, children: Dom[]) => void
   ): void {
-    let index = 0;
-
-    const func = function (parent: Dom, depth: number) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        callback(child, index++, depth);
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-
-    func(this, 1);
+    this.getChildren().forEach(callback);
   }
 
   find(
-    callback: (child: Dom, index: number, depth: number) => any
+    callback: (child: Dom, index: number, children: Dom[]) => any
   ): Dom | undefined {
-    let index = 0;
-
-    const func = function (parent: Dom, depth: number): Dom | undefined {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        if (callback(child, index++, depth)) {
-          return child;
-        }
-        if (child.type === "tag") {
-          const grandchild = func(child, depth + 1);
-          if (grandchild) {
-            return grandchild;
-          }
-        }
-      }
-    };
-
-    return func(this, 1);
+    return this.getChildren().find(callback);
   }
 
   findLast(
-    callback: (parent: Dom, index: number, depth: number) => any
+    callback: (parent: Dom, index: number, parents: Dom[]) => any
   ): Dom | undefined {
-    let index = 0;
-
-    const func = function (child: Dom, depth: number): Dom | undefined {
-      if (child.parent) {
-        if (callback(child.parent, index++, depth)) {
-          return child.parent;
-        }
-        func(child.parent, depth + 1);
-      }
-    };
-
-    return func(this, 1);
+    return this.getParents().find(callback);
   }
 
   filter(
-    callback: (child: Dom, index: number, depth: number) => any
+    callback: (child: Dom, index: number, children: Dom[]) => any
   ): Dom[] {
-    const result: Dom[] = [];
-
-    let index = 0;
-
-    const func = function (parent: Dom, depth: number) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        if (callback(child, index++, depth)) {
-          result.push(child);
-        }
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-
-    func(this, 1);
-
-    return result;
+    return this.getChildren().filter(callback);
   }
 
   map<T>(
     callback: (
       child: Dom,
       index: number,
-      depth: number,
+      children: Dom[],
     ) => T
   ): T[] {
-    const result: T[] = [];
-    let index = 0;
-
-    const func = function (parent: Dom, depth: number) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        result.push(callback(child, index++, depth));
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-
-    func(this, 1);
-
-    return result;
+    return this.children.map<T>(callback);
   }
 
   reduce<T>(
     callback: (
-      accumulator: T,
-      child: Dom,
-      index: number,
-      depth: number,
+      previousValue: T,
+      currentValue: Dom,
+      currentIndex: number,
+      array: Dom[],
     ) => T,
     initialValue: T
   ): T {
-    let result = initialValue,
-        index = 0;
+    return this.children.reduce<T>(callback, initialValue);
+  }
 
-    const func = function (parent: Dom, depth: number) {
-      for (let i = 0; i < parent.children.length; i++) {
-        const child = parent.children[i];
-        result = callback(result, child, index++, depth);
-        if (child.type === "tag") {
-          func(child, depth + 1);
-        }
-      }
-    };
-
-    func(this, 1);
-
-    return result;
+  reduceRight<T>(
+    callback: (
+      previousValue: T,
+      currentValue: Dom,
+      currentIndex: number,
+      array: Dom[],
+    ) => T,
+    initialValue: T
+  ): T {
+    return this.children.reduceRight<T>(callback, initialValue);
   }
 
   remove(): void {
@@ -753,32 +704,49 @@ export class Dom implements DomImpl {
     });
   }
 
+  /**
+   * Get html string
+   */
   toString(): string {
     const { type, tag, closer, children } = this;
 
-    switch(type) {
-      case "root": return children.map((child) => child.toString()).join("");
-      case "comment": return `<!--${this.getContent()}-->`;
-      case "text": return this.getContent();
+    if (type === "root") {
+      return children.map((child) => child.toString()).join("");
     }
 
-    if (!tag) {
-      throw new Error("DOMElem must have a value of tag attribute");
+    if (type === "comment") {
+      return `<!--${this.getContent()}-->`;
+    }
+
+    if (type === "text") {
+      return this.getContent();
     }
 
     const attrs = stringifyAttrs(this.attributes);
 
-    switch(type) {
-      case "script": return `<script${attrs}>${this.getContent()}</script>`;
-      case "style": return `<style${attrs}>${this.getContent()}</style>`;
-      case "tag": return this.hasCloser()
-        ? `<${tag}${attrs}${closer}>`
-        : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
+    if (type === "script") {
+      return `<script${attrs}>${this.getContent()}</script>`;
     }
+
+    if (type === "style") {
+      return `<style${attrs}>${this.getContent()}</style>`;
+    }
+
+    if (!tag) {
+      throw new Error("This element must have a value of tag attribute");
+    }
+
+    // type === tag
+    return this.hasCloser()
+      ? `<${tag}${attrs}${closer}>`
+      : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
   }
 
+  /**
+   * Get children array contains this element
+   */
   toArray(): Dom[] {
-    return [this, ...this.map((child) => child)];
+    return [this, ...this.getChildren()];
   }
 
   static parse = parseStr as typeof parseStr;

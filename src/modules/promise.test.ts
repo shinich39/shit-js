@@ -10,11 +10,11 @@ test("sleep", async () => {
 });
 
 test("retry", async () => {
-  const func = retry(async () => {
+  const fn = retry(async () => {
     throw new Error("An error occurred");
   }, 3, 256);
 
-  rejects(() => func());
+  rejects(() => fn());
 });
 
 test("QueueWorker", async () => {

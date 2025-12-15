@@ -33,6 +33,13 @@ export declare class Dom implements DomImpl {
     isTag(): boolean;
     getParent(): Dom | undefined;
     hasParent(): boolean;
+    /**
+     * Get all parent elements from target to root
+     */
+    getParents(): Dom[];
+    /**
+     * Get all children regardless of depth
+     */
     getChildren(): Dom[];
     hasChildren(): boolean;
     getSiblings(): Dom[];
@@ -44,9 +51,9 @@ export declare class Dom implements DomImpl {
     setCloser(value: string | null | undefined): void;
     hasCloser(): boolean;
     getContent(): string;
-    getContents(): string[];
     setContent(value: string): void;
     hasContent(): boolean;
+    getContents(): string[];
     getAttribute(key: string): string | null | undefined;
     setAttribute(key: string, value: string | null | undefined): void;
     hasAttribute(key: string): boolean;
@@ -59,16 +66,23 @@ export declare class Dom implements DomImpl {
     prepend(...args: (string | DomImpl | Dom)[]): void;
     before(...args: (string | DomImpl | Dom)[]): void;
     after(...args: (string | DomImpl | Dom)[]): void;
-    forEach(callback: (child: Dom, index: number, depth: number) => void): void;
-    find(callback: (child: Dom, index: number, depth: number) => any): Dom | undefined;
-    findLast(callback: (parent: Dom, index: number, depth: number) => any): Dom | undefined;
-    filter(callback: (child: Dom, index: number, depth: number) => any): Dom[];
-    map<T>(callback: (child: Dom, index: number, depth: number) => T): T[];
-    reduce<T>(callback: (accumulator: T, child: Dom, index: number, depth: number) => T, initialValue: T): T;
+    forEach(callback: (child: Dom, index: number, children: Dom[]) => void): void;
+    find(callback: (child: Dom, index: number, children: Dom[]) => any): Dom | undefined;
+    findLast(callback: (parent: Dom, index: number, parents: Dom[]) => any): Dom | undefined;
+    filter(callback: (child: Dom, index: number, children: Dom[]) => any): Dom[];
+    map<T>(callback: (child: Dom, index: number, children: Dom[]) => T): T[];
+    reduce<T>(callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T, initialValue: T): T;
+    reduceRight<T>(callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T, initialValue: T): T;
     remove(): void;
     removeChild(arg: Dom): void;
     removeChildren(...args: Dom[]): void;
+    /**
+     * Get html string
+     */
     toString(): string;
+    /**
+     * Get children array contains this element
+     */
     toArray(): Dom[];
     static parse: typeof parseStr;
 }

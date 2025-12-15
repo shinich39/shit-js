@@ -160,12 +160,12 @@ export function shuffleArray<T>(arr: T[]): T[] {
  */
 export function uniqueBy<T>(
   arr: T[],
-  func: (item: T, index: number, array: T[]) => any,
+  fn: (item: T, index: number, array: T[]) => any,
 ): T[] {
   const map = new Map();
 
   for (let i = 0; i < arr.length; i++) {
-    const key = func(arr[i], i, arr);
+    const key = fn(arr[i], i, arr);
 
     if (!map.has(key)) {
       map.set(key, arr[i]);
@@ -181,13 +181,13 @@ export function uniqueBy<T>(
  */
 export function groupBy<T>(
   arr: T[],
-  func: (item: T, index: number, array: T[]) => string
+  fn: (item: T, index: number, array: T[]) => string
 ): Record<string, T[]> {
   const result: Record<string, T[]> = {};
 
   for (let i = 0; i < arr.length; i++) {
     const item = arr[i];
-    const key = func(item, i, arr);
+    const key = fn(item, i, arr);
 
     if (!result[key]) {
       result[key] = [item];

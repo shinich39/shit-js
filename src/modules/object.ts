@@ -58,7 +58,7 @@ export function getObjectValue(obj: Record<string, any>, key: string): any {
  * ); // true
  */
 export function matchObject(obj: any, query: any): boolean {
-  const func = function(a: any, b: any, seen = new WeakMap()) {
+  const fn = function(a: any, b: any, seen = new WeakMap()) {
     // Same address
     if (Object.is(a, b)) {
       return true;
@@ -93,7 +93,7 @@ export function matchObject(obj: any, query: any): boolean {
       for (const j of b) {
         let isExists = false;
         for (const i of a) {
-          if (func(i, j, seen)) {
+          if (fn(i, j, seen)) {
             isExists = true;
             break;
           }
@@ -117,7 +117,7 @@ export function matchObject(obj: any, query: any): boolean {
       if (!(a instanceof Set) || a.size < b.size) {
         return false;
       }
-      return func(Array.from(a), Array.from(b), seen);
+      return fn(Array.from(a), Array.from(b), seen);
     }
 
     // Include
@@ -126,7 +126,7 @@ export function matchObject(obj: any, query: any): boolean {
         return false;
       }
       for (const [key, value] of b) {
-        if (!a.has(key) || !func(a.get(key), value, seen)) {
+        if (!a.has(key) || !fn(a.get(key), value, seen)) {
           return false;
         }
       }
@@ -146,7 +146,7 @@ export function matchObject(obj: any, query: any): boolean {
     }
 
     for (const key of keysB) {
-      if (keysA.indexOf(key) === -1 || !func(a[key], b[key], seen)) {
+      if (keysA.indexOf(key) === -1 || !fn(a[key], b[key], seen)) {
         return false;
       }
     }
@@ -154,5 +154,5 @@ export function matchObject(obj: any, query: any): boolean {
     return true;
   }
 
-  return func(obj, query);
+  return fn(obj, query);
 }
