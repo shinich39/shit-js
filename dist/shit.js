@@ -1263,8 +1263,8 @@ var shitJs = (() => {
      * worker.add(() => console.log(`Task 0`));
      * worker.add(async () => { await fetch(`/api/data`); })
      */
-    add(func) {
-      this.queue.push(func);
+    add(fn) {
+      this.queue.push(fn);
     }
     /**
      * @example

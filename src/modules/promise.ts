@@ -7,8 +7,8 @@ export function sleep(ms: number): Promise<void> {
 }
 /**
  * @example
- * const func = await (arg: any) => arg;
- * const wrappedFunc = retry(func, 10, 1000);
+ * const fn = await (arg: any) => arg;
+ * const wrappedFn = retry(fn, 10, 1000);
  * const result = await wrappedFn(1); // 1
  */
 export function retry<T extends (...args: any[]) => any>(
@@ -54,8 +54,8 @@ export class QueueWorker {
    * worker.add(() => console.log(`Task 0`));
    * worker.add(async () => { await fetch(`/api/data`); })
    */
-  add(func: () => void | Promise<void>): void {
-    this.queue.push(func);
+  add(fn: () => void | Promise<void>): void {
+    this.queue.push(fn);
   }
   /**
    * @example
