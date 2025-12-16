@@ -80,4 +80,6 @@ export declare function getCoveredSize(srcWidth: number, srcHeight: number, dstW
  * const result = getAdjustedSize(175, 175, 200, 200, 100, 100); // [175, 175]
  */
 export declare function getAdjustedSize(srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number, minWidth: number, minHeight: number): [number, number];
+export declare function getLogScore(total: number, current: number): number;
+export declare function getPowerScore(total: number, current: number, alpha?: number): number;
 //# sourceMappingURL=number.d.ts.map

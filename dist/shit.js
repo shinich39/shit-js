@@ -49,6 +49,7 @@ var shitJs = (() => {
     getInts: () => getInts,
     getLengthFromFloat: () => getLengthFromFloat,
     getLengthFromInt: () => getLengthFromInt,
+    getLogScore: () => getLogScore,
     getLoopedNumber: () => getLoopedNumber,
     getMaxValue: () => getMaxValue,
     getMeanValue: () => getMeanValue,
@@ -57,6 +58,7 @@ var shitJs = (() => {
     getModeValue: () => getModeValue,
     getModeValueWithCount: () => getModeValueWithCount,
     getObjectValue: () => getObjectValue,
+    getPowerScore: () => getPowerScore,
     getRelativePath: () => getRelativePath,
     getRootPath: () => getRootPath,
     getStringSize: () => getStringSize,
@@ -1013,6 +1015,12 @@ var shitJs = (() => {
       w = minHeight * aspectRatio;
     }
     return [w, h];
+  }
+  function getLogScore(total, current) {
+    return Math.log(current + 1) / Math.log(total + 1);
+  }
+  function getPowerScore(total, current, alpha = 0.5) {
+    return Math.pow(current, alpha) / Math.pow(total, alpha);
   }
 
   // src/modules/object.ts

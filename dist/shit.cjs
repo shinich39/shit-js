@@ -48,6 +48,7 @@ __export(shit_exports, {
   getInts: () => getInts,
   getLengthFromFloat: () => getLengthFromFloat,
   getLengthFromInt: () => getLengthFromInt,
+  getLogScore: () => getLogScore,
   getLoopedNumber: () => getLoopedNumber,
   getMaxValue: () => getMaxValue,
   getMeanValue: () => getMeanValue,
@@ -56,6 +57,7 @@ __export(shit_exports, {
   getModeValue: () => getModeValue,
   getModeValueWithCount: () => getModeValueWithCount,
   getObjectValue: () => getObjectValue,
+  getPowerScore: () => getPowerScore,
   getRelativePath: () => getRelativePath,
   getRootPath: () => getRootPath,
   getStringSize: () => getStringSize,
@@ -1014,6 +1016,12 @@ function getAdjustedSize(srcWidth, srcHeight, maxWidth, maxHeight, minWidth, min
   }
   return [w, h];
 }
+function getLogScore(total, current) {
+  return Math.log(current + 1) / Math.log(total + 1);
+}
+function getPowerScore(total, current, alpha = 0.5) {
+  return Math.pow(current, alpha) / Math.pow(total, alpha);
+}
 
 // src/modules/object.ts
 function clone(obj) {
@@ -1621,6 +1629,7 @@ function toError(err) {
   getInts,
   getLengthFromFloat,
   getLengthFromInt,
+  getLogScore,
   getLoopedNumber,
   getMaxValue,
   getMeanValue,
@@ -1629,6 +1638,7 @@ function toError(err) {
   getModeValue,
   getModeValueWithCount,
   getObjectValue,
+  getPowerScore,
   getRelativePath,
   getRootPath,
   getStringSize,

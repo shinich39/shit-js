@@ -922,6 +922,12 @@ function getAdjustedSize(srcWidth, srcHeight, maxWidth, maxHeight, minWidth, min
   }
   return [w, h];
 }
+function getLogScore(total, current) {
+  return Math.log(current + 1) / Math.log(total + 1);
+}
+function getPowerScore(total, current, alpha = 0.5) {
+  return Math.pow(current, alpha) / Math.pow(total, alpha);
+}
 
 // src/modules/object.ts
 function clone(obj) {
@@ -1528,6 +1534,7 @@ export {
   getInts,
   getLengthFromFloat,
   getLengthFromInt,
+  getLogScore,
   getLoopedNumber,
   getMaxValue,
   getMeanValue,
@@ -1536,6 +1543,7 @@ export {
   getModeValue,
   getModeValueWithCount,
   getObjectValue,
+  getPowerScore,
   getRelativePath,
   getRootPath,
   getStringSize,

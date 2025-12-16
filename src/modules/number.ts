@@ -216,3 +216,11 @@ export function getAdjustedSize(
 
   return [w, h];
 }
+
+export function getLogScore(total: number, current: number): number {
+  return Math.log(current + 1) / Math.log(total + 1);
+}
+
+export function getPowerScore(total: number, current: number, alpha: number = 0.5): number {
+  return Math.pow(current, alpha) / Math.pow(total, alpha);
+}

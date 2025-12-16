@@ -13,6 +13,8 @@ import {
   generateFloat,
   getLengthFromInt,
   getLengthFromFloat,
+  getLogScore,
+  getPowerScore,
 } from "./number";
 
 test("generateFloat", () => {
@@ -99,4 +101,20 @@ test("getAdjustedSize", () => {
 
   eq(getAdjustedSize(150, 150, 200, 200, 100, 100), [150, 150]);
   eq(getAdjustedSize(175, 175, 200, 200, 100, 100), [175, 175]);
+});
+
+test("getLogScore", () => {
+  eq(getLogScore(100, 0), 0);
+  eq(getLogScore(100, 25).toFixed(4), "0.7060");
+  eq(getLogScore(100, 50).toFixed(4), "0.8519");
+  eq(getLogScore(100, 75).toFixed(4), "0.9384");
+  eq(getLogScore(100, 100), 1);
+});
+
+test("getPowerScore", () => {
+  eq(getPowerScore(100, 0), 0);
+  eq(getPowerScore(100, 25).toFixed(4), "0.5000");
+  eq(getPowerScore(100, 50).toFixed(4), "0.7071");
+  eq(getPowerScore(100, 75).toFixed(4), "0.8660");
+  eq(getPowerScore(100, 100), 1);
 });
