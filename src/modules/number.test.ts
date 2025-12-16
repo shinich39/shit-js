@@ -105,16 +105,16 @@ test("getAdjustedSize", () => {
 
 test("getLogScore", () => {
   eq(getLogScore(100, 0), 0);
-  eq(getLogScore(100, 25).toFixed(4), "0.7060");
-  eq(getLogScore(100, 50).toFixed(4), "0.8519");
-  eq(getLogScore(100, 75).toFixed(4), "0.9384");
+  eq(getLogScore(100, 25).toFixed(4), 0.7059613126314263.toFixed(4));
+  eq(getLogScore(100, 50).toFixed(4), 0.8519443031609923.toFixed(4));
+  eq(getLogScore(100, 75).toFixed(4), 0.9383792523906672.toFixed(4));
   eq(getLogScore(100, 100), 1);
 });
 
 test("getPowerScore", () => {
   eq(getPowerScore(100, 0), 0);
-  eq(getPowerScore(100, 25).toFixed(4), "0.5000");
-  eq(getPowerScore(100, 50).toFixed(4), "0.7071");
-  eq(getPowerScore(100, 75).toFixed(4), "0.8660");
+  eq(getPowerScore(100, 25).toFixed(4), 0.5.toFixed(4)); 
+  eq(getPowerScore(100, 50).toFixed(4), 0.7071067811865476.toFixed(4));
+  eq(getPowerScore(100, 75).toFixed(4), 0.8660254037844387.toFixed(4));
   eq(getPowerScore(100, 100), 1);
 });

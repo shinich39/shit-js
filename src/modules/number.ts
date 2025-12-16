@@ -216,11 +216,25 @@ export function getAdjustedSize(
 
   return [w, h];
 }
-
+/**
+ * @example
+ * getLogScore(100, 0); // 0
+ * getLogScore(100, 25); // 0.7059613126314263
+ * getLogScore(100, 50); // 0.8519443031609923
+ * getLogScore(100, 75); // 0.9383792523906672
+ * getLogScore(100, 100); // 1
+ */
 export function getLogScore(total: number, current: number): number {
   return Math.log(current + 1) / Math.log(total + 1);
 }
-
+/**
+ * @example
+ * getPowerScore(100, 0); // 0
+ * getPowerScore(100, 25); // 0.5
+ * getPowerScore(100, 50); // 0.7071067811865476
+ * getPowerScore(100, 75); // 0.8660254037844387
+ * getPowerScore(100, 100); // 1
+ */
 export function getPowerScore(total: number, current: number, alpha: number = 0.5): number {
   return Math.pow(current, alpha) / Math.pow(total, alpha);
 }
