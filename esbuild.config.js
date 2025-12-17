@@ -1,3 +1,4 @@
+import path from "node:path";
 import fs from "node:fs";
 import * as esbuild from 'esbuild';
 
@@ -7,7 +8,7 @@ const BROWSER = true;
 const BROWSER_GLOBAL_NAME = "shitJs";
 
 const ENTRY_POINT = "./src/shit.ts";
-const FILENAME = "shit";
+const FILENAME = path.basename(ENTRY_POINT, path.extname(ENTRY_POINT));
 
 const ESM_OUTPUT_PATH = `./dist/${FILENAME}.mjs`;
 const ESM_MIN_OUTPUT_PATH = `./dist/${FILENAME}.min.mjs`;
@@ -20,9 +21,11 @@ const TYPE_OUTPUT_PATH = `./dist/types/${FILENAME}.d.ts`;
 /** @see https://esbuild.github.io/api/#external */
 const externalPackages = [];
 
-const options = [];
+/** @type {import("esbuild").BuildOptions[]} */
+const buildOptions = [];
+
 if (ESM) {
-  options.push(
+  buildOptions.push(
     {
       entryPoints: [ENTRY_POINT],
       platform: "node",
@@ -44,7 +47,7 @@ if (ESM) {
 }
 
 if (CJS) {
-  options.push(
+  buildOptions.push(
     {
       entryPoints: [ENTRY_POINT],
       platform: "node",
@@ -66,7 +69,7 @@ if (CJS) {
 }
 
 if (BROWSER) {
-  options.push(
+  buildOptions.push(
     {
       entryPoints: [ENTRY_POINT],
       platform: "browser",
@@ -95,6 +98,6 @@ if (fs.existsSync("./dist")) {
 }
 
 // Build
-for (const option of options) {
+for (const option of buildOptions) {
   await esbuild.build(option);
 }
