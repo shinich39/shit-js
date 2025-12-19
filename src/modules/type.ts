@@ -10,17 +10,25 @@
 export function getType(e: unknown): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function" | "null" | "array" | "date" | "regexp" {
   if (e === undefined) {
     return "undefined";
-  } else if (e === null) {
-    return "null";
-  } else if (Array.isArray(e)) {
-    return "array";
-  } else if (e instanceof Date) {
-    return "date";
-  } else if (e instanceof RegExp) {
-    return "regexp";
-  } else {
-    return typeof e;
   }
+  
+  if (e === null) {
+    return "null";
+  }
+  
+  if (Array.isArray(e)) {
+    return "array";
+  }
+  
+  if (e instanceof Date) {
+    return "date";
+  }
+  
+  if (e instanceof RegExp) {
+    return "regexp";
+  }
+
+  return typeof e;
 }
 /**
  * @example
@@ -48,13 +56,20 @@ export function isNumber(e: any): e is number | string {
 export function toNumber(e: any): number {
   if (isNumeric(e)) {
     return parseFloat(e);
-  } else if (typeof e === "number") {
+  }
+  
+  if (typeof e === "number") {
     return e;
-  } else if (typeof e === "boolean") {
+  }
+  
+  if (typeof e === "boolean") {
     return e ? 1 : 0;
-  } else if (!e) {
+  }
+  
+  if (!e) {
     return 0; // undefined, null
   }
+
   // Invalid string, object, Array, function
   throw new Error(`Invalid argument type: ${typeof e}`);
 }
@@ -67,11 +82,40 @@ export function toError(err: any): Error {
     return err;
   }
 
-  const error = new Error("An error occurred");
-
   if (typeof err === "string") {
-    error.message = err;
-  } else if (typeof err === "object") {
+    return new Error(err);
+  }
+
+  if (typeof err === "number") {
+    return new Error(
+      {
+        400: "Bad Request",
+        401: "Unauthorized",
+        402: "Payment Required",
+        403: "Forbidden",
+        404: "Not Found",
+        405: "Method Not Allowed",
+        406: "Not Acceptable",
+        408: "Request Timeout",
+        409: "Conflict",
+        410: "Gone",
+        412: "Precondition Failed",
+        413: "Payload Too Large",
+        415: "Unsupported Media Type",
+        418: "I'm a teapot",
+        422: "Unprocessable Entity",
+        429: "Too Many Requests",
+        500: "Internal Server Error",
+        501: "Not Implemented",
+        502: "Bad Gateway",
+        503: "Service Unavailable",
+        504: "Gateway Timeout",
+      }[err] || "Unexpected Error"
+    );
+  }
+  
+  if (typeof err === "object") {
+    const error = new Error(err);
     if (typeof err.name === "string") {
       error.name = err.name;
     }
@@ -83,5 +127,5 @@ export function toError(err: any): Error {
     }
   }
 
-  return error;
+  return new Error("An unexpected error occurred.");
 }
