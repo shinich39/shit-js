@@ -360,7 +360,9 @@ export function matchStrings(from: string, to: string): {
   // Various similarity metrics
   return {
     // Proportion of matching characters
-    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
+    matchRate: totalOperations > 0 
+      ? matches / totalOperations 
+      : 1,
     
     // Similarity based on longer string
     similarity: Math.max(from.length, to.length) > 0 
