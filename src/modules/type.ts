@@ -54,24 +54,88 @@ export function isNumber(e: any): e is number | string {
  * const result = toNumber(1.1); // 1.1
  */
 export function toNumber(e: any): number {
+  // String
   if (isNumeric(e)) {
     return parseFloat(e);
   }
   
+  // Number
   if (typeof e === "number") {
     return e;
   }
   
+  // Boolean
   if (typeof e === "boolean") {
     return e ? 1 : 0;
   }
   
+  // Null, undefined
   if (!e) {
-    return 0; // undefined, null
+    return 0;
   }
 
   // Invalid string, object, Array, function
   throw new Error(`Invalid argument type: ${typeof e}`);
+}
+/**
+ * @example
+ * const result = isNumber("1"); // true
+ * const result = isNumber(1); // true
+ */
+export function isBuffer(e: any): boolean {
+  if (!e) {
+    return false;
+  }
+
+  // Node Buffer
+  if (typeof Buffer !== "undefined" && Buffer.isBuffer(e)) {
+    return true;
+  }
+
+  // ArrayBuffer
+  if (e instanceof ArrayBuffer) {
+    return true;
+  }
+
+  // SharedArrayBuffer (if supported)
+  if (typeof SharedArrayBuffer !== "undefined" && e instanceof SharedArrayBuffer) {
+    return true;
+  }
+
+  // TypedArray / DataView
+  if (ArrayBuffer.isView(e)) {
+    return true;
+  }
+
+  return false;
+}
+/**
+ * 
+ * @param e 
+ * @returns 
+ */
+export function toBuffer(e: any): Buffer {
+  // Buffer
+  if (Buffer.isBuffer(e)) {
+    return e;
+  }
+
+  // ArrayBuffer
+  if (e instanceof ArrayBuffer) {
+    return Buffer.from(e);
+  }
+
+  // SharedArrayBuffer
+  if (typeof SharedArrayBuffer !== "undefined" && e instanceof SharedArrayBuffer) {
+    return Buffer.from(e);
+  }
+
+  // TypedArray / DataView
+  if (ArrayBuffer.isView(e)) {
+    return Buffer.from(e.buffer, e.byteOffset, e.byteLength);
+  }
+
+  throw new TypeError("Not binary data");
 }
 /**
  * @example

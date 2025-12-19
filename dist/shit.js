@@ -66,6 +66,7 @@ var shitJs = (() => {
     getType: () => getType,
     groupBy: () => groupBy,
     humanizeFileSize: () => humanizeFileSize,
+    isBuffer: () => isBuffer,
     isNumber: () => isNumber,
     isNumeric: () => isNumeric,
     joinPaths: () => joinPaths,
@@ -77,6 +78,7 @@ var shitJs = (() => {
     setBit: () => setBit,
     shuffleArray: () => shuffleArray,
     sleep: () => sleep,
+    toBuffer: () => toBuffer,
     toBytes: () => toBytes,
     toCamelCase: () => toCamelCase,
     toError: () => toError,
@@ -1584,6 +1586,39 @@ var shitJs = (() => {
       return 0;
     }
     throw new Error(`Invalid argument type: ${typeof e}`);
+  }
+  function isBuffer(e) {
+    if (!e) {
+      return false;
+    }
+    if (typeof Buffer !== "undefined" && Buffer.isBuffer(e)) {
+      return true;
+    }
+    if (e instanceof ArrayBuffer) {
+      return true;
+    }
+    if (typeof SharedArrayBuffer !== "undefined" && e instanceof SharedArrayBuffer) {
+      return true;
+    }
+    if (ArrayBuffer.isView(e)) {
+      return true;
+    }
+    return false;
+  }
+  function toBuffer(e) {
+    if (Buffer.isBuffer(e)) {
+      return e;
+    }
+    if (e instanceof ArrayBuffer) {
+      return Buffer.from(e);
+    }
+    if (typeof SharedArrayBuffer !== "undefined" && e instanceof SharedArrayBuffer) {
+      return Buffer.from(e);
+    }
+    if (ArrayBuffer.isView(e)) {
+      return Buffer.from(e.buffer, e.byteOffset, e.byteLength);
+    }
+    throw new TypeError("Not binary data");
   }
   function toError(err) {
     if (err instanceof Error) {

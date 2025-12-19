@@ -28,6 +28,18 @@ export declare function isNumber(e: any): e is number | string;
 export declare function toNumber(e: any): number;
 /**
  * @example
+ * const result = isNumber("1"); // true
+ * const result = isNumber(1); // true
+ */
+export declare function isBuffer(e: any): boolean;
+/**
+ *
+ * @param e
+ * @returns
+ */
+export declare function toBuffer(e: any): Buffer;
+/**
+ * @example
  * const result = toError("MESSAGE"); // == new Error("MESSAGE");
  */
 export declare function toError(err: any): Error;
