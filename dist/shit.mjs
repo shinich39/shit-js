@@ -1522,7 +1522,7 @@ function toError(err) {
         502: "Bad Gateway",
         503: "Service Unavailable",
         504: "Gateway Timeout"
-      }[err] || "Unexpected Error"
+      }[err] || "An unexpected error occurred."
     );
   }
   if (typeof err === "object") {
@@ -1536,6 +1536,7 @@ function toError(err) {
     if (typeof err.stack === "string") {
       error.stack = err.stack;
     }
+    return error;
   }
   return new Error("An unexpected error occurred.");
 }

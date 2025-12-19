@@ -110,21 +110,26 @@ export function toError(err: any): Error {
         502: "Bad Gateway",
         503: "Service Unavailable",
         504: "Gateway Timeout",
-      }[err] || "Unexpected Error"
+      }[err] || "An unexpected error occurred."
     );
   }
   
   if (typeof err === "object") {
     const error = new Error(err);
+
     if (typeof err.name === "string") {
       error.name = err.name;
     }
+
     if (typeof err.message === "string") {
       error.message = err.message;
     }
+
     if (typeof err.stack === "string") {
       error.stack = err.stack;
     }
+
+    return error;
   }
 
   return new Error("An unexpected error occurred.");
