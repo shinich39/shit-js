@@ -1,13 +1,9 @@
 // src/modules/array.ts
 function getMaxValue(arr) {
-  return arr.reduce((acc, cur) => {
-    return acc > cur ? acc : cur;
-  }, Number.MIN_SAFE_INTEGER);
+  return arr.reduce((acc, cur) => acc > cur ? acc : cur, Number.MIN_SAFE_INTEGER);
 }
 function getMinValue(arr) {
-  return arr.reduce((acc, cur) => {
-    return acc < cur ? acc : cur;
-  }, Number.MAX_SAFE_INTEGER);
+  return arr.reduce((acc, cur) => acc < cur ? acc : cur, Number.MAX_SAFE_INTEGER);
 }
 function getSumValue(arr) {
   return arr.reduce((acc, cur) => acc + cur, 0);

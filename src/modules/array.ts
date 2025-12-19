@@ -3,18 +3,14 @@
  * const result = getMaxValue([1,2,3]); // 3
  */
 export function getMaxValue(arr: number[]): number {
-  return arr.reduce((acc, cur) => {
-    return acc > cur ? acc : cur;
-  }, Number.MIN_SAFE_INTEGER);
+  return arr.reduce((acc, cur) => acc > cur ? acc : cur, Number.MIN_SAFE_INTEGER);
 }
 /**
  * @example
  * const result = getMinValue([1,2,3]); // 1
  */
 export function getMinValue(arr: number[]): number {
-  return arr.reduce((acc, cur) => {
-    return acc < cur ? acc : cur;
-  }, Number.MAX_SAFE_INTEGER);
+  return arr.reduce((acc, cur) => acc < cur ? acc : cur, Number.MAX_SAFE_INTEGER);
 }
 /**
  * @example
@@ -172,7 +168,7 @@ export function uniqueBy<T>(
     }
   }
 
-  return Array.from(map.values()) as T[];
+  return Array.from(map.values());
 }
 /**
  * @example
