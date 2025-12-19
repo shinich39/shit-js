@@ -884,7 +884,7 @@ function compressLzw(input) {
   const data = input.split("");
   const result = [];
   let dictSize = 256;
-  for (let i = 0; i < 256; i++) {
+  for (let i = 0; i < dictSize; i++) {
     dict[String.fromCharCode(i)] = i;
   }
   let w = "";
@@ -898,13 +898,15 @@ function compressLzw(input) {
       w = String(c);
     }
   }
-  if (w !== "") result.push(dict[w]);
+  if (w !== "") {
+    result.push(dict[w]);
+  }
   return result;
 }
 function decompressLzw(compressed) {
   const dict = [];
   let dictSize = 256;
-  for (let i = 0; i < 256; i++) {
+  for (let i = 0; i < dictSize; i++) {
     dict[i] = String.fromCharCode(i);
   }
   let w = String.fromCharCode(compressed[0]);

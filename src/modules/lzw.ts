@@ -12,16 +12,17 @@
  */
 export function compressLzw(input: string): number[] {
   const dict: Record<string, number> = {};
-  const data = input.split("");
+  const data: string[] = input.split("");
   const result: number[] = [];
-  let dictSize = 256;
+  let dictSize: number = 256;
 
   // Initialization (ASCII)
-  for (let i = 0; i < 256; i++) {
+  for (let i = 0; i < dictSize; i++) {
     dict[String.fromCharCode(i)] = i;
   }
 
   let w = "";
+
   for (const c of data) {
     const wc = w + c;
     if (dict[wc]) {
@@ -33,7 +34,10 @@ export function compressLzw(input: string): number[] {
     }
   }
 
-  if (w !== "") result.push(dict[w]);
+  if (w !== "") {
+    result.push(dict[w]);
+  }
+
   return result;
 }
 /**
@@ -43,15 +47,15 @@ export function compressLzw(input: string): number[] {
  */
 export function decompressLzw(compressed: number[]): string {
   const dict: string[] = [];
-  let dictSize = 256;
+  let dictSize: number = 256;
 
   // Initialization (ASCII)
-  for (let i = 0; i < 256; i++) {
+  for (let i = 0; i < dictSize; i++) {
     dict[i] = String.fromCharCode(i);
   }
 
-  let w = String.fromCharCode(compressed[0]);
-  let result = w;
+  let w: string = String.fromCharCode(compressed[0]);
+  let result: string = w;
 
   for (let i = 1; i < compressed.length; i++) {
     const k = compressed[i];
