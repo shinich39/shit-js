@@ -38,6 +38,11 @@ export declare function getModeCount<T>(arr: T[]): number;
 export declare function getModeValue<T>(arr: T[]): T | undefined;
 /**
  * @example
+ * const result = splitArray([1,2,3,4,5,6,7,8,9,10], 3); // [[1,2,3],[4,5,6],[7,8,9],[10]]
+ */
+export declare function splitArray<T>(arr: T[], size: number): T[][];
+/**
+ * @example
  * const result = getCombinations([1, 2]);
  * // [[1], [2], [1, 2]]
  */

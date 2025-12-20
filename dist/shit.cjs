@@ -77,6 +77,7 @@ __export(shit_exports, {
   setBit: () => setBit,
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
+  splitArray: () => splitArray,
   toBuffer: () => toBuffer,
   toBytes: () => toBytes,
   toCamelCase: () => toCamelCase,
@@ -126,6 +127,16 @@ function getModeCount(arr) {
 }
 function getModeValue(arr) {
   return getModeValueWithCount(arr).value;
+}
+function splitArray(arr, size) {
+  return arr.reduce((acc, curr) => {
+    if (!acc[acc.length - 1] || acc[acc.length - 1].length >= size) {
+      acc.push([curr]);
+    } else {
+      acc[acc.length - 1].push(curr);
+    }
+    return acc;
+  }, []);
 }
 function getCombinations(arr) {
   const result = [];
@@ -1726,6 +1737,7 @@ function toError(err) {
   setBit,
   shuffleArray,
   sleep,
+  splitArray,
   toBuffer,
   toBytes,
   toCamelCase,

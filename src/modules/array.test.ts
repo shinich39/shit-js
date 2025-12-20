@@ -13,6 +13,7 @@ import {
   shuffleArray,
   groupBy,
   uniqueBy,
+  splitArray,
 } from "./array";
 
 const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
@@ -43,6 +44,10 @@ test("getModeValue", () => {
 
 test("getModeCount", () => {
   eq(getModeCount(arr), 2);
+});
+
+test("splitArray", () => {
+  eq(splitArray([1,2,3,4,5,6,7,8,9,10], 3), [[1,2,3],[4,5,6],[7,8,9],[10]]);
 });
 
 test("getCombinations", () => {
