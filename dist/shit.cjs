@@ -1315,11 +1315,11 @@ var QueueWorker = class {
     }
     this.inProgress = true;
     while (this.inProgress) {
-      const queue = this.queue.shift();
-      if (!queue) {
+      const task = this.queue.shift();
+      if (!task) {
         break;
       }
-      await queue();
+      await task();
     }
     this.inProgress = false;
   }

@@ -73,13 +73,13 @@ export class QueueWorker {
     this.inProgress = true;
 
     while(this.inProgress) {
-      const queue = this.queue.shift();
+      const task = this.queue.shift();
       
-      if (!queue) {
+      if (!task) {
         break;
       }
 
-      await queue();
+      await task();
     }
 
     this.inProgress = false;
