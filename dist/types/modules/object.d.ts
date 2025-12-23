@@ -25,4 +25,14 @@ export declare function getObjectValue(obj: Record<string, any>, key: string): a
  * ); // true
  */
 export declare function matchObject(obj: any, query: any): boolean;
+/**
+ * @example
+ * const store = createStore<number>((prop, oldValue, newValue) => { ... });
+ * store.set("a", 1);
+ * store.get("a"); // 1
+ */
+export declare function createStore<T = any>(callback: (property: string, oldValue: T | undefined, newValue: T) => void | Promise<void>): {
+    get(key: string): T | undefined;
+    set(key: string, newValue: T): void;
+};
 //# sourceMappingURL=object.d.ts.map

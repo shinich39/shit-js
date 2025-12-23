@@ -156,3 +156,30 @@ export function matchObject(obj: any, query: any): boolean {
 
   return fn(obj, query);
 }
+/**
+ * @example
+ * const store = createStore<number>((prop, oldValue, newValue) => { ... });
+ * store.set("a", 1);
+ * store.get("a"); // 1
+ */
+export function createStore<T = any>(
+  callback: (property: string, oldValue: T | undefined, newValue: T) => void | Promise<void>,
+): {
+  get(key: string): T | undefined;
+  set(key: string, newValue: T): void;
+} {
+  const obj: Record<string, T> = {};
+
+  return {
+    get(key: string): T | undefined {
+      return obj[key];
+    },
+    set(key: string, newValue: T) {
+      const oldValue = obj[key];
+      if (oldValue !== newValue) {
+        obj[key] = newValue;
+        callback(key, oldValue, newValue);
+      }
+    },
+  };
+}

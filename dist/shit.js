@@ -29,6 +29,7 @@ var shitJs = (() => {
     clearBit: () => clearBit,
     clone: () => clone,
     compressLzw: () => compressLzw,
+    createStore: () => createStore,
     decompressLzw: () => decompressLzw,
     generateFloat: () => generateFloat,
     generateInt: () => generateInt,
@@ -1138,6 +1139,21 @@ var shitJs = (() => {
       return true;
     };
     return fn(obj, query);
+  }
+  function createStore(callback) {
+    const obj = {};
+    return {
+      get(key) {
+        return obj[key];
+      },
+      set(key, newValue) {
+        const oldValue = obj[key];
+        if (oldValue !== newValue) {
+          obj[key] = newValue;
+          callback(key, oldValue, newValue);
+        }
+      }
+    };
   }
 
   // src/modules/path.ts
