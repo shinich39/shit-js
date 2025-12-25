@@ -9,7 +9,7 @@ God breathe on me.
 - npm
 
 ```sh
-npm install github:shinich39/shit-js
+npm install https://github.com/shinich39/shit-js
 ```
 
 ### Usage
