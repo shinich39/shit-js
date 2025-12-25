@@ -178,16 +178,14 @@ export function toError(err: any): Error {
     );
   }
   
-  if (typeof err === "object") {
+  if (
+    typeof err === "object" &&
+    typeof err.name === "string" &&
+    typeof err.message === "string"
+  ) {
     const error = new Error(err);
-
-    if (typeof err.name === "string") {
-      error.name = err.name;
-    }
-
-    if (typeof err.message === "string") {
-      error.message = err.message;
-    }
+    error.name = err.name;
+    error.message = err.message;
 
     if (typeof err.stack === "string") {
       error.stack = err.stack;
