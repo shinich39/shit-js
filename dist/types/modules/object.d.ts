@@ -27,11 +27,11 @@ export declare function getObjectValue(obj: Record<string, any>, key: string): a
 export declare function matchObject(obj: any, query: any): boolean;
 /**
  * @example
- * const store = createStore<number>((prop, oldValue, newValue) => { ... });
+ * const store = createStore<number>((key, oldValue, newValue) => { ... });
  * store.set("a", 1);
  * store.get("a"); // 1
  */
-export declare function createStore<T = any>(callback: (property: string, oldValue: T | undefined, newValue: T) => void | Promise<void>): {
+export declare function createStore<T = any>(callback: (key: string, oldValue: T | undefined, newValue: T) => void | Promise<void>): {
     get(key: string): T | undefined;
     set(key: string, newValue: T): void;
 };

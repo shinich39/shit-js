@@ -35,7 +35,7 @@ export declare function getLengthFromFloat(num: number): number;
  *
  * @example
  * const result = getClampedNumber(5, 0, 10); // 5
- * const result = getClampedNumber(10, 0, 10), 1; // 10
+ * const result = getClampedNumber(10, 0, 10); // 10
  */
 export declare function getClampedNumber(num: number, min: number, max: number): number;
 /**
