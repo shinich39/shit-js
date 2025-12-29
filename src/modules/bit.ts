@@ -31,9 +31,12 @@ export function toggleBit(a: number, b: number): number {
   return a ^ b;
 }
 /**
- * XOR gate
  * @example
- * const result = toggleBit(0b1100, 0b1110); // 0b0010
+ * const result = toBitString(0b1100); // "1100"
+ * const result = toBitString(0b1111); // "1111"
+ * const result = toBitString(0b1111, 4); // "1111"
+ * const result = toBitString(0b1111, 8); // "00001111"
+ * const result = toBitString(0b10101010); // "10101010"
  */
 export function toBitString(bit: number, size?: number): string {
   return bit

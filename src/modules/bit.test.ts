@@ -33,7 +33,7 @@ test("toggleBit", () => {
   eq(toggleBit(0b1100, 0b1111), 0b0011);
 });
 
-test("toggleBit", () => {
+test("toBitString", () => {
   eq(toBitString(0b1100), "1100");
   eq(toBitString(0b1111), "1111");
   eq(toBitString(0b1111, 4), "1111");
