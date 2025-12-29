@@ -37,6 +37,7 @@ __export(shit_exports, {
   generateXor: () => generateXor,
   getAdjustedSize: () => getAdjustedSize,
   getBaseName: () => getBaseName,
+  getBitSize: () => getBitSize,
   getCases: () => getCases,
   getClampedNumber: () => getClampedNumber,
   getCombinations: () => getCombinations,
@@ -79,6 +80,7 @@ __export(shit_exports, {
   shuffleArray: () => shuffleArray,
   sleep: () => sleep,
   splitArray: () => splitArray,
+  toBitString: () => toBitString,
   toBuffer: () => toBuffer,
   toBytes: () => toBytes,
   toCamelCase: () => toCamelCase,
@@ -91,6 +93,7 @@ __export(shit_exports, {
   toRegExp: () => toRegExp,
   toSentenceCase: () => toSentenceCase,
   toSlug: () => toSlug,
+  toTitleCase: () => toTitleCase,
   toggleBit: () => toggleBit,
   uniqueBy: () => uniqueBy
 });
@@ -226,6 +229,9 @@ function clearBit(a, b) {
 }
 function toggleBit(a, b) {
   return a ^ b;
+}
+function toBitString(bit, size) {
+  return bit.toString(2).padStart(Math.max(bit === 0 ? 1 : Math.floor(Math.log2(bit)) + 1, size || 1), "0");
 }
 
 // src/modules/date.ts
@@ -952,6 +958,9 @@ function generateInt(min, max, seed) {
 function getLengthFromInt(num) {
   return Math.log(num) * Math.LOG10E + 1 | 0;
 }
+function getBitSize(num) {
+  return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;
+}
 function getLengthFromFloat(num) {
   return ("" + num).replace(".", "").length;
 }
@@ -1385,6 +1394,9 @@ var Quotes = {
   "\u201E": "\u201C",
   "\xAB": "\xBB"
 };
+function toTitleCase(str) {
+  return str.split(/[\s_-]+/).map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ");
+}
 function toSentenceCase(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -1395,7 +1407,7 @@ function toCamelCase(str) {
   return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toLowerCase());
 }
 function toPascalCase(str) {
-  return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^(.)/, (m) => m.toUpperCase());
+  return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^./, (m) => m.toUpperCase());
 }
 function generateUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -1709,6 +1721,7 @@ function toError(err) {
   generateXor,
   getAdjustedSize,
   getBaseName,
+  getBitSize,
   getCases,
   getClampedNumber,
   getCombinations,
@@ -1751,6 +1764,7 @@ function toError(err) {
   shuffleArray,
   sleep,
   splitArray,
+  toBitString,
   toBuffer,
   toBytes,
   toCamelCase,
@@ -1763,6 +1777,7 @@ function toError(err) {
   toRegExp,
   toSentenceCase,
   toSlug,
+  toTitleCase,
   toggleBit,
   uniqueBy
 });

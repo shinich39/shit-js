@@ -17,21 +17,34 @@ import {
   toRegExp,
   toFullWidthString,
   toPascalCase,
+  toSentenceCase,
+  toTitleCase,
 } from "./string";
 
+test("toSentenceCase", () => {
+  eq(toSentenceCase("lorem ipsum"), "Lorem ipsum");
+});
+
 test("toSlug", () => {
-  const result = toSlug("Lorem  ipsum");
-  eq(result, "lorem-ipsum");
+  eq(toSlug("Lorem ipsum"), "lorem-ipsum");
+  eq(toSlug("Lorem  ipsum"), "lorem-ipsum");
+  eq(toSlug("Lorem  ipsum"), "lorem-ipsum");
 });
 
 test("toCamelCase", () => {
-  const result = toCamelCase("Lorem ipsum");
-  eq(result, "loremIpsum");
+  eq(toCamelCase("Lorem ipsum"), "loremIpsum");
 });
 
 test("toPascalCase", () => {
-  const result = toPascalCase("lorem ipsum");
-  eq(result, "LoremIpsum");
+  eq(toPascalCase("lorem ipsum"), "LoremIpsum");
+  eq(toPascalCase("lorem-ipsum"), "LoremIpsum");
+  eq(toPascalCase("lorem_ipsum"), "LoremIpsum");
+});
+
+test("toTitleCase", () => {
+  eq(toTitleCase("lorem ipsum"), "Lorem Ipsum");
+  eq(toTitleCase("lorem-ipsum"), "Lorem Ipsum");
+  eq(toTitleCase("lorem_ipsum"), "Lorem Ipsum");
 });
 
 test("generateUuid", () => {

@@ -47,12 +47,17 @@ export declare const Quotes: {
 };
 /**
  * @example
+ * const result = toTitleCase("lorem-ipsum"); // "Lorem Ipsum"
+ */
+export declare function toTitleCase(str: string): string;
+/**
+ * @example
  * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
  */
 export declare function toSentenceCase(str: string): string;
 /**
  * @example
- * const result = toSlug("Lorem  ipsum"); // "lorem-ipsum"
+ * const result = toSlug(" Lorem  ipsum "); // "lorem-ipsum"
  */
 export declare function toSlug(str: string): string;
 /**

@@ -45,6 +45,16 @@ export function getLengthFromInt(num: number): number {
 }
 /**
  * @example
+ * const result = getBitSize(1); // 1;
+ * const result = getBitSize(2); // 2;
+ * const result = getBitSize(4); // 3;
+ * const result = getBitSize(8); // 4;
+ */
+export function getBitSize(num: number): number {
+  return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;
+}
+/**
+ * @example
  * const result = getLengthFromFloat(1.2); // 2
  * const result = getLengthFromFloat(1.23); // 3
  */

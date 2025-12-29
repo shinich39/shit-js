@@ -26,6 +26,14 @@ export declare function generateInt(min: number, max: number, seed?: number | nu
 export declare function getLengthFromInt(num: number): number;
 /**
  * @example
+ * const result = getBitSize(1); // 1;
+ * const result = getBitSize(2); // 2;
+ * const result = getBitSize(4); // 3;
+ * const result = getBitSize(8); // 4;
+ */
+export declare function getBitSize(num: number): number;
+/**
+ * @example
  * const result = getLengthFromFloat(1.2); // 2
  * const result = getLengthFromFloat(1.23); // 3
  */

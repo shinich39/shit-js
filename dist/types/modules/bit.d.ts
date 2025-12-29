@@ -22,4 +22,10 @@ export declare function clearBit(a: number, b: number): number;
  * const result = toggleBit(0b1100, 0b1110); // 0b0010
  */
 export declare function toggleBit(a: number, b: number): number;
+/**
+ * XOR gate
+ * @example
+ * const result = toggleBit(0b1100, 0b1110); // 0b0010
+ */
+export declare function toBitString(bit: number, size?: number): string;
 //# sourceMappingURL=bit.d.ts.map

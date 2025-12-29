@@ -47,6 +47,16 @@ export const Quotes = {
 } as const;
 /**
  * @example
+ * const result = toTitleCase("lorem-ipsum"); // "Lorem Ipsum"
+ */
+export function toTitleCase(str: string): string {
+  return str
+    .split(/[\s_-]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+/**
+ * @example
  * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
  */
 export function toSentenceCase(str: string): string {
@@ -54,7 +64,7 @@ export function toSentenceCase(str: string): string {
 }
 /**
  * @example
- * const result = toSlug("Lorem  ipsum"); // "lorem-ipsum"
+ * const result = toSlug(" Lorem  ipsum "); // "lorem-ipsum"
  */
 export function toSlug(str: string): string {
   return str.toLowerCase().replace(/\s+/g, '-');
@@ -65,9 +75,7 @@ export function toSlug(str: string): string {
  */
 export function toCamelCase(str: string): string {
   return str
-    // Remove separators and capitalize next letter
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')) 
-    // Ensure first letter is lowercase
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
     .replace(/^(.)/, (m) => m.toLowerCase()); 
 }
 /**
@@ -76,10 +84,8 @@ export function toCamelCase(str: string): string {
  */
 export function toPascalCase(str: string): string {
   return str
-    // Remove separators and capitalize next letter
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : '')) 
-    // Ensure first letter is uppercase
-    .replace(/^(.)/, (m) => m.toUpperCase()); 
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    .replace(/^./, (m) => m.toUpperCase()); 
 }
 /**
  * @example

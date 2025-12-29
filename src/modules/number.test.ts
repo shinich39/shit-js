@@ -15,6 +15,7 @@ import {
   getLengthFromFloat,
   getLogScore,
   getPowerScore,
+  getBitSize,
 } from "./number";
 
 test("generateFloat", () => {
@@ -38,6 +39,20 @@ test("getLengthFromInt", () => {
   eq(getLengthFromFloat(10), 2);
   eq(getLengthFromFloat(100), 3);
   eq(getLengthFromFloat(100.1), 4);
+});
+
+test("getBitSize", () => {
+  eq(getBitSize(0), 1); // 0
+  eq(getBitSize(1), 1); // 1
+  eq(getBitSize(2), 2); // 10
+  eq(getBitSize(3), 2); // 11
+  eq(getBitSize(4), 3); // 100
+  eq(getBitSize(5), 3); // 101
+  eq(getBitSize(6), 3); // 110
+  eq(getBitSize(7), 3); // 111
+  eq(getBitSize(8), 4); // 1000
+  eq(getBitSize(16), 5); // 10000
+  eq(getBitSize(32), 6); // 100000
 });
 
 test("getClampedNumber", () => {

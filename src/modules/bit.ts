@@ -30,3 +30,13 @@ export function clearBit(a: number, b: number): number {
 export function toggleBit(a: number, b: number): number {
   return a ^ b;
 }
+/**
+ * XOR gate
+ * @example
+ * const result = toggleBit(0b1100, 0b1110); // 0b0010
+ */
+export function toBitString(bit: number, size?: number): string {
+  return bit
+    .toString(2)
+    .padStart(Math.max(bit === 0 ? 1 : Math.floor(Math.log2(bit)) + 1, size || 1), "0");
+}
