@@ -33,6 +33,12 @@ type TypingOptions = {
         max: number;
     };
 };
+/**
+ * @example
+ * await typing("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", (char, i, str) => {
+ *   process.stdout.write(char);
+ * });
+ */
 export declare function typing(value: string, callback: (character: string, index: number, string: string) => void | Promise<void>, options?: TypingOptions): Promise<void>;
 /**
  * @example
