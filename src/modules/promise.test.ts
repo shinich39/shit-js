@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
-import { QueueWorker, sleep, retry } from "./promise";
+import { QueueWorker, sleep, retry, typing } from "./promise";
 
 test("sleep", async () => {
   const a = Date.now();
@@ -15,6 +15,13 @@ test("retry", async () => {
   }, 3, 256);
 
   rejects(() => fn());
+});
+
+test("typing", async () => {
+  // await sleep(100);
+  // await typing("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", (char, i, str) => {
+  //   process.stdout.write(char);
+  // });
 });
 
 test("QueueWorker", async () => {

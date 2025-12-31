@@ -1194,6 +1194,44 @@ function retry(fn, count, delay) {
     throw error;
   };
 }
+async function typing(value, callback, options) {
+  const defaultOptions = {
+    character: { min: 35, max: 95 },
+    word: { min: 120, max: 200 },
+    sentence: { min: 220, max: 380 },
+    acceleration: { strength: 18, frequency: 3.2 },
+    clamp: { min: 28, max: 420 }
+  };
+  const resolveOptions = (options2) => {
+    return {
+      character: { ...defaultOptions.character, ...options2?.character },
+      word: { ...defaultOptions.word, ...options2?.word },
+      sentence: { ...defaultOptions.sentence, ...options2?.sentence },
+      acceleration: { ...defaultOptions.acceleration, ...options2?.acceleration },
+      clamp: { ...defaultOptions.clamp, ...options2?.clamp }
+    };
+  };
+  const createDelay = (char, index) => {
+    let base;
+    if (/[.,!?]/.test(char)) {
+      base = generateInt(opts.sentence.min, opts.sentence.max);
+    } else if (char === " ") {
+      base = generateInt(opts.word.min, opts.word.max);
+    } else {
+      base = generateInt(opts.character.min, opts.character.max);
+    }
+    const accel = Math.sin(index / opts.acceleration.frequency) * opts.acceleration.strength;
+    base -= accel;
+    return Math.max(opts.clamp.min, Math.min(base, opts.clamp.max));
+  };
+  const opts = resolveOptions(options);
+  for (let i = 0; i < value.length; i++) {
+    const c = value[i];
+    const d = createDelay(c, i);
+    await callback(c, i, value);
+    await sleep(d);
+  }
+}
 var QueueWorker = class {
   inProgress;
   queue;
@@ -1677,5 +1715,6 @@ export {
   toSlug,
   toTitleCase,
   toggleBit,
+  typing,
   uniqueBy
 };

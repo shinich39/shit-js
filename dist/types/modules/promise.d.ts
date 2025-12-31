@@ -10,6 +10,30 @@ export declare function sleep(ms: number): Promise<void>;
  * const result = await wrappedFn(1); // 1
  */
 export declare function retry<T extends (...args: any[]) => any>(fn: T, count: number, delay: number): (...args: Parameters<T>) => Promise<ReturnType<T>>;
+type TypingOptions = {
+    character?: {
+        min: number;
+        max: number;
+    };
+    word?: {
+        min: number;
+        max: number;
+    };
+    sentence?: {
+        min: number;
+        max: number;
+    };
+    acceleration?: {
+        /** ms */
+        strength: number;
+        frequency: number;
+    };
+    clamp?: {
+        min: number;
+        max: number;
+    };
+};
+export declare function typing(value: string, callback: (character: string, index: number, string: string) => void | Promise<void>, options?: TypingOptions): Promise<void>;
 /**
  * @example
  * const worker = new QueueWorker();
@@ -49,4 +73,5 @@ export declare class QueueWorker {
      */
     stop(): void;
 }
+export {};
 //# sourceMappingURL=promise.d.ts.map
