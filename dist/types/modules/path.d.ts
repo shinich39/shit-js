@@ -1,39 +1,32 @@
 /**
  * @example
- * const result = joinPaths("./project/", "abc", "./package.json");
- * // "project/abc/package.json"
+ * joinPaths("./project/", "abc", "./package.json"); // "project/abc/package.json"
  */
 export declare function joinPaths(...args: string[]): string;
 /**
  * @example
- * const result = getBaseName("./project/package.json");
- * // "package.json"
- *
- * const result = getBaseName("./project/package.json", ".json");
- * // "package"
+ * getBaseName("./project/package.json"); // "package.json"
+ * getBaseName("./project/package.json", ".json"); // "package"
  */
 export declare function getBaseName(str: string, suffix?: string): string;
 /**
  * @example
- * const result = getExtName("./project/package.json");
- * // ".json"
+ * getExtName("./project/package.json"); // ".json"
  */
 export declare function getExtName(str: string): string;
 /**
  * @example
- * const result = getDirName("./project/package.json");
- * // "./project"
+ * getDirName("./project/package.json"); // "./project"
  */
 export declare function getDirName(str: string): string;
 /**
  * @example
- * const result = getRelativePath("./project/", "./package.json");
- * // "../package.json"
+ * getRelativePath("./project/", "./package.json"); // "../package.json"
  */
 export declare function getRelativePath(from: string, to: string): string;
 /**
  * @example
- * const result = getRootPath(
+ * getRootPath(
  *   "./project/abc/package.json",
  *   "./project/abc/def",
  *   "./project/abc/def/package.json",

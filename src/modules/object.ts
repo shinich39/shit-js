@@ -2,7 +2,7 @@
  * @example
  * const a = {};
  * const b = copyObject(a);
- * const result = a == b; // false
+ * a == b; // false
  */
 export function copyObject<T>(
   obj: T,

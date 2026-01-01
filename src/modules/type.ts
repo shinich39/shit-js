@@ -1,11 +1,11 @@
 /**
  * @example
- * const result = getType(undefined); // "undefined"
- * const result = getType(null); // "null"
- * const result = getType([]); // "array"
- * const result = getType(new Date()); // "date"
- * const result = getType(new RegExp()); // "regexp"
- * const result = getType(new RegExp()); // "regexp"
+ * getType(undefined); // "undefined"
+ * getType(null); // "null"
+ * getType([]); // "array"
+ * getType(new Date()); // "date"
+ * getType(new RegExp()); // "regexp"
+ * getType(new RegExp()); // "regexp"
  */
 export function getType(e: unknown): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function" | "null" | "array" | "date" | "regexp" {
   if (e === undefined) {
@@ -32,8 +32,8 @@ export function getType(e: unknown): "string" | "number" | "bigint" | "boolean" 
 }
 /**
  * @example
- * const result = isNumeric("1"); // true
- * const result = isNumeric(1); // false
+ * isNumeric("1"); // true
+ * isNumeric(1); // false
  */
 export function isNumeric(e: any): e is string {
   return typeof e === "string"
@@ -42,16 +42,16 @@ export function isNumeric(e: any): e is string {
 }
 /**
  * @example
- * const result = isNumber("1"); // true
- * const result = isNumber(1); // true
+ * isNumber("1"); // true
+ * isNumber(1); // true
  */
 export function isNumber(e: any): e is number | string {
   return typeof e === "number" || isNumeric(e);
 }
 /**
  * @example
- * const result = toNumber("1.1"); // 1.1
- * const result = toNumber(1.1); // 1.1
+ * toNumber("1.1"); // 1.1
+ * toNumber(1.1); // 1.1
  */
 export function toNumber(e: any): number {
   // String
@@ -79,8 +79,8 @@ export function toNumber(e: any): number {
 }
 /**
  * @example
- * const result = isNumber("1"); // true
- * const result = isNumber(1); // true
+ * isNumber("1"); // true
+ * isNumber(1); // true
  */
 export function isBuffer(e: any): boolean {
   if (!e) {
@@ -110,9 +110,14 @@ export function isBuffer(e: any): boolean {
   return false;
 }
 /**
+ * @example
+ * const u8 = new Uint8Array([255, 128, 64]);
+ * toBuffer(u8); // <Buffer 68 65 6c 6c 6f>
  * 
- * @param e 
- * @returns 
+ * const ab = new ArrayBuffer(4);
+ * const view = new Uint8Array(ab);
+ * view.set([1, 2, 3, 4]);
+ * toBuffer(ab); // <Buffer 01 02 03 04>
  */
 export function toBuffer(e: any): Buffer {
   // Buffer
@@ -139,7 +144,7 @@ export function toBuffer(e: any): Buffer {
 }
 /**
  * @example
- * const result = toError("MESSAGE"); // == new Error("MESSAGE");
+ * toError("MESSAGE"); // new Error("MESSAGE");
  */
 export function toError(err: any): Error {
   if (err instanceof Error) {

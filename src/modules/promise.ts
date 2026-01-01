@@ -1,6 +1,7 @@
 /**
  * @example
- * await sleep(1000); // 1s
+ * await sleep(1000); 
+ * // Wait 1s...
  */
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -9,7 +10,7 @@ export function sleep(ms: number): Promise<void> {
  * @example
  * const fn = await (arg: any) => arg;
  * const wrappedFn = retry(fn, 10, 1000);
- * const result = await wrappedFn(1); // 1
+ * await wrappedFn(1); // 1
  */
 export function retry<T extends (...args: any[]) => any>(
   fn: T,

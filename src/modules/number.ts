@@ -13,10 +13,10 @@ function mulberry32(seed: number): number {
  * @returns min <= n < max
  * 
  * @example
- * const result = generateFloat(0, 1); // 0.12451251251251
- * const result = generateFloat(0, 1, 0); // 0.26642920868471265
- * const result = generateFloat(0, 1, 10); // 0.5019920116756111
- * const result = generateFloat(0, 1, 100); // 0.2043598669115454
+ * generateFloat(0, 1); // 0.12451251251251
+ * generateFloat(0, 1, 0); // 0.26642920868471265
+ * generateFloat(0, 1, 10); // 0.5019920116756111
+ * generateFloat(0, 1, 100); // 0.2043598669115454
  */
 export function generateFloat(min: number, max: number, seed?: number | null | undefined): number {
   return typeof seed === "number"
@@ -77,36 +77,36 @@ export function generateTypingDelay(
  * @returns min <= n < max
  * 
  * @example
- * const result = generateInt(0, 10); // 5
- * const result = generateInt(0, 10, 0); // 2
- * const result = generateInt(0, 10, 10); // 5
- * const result = generateInt(0, 10, 100); // 2
+ * generateInt(0, 10); // 5
+ * generateInt(0, 10, 0); // 2
+ * generateInt(0, 10, 10); // 5
+ * generateInt(0, 10, 100); // 2
  */
 export function generateInt(min: number, max: number, seed?: number | null | undefined): number {
   return Math.floor(generateFloat(min, max, seed));
 }
 /**
  * @example
- * const result = getLengthFromInt(10); // 2
- * const result = getLengthFromInt(100); // 3
+ * getLengthFromInt(10); // 2
+ * getLengthFromInt(100); // 3
  */
 export function getLengthFromInt(num: number): number {
   return Math.log(num) * Math.LOG10E + 1 | 0;
 }
 /**
  * @example
- * const result = getBitSize(1); // 1;
- * const result = getBitSize(2); // 2;
- * const result = getBitSize(4); // 3;
- * const result = getBitSize(8); // 4;
+ * getBitSize(1); // 1;
+ * getBitSize(2); // 2;
+ * getBitSize(4); // 3;
+ * getBitSize(8); // 4;
  */
 export function getBitSize(num: number): number {
   return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;
 }
 /**
  * @example
- * const result = getLengthFromFloat(1.2); // 2
- * const result = getLengthFromFloat(1.23); // 3
+ * getLengthFromFloat(1.2); // 2
+ * getLengthFromFloat(1.23); // 3
  */
 export function getLengthFromFloat(num: number): number {
   return ("" + num).replace(".", "").length;
@@ -115,8 +115,8 @@ export function getLengthFromFloat(num: number): number {
  * @returns min <= n <= max
  * 
  * @example
- * const result = getClampedNumber(5, 0, 10); // 5
- * const result = getClampedNumber(10, 0, 10); // 10
+ * getClampedNumber(5, 0, 10); // 5
+ * getClampedNumber(10, 0, 10); // 10
  */
 export function getClampedNumber(num: number, min: number, max: number): number {
   return Math.min(max, Math.max(num, min));
@@ -125,12 +125,12 @@ export function getClampedNumber(num: number, min: number, max: number): number 
  * @returns min <= n < max
  * 
  * @example
- * const result = getLoopedNumber(-5, 0, 10); // 5
- * const result = getLoopedNumber(-2.5, 0, 10); // 7.5
- * const result = getLoopedNumber(0, 0, 10); // 0
- * const result = getLoopedNumber(5, 0, 10); // 5
- * const result = getLoopedNumber(10, 0, 10); // 0
- * const result = getLoopedNumber(20, 0, 10); // 0
+ * getLoopedNumber(-5, 0, 10); // 5
+ * getLoopedNumber(-2.5, 0, 10); // 7.5
+ * getLoopedNumber(0, 0, 10); // 0
+ * getLoopedNumber(5, 0, 10); // 5
+ * getLoopedNumber(10, 0, 10); // 0
+ * getLoopedNumber(20, 0, 10); // 0
  */
 export function getLoopedNumber(num: number, min: number, max: number): number {
   num -= min;
@@ -148,7 +148,7 @@ export function getLoopedNumber(num: number, min: number, max: number): number {
 }
 /**
  * @example
- * const result = toBytes(1, "MB"); // 1048576
+ * toBytes(1, "MB"); // 1048576
  */
 export function toBytes(
   bytes: number,
@@ -168,7 +168,7 @@ export function toBytes(
 }
 /**
  * @example
- * const result = toFileSize(1024 * 1024, "MB"); // 1
+ * toFileSize(1024 * 1024, "MB"); // 1
  */
 export function toFileSize(
   bytes: number,
@@ -188,7 +188,7 @@ export function toFileSize(
 }
 /**
  * @example
- * const result = humanizeFileSize(1024 * 1024, "Bytes"); // "1.00 MB"
+ * humanizeFileSize(1024 * 1024, "Bytes"); // "1.00 MB"
  */
 export function humanizeFileSize(
   num: number,
@@ -209,7 +209,7 @@ export function humanizeFileSize(
 }
 /**
  * @example
- * const result = getContainedSize(100, 100, 200, 100); // [100, 100]
+ * getContainedSize(100, 100, 200, 100); // [100, 100]
  */
 export function getContainedSize(
   srcWidth: number,
@@ -224,7 +224,7 @@ export function getContainedSize(
 }
 /**
  * @example
- * const result = getCoveredSize(100, 100, 200, 100); // [200, 200]
+ * getCoveredSize(100, 100, 200, 100); // [200, 200]
  */
 export function getCoveredSize(
   srcWidth: number,
@@ -239,7 +239,7 @@ export function getCoveredSize(
 }
 /**
  * @example
- * const result = getAdjustedSize(175, 175, 200, 200, 100, 100); // [175, 175]
+ * getAdjustedSize(175, 175, 200, 200, 100, 100); // [175, 175]
  */
 export function getAdjustedSize(
   srcWidth: number,

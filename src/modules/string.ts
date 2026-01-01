@@ -1,6 +1,6 @@
 /**
  * @example
- * const result = BRACKETS["("]; // ")"
+ * BRACKETS["("]; // ")"
  */
 export const BRACKETS = {
   "(": ")",
@@ -32,7 +32,7 @@ export const BRACKETS = {
 } as const;
 /**
  * @example
- * const result = QUOTES["'"]; // "'"
+ * QUOTES["'"]; // "'"
  */
 export const QUOTES = {
   "'": "'",
@@ -47,7 +47,7 @@ export const QUOTES = {
 } as const;
 /**
  * @example
- * const result = toTitleCase("lorem-ipsum"); // "Lorem Ipsum"
+ * toTitleCase("lorem-ipsum"); // "Lorem Ipsum"
  */
 export function toTitleCase(str: string): string {
   return str
@@ -57,21 +57,21 @@ export function toTitleCase(str: string): string {
 }
 /**
  * @example
- * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
+ * toSentenceCase("lorem ipsum"); // "Lorem ipsum"
  */
 export function toSentenceCase(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 /**
  * @example
- * const result = toSlug(" Lorem  ipsum "); // "lorem-ipsum"
+ * toSlug(" Lorem  ipsum "); // "lorem-ipsum"
  */
 export function toSlug(str: string): string {
   return str.toLowerCase().replace(/\s+/g, '-');
 }
 /**
  * @example
- * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
+ * toCamelCase("Lorem ipsum"); // "loremIpsum"
  */
 export function toCamelCase(str: string): string {
   return str
@@ -80,7 +80,7 @@ export function toCamelCase(str: string): string {
 }
 /**
  * @example
- * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
+ * toPascalCase("lorem ipsum"); // "LoremIpsum"
  */
 export function toPascalCase(str: string): string {
   return str
@@ -89,7 +89,7 @@ export function toPascalCase(str: string): string {
 }
 /**
  * @example
- * const uuid = generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
+ * generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export function generateUuid(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -100,8 +100,8 @@ export function generateUuid(): string {
 }
 /**
  * @example
- * const result = generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
- * const result = generateString(); // "a"
+ * generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
+ * generateString(); // "a"
  */
 export function generateString(
   charset: string = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-",
@@ -119,7 +119,8 @@ export function generateString(
 }
 /**
  * @example
- * const encrypted = toXor("text", "this is salt!");
+ * const original = "text";
+ * const encrypted = toXor(original, "this is salt!");
  * const decrypted = toXor(encrypted, "this is salt!"); // "text"
  */
 export function toXor(str: string, salt: string): string {
@@ -146,7 +147,7 @@ export function getInts(str: string): number[] {
 }
 /**
  * @example
- * const result = getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
+ * getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
  */
 export function getFloats(str: string): number[] {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
@@ -156,7 +157,7 @@ export function getFloats(str: string): number[] {
  * 2. Change all type of whitespaces to " "
  * 
  * @example
- * const result = toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
+ * toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
  */
 export function toHalfWidthString(str: string): string {
   return str
@@ -165,7 +166,7 @@ export function toHalfWidthString(str: string): string {
 }
 /**
  * @example
- * const result = toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ * toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
  */
 export function toFullWidthString(str: string): string {
   return str
@@ -174,7 +175,7 @@ export function toFullWidthString(str: string): string {
 }
 /**
  * @example
- * const result = toRegExp("/abc/gi"); // /abc/gi
+ * toRegExp("/abc/gi"); // /abc/gi
  */
 export function toRegExp(str: string): RegExp {
   const parts = str.split("/");
@@ -198,7 +199,7 @@ export function toRegExp(str: string): RegExp {
  * 1: Number of inserted characters
  * 
  * @example
- * const result = getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
 export function getStringDiffs(from: string, to: string): [number, string][] {
   const backtrack = function(
@@ -320,7 +321,7 @@ export function getStringDiffs(from: string, to: string): [number, string][] {
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
  * const b = "sit amet, adipiscing";
- * const result = matchStrings(a, b);
+ * matchStrings(a, b);
  * // {
  * //   matchRate: 0.35714285714285715,
  * //   similarity: 0.35714285714285715,

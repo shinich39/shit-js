@@ -2,7 +2,7 @@
  * @example
  * const a = {};
  * const b = copyObject(a);
- * const result = a == b; // false
+ * a == b; // false
  */
 export declare function copyObject<T>(obj: T, cache?: WeakMap<object, any>): T;
 /**

@@ -1,6 +1,6 @@
 /**
  * @example
- * const compressed = toLzw("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+ * toLzw("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
  * // [
  * //    76, 111, 114, 101, 109,  32, 105, 112, 115,
  * //   117, 260, 100, 111, 108, 257,  32, 115, 105,
@@ -13,8 +13,7 @@
 export declare function toLzw(input: string): number[];
 /**
  * @example
- * const decompressed = fromLzw([76, 111, 114, 101, 109, ...]);
- * // "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+ * fromLzw([76, 111, 114, 101, 109, ...]); // "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
  */
 export declare function fromLzw(compressed: number[]): string;
 //# sourceMappingURL=lzw.d.ts.map

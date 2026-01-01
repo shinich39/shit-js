@@ -1,7 +1,6 @@
 /**
  * @example
- * const result = joinPaths("./project/", "abc", "./package.json");
- * // "project/abc/package.json"
+ * joinPaths("./project/", "abc", "./package.json"); // "project/abc/package.json"
  */
 export function joinPaths(...args: string[]): string {
   const parts = args.join("/").split(/[\\/]+/);
@@ -31,11 +30,8 @@ export function joinPaths(...args: string[]): string {
 }
 /**
  * @example
- * const result = getBaseName("./project/package.json");
- * // "package.json"
- * 
- * const result = getBaseName("./project/package.json", ".json");
- * // "package"
+ * getBaseName("./project/package.json"); // "package.json"
+ * getBaseName("./project/package.json", ".json"); // "package"
  */
 export function getBaseName(str: string, suffix?: string): string {
   str = str.replace(/[\\/]$/, "");
@@ -60,8 +56,7 @@ export function getBaseName(str: string, suffix?: string): string {
 }
 /**
  * @example
- * const result = getExtName("./project/package.json");
- * // ".json"
+ * getExtName("./project/package.json"); // ".json"
  */
 export function getExtName(str: string): string {
   let i = str.length - 1;
@@ -83,8 +78,7 @@ export function getExtName(str: string): string {
 }
 /**
  * @example
- * const result = getDirName("./project/package.json");
- * // "./project"
+ * getDirName("./project/package.json"); // "./project"
  */
 export function getDirName(str: string): string {
   str = str.replace(/[\\/]$/, "");
@@ -104,8 +98,7 @@ export function getDirName(str: string): string {
 }
 /**
  * @example
- * const result = getRelativePath("./project/", "./package.json");
- * // "../package.json"
+ * getRelativePath("./project/", "./package.json"); // "../package.json"
  */
 export function getRelativePath(from: string, to: string): string {
   const normalize = (str: string) => {
@@ -148,7 +141,7 @@ export function getRelativePath(from: string, to: string): string {
 }
 /**
  * @example
- * const result = getRootPath(
+ * getRootPath(
  *   "./project/abc/package.json",
  *   "./project/abc/def",
  *   "./project/abc/def/package.json",

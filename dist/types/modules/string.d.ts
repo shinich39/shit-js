@@ -1,6 +1,6 @@
 /**
  * @example
- * const result = BRACKETS["("]; // ")"
+ * BRACKETS["("]; // ")"
  */
 export declare const BRACKETS: {
     readonly "(": ")";
@@ -32,7 +32,7 @@ export declare const BRACKETS: {
 };
 /**
  * @example
- * const result = QUOTES["'"]; // "'"
+ * QUOTES["'"]; // "'"
  */
 export declare const QUOTES: {
     readonly "'": "'";
@@ -47,43 +47,44 @@ export declare const QUOTES: {
 };
 /**
  * @example
- * const result = toTitleCase("lorem-ipsum"); // "Lorem Ipsum"
+ * toTitleCase("lorem-ipsum"); // "Lorem Ipsum"
  */
 export declare function toTitleCase(str: string): string;
 /**
  * @example
- * const result = toSentenceCase("lorem ipsum"); // "Lorem ipsum"
+ * toSentenceCase("lorem ipsum"); // "Lorem ipsum"
  */
 export declare function toSentenceCase(str: string): string;
 /**
  * @example
- * const result = toSlug(" Lorem  ipsum "); // "lorem-ipsum"
+ * toSlug(" Lorem  ipsum "); // "lorem-ipsum"
  */
 export declare function toSlug(str: string): string;
 /**
  * @example
- * const result = toCamelCase("Lorem ipsum"); // "loremIpsum"
+ * toCamelCase("Lorem ipsum"); // "loremIpsum"
  */
 export declare function toCamelCase(str: string): string;
 /**
  * @example
- * const result = toPascalCase("lorem ipsum"); // "LoremIpsum"
+ * toPascalCase("lorem ipsum"); // "LoremIpsum"
  */
 export declare function toPascalCase(str: string): string;
 /**
  * @example
- * const uuid = generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
+ * generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export declare function generateUuid(): string;
 /**
  * @example
- * const result = generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
- * const result = generateString(); // "a"
+ * generateString("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", 1); // "a"
+ * generateString(); // "a"
  */
 export declare function generateString(charset?: string, size?: number): string;
 /**
  * @example
- * const encrypted = toXor("text", "this is salt!");
+ * const original = "text";
+ * const encrypted = toXor(original, "this is salt!");
  * const decrypted = toXor(encrypted, "this is salt!"); // "text"
  */
 export declare function toXor(str: string, salt: string): string;
@@ -94,7 +95,7 @@ export declare function toXor(str: string, salt: string): string;
 export declare function getInts(str: string): number[];
 /**
  * @example
- * const result = getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
+ * getFloats("ftp://192.168.0.1"); // [192.168, 0.1]
  */
 export declare function getFloats(str: string): number[];
 /**
@@ -102,17 +103,17 @@ export declare function getFloats(str: string): number[];
  * 2. Change all type of whitespaces to " "
  *
  * @example
- * const result = toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
+ * toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
  */
 export declare function toHalfWidthString(str: string): string;
 /**
  * @example
- * const result = toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ * toFullWidthString("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
  */
 export declare function toFullWidthString(str: string): string;
 /**
  * @example
- * const result = toRegExp("/abc/gi"); // /abc/gi
+ * toRegExp("/abc/gi"); // /abc/gi
  */
 export declare function toRegExp(str: string): RegExp;
 /**
@@ -125,14 +126,14 @@ export declare function toRegExp(str: string): RegExp;
  * 1: Number of inserted characters
  *
  * @example
- * const result = getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
 export declare function getStringDiffs(from: string, to: string): [number, string][];
 /**
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
  * const b = "sit amet, adipiscing";
- * const result = matchStrings(a, b);
+ * matchStrings(a, b);
  * // {
  * //   matchRate: 0.35714285714285715,
  * //   similarity: 0.35714285714285715,
