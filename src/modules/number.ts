@@ -24,6 +24,56 @@ export function generateFloat(min: number, max: number, seed?: number | null | u
     : Math.random() * (max - min) + min;
 }
 /**
+ * @example
+ * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+ * for (let i = 0; i < str.length; i++) {
+ *   const char = str[i];
+ *   const delay = generateTypingDelay(char, i, 1);
+ *   process.stdout.write(char);
+ *   await sleep(delay);
+ * }
+ */
+export function generateTypingDelay(
+  char: string,
+  index = 0,
+  speed = 1,
+): number {
+  let base: number;
+
+  const scale = (v: number) => v / speed;
+
+  // Sentence
+  if (/[.,!?]/.test(char)) {
+    base = generateInt(
+      scale(320),
+      scale(520)
+    );
+  } // Word
+  else if (char === " ") {
+    base = generateInt(
+      scale(200),
+      scale(320)
+    );
+  } // Character
+  else {
+    base = generateInt(
+      scale(75),
+      scale(120)
+    );
+  }
+
+  const accel = Math.sin(index / scale(4.5)) * scale(12)
+    + (Math.random() - 0.5) * scale(5);
+
+  base -= accel;
+
+  // Clamp
+  return Math.max(
+    scale(35),
+    Math.min(base, scale(520))
+  );
+}
+/**
  * @returns min <= n < max
  * 
  * @example

@@ -1,5 +1,3 @@
-import { generateInt } from "./number.js";
-
 /**
  * @example
  * await sleep(1000); // 1s
@@ -36,87 +34,6 @@ export function retry<T extends (...args: any[]) => any>(
 
     throw error;
   };
-}
-
-type TypingOptions = {
-  character?: {
-    min: number;
-    max: number;
-  },
-  word?: {
-    min: number;
-    max: number;
-  },
-  sentence?: {
-    min: number;
-    max: number;
-  },
-  acceleration?: {
-    /** ms */
-    strength: number,
-    frequency: number,
-  },
-  clamp?: {
-    min: number;
-    max: number; 
-  }
-};
-/**
- * @example
- * await typing("Lorem ipsum dolor sit amet, consectetur adipiscing elit.", (char, i, str) => {
- *   process.stdout.write(char);
- * });
- */
-export async function typing(
-  value: string,
-  callback: (character: string, index: number, string: string) => void | Promise<void>,
-  options?: TypingOptions,
-): Promise<void> {
-  const defaultOptions: Required<TypingOptions> = {
-    character: { min: 35, max: 95 },
-    word: { min: 120, max: 200 },
-    sentence: { min: 220, max: 380 },
-    acceleration: { strength: 18, frequency: 3.2 },
-    clamp: { min: 28, max: 420 },
-  }
-
-  const resolveOptions = (options?: TypingOptions) => {
-    return {
-      character: { ...defaultOptions.character, ...options?.character },
-      word: { ...defaultOptions.word, ...options?.word },
-      sentence: { ...defaultOptions.sentence, ...options?.sentence },
-      acceleration: { ...defaultOptions.acceleration, ...options?.acceleration },
-      clamp: { ...defaultOptions.clamp, ...options?.clamp },
-    }
-  }
-
-  const createDelay = (char: string, index: number) => {
-    let base: number;
-
-    if (/[.,!?]/.test(char)) {
-      base = generateInt(opts.sentence.min, opts.sentence.max);
-    } else if (char === " ") {
-      base = generateInt(opts.word.min, opts.word.max);
-    } else {
-      base = generateInt(opts.character.min, opts.character.max);
-    }
-
-    const accel = Math.sin(index / opts.acceleration.frequency) * opts.acceleration.strength;
-    base -= accel;
-
-    // Clamp
-    return Math.max(opts.clamp.min, Math.min(base, opts.clamp.max));
-  }
-
-  const opts = resolveOptions(options);
-
-  for (let i = 0; i < value.length; i++) {
-    const c = value[i];
-    const d = createDelay(c, i);
-
-    await callback(c, i, value);
-    await sleep(d);
-  }
 }
 /**
  * @example

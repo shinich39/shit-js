@@ -16,7 +16,9 @@ import {
   getLogScore,
   getPowerScore,
   getBitSize,
+  generateTypingDelay,
 } from "./number";
+import { sleep } from "./promise";
 
 test("generateFloat", () => {
   eq(generateFloat(0, 1) < 1, true);
@@ -26,6 +28,17 @@ test("generateFloat", () => {
 test("generateInt", () => {
   eq(generateInt(0, 1) < 1, true);
   eq(generateInt(0, 1) >= 0, true);
+});
+
+test("generateTypingDelay", async () => {
+  // const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+  // await sleep(100);
+  // for (let i = 0; i < str.length; i++) {
+  //   const char = str[i];
+  //   const delay = generateTypingDelay(char, i, 2);
+  //   process.stdout.write(char);
+  //   await sleep(delay);
+  // }
 });
 
 test("getLengthFromInt", () => {

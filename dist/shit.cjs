@@ -33,6 +33,7 @@ __export(shit_exports, {
   generateFloat: () => generateFloat,
   generateInt: () => generateInt,
   generateString: () => generateString,
+  generateTypingDelay: () => generateTypingDelay,
   generateUuid: () => generateUuid,
   generateXor: () => generateXor,
   getAdjustedSize: () => getAdjustedSize,
@@ -95,7 +96,6 @@ __export(shit_exports, {
   toSlug: () => toSlug,
   toTitleCase: () => toTitleCase,
   toggleBit: () => toggleBit,
-  typing: () => typing,
   uniqueBy: () => uniqueBy
 });
 module.exports = __toCommonJS(shit_exports);
@@ -953,6 +953,32 @@ function mulberry32(seed) {
 function generateFloat(min, max, seed) {
   return typeof seed === "number" ? mulberry32(seed) * (max - min) + min : Math.random() * (max - min) + min;
 }
+function generateTypingDelay(char, index = 0, speed = 1) {
+  let base;
+  const scale = (v) => v / speed;
+  if (/[.,!?]/.test(char)) {
+    base = generateInt(
+      scale(320),
+      scale(520)
+    );
+  } else if (char === " ") {
+    base = generateInt(
+      scale(200),
+      scale(320)
+    );
+  } else {
+    base = generateInt(
+      scale(75),
+      scale(120)
+    );
+  }
+  const accel = Math.sin(index / scale(4.5)) * scale(12) + (Math.random() - 0.5) * scale(5);
+  base -= accel;
+  return Math.max(
+    scale(35),
+    Math.min(base, scale(520))
+  );
+}
 function generateInt(min, max, seed) {
   return Math.floor(generateFloat(min, max, seed));
 }
@@ -1295,44 +1321,6 @@ function retry(fn, count, delay) {
     }
     throw error;
   };
-}
-async function typing(value, callback, options) {
-  const defaultOptions = {
-    character: { min: 35, max: 95 },
-    word: { min: 120, max: 200 },
-    sentence: { min: 220, max: 380 },
-    acceleration: { strength: 18, frequency: 3.2 },
-    clamp: { min: 28, max: 420 }
-  };
-  const resolveOptions = (options2) => {
-    return {
-      character: { ...defaultOptions.character, ...options2?.character },
-      word: { ...defaultOptions.word, ...options2?.word },
-      sentence: { ...defaultOptions.sentence, ...options2?.sentence },
-      acceleration: { ...defaultOptions.acceleration, ...options2?.acceleration },
-      clamp: { ...defaultOptions.clamp, ...options2?.clamp }
-    };
-  };
-  const createDelay = (char, index) => {
-    let base;
-    if (/[.,!?]/.test(char)) {
-      base = generateInt(opts.sentence.min, opts.sentence.max);
-    } else if (char === " ") {
-      base = generateInt(opts.word.min, opts.word.max);
-    } else {
-      base = generateInt(opts.character.min, opts.character.max);
-    }
-    const accel = Math.sin(index / opts.acceleration.frequency) * opts.acceleration.strength;
-    base -= accel;
-    return Math.max(opts.clamp.min, Math.min(base, opts.clamp.max));
-  };
-  const opts = resolveOptions(options);
-  for (let i = 0; i < value.length; i++) {
-    const c = value[i];
-    const d = createDelay(c, i);
-    await callback(c, i, value);
-    await sleep(d);
-  }
 }
 var QueueWorker = class {
   inProgress;
@@ -1756,6 +1744,7 @@ function toError(err) {
   generateFloat,
   generateInt,
   generateString,
+  generateTypingDelay,
   generateUuid,
   generateXor,
   getAdjustedSize,
@@ -1818,6 +1807,5 @@ function toError(err) {
   toSlug,
   toTitleCase,
   toggleBit,
-  typing,
   uniqueBy
 });
