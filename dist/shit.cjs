@@ -1446,11 +1446,11 @@ function getStringDiffs(from, to) {
   return [];
 }
 function matchStrings(from, to) {
-  const diff = getStringDiffs(from, to);
+  const diffs = getStringDiffs(from, to);
   let matches = 0;
   let insertions = 0;
   let deletions = 0;
-  for (const [op, str] of diff) {
+  for (const [op, str] of diffs) {
     const len = str.length;
     if (op === 0) {
       matches += len;
