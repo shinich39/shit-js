@@ -56,15 +56,13 @@ function getCombinations(arr) {
   return result;
 }
 function getCases(...args) {
+  args = args.filter((arg) => arg.length > 0);
   if (args.length === 0) {
     return [];
   }
   const indexes = Array(args.length).fill(0);
   const result = [[]];
   for (let i2 = 0; i2 < args.length; i2++) {
-    if (args[i2].length === 0) {
-      throw new Error(`Invalid argument: argument cannot be empty`);
-    }
     const item = args[i2][indexes[i2]];
     result[0].push(item);
   }

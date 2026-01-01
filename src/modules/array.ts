@@ -102,6 +102,8 @@ export function getCombinations<T>(arr: T[]): T[][] {
  * // [["a", 1],["b", 1],["c", 1]]
  */
 export function getCases<T>(...args: T[][]): T[][] {
+  args = args.filter((arg) => arg.length > 0);
+
   if (args.length === 0) {
     return [];
   }
@@ -109,18 +111,14 @@ export function getCases<T>(...args: T[][]): T[][] {
   const indexes: number[] = Array(args.length).fill(0);
   const result: T[][] = [[]];
 
-  // Create first plot
+  // Append first item of arrays
   for (let i = 0; i < args.length; i++) {
-    if (args[i].length === 0) {
-      throw new Error(`Invalid argument: argument cannot be empty`);
-    }
-
-    // Append first item of arrays
     const item = args[i][indexes[i]];
     result[0].push(item);
   }
 
   let i = args.length - 1;
+  
   while (true) {
     if (indexes[i] < args[i].length - 1) {
       // Increase index
