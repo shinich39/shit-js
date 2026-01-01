@@ -27,17 +27,10 @@ test("QueueWorker", async () => {
     worker.add(async function () {
       await sleep(10);
       // console.log(`Task ${index}, Queue: ${worker.queue.length}, Time: ${Date.now() - startedAt}ms`);
-    });
+    }).then(() => {
+      if (!worker.running) {
+        eq(Date.now() - startedAt >= 30, true);
+      }
+    })
   }
-
-  eq(worker.queue.length, 3);
-
-  worker.start();
-
-  setTimeout(() => {
-    worker.pause();
-    setTimeout(() => {
-      worker.start();
-    }, 15);
-  }, 15);
 });

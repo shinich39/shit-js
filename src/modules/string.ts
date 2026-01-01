@@ -1,8 +1,8 @@
 /**
  * @example
- * const result = Brackets["("]; // ")"
+ * const result = BRACKETS["("]; // ")"
  */
-export const Brackets = {
+export const BRACKETS = {
   "(": ")",
   "[": "]",
   "{": "}",
@@ -32,9 +32,9 @@ export const Brackets = {
 } as const;
 /**
  * @example
- * const result = Quotes["'"]; // "'"
+ * const result = QUOTES["'"]; // "'"
  */
-export const Quotes = {
+export const QUOTES = {
   "'": "'",
   "\"": "\"",
   "`": "`",
@@ -119,10 +119,10 @@ export function generateString(
 }
 /**
  * @example
- * const encrypted = generateXor("text", "this is salt!");
- * const decrypted = generateXor(encrypted, "this is salt!"); // "text"
+ * const encrypted = toXor("text", "this is salt!");
+ * const decrypted = toXor(encrypted, "this is salt!"); // "text"
  */
-export function generateXor(str: string, salt: string): string {
+export function toXor(str: string, salt: string): string {
   const saltSize = salt.length;
 
   if (saltSize === 0) {
@@ -198,9 +198,9 @@ export function toRegExp(str: string): RegExp {
  * 1: Number of inserted characters
  * 
  * @example
- * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * const result = getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export function getDiffs(from: string, to: string): [number, string][] {
+export function getStringDiffs(from: string, to: string): [number, string][] {
   const backtrack = function(
     from: string,
     to: string,
@@ -344,7 +344,7 @@ export function matchStrings(from: string, to: string): {
   insertions: number,
   deletions: number,
 } {
-  const diff = getDiffs(from, to);
+  const diff = getStringDiffs(from, to);
   
   let matches = 0;
   let insertions = 0;

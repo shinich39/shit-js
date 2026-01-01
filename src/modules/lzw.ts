@@ -1,6 +1,6 @@
 /**
  * @example
- * const compressed = compressLZW("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+ * const compressed = toLzw("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
  * // [
  * //    76, 111, 114, 101, 109,  32, 105, 112, 115,
  * //   117, 260, 100, 111, 108, 257,  32, 115, 105,
@@ -10,9 +10,8 @@
  * //    32, 101, 108, 273,  46
  * // ]
  */
-export function compressLzw(input: string): number[] {
+export function toLzw(input: string): number[] {
   const dict: Record<string, number> = {};
-  const data: string[] = input.split("");
   const result: number[] = [];
   let dictSize: number = 256;
 
@@ -23,14 +22,14 @@ export function compressLzw(input: string): number[] {
 
   let w = "";
 
-  for (const c of data) {
+  for (const c of input) {
     const wc = w + c;
-    if (dict[wc]) {
+    if (dict[wc] !== undefined) {
       w = wc;
     } else {
       result.push(dict[w]);
       dict[wc] = dictSize++;
-      w = String(c);
+      w = c;
     }
   }
 
@@ -42,10 +41,10 @@ export function compressLzw(input: string): number[] {
 }
 /**
  * @example
- * const decompressed = decompressLZW([76, 111, 114, 101, 109, ...]);
+ * const decompressed = fromLzw([76, 111, 114, 101, 109, ...]);
  * // "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
  */
-export function decompressLzw(compressed: number[]): string {
+export function fromLzw(compressed: number[]): string {
   const dict: string[] = [];
   let dictSize: number = 256;
 

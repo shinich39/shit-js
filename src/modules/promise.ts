@@ -35,6 +35,14 @@ export function retry<T extends (...args: any[]) => any>(
     throw error;
   };
 }
+
+type QueueFunction<T = void> = () => T | Promise<T>;
+
+interface QueueItem<T> {
+  fn: QueueFunction<T>,
+  resolve: (value: T) => void;
+  reject: (reason?: any) => void;
+}
 /**
  * @example
  * const worker = new QueueWorker();
@@ -42,66 +50,36 @@ export function retry<T extends (...args: any[]) => any>(
  * worker.add(async () => { await fetch('/api/data'); });
  */
 export class QueueWorker {
-  inProgress: boolean;
-  queue: (() => void | Promise<void>)[];
-
-  constructor() {
-    this.inProgress = false;
-    this.queue = [];
-  }
+  queue: QueueItem<any>[] = [];
+  running: boolean = false;
   /**
    * @example
    * worker.add(() => console.log(`Task 0`));
    * worker.add(async () => { await fetch(`/api/data`); })
    */
-  add(fn: () => void | Promise<void>): void {
-    this.queue.push(fn);
-  }
-  /**
-   * @example
-   * const isFirst = !worker.inProgress;
-   * await worker.start();
-   * if (isFirst) {
-   *   // Write code here to running after end of task.
-   * }
-   */
-  async start(): Promise<void> {
-    if (this.inProgress) {
-      return;
-    }
+  add<T>(fn: QueueFunction<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.queue.push({ fn, resolve, reject });
 
-    this.inProgress = true;
-
-    while(this.inProgress) {
-      const task = this.queue.shift();
-      
-      if (!task) {
-        break;
+      if (!this.running) {
+        this.running = true;
+        this.run();
       }
+    });
+  }
 
-      await task();
+  private async run(): Promise<void> {
+    while (this.queue.length > 0) {
+      const item = this.queue.shift()!;
+
+      try {
+        const result = await item.fn();
+        item.resolve(result);
+      } catch (err) {
+        item.reject(err);
+      }
     }
 
-    this.inProgress = false;
-  }
-  /**
-   * worker.inProgress = false;
-   */
-  pause(): void {
-    this.inProgress = false;
-  }
-  /**
-   * worker.queue = [];
-   */
-  clear(): void {
-    this.queue = [];
-  }
-  /**
-   * worker.queue = [];
-   * worker.inProgress = false;
-   */
-  stop(): void {
-    this.clear();
-    this.pause();
+    this.running = false;
   }
 }

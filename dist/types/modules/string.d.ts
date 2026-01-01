@@ -1,8 +1,8 @@
 /**
  * @example
- * const result = Brackets["("]; // ")"
+ * const result = BRACKETS["("]; // ")"
  */
-export declare const Brackets: {
+export declare const BRACKETS: {
     readonly "(": ")";
     readonly "[": "]";
     readonly "{": "}";
@@ -32,9 +32,9 @@ export declare const Brackets: {
 };
 /**
  * @example
- * const result = Quotes["'"]; // "'"
+ * const result = QUOTES["'"]; // "'"
  */
-export declare const Quotes: {
+export declare const QUOTES: {
     readonly "'": "'";
     readonly "\"": "\"";
     readonly "`": "`";
@@ -83,10 +83,10 @@ export declare function generateUuid(): string;
 export declare function generateString(charset?: string, size?: number): string;
 /**
  * @example
- * const encrypted = generateXor("text", "this is salt!");
- * const decrypted = generateXor(encrypted, "this is salt!"); // "text"
+ * const encrypted = toXor("text", "this is salt!");
+ * const decrypted = toXor(encrypted, "this is salt!"); // "text"
  */
-export declare function generateXor(str: string, salt: string): string;
+export declare function toXor(str: string, salt: string): string;
 /**
  * @example
  * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
@@ -125,9 +125,9 @@ export declare function toRegExp(str: string): RegExp;
  * 1: Number of inserted characters
  *
  * @example
- * const result = getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * const result = getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export declare function getDiffs(from: string, to: string): [number, string][];
+export declare function getStringDiffs(from: string, to: string): [number, string][];
 /**
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";

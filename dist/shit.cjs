@@ -20,22 +20,20 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/shit.ts
 var shit_exports = {};
 __export(shit_exports, {
-  Brackets: () => Brackets,
+  BRACKETS: () => BRACKETS,
   Dom: () => Dom,
+  QUOTES: () => QUOTES,
   QueueWorker: () => QueueWorker,
-  Quotes: () => Quotes,
   checkBit: () => checkBit,
   clearBit: () => clearBit,
-  clone: () => clone,
-  compressLzw: () => compressLzw,
+  copyObject: () => copyObject,
   createStore: () => createStore,
-  decompressLzw: () => decompressLzw,
+  fromLzw: () => fromLzw,
   generateFloat: () => generateFloat,
   generateInt: () => generateInt,
   generateString: () => generateString,
   generateTypingDelay: () => generateTypingDelay,
   generateUuid: () => generateUuid,
-  generateXor: () => generateXor,
   getAdjustedSize: () => getAdjustedSize,
   getBaseName: () => getBaseName,
   getBitSize: () => getBitSize,
@@ -44,7 +42,6 @@ __export(shit_exports, {
   getCombinations: () => getCombinations,
   getContainedSize: () => getContainedSize,
   getCoveredSize: () => getCoveredSize,
-  getDiffs: () => getDiffs,
   getDirName: () => getDirName,
   getExtName: () => getExtName,
   getFloats: () => getFloats,
@@ -59,10 +56,10 @@ __export(shit_exports, {
   getModeCount: () => getModeCount,
   getModeValue: () => getModeValue,
   getModeValueWithCount: () => getModeValueWithCount,
-  getObjectValue: () => getObjectValue,
   getPowerScore: () => getPowerScore,
   getRelativePath: () => getRelativePath,
   getRootPath: () => getRootPath,
+  getStringDiffs: () => getStringDiffs,
   getStringSize: () => getStringSize,
   getSumValue: () => getSumValue,
   getType: () => getType,
@@ -72,7 +69,6 @@ __export(shit_exports, {
   isNumber: () => isNumber,
   isNumeric: () => isNumeric,
   joinPaths: () => joinPaths,
-  matchObject: () => matchObject,
   matchStrings: () => matchStrings,
   parseDate: () => parseDate,
   parseDom: () => parseDom,
@@ -89,12 +85,14 @@ __export(shit_exports, {
   toFileSize: () => toFileSize,
   toFullWidthString: () => toFullWidthString,
   toHalfWidthString: () => toHalfWidthString,
+  toLzw: () => toLzw,
   toNumber: () => toNumber,
   toPascalCase: () => toPascalCase,
   toRegExp: () => toRegExp,
   toSentenceCase: () => toSentenceCase,
   toSlug: () => toSlug,
   toTitleCase: () => toTitleCase,
+  toXor: () => toXor,
   toggleBit: () => toggleBit,
   uniqueBy: () => uniqueBy
 });
@@ -894,23 +892,22 @@ var Dom = class _Dom {
 };
 
 // src/modules/lzw.ts
-function compressLzw(input) {
+function toLzw(input) {
   const dict = {};
-  const data = input.split("");
   const result = [];
   let dictSize = 256;
   for (let i = 0; i < dictSize; i++) {
     dict[String.fromCharCode(i)] = i;
   }
   let w = "";
-  for (const c of data) {
+  for (const c of input) {
     const wc = w + c;
-    if (dict[wc]) {
+    if (dict[wc] !== void 0) {
       w = wc;
     } else {
       result.push(dict[w]);
       dict[wc] = dictSize++;
-      w = String(c);
+      w = c;
     }
   }
   if (w !== "") {
@@ -918,7 +915,7 @@ function compressLzw(input) {
   }
   return result;
 }
-function decompressLzw(compressed) {
+function fromLzw(compressed) {
   const dict = [];
   let dictSize = 256;
   for (let i = 0; i < dictSize; i++) {
@@ -1072,9 +1069,12 @@ function getPowerScore(total, current, alpha = 0.5) {
 }
 
 // src/modules/object.ts
-function clone(obj) {
+function copyObject(obj, cache = /* @__PURE__ */ new WeakMap()) {
   if (obj === null || typeof obj !== "object") {
     return obj;
+  }
+  if (cache.has(obj)) {
+    return cache.get(obj);
   }
   if (obj instanceof Date) {
     return new Date(obj.getTime());
@@ -1083,98 +1083,14 @@ function clone(obj) {
     return new RegExp(obj.source, obj.flags);
   }
   if (Array.isArray(obj)) {
-    return obj.map((item) => clone(item));
+    return obj.map((item) => copyObject(item));
   }
-  return Object.entries(obj).reduce((acc, cur) => {
-    acc[cur[0]] = clone(cur[1]);
-    return acc;
-  }, {});
-}
-function getObjectValue(obj, key) {
-  let cur = obj;
-  for (const k of key.split(".")) {
-    if (typeof cur !== "object" || cur === null) {
-      break;
-    }
-    cur = cur[k];
+  const result = Object.create(Object.getPrototypeOf(obj));
+  cache.set(obj, result);
+  for (const key of Object.keys(obj)) {
+    result[key] = copyObject(obj[key], cache);
   }
-  return cur;
-}
-function matchObject(obj, query) {
-  const fn = function(a, b, seen = /* @__PURE__ */ new WeakMap()) {
-    if (Object.is(a, b)) {
-      return true;
-    }
-    if (typeof a !== typeof b) {
-      return false;
-    }
-    if (typeof b !== "object") {
-      return a === b;
-    }
-    if (b === null) {
-      return a === null;
-    }
-    if (seen.has(b)) {
-      return seen.get(b) === a;
-    }
-    seen.set(b, a);
-    if (Array.isArray(b)) {
-      if (!Array.isArray(a) || a.length < b.length) {
-        return false;
-      }
-      for (const j of b) {
-        let isExists = false;
-        for (const i of a) {
-          if (fn(i, j, seen)) {
-            isExists = true;
-            break;
-          }
-        }
-        if (!isExists) {
-          return false;
-        }
-      }
-      return true;
-    }
-    if (b instanceof Date) {
-      if (!(a instanceof Date)) {
-        return false;
-      }
-      return a.valueOf() === b.valueOf();
-    }
-    if (b instanceof Set) {
-      if (!(a instanceof Set) || a.size < b.size) {
-        return false;
-      }
-      return fn(Array.from(a), Array.from(b), seen);
-    }
-    if (b instanceof Map) {
-      if (!(a instanceof Map) || a.size < b.size) {
-        return false;
-      }
-      for (const [key, value] of b) {
-        if (!a.has(key) || !fn(a.get(key), value, seen)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    if (Object.getPrototypeOf(a) !== Object.getPrototypeOf(b)) {
-      return false;
-    }
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
-    if (keysA.length < keysB.length) {
-      return false;
-    }
-    for (const key of keysB) {
-      if (keysA.indexOf(key) === -1 || !fn(a[key], b[key], seen)) {
-        return false;
-      }
-    }
-    return true;
-  };
-  return fn(obj, query);
+  return result;
 }
 function createStore(callback) {
   const obj = {};
@@ -1323,66 +1239,38 @@ function retry(fn, count, delay) {
   };
 }
 var QueueWorker = class {
-  inProgress;
-  queue;
-  constructor() {
-    this.inProgress = false;
-    this.queue = [];
-  }
+  queue = [];
+  running = false;
   /**
    * @example
    * worker.add(() => console.log(`Task 0`));
    * worker.add(async () => { await fetch(`/api/data`); })
    */
   add(fn) {
-    this.queue.push(fn);
-  }
-  /**
-   * @example
-   * const isFirst = !worker.inProgress;
-   * await worker.start();
-   * if (isFirst) {
-   *   // Write code here to running after end of task.
-   * }
-   */
-  async start() {
-    if (this.inProgress) {
-      return;
-    }
-    this.inProgress = true;
-    while (this.inProgress) {
-      const task = this.queue.shift();
-      if (!task) {
-        break;
+    return new Promise((resolve, reject) => {
+      this.queue.push({ fn, resolve, reject });
+      if (!this.running) {
+        this.running = true;
+        this.run();
       }
-      await task();
+    });
+  }
+  async run() {
+    while (this.queue.length > 0) {
+      const item = this.queue.shift();
+      try {
+        const result = await item.fn();
+        item.resolve(result);
+      } catch (err) {
+        item.reject(err);
+      }
     }
-    this.inProgress = false;
-  }
-  /**
-   * worker.inProgress = false;
-   */
-  pause() {
-    this.inProgress = false;
-  }
-  /**
-   * worker.queue = [];
-   */
-  clear() {
-    this.queue = [];
-  }
-  /**
-   * worker.queue = [];
-   * worker.inProgress = false;
-   */
-  stop() {
-    this.clear();
-    this.pause();
+    this.running = false;
   }
 };
 
 // src/modules/string.ts
-var Brackets = {
+var BRACKETS = {
   "(": ")",
   "[": "]",
   "{": "}",
@@ -1410,7 +1298,7 @@ var Brackets = {
   "\u27E8": "\u27E9",
   "\u2770": "\u2771"
 };
-var Quotes = {
+var QUOTES = {
   "'": "'",
   '"': '"',
   "`": "`",
@@ -1451,7 +1339,7 @@ function generateString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefgh
   }
   return result;
 }
-function generateXor(str, salt) {
+function toXor(str, salt) {
   const saltSize = salt.length;
   if (saltSize === 0) {
     throw new Error(`Invalid argument: salt.length === 0`);
@@ -1483,7 +1371,7 @@ function toRegExp(str) {
   const pattern = parts.slice(1).join("/");
   return new RegExp(pattern, flags);
 }
-function getDiffs(from, to) {
+function getStringDiffs(from, to) {
   const backtrack = function(from2, to2, trace2, d) {
     const result = [];
     let x = from2.length;
@@ -1560,7 +1448,7 @@ function getDiffs(from, to) {
   return [];
 }
 function matchStrings(from, to) {
-  const diff = getDiffs(from, to);
+  const diff = getStringDiffs(from, to);
   let matches = 0;
   let insertions = 0;
   let deletions = 0;
@@ -1731,22 +1619,20 @@ function toError(err) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  Brackets,
+  BRACKETS,
   Dom,
+  QUOTES,
   QueueWorker,
-  Quotes,
   checkBit,
   clearBit,
-  clone,
-  compressLzw,
+  copyObject,
   createStore,
-  decompressLzw,
+  fromLzw,
   generateFloat,
   generateInt,
   generateString,
   generateTypingDelay,
   generateUuid,
-  generateXor,
   getAdjustedSize,
   getBaseName,
   getBitSize,
@@ -1755,7 +1641,6 @@ function toError(err) {
   getCombinations,
   getContainedSize,
   getCoveredSize,
-  getDiffs,
   getDirName,
   getExtName,
   getFloats,
@@ -1770,10 +1655,10 @@ function toError(err) {
   getModeCount,
   getModeValue,
   getModeValueWithCount,
-  getObjectValue,
   getPowerScore,
   getRelativePath,
   getRootPath,
+  getStringDiffs,
   getStringSize,
   getSumValue,
   getType,
@@ -1783,7 +1668,6 @@ function toError(err) {
   isNumber,
   isNumeric,
   joinPaths,
-  matchObject,
   matchStrings,
   parseDate,
   parseDom,
@@ -1800,12 +1684,14 @@ function toError(err) {
   toFileSize,
   toFullWidthString,
   toHalfWidthString,
+  toLzw,
   toNumber,
   toPascalCase,
   toRegExp,
   toSentenceCase,
   toSlug,
   toTitleCase,
+  toXor,
   toggleBit,
   uniqueBy
 });

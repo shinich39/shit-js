@@ -1,16 +1,16 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
 import {
-  Brackets,
-  Quotes,
+  BRACKETS,
+  QUOTES,
   toCamelCase,
-  getDiffs,
+  getStringDiffs,
   getFloats,
   getInts,
   generateString,
   getStringSize,
   generateUuid,
-  generateXor,
+  toXor,
   matchStrings,
   toHalfWidthString,
   toSlug,
@@ -55,11 +55,11 @@ test("generateString", () => {
   eq(/^[abc]+$/.test(generateString("abc", 100)), true);
 });
 
-test("generateXor", () => {
+test("toXor", () => {
   const orig = "Hello, world!";
-  const encrypted = generateXor(orig, "this is salt!");
+  const encrypted = toXor(orig, "this is salt!");
   eq(encrypted !== orig, true);
-  const decrypted = generateXor(encrypted, "this is salt!");
+  const decrypted = toXor(encrypted, "this is salt!");
   eq(decrypted, orig);
 });
 
@@ -88,10 +88,10 @@ test("toRegExp", () => {
   eq(toRegExp("/a[\\\\\/]c/gi"), /a[\\/]c/gi);
 });
 
-test("getDiffs", () => {
+test("getStringDiffs", () => {
   const b = "sit amet, adipiscing";
   const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-  const result = getDiffs(a, b);
+  const result = getStringDiffs(a, b);
 
   eq(result, [
     [ -1, 'Lorem ip' ],
@@ -122,10 +122,10 @@ test("matchStrings", () => {
   });
 });
 
-test("Brackets", () => {
-  const result = "( )[ ]{ }< >〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(
+test("BRACKETS", () => {
+  const result = "()[]{}<>〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(
     new RegExp(
-      Object.entries(Brackets)
+      Object.entries(BRACKETS)
         .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
         .map((e) => `\\${e}`)
         .join("|")

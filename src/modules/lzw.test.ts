@@ -1,16 +1,16 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
-import { compressLzw, decompressLzw } from "./lzw";
+import { toLzw, fromLzw } from "./lzw";
 
-test("compressLzw", () => {
+test("toLzw", () => {
   const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-  const compressed = compressLzw(str);
+  const compressed = toLzw(str);
   eq(Array.isArray(compressed), true);
 });
 
-test("decompressLzw", () => {
+test("fromLzw", () => {
   const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-  const compressed = compressLzw(str);
-  const decompressed = decompressLzw(compressed);
+  const compressed = toLzw(str);
+  const decompressed = fromLzw(compressed);
   eq(str, decompressed);
 });
