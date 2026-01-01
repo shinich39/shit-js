@@ -4,7 +4,7 @@
  * const b = copyObject(a);
  * a == b; // false
  */
-export declare function copyObject<T>(obj: T, cache?: WeakMap<object, any>): T;
+export declare function copyObject<T>(obj: T): T;
 /**
  * @example
  * const store = createStore<number>((key, oldValue, newValue) => { ... });

@@ -4,38 +4,41 @@
  * const b = copyObject(a);
  * a == b; // false
  */
-export function copyObject<T>(
-  obj: T,
-  cache: WeakMap<object, any> = new WeakMap(),
-): T {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
+export function copyObject<T>(obj: T): T {
+  const cache: WeakMap<object, any> = new WeakMap();
+
+  const fn = (o: T) => {
+    if (o === null || typeof o !== "object") {
+      return o;
+    }
+
+    if (cache.has(o as any)) {
+      return cache.get(o as any);
+    }
+
+    if (o instanceof Date) {
+      return new Date(o.getTime()) as any;
+    }
+
+    if (o instanceof RegExp) {
+      return new RegExp(o.source, o.flags) as any;
+    }
+
+    if (Array.isArray(o)) {
+      return o.map((item) => copyObject(item)) as any;
+    }
+
+    const result = Object.create(Object.getPrototypeOf(o));
+    cache.set(o as any, result);
+
+    for (const key of Object.keys(o as any)) {
+      result[key] = fn((o as any)[key]);
+    }
+
+    return result;
   }
 
-  if (cache.has(obj as any)) {
-    return cache.get(obj as any);
-  }
-
-  if (obj instanceof Date) {
-    return new Date(obj.getTime()) as any;
-  }
-
-  if (obj instanceof RegExp) {
-    return new RegExp(obj.source, obj.flags) as any;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => copyObject(item)) as any;
-  }
-
-  const result = Object.create(Object.getPrototypeOf(obj));
-  cache.set(obj as any, result);
-
-  for (const key of Object.keys(obj as any)) {
-    result[key] = copyObject((obj as any)[key], cache);
-  }
-
-  return result;
+  return fn(obj);
 }
 /**
  * @example

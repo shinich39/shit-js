@@ -403,8 +403,8 @@ export function matchStrings(from: string, to: string): {
 /**
  * @returns bytes
  * @example
- * const bytes = getStringSize("abc"); // 3
- * const bytes = getStringSize("ㄱㄴㄷ"); // 9
+ * getStringSize("abc"); // 3
+ * getStringSize("ㄱㄴㄷ"); // 9
  */
 export function getStringSize(str: string): number {
   let result = 0;

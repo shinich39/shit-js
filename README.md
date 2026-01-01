@@ -6,8 +6,6 @@ God breathe on me.
 
 ### Installation
 
-- npm
-
 ```sh
 npm install https://github.com/shinich39/shit-js
 ```

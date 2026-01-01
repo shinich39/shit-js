@@ -33,9 +33,8 @@ test("generateInt", () => {
 test("generateTypingDelay", async () => {
   // const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
   // await sleep(100);
-  // for (let i = 0; i < str.length; i++) {
-  //   const char = str[i];
-  //   const delay = generateTypingDelay(char, i, 2);
+  // for (const char of str) {
+  //   const delay = generateTypingDelay(char, 1);
   //   process.stdout.write(char);
   //   await sleep(delay);
   // }

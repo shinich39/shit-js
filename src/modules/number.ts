@@ -26,52 +26,48 @@ export function generateFloat(min: number, max: number, seed?: number | null | u
 /**
  * @example
  * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
- * for (let i = 0; i < str.length; i++) {
- *   const char = str[i];
- *   const delay = generateTypingDelay(char, i, 1);
+ * for (cosnt char of str) {
+ *   const delay = generateTypingDelay(char, 1);
  *   process.stdout.write(char);
  *   await sleep(delay);
  * }
  */
 export function generateTypingDelay(
   char: string,
-  index = 0,
   speed = 1,
 ): number {
-  let base: number;
+  let velocity = 0;
+  let drift = 0;
 
-  const scale = (v: number) => v / speed;
+  return (() => {
+    const scale = (v: number) => v / speed;
 
-  // Sentence
-  if (/[.,!?]/.test(char)) {
-    base = generateInt(
-      scale(320),
-      scale(520)
-    );
-  } // Word
-  else if (char === " ") {
-    base = generateInt(
-      scale(200),
-      scale(320)
-    );
-  } // Character
-  else {
-    base = generateInt(
-      scale(75),
-      scale(120)
-    );
-  }
+      let base: number;
 
-  const accel = Math.sin(index / scale(4.5)) * scale(12)
-    + (Math.random() - 0.5) * scale(5);
+      // Sentence
+      if (/[.,!?]/.test(char)) {
+        base = generateInt(scale(300), scale(480));
+      } // Word
+      else if (char === " ") {
+        base = generateInt(scale(180), scale(300));
+      } // Character
+      else {
+        base = generateInt(scale(85), scale(130));
+      }
 
-  base -= accel;
+      velocity += (Math.random() - 0.5) * scale(1.1);
+      velocity *= 0.8;
 
-  // Clamp
-  return Math.max(
-    scale(35),
-    Math.min(base, scale(520))
-  );
+      drift += (Math.random() - 0.5) * scale(0.3);
+      drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
+
+      const accel = velocity * scale(4.5) + drift;
+
+      base -= accel;
+
+      // Clamp
+      return Math.max(scale(45), Math.min(base, scale(520)));
+  })();
 }
 /**
  * @returns min <= n < max

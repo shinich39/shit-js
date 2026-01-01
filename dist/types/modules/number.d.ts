@@ -11,14 +11,13 @@ export declare function generateFloat(min: number, max: number, seed?: number | 
 /**
  * @example
  * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
- * for (let i = 0; i < str.length; i++) {
- *   const char = str[i];
- *   const delay = generateTypingDelay(char, i, 1);
+ * for (cosnt char of str) {
+ *   const delay = generateTypingDelay(char, 1);
  *   process.stdout.write(char);
  *   await sleep(delay);
  * }
  */
-export declare function generateTypingDelay(char: string, index?: number, speed?: number): number;
+export declare function generateTypingDelay(char: string, speed?: number): number;
 /**
  * @returns min <= n < max
  *

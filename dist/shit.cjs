@@ -948,31 +948,27 @@ function mulberry32(seed) {
 function generateFloat(min, max, seed) {
   return typeof seed === "number" ? mulberry32(seed) * (max - min) + min : Math.random() * (max - min) + min;
 }
-function generateTypingDelay(char, index = 0, speed = 1) {
-  let base;
-  const scale = (v) => v / speed;
-  if (/[.,!?]/.test(char)) {
-    base = generateInt(
-      scale(320),
-      scale(520)
-    );
-  } else if (char === " ") {
-    base = generateInt(
-      scale(200),
-      scale(320)
-    );
-  } else {
-    base = generateInt(
-      scale(75),
-      scale(120)
-    );
-  }
-  const accel = Math.sin(index / scale(4.5)) * scale(12) + (Math.random() - 0.5) * scale(5);
-  base -= accel;
-  return Math.max(
-    scale(35),
-    Math.min(base, scale(520))
-  );
+function generateTypingDelay(char, speed = 1) {
+  let velocity = 0;
+  let drift = 0;
+  return (() => {
+    const scale = (v) => v / speed;
+    let base;
+    if (/[.,!?]/.test(char)) {
+      base = generateInt(scale(300), scale(480));
+    } else if (char === " ") {
+      base = generateInt(scale(180), scale(300));
+    } else {
+      base = generateInt(scale(85), scale(130));
+    }
+    velocity += (Math.random() - 0.5) * scale(1.1);
+    velocity *= 0.8;
+    drift += (Math.random() - 0.5) * scale(0.3);
+    drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
+    const accel = velocity * scale(4.5) + drift;
+    base -= accel;
+    return Math.max(scale(45), Math.min(base, scale(520)));
+  })();
 }
 function generateInt(min, max, seed) {
   return Math.floor(generateFloat(min, max, seed));
@@ -1067,28 +1063,32 @@ function getPowerScore(total, current, alpha = 0.5) {
 }
 
 // src/modules/object.ts
-function copyObject(obj, cache = /* @__PURE__ */ new WeakMap()) {
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-  if (cache.has(obj)) {
-    return cache.get(obj);
-  }
-  if (obj instanceof Date) {
-    return new Date(obj.getTime());
-  }
-  if (obj instanceof RegExp) {
-    return new RegExp(obj.source, obj.flags);
-  }
-  if (Array.isArray(obj)) {
-    return obj.map((item) => copyObject(item));
-  }
-  const result = Object.create(Object.getPrototypeOf(obj));
-  cache.set(obj, result);
-  for (const key of Object.keys(obj)) {
-    result[key] = copyObject(obj[key], cache);
-  }
-  return result;
+function copyObject(obj) {
+  const cache = /* @__PURE__ */ new WeakMap();
+  const fn = (o) => {
+    if (o === null || typeof o !== "object") {
+      return o;
+    }
+    if (cache.has(o)) {
+      return cache.get(o);
+    }
+    if (o instanceof Date) {
+      return new Date(o.getTime());
+    }
+    if (o instanceof RegExp) {
+      return new RegExp(o.source, o.flags);
+    }
+    if (Array.isArray(o)) {
+      return o.map((item) => copyObject(item));
+    }
+    const result = Object.create(Object.getPrototypeOf(o));
+    cache.set(o, result);
+    for (const key of Object.keys(o)) {
+      result[key] = fn(o[key]);
+    }
+    return result;
+  };
+  return fn(obj);
 }
 function createStore(callback) {
   const obj = {};
