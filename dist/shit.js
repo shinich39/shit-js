@@ -45,10 +45,10 @@ var shitJs = (() => {
     getCoveredSize: () => getCoveredSize,
     getDirName: () => getDirName,
     getExtName: () => getExtName,
+    getFloatSize: () => getFloatSize,
     getFloats: () => getFloats,
+    getIntSize: () => getIntSize,
     getInts: () => getInts,
-    getLengthFromFloat: () => getLengthFromFloat,
-    getLengthFromInt: () => getLengthFromInt,
     getLogScore: () => getLogScore,
     getLoopedNumber: () => getLoopedNumber,
     getMaxValue: () => getMaxValue,
@@ -973,13 +973,13 @@ var shitJs = (() => {
   function generateInt(min, max, seed) {
     return Math.floor(generateFloat(min, max, seed));
   }
-  function getLengthFromInt(num) {
-    return Math.log(num) * Math.LOG10E + 1 | 0;
-  }
   function getBitSize(num) {
     return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;
   }
-  function getLengthFromFloat(num) {
+  function getIntSize(num) {
+    return Math.log(num) * Math.LOG10E + 1 | 0;
+  }
+  function getFloatSize(num) {
     return ("" + num).replace(".", "").length;
   }
   function getClampedNumber(num, min, max) {

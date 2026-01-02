@@ -83,14 +83,6 @@ export function generateInt(min: number, max: number, seed?: number | null | und
 }
 /**
  * @example
- * getLengthFromInt(10); // 2
- * getLengthFromInt(100); // 3
- */
-export function getLengthFromInt(num: number): number {
-  return Math.log(num) * Math.LOG10E + 1 | 0;
-}
-/**
- * @example
  * getBitSize(1); // 1;
  * getBitSize(2); // 2;
  * getBitSize(4); // 3;
@@ -101,10 +93,18 @@ export function getBitSize(num: number): number {
 }
 /**
  * @example
- * getLengthFromFloat(1.2); // 2
- * getLengthFromFloat(1.23); // 3
+ * getIntSize(10); // 2
+ * getIntSize(100); // 3
  */
-export function getLengthFromFloat(num: number): number {
+export function getIntSize(num: number): number {
+  return Math.log(num) * Math.LOG10E + 1 | 0;
+}
+/**
+ * @example
+ * getFloatSize(1.2); // 2
+ * getFloatSize(1.23); // 3
+ */
+export function getFloatSize(num: number): number {
   return ("" + num).replace(".", "").length;
 }
 /**

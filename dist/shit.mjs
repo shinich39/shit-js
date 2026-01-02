@@ -873,13 +873,13 @@ function generateTypingDelay(char, speed = 1) {
 function generateInt(min, max, seed) {
   return Math.floor(generateFloat(min, max, seed));
 }
-function getLengthFromInt(num) {
-  return Math.log(num) * Math.LOG10E + 1 | 0;
-}
 function getBitSize(num) {
   return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;
 }
-function getLengthFromFloat(num) {
+function getIntSize(num) {
+  return Math.log(num) * Math.LOG10E + 1 | 0;
+}
+function getFloatSize(num) {
   return ("" + num).replace(".", "").length;
 }
 function getClampedNumber(num, min, max) {
@@ -1540,10 +1540,10 @@ export {
   getCoveredSize,
   getDirName,
   getExtName,
+  getFloatSize,
   getFloats,
+  getIntSize,
   getInts,
-  getLengthFromFloat,
-  getLengthFromInt,
   getLogScore,
   getLoopedNumber,
   getMaxValue,

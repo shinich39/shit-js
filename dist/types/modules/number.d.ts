@@ -30,12 +30,6 @@ export declare function generateTypingDelay(char: string, speed?: number): numbe
 export declare function generateInt(min: number, max: number, seed?: number | null | undefined): number;
 /**
  * @example
- * getLengthFromInt(10); // 2
- * getLengthFromInt(100); // 3
- */
-export declare function getLengthFromInt(num: number): number;
-/**
- * @example
  * getBitSize(1); // 1;
  * getBitSize(2); // 2;
  * getBitSize(4); // 3;
@@ -44,10 +38,16 @@ export declare function getLengthFromInt(num: number): number;
 export declare function getBitSize(num: number): number;
 /**
  * @example
- * getLengthFromFloat(1.2); // 2
- * getLengthFromFloat(1.23); // 3
+ * getIntSize(10); // 2
+ * getIntSize(100); // 3
  */
-export declare function getLengthFromFloat(num: number): number;
+export declare function getIntSize(num: number): number;
+/**
+ * @example
+ * getFloatSize(1.2); // 2
+ * getFloatSize(1.23); // 3
+ */
+export declare function getFloatSize(num: number): number;
 /**
  * @returns min <= n <= max
  *

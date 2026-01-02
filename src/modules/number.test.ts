@@ -11,8 +11,8 @@ import {
   toBytes,
   generateInt,
   generateFloat,
-  getLengthFromInt,
-  getLengthFromFloat,
+  getIntSize,
+  getFloatSize,
   getLogScore,
   getPowerScore,
   getBitSize,
@@ -40,19 +40,6 @@ test("generateTypingDelay", async () => {
   // }
 });
 
-test("getLengthFromInt", () => {
-  eq(getLengthFromInt(1), 1);
-  eq(getLengthFromInt(10), 2);
-  eq(getLengthFromInt(100), 3);
-});
-
-test("getLengthFromInt", () => {
-  eq(getLengthFromFloat(1), 1);
-  eq(getLengthFromFloat(10), 2);
-  eq(getLengthFromFloat(100), 3);
-  eq(getLengthFromFloat(100.1), 4);
-});
-
 test("getBitSize", () => {
   eq(getBitSize(0), 1); // 0
   eq(getBitSize(1), 1); // 1
@@ -65,6 +52,19 @@ test("getBitSize", () => {
   eq(getBitSize(8), 4); // 1000
   eq(getBitSize(16), 5); // 10000
   eq(getBitSize(32), 6); // 100000
+});
+
+test("getIntSize", () => {
+  eq(getIntSize(1), 1);
+  eq(getIntSize(10), 2);
+  eq(getIntSize(100), 3);
+});
+
+test("getFloatSize", () => {
+  eq(getFloatSize(1), 1);
+  eq(getFloatSize(10), 2);
+  eq(getFloatSize(100), 3);
+  eq(getFloatSize(100.1), 4);
 });
 
 test("getClampedNumber", () => {
