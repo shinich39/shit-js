@@ -9,11 +9,11 @@ import {
   getModeValue,
   getModeValueWithCount,
   getSumValue,
-  getCases,
   shuffleArray,
   groupBy,
   uniqueBy,
   splitArray,
+  joinArray,
 } from "./array";
 
 const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
@@ -47,21 +47,23 @@ test("getModeCount", () => {
 });
 
 test("splitArray", () => {
-  eq(splitArray([1,2,3,4,5,6,7,8,9,10], 3), [[1,2,3],[4,5,6],[7,8,9],[10]]);
+  eq(splitArray([1,2,3,4,5], 3), [[1,2,3],[4,5]]);
+});
+
+test("joinArray", () => {
+  eq(joinArray([1,2,3,[4,5]]), [1,2,3,4,5]);
 });
 
 test("getCombinations", () => {
-  eq(getCombinations([1,2]), [[1], [2], [1,2]]);
-});
+  eq(getCombinations(), []);
 
-test("getCases", () => {
-  eq(getCases<string|number>(["a", "b", "c"], [1]), [
+  eq(getCombinations<string|number>(["a", "b", "c"], [1]), [
     ["a", 1],
     ["b", 1],
     ["c", 1],
   ]);
 
-  eq(getCases(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
+  eq(getCombinations(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
     [ 'a', 'a', 'a' ], [ 'a', 'a', 'b' ],
     [ 'a', 'a', 'c' ], [ 'a', 'c', 'a' ],
     [ 'a', 'c', 'b' ], [ 'a', 'c', 'c' ],

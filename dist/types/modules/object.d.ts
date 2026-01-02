@@ -1,4 +1,6 @@
 /**
+ * Deep clone
+ *
  * @example
  * const a = {};
  * const b = copyObject(a);
@@ -6,6 +8,8 @@
  */
 export declare function copyObject<T>(obj: T): T;
 /**
+ * Key-Value observer
+ *
  * @example
  * const store = createStore<number>((key, oldValue, newValue) => { ... });
  * store.set("a", 1);

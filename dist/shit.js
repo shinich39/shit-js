@@ -38,7 +38,6 @@ var shitJs = (() => {
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
     getBitSize: () => getBitSize,
-    getCases: () => getCases,
     getClampedNumber: () => getClampedNumber,
     getCombinations: () => getCombinations,
     getContainedSize: () => getContainedSize,
@@ -69,6 +68,7 @@ var shitJs = (() => {
     isBuffer: () => isBuffer,
     isNumber: () => isNumber,
     isNumeric: () => isNumeric,
+    joinArray: () => joinArray,
     joinPaths: () => joinPaths,
     matchStrings: () => matchStrings,
     parseDate: () => parseDate,
@@ -141,45 +141,23 @@ var shitJs = (() => {
       return acc;
     }, []);
   }
-  function getCombinations(arr) {
+  function joinArray(arr, depth = 1) {
     const result = [];
-    const n = arr.length;
-    for (let i = 1; i < 1 << n; i++) {
-      const combo = [];
-      for (let j = 0; j < n; j++) {
-        if (i >> j & 1) {
-          combo.push(arr[j]);
-        }
+    for (const item of arr) {
+      if (Array.isArray(item) && depth > 0) {
+        result.push(...joinArray(item, depth - 1));
+      } else {
+        result.push(item);
       }
-      result.push(combo);
     }
     return result;
   }
-  function getCases(...args) {
-    args = args.filter((arg) => arg.length > 0);
-    if (args.length === 0) {
+  function getCombinations(...arrays) {
+    const filtered = arrays.filter((arr) => arr.length > 0);
+    if (filtered.length < 1) {
       return [];
     }
-    const indexes = Array(args.length).fill(0);
-    const result = [[]];
-    for (let i2 = 0; i2 < args.length; i2++) {
-      const item = args[i2][indexes[i2]];
-      result[0].push(item);
-    }
-    let i = args.length - 1;
-    while (true) {
-      if (indexes[i] < args[i].length - 1) {
-        indexes[i] += 1;
-        result.push(args.map((arg, idx) => arg[indexes[idx]]));
-        i = args.length - 1;
-      } else {
-        indexes[i] = 0;
-        i--;
-        if (i < 0) {
-          return result;
-        }
-      }
-    }
+    return filtered.reduce((acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])), [[]]);
   }
   function shuffleArray(arr) {
     let i = arr.length;
@@ -1520,7 +1498,7 @@ var shitJs = (() => {
     return typeof e === "string" && !Number.isNaN(parseFloat(e)) && Number.isFinite(parseFloat(e));
   }
   function isNumber(e) {
-    return typeof e === "number" || isNumeric(e);
+    return typeof e === "number" || isNumeric(e) || typeof e === "boolean" || e === null || typeof e === "undefined";
   }
   function toNumber(e) {
     if (isNumeric(e)) {

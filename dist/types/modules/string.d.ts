@@ -90,7 +90,7 @@ export declare function generateString(charset?: string, size?: number): string;
 export declare function toXor(str: string, salt: string): string;
 /**
  * @example
- * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
+ * getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
  */
 export declare function getInts(str: string): number[];
 /**

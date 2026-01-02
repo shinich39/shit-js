@@ -64,8 +64,10 @@ export function getModeValue<T>(arr: T[]): T | undefined {
   return getModeValueWithCount(arr).value;
 }
 /**
+ * @see https://lodash.com/docs/4.17.21#chunk
+ * 
  * @example
- * splitArray([1,2,3,4,5,6,7,8,9,10], 3); // [[1,2,3],[4,5,6],[7,8,9],[10]]
+ * splitArray([1,2,3,4,5], 3); // [[1,2,3],[4,5]]
  */
 export function splitArray<T>(arr: T[], size: number): T[][] {
   return arr.reduce<T[][]>((acc, curr) => {
@@ -78,66 +80,40 @@ export function splitArray<T>(arr: T[], size: number): T[][] {
   }, []);
 }
 /**
+ * @see https://lodash.com/docs/4.17.21#flatten
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat
+ * 
  * @example
- * getCombinations([1, 2]); // [[1], [2], [1, 2]]
+ * joinArray([1,2,3,[4,5]]); // [1,2,3,4,5]
  */
-export function getCombinations<T>(arr: T[]): T[][] {
-  const result: T[][] = [];
-  const n = arr.length;
-  for (let i = 1; i < (1 << n); i++) {
-    const combo = [];
-    for (let j = 0; j < n; j++) {
-      if ((i >> j) & 1) {
-        combo.push(arr[j]);
-      }
+export function joinArray<T>(arr: (T | T[])[], depth = 1): T[] {
+  const result: T[] = [];
+
+  for (const item of arr) {
+    if (Array.isArray(item) && depth > 0) {
+      result.push(...joinArray(item, depth - 1));
+    } else {
+      result.push(item as T);
     }
-    result.push(combo);
   }
+
   return result;
 }
 /**
+ * Cartesian product
+ * 
  * @example
- * getCases(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
+ * getCombinations(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
+ * getCombinations(); // []
  */
-export function getCases<T>(...args: T[][]): T[][] {
-  args = args.filter((arg) => arg.length > 0);
+export function getCombinations<T>(...arrays: T[][]): T[][] {
+  const filtered = arrays.filter(arr => arr.length > 0);
 
-  if (args.length === 0) {
+  if (filtered.length < 1) {
     return [];
   }
-
-  const indexes: number[] = Array(args.length).fill(0);
-  const result: T[][] = [[]];
-
-  // Append first item of arrays
-  for (let i = 0; i < args.length; i++) {
-    const item = args[i][indexes[i]];
-    result[0].push(item);
-  }
-
-  let i = args.length - 1;
-
-  while (true) {
-    if (indexes[i] < args[i].length - 1) {
-      // Increase index
-      indexes[i] += 1;
-
-      // Store values
-      result.push(args.map((arg, idx) => arg[indexes[idx]]));
-
-      i = args.length - 1;
-    } else {
-      // Reset index
-      indexes[i] = 0;
-
-      // Change place
-      i--;
-
-      if (i < 0) {
-        return result;
-      }
-    }
-  }
+  
+  return filtered.reduce<T[][]>((acc, curr) => acc.flatMap(a => curr.map(b => [...a, b])), [[]]);
 }
 /**
  * @see https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array

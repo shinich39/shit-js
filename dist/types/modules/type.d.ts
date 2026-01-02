@@ -18,8 +18,11 @@ export declare function isNumeric(e: any): e is string;
  * @example
  * isNumber("1"); // true
  * isNumber(1); // true
+ * isNumber(true); // true
+ * isNumber(null); // true
+ * isNumber(undefined); // true
  */
-export declare function isNumber(e: any): e is number | string;
+export declare function isNumber(e: any): e is number | string | boolean | null | undefined;
 /**
  * @example
  * toNumber("1.1"); // 1.1

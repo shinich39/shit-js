@@ -140,7 +140,7 @@ export function toXor(str: string, salt: string): string {
 }
 /**
  * @example
- * conss result = getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
+ * getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
  */
 export function getInts(str: string): number[] {
   return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];

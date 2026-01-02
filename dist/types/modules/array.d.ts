@@ -37,20 +37,28 @@ export declare function getModeCount<T>(arr: T[]): number;
  */
 export declare function getModeValue<T>(arr: T[]): T | undefined;
 /**
+ * @see https://lodash.com/docs/4.17.21#chunk
+ *
  * @example
- * splitArray([1,2,3,4,5,6,7,8,9,10], 3); // [[1,2,3],[4,5,6],[7,8,9],[10]]
+ * splitArray([1,2,3,4,5], 3); // [[1,2,3],[4,5]]
  */
 export declare function splitArray<T>(arr: T[], size: number): T[][];
 /**
+ * @see https://lodash.com/docs/4.17.21#flatten
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat
+ *
  * @example
- * getCombinations([1, 2]); // [[1], [2], [1, 2]]
+ * joinArray([1,2,3,[4,5]]); // [1,2,3,4,5]
  */
-export declare function getCombinations<T>(arr: T[]): T[][];
+export declare function joinArray<T>(arr: (T | T[])[], depth?: number): T[];
 /**
+ * Cartesian product
+ *
  * @example
- * getCases(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
+ * getCombinations(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
+ * getCombinations(); // []
  */
-export declare function getCases<T>(...args: T[][]): T[][];
+export declare function getCombinations<T>(...arrays: T[][]): T[][];
 /**
  * @see https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
  *

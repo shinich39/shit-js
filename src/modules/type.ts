@@ -44,9 +44,16 @@ export function isNumeric(e: any): e is string {
  * @example
  * isNumber("1"); // true
  * isNumber(1); // true
+ * isNumber(true); // true
+ * isNumber(null); // true
+ * isNumber(undefined); // true
  */
-export function isNumber(e: any): e is number | string {
-  return typeof e === "number" || isNumeric(e);
+export function isNumber(e: any): e is number | string | boolean | null | undefined {
+  return typeof e === "number"
+    || isNumeric(e)
+    || typeof e === "boolean"
+    || e === null
+    || typeof e === "undefined";
 }
 /**
  * @example
