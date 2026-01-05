@@ -43,32 +43,40 @@ export function copyObject<T>(obj: T): T {
   return fn(obj);
 }
 
-type StoreCallback<T extends object> = <K extends keyof T>(
-  key: K,
-  oldValue: T[K] | undefined,
-  newValue: T[K],
-) => void | Promise<void>;
+type StoreHandlers<T extends object> = {
+  [K in keyof T]?: (
+    oldValue: T[K] | undefined,
+    newValue: T[K],
+  ) => void | Promise<void>;
+}
 
 /**
  * Create an observed object
  * 
  * @example
  * const initial = { count: 1 };
- * const store = createStore<typeof initial>(initial, (key, oldValue, newValue) => { ... });
+ * const store = createStore<typeof initial>(initial, {
+ *   count: (oldValue, newValue) => { ... },
+ * });
  * store.count++;
  */
 export function createStore<T extends object>(
   initial: T,
-  callback: StoreCallback<T>,
+  handlers: StoreHandlers<T>,
 ): T {
   return new Proxy({ ...initial }, {
     set(target, key, value) {
-      const k = key as keyof T;
-      const oldValue = target[k];
+      const typedKey = key as keyof T;
+      const oldValue = target[typedKey];
 
       if (oldValue !== value) {
-        target[k] = value;
-        callback(k, oldValue, value);
+        target[typedKey] = value;
+
+        const handler = handlers[typedKey];
+        
+        if (handler) {
+          handler(oldValue, value);
+        }
       }
 
       return true;

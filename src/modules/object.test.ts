@@ -14,19 +14,17 @@ test("copyObject", () => {
 test("createStore", () => {
   const initial = {
     count: 1,
-    name: "TEST-1",
   }
 
-  const store = createStore<typeof initial>(initial, (key, oldValue, newValue) => {
-    // console.log(key, oldValue, newValue);
+  const store = createStore<typeof initial>(initial, {
+    count: (oldValue, newValue) => {
+      eq(oldValue, newValue - 1);
+    },
   });
 
   eq(store.count, 1);
-  eq(store.name, `TEST-1`);
 
   store.count++;
-  store.name = `TEST-${store.count}`;
 
   eq(store.count, 2);
-  eq(store.name, `TEST-2`);
 });

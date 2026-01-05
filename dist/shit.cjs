@@ -1068,14 +1068,17 @@ function copyObject(obj) {
   };
   return fn(obj);
 }
-function createStore(initial, callback) {
+function createStore(initial, handlers) {
   return new Proxy({ ...initial }, {
     set(target, key, value) {
-      const k = key;
-      const oldValue = target[k];
+      const typedKey = key;
+      const oldValue = target[typedKey];
       if (oldValue !== value) {
-        target[k] = value;
-        callback(k, oldValue, value);
+        target[typedKey] = value;
+        const handler = handlers[typedKey];
+        if (handler) {
+          handler(oldValue, value);
+        }
       }
       return true;
     }
