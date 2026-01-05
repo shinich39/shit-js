@@ -45,7 +45,7 @@ export function copyObject<T>(obj: T): T {
 
 type StoreHandlers<T extends object> = {
   [K in keyof T]?: (
-    oldValue: T[K] | undefined,
+    oldValue: T[K],
     newValue: T[K],
   ) => void | Promise<void>;
 }

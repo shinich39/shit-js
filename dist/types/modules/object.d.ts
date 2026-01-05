@@ -8,7 +8,7 @@
  */
 export declare function copyObject<T>(obj: T): T;
 type StoreHandlers<T extends object> = {
-    [K in keyof T]?: (oldValue: T[K] | undefined, newValue: T[K]) => void | Promise<void>;
+    [K in keyof T]?: (oldValue: T[K], newValue: T[K]) => void | Promise<void>;
 };
 /**
  * Create an observed object
