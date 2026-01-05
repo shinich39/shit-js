@@ -12,14 +12,21 @@ test("copyObject", () => {
 });
 
 test("createStore", () => {
-  const store = createStore<number>((prop, oldValue, newValue) => {
-    // console.log(prop, oldValue, newValue);
+  const initial = {
+    count: 1,
+    name: "TEST-1",
+  }
+
+  const store = createStore<typeof initial>(initial, (key, oldValue, newValue) => {
+    // console.log(key, oldValue, newValue);
   });
 
-  store.set("a", 1);
-  const v1 = store.get("a");
-  store.set("a", 39);
-  const v2 = store.get("a");
-  eq(v1, 1);
-  eq(v2, 39);
+  eq(store.count, 1);
+  eq(store.name, `TEST-1`);
+
+  store.count++;
+  store.name = `TEST-${store.count}`;
+
+  eq(store.count, 2);
+  eq(store.name, `TEST-2`);
 });

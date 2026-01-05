@@ -7,16 +7,15 @@
  * a == b; // false
  */
 export declare function copyObject<T>(obj: T): T;
+type StoreCallback<T extends object> = <K extends keyof T>(key: K, oldValue: T[K] | undefined, newValue: T[K]) => void | Promise<void>;
 /**
- * Key-Value observer
+ * Create an observed object
  *
  * @example
- * const store = createStore<number>((key, oldValue, newValue) => { ... });
- * store.set("a", 1);
- * store.get("a"); // 1
+ * const initial = { count: 1 };
+ * const store = createStore<typeof initial>(initial, (key, oldValue, newValue) => { ... });
+ * store.count++;
  */
-export declare function createStore<T = any>(callback: (key: string, oldValue: T | undefined, newValue: T) => void | Promise<void>): {
-    get(key: string): T | undefined;
-    set(key: string, newValue: T): void;
-};
+export declare function createStore<T extends object>(initial: T, callback: StoreCallback<T>): T;
+export {};
 //# sourceMappingURL=object.d.ts.map

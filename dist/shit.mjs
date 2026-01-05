@@ -968,20 +968,18 @@ function copyObject(obj) {
   };
   return fn(obj);
 }
-function createStore(callback) {
-  const obj = {};
-  return {
-    get(key) {
-      return obj[key];
-    },
-    set(key, newValue) {
-      const oldValue = obj[key];
-      if (oldValue !== newValue) {
-        obj[key] = newValue;
-        callback(key, oldValue, newValue);
+function createStore(initial, callback) {
+  return new Proxy({ ...initial }, {
+    set(target, key, value) {
+      const k = key;
+      const oldValue = target[k];
+      if (oldValue !== value) {
+        target[k] = value;
+        callback(k, oldValue, value);
       }
+      return true;
     }
-  };
+  });
 }
 
 // src/modules/path.ts

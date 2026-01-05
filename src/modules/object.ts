@@ -42,32 +42,36 @@ export function copyObject<T>(obj: T): T {
 
   return fn(obj);
 }
+
+type StoreCallback<T extends object> = <K extends keyof T>(
+  key: K,
+  oldValue: T[K] | undefined,
+  newValue: T[K],
+) => void | Promise<void>;
+
 /**
- * Key-Value observer
+ * Create an observed object
  * 
  * @example
- * const store = createStore<number>((key, oldValue, newValue) => { ... });
- * store.set("a", 1);
- * store.get("a"); // 1
+ * const initial = { count: 1 };
+ * const store = createStore<typeof initial>(initial, (key, oldValue, newValue) => { ... });
+ * store.count++;
  */
-export function createStore<T = any>(
-  callback: (key: string, oldValue: T | undefined, newValue: T) => void | Promise<void>,
-): {
-  get(key: string): T | undefined;
-  set(key: string, newValue: T): void;
-} {
-  const obj: Record<string, T> = {};
+export function createStore<T extends object>(
+  initial: T,
+  callback: StoreCallback<T>,
+): T {
+  return new Proxy({ ...initial }, {
+    set(target, key, value) {
+      const k = key as keyof T;
+      const oldValue = target[k];
 
-  return {
-    get(key: string): T | undefined {
-      return obj[key];
-    },
-    set(key: string, newValue: T) {
-      const oldValue = obj[key];
-      if (oldValue !== newValue) {
-        obj[key] = newValue;
-        callback(key, oldValue, newValue);
+      if (oldValue !== value) {
+        target[k] = value;
+        callback(k, oldValue, value);
       }
+
+      return true;
     },
-  };
+  });
 }
