@@ -2,102 +2,126 @@ import path from "node:path";
 import fs from "node:fs";
 import * as esbuild from 'esbuild';
 
-const ESM = true;
-const CJS = true;
-const BROWSER = true;
-const BROWSER_GLOBAL_NAME = "shitJs";
+const pkg = JSON.parse(fs.readFileSync("./package.json"));
 
-const ENTRY_POINT = "./src/shit.ts";
-const FILENAME = path.basename(ENTRY_POINT, path.extname(ENTRY_POINT));
+const options = {
+  esm: true,
+  cjs: true,
+  browser: true,
+  globalName: "shitJs",
+  entryPoint: "./src/shit.ts",
+}
 
-const ESM_OUTPUT_PATH = `./dist/${FILENAME}.mjs`;
-const ESM_MIN_OUTPUT_PATH = `./dist/${FILENAME}.min.mjs`;
-const CJS_OUTPUT_PATH = `./dist/${FILENAME}.cjs`;
-const CJS_MIN_OUTPUT_PATH = `./dist/${FILENAME}.min.cjs`;
-const BROWSER_OUTPUT_PATH = `./dist/${FILENAME}.js`;
-const BROWSER_MIN_OUTPUT_PATH = `./dist/${FILENAME}.min.js`;
-const TYPE_OUTPUT_PATH = `./dist/types/${FILENAME}.d.ts`;
+const filename = path.basename(options.entryPoint, path.extname(options.entryPoint));
 
+const paths = {
+  esm: `./dist/${filename}.mjs`,
+  esmMin: `./dist/${filename}.min.mjs`,
+  cjs: `./dist/${filename}.cjs`,
+  cjsMin: `./dist/${filename}.min.cjs`,
+  browser: `./dist/${filename}.js`,
+  browserMin: `./dist/${filename}.min.js`,
+  type: `./dist/types/${filename}.d.ts`,
+}
+
+const isPackageChanged = pkg["main"] !== paths.esmMin ||
+  pkg["module"] !== paths.esmMin ||
+  pkg["types"] !== paths.type ||
+  pkg["exports"]["."]["types"] !== paths.type ||
+  pkg["exports"]["."]["import"] !== paths.esmMin ||
+  pkg["exports"]["."]["require"] !== paths.cjsMin;
+  
 /** @see https://esbuild.github.io/api/#external */
 const externalPackages = [];
 
 /** @type {import("esbuild").BuildOptions[]} */
 const buildOptions = [];
 
-if (ESM) {
+if (options.esm) {
   buildOptions.push(
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: [options.entryPoint],
       platform: "node",
       format: 'esm',
       bundle: true,
-      outfile: ESM_OUTPUT_PATH,
+      outfile: paths.esm,
       external: externalPackages,
     },
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: [options.entryPoint],
       platform: "node",
       format: 'esm',
       bundle: true,
       minify: true,
-      outfile: ESM_MIN_OUTPUT_PATH,
+      outfile: paths.esmMin,
       external: externalPackages,
     },
   );
 }
 
-if (CJS) {
+if (options.cjs) {
   buildOptions.push(
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: [options.entryPoint],
       platform: "node",
       format: 'cjs',
       bundle: true,
-      outfile: CJS_OUTPUT_PATH,
+      outfile: paths.cjs,
       external: externalPackages,
     },
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: [options.entryPoint],
       platform: "node",
       format: 'cjs',
       bundle: true,
       minify: true,
-      outfile: CJS_MIN_OUTPUT_PATH,
+      outfile: paths.cjsMin,
       external: externalPackages,
     },
   );
 }
 
-if (BROWSER) {
+if (options.browser) {
   buildOptions.push(
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: [options.entryPoint],
       platform: "browser",
       format: "iife",
-      globalName: BROWSER_GLOBAL_NAME,
+      globalName: options.globalName,
       bundle: true,
-      outfile: BROWSER_OUTPUT_PATH,
+      outfile: paths.browser,
       external: externalPackages,
     },
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: [options.entryPoint],
       platform: "browser",
       format: "iife",
-      globalName: BROWSER_GLOBAL_NAME,
+      globalName: options.globalName,
       bundle: true,
       minify: true,
-      outfile: BROWSER_MIN_OUTPUT_PATH,
+      outfile: paths.browserMin,
       external: externalPackages,
     },
   );
 }
 
-// Clear
+// Clear dist directory
 if (fs.existsSync("./dist")) {
   fs.rmSync("./dist", { recursive: true });
 }
 
-// Build
+// Create script files
 for (const option of buildOptions) {
   await esbuild.build(option);
+}
+
+// Update package.json
+if (isPackageChanged) {
+  pkg["main"] = paths.esmMin;
+  pkg["module"] = paths.esmMin;
+  pkg["types"] = paths.type;
+  pkg["exports"]["."]["types"] = paths.type;
+  pkg["exports"]["."]["import"] = paths.esmMin;
+  pkg["exports"]["."]["require"] = paths.cjsMin;
+  fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2), "utf8");
 }
