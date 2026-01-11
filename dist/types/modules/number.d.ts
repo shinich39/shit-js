@@ -70,21 +70,6 @@ export declare function getClampedNumber(num: number, min: number, max: number):
 export declare function getLoopedNumber(num: number, min: number, max: number): number;
 /**
  * @example
- * toBytes(1, "MB"); // 1048576
- */
-export declare function toBytes(bytes: number, format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): number;
-/**
- * @example
- * toFileSize(1024 * 1024, "MB"); // 1
- */
-export declare function toFileSize(bytes: number, format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): number;
-/**
- * @example
- * humanizeFileSize(1024 * 1024, "Bytes"); // "1.00 MB"
- */
-export declare function humanizeFileSize(num: number, format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB"): string;
-/**
- * @example
  * getContainedSize(100, 100, 200, 100); // [100, 100]
  */
 export declare function getContainedSize(srcWidth: number, srcHeight: number, dstWidth: number, dstHeight: number): [number, number];
@@ -116,4 +101,91 @@ export declare function getLogScore(total: number, current: number): number;
  * getPowerScore(100, 100); // 1
  */
 export declare function getPowerScore(total: number, current: number, alpha?: number): number;
+/**
+ * @example
+ * fromKilobyte(1); // Math.pow(1024, 1)
+ */
+export declare function fromKilobyte(kb: number): number;
+/**
+ * @example
+ * fromMegabyte(1); // Math.pow(1024, 2)
+ */
+export declare function fromMegabyte(mb: number): number;
+/**
+ * @example
+ * fromGigabyte(1); // Math.pow(1024, 3)
+ */
+export declare function fromGigabyte(gb: number): number;
+/**
+ * @example
+ * fromTerabyte(1); // Math.pow(1024, 4)
+ */
+export declare function fromTerabyte(tb: number): number;
+/**
+ * @example
+ * fromPetabyte(1); // Math.pow(1024, 5)
+ */
+export declare function fromPetabyte(pt: number): number;
+/**
+ * @example
+ * fromExabyte(1); // Math.pow(1024, 6)
+ */
+export declare function fromExabyte(eb: number): number;
+/**
+ * @example
+ * fromZettabyte(1); // Math.pow(1024, 7)
+ */
+export declare function fromZettabyte(zb: number): number;
+/**
+ * @example
+ * fromYottabyte(1); // Math.pow(1024, 8)
+ */
+export declare function fromYottabyte(yb: number): number;
+/**
+ * @example
+ * toKilobyte(Math.pow(1024, 1)); // 1
+ */
+export declare function toKilobyte(bytes: number): number;
+/**
+ * @example
+ * toMegabyte(Math.pow(1024, 2)); // 1
+ */
+export declare function toMegabyte(bytes: number): number;
+/**
+ * @example
+ * toGigabyte(Math.pow(1024, 3)); // 1
+ */
+export declare function toGigabyte(bytes: number): number;
+/**
+ * @example
+ * toTerabyte(Math.pow(1024, 4)); // 1
+ */
+export declare function toTerabyte(bytes: number): number;
+/**
+ * @example
+ * toPetabyte(Math.pow(1024, 5)); // 1
+ */
+export declare function toPetabyte(bytes: number): number;
+/**
+ * @example
+ * toExabyte(Math.pow(1024, 6)); // 1
+ */
+export declare function toExabyte(bytes: number): number;
+/**
+ * @example
+ * toZettabyte(Math.pow(1024, 7)); // 1
+ */
+export declare function toZettabyte(bytes: number): number;
+/**
+ * @example
+ * toYottabyte(Math.pow(1024, 8)); // 1
+ */
+export declare function toYottabyte(bytes: number): number;
+/**
+ * @example
+ * toFileSize(1024 * 1024); // "1 MB"
+ * toFileSize(1024 * 1024 * 1024); // "1 GB"
+ * toFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512); // "1.5 GB"
+ */
+export declare function toFileSize(bytes: number): string;
 //# sourceMappingURL=number.d.ts.map

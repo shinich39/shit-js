@@ -144,67 +144,6 @@ export function getLoopedNumber(num: number, min: number, max: number): number {
 }
 /**
  * @example
- * toBytes(1, "MB"); // 1048576
- */
-export function toBytes(
-  bytes: number,
-  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-): number {
-  if (format === "Bytes") {
-    return bytes;
-  }
-
-  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
-
-  if (i === -1) {
-    throw new Error(`Invalid argument: ${format} is not supported format`);
-  }
-
-  return bytes * Math.pow(1024, i + 1);
-}
-/**
- * @example
- * toFileSize(1024 * 1024, "MB"); // 1
- */
-export function toFileSize(
-  bytes: number,
-  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-): number {
-  if (format === "Bytes") {
-    return bytes;
-  }
-
-  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
-
-  if (i === -1) {
-    throw new Error(`Invalid argument: ${format} is not supported format`);
-  }
-
-  return bytes * Math.pow(1024, -(i + 1));
-}
-/**
- * @example
- * humanizeFileSize(1024 * 1024, "Bytes"); // "1.00 MB"
- */
-export function humanizeFileSize(
-  num: number,
-  format: "Bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "EB" | "ZB" | "YB",
-): string {
-  const bytes = toBytes(num, format);
-
-  if (bytes === 0) {
-    return "0 Bytes";
-  }
-
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-
-  // Keep 2 decimal places
-  const size = (bytes / Math.pow(1024, i)).toFixed(2);
-
-  return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
-}
-/**
- * @example
  * getContainedSize(100, 100, 200, 100); // [100, 100]
  */
 export function getContainedSize(
@@ -293,4 +232,159 @@ export function getLogScore(total: number, current: number): number {
  */
 export function getPowerScore(total: number, current: number, alpha: number = 0.5): number {
   return Math.pow(current, alpha) / Math.pow(total, alpha);
+}
+/**
+ * @example
+ * fromKilobyte(1); // Math.pow(1024, 1)
+ */
+export function fromKilobyte(kb: number): number {
+  return kb * Math.pow(1024, 1);
+}
+/**
+ * @example
+ * fromMegabyte(1); // Math.pow(1024, 2)
+ */
+export function fromMegabyte(mb: number): number {
+  return mb * Math.pow(1024, 2);
+}
+/**
+ * @example
+ * fromGigabyte(1); // Math.pow(1024, 3)
+ */
+export function fromGigabyte(gb: number): number {
+  return gb * Math.pow(1024, 3);
+}
+/**
+ * @example
+ * fromTerabyte(1); // Math.pow(1024, 4)
+ */
+export function fromTerabyte(tb: number): number {
+  return tb * Math.pow(1024, 4);
+}
+/**
+ * @example
+ * fromPetabyte(1); // Math.pow(1024, 5)
+ */
+export function fromPetabyte(pt: number): number {
+  return pt * Math.pow(1024, 5);
+}
+/**
+ * @example
+ * fromExabyte(1); // Math.pow(1024, 6)
+ */
+export function fromExabyte(eb: number): number {
+  return eb * Math.pow(1024, 6);
+}
+/**
+ * @example
+ * fromZettabyte(1); // Math.pow(1024, 7)
+ */
+export function fromZettabyte(zb: number): number {
+  return zb * Math.pow(1024, 7);
+}
+/**
+ * @example
+ * fromYottabyte(1); // Math.pow(1024, 8)
+ */
+export function fromYottabyte(yb: number): number {
+  return yb * Math.pow(1024, 8);
+}
+/**
+ * @example
+ * toKilobyte(Math.pow(1024, 1)); // 1
+ */
+export function toKilobyte(bytes: number): number {
+  return bytes * Math.pow(1024, -1);
+}
+/**
+ * @example
+ * toMegabyte(Math.pow(1024, 2)); // 1
+ */
+export function toMegabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -2);
+}
+/**
+ * @example
+ * toGigabyte(Math.pow(1024, 3)); // 1
+ */
+export function toGigabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -3);
+}
+/**
+ * @example
+ * toTerabyte(Math.pow(1024, 4)); // 1
+ */
+export function toTerabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -4);
+}
+/**
+ * @example
+ * toPetabyte(Math.pow(1024, 5)); // 1
+ */
+export function toPetabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -5);
+}
+/**
+ * @example
+ * toExabyte(Math.pow(1024, 6)); // 1
+ */
+export function toExabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -6);
+}
+/**
+ * @example
+ * toZettabyte(Math.pow(1024, 7)); // 1
+ */
+export function toZettabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -7);
+}
+/**
+ * @example
+ * toYottabyte(Math.pow(1024, 8)); // 1
+ */
+export function toYottabyte(bytes: number): number {
+  return bytes * Math.pow(1024, -8);
+}
+/**
+ * @example
+ * toFileSize(1024 * 1024); // "1 MB"
+ * toFileSize(1024 * 1024 * 1024); // "1 GB"
+ * toFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512); // "1.5 GB"
+ */
+export function toFileSize(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  const units = [
+    "B",
+    "KB",
+    "MB",
+    "GB",
+    "TB",
+    "PB",
+    "EB",
+    "ZB",
+    "YB",
+  ];
+
+  let value = bytes;
+  let unitIndex = 0;
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex++;
+  }
+
+  let formatted: number;
+
+  if (value >= 100) {
+    formatted = Math.round(value); // 123 MB
+  } else if (value >= 10) {
+    formatted = Math.round(value * 10) / 10; // 12.3 MB
+  } else {
+    formatted = Math.round(value * 100) / 100; // 1.23 MB
+  }
+
+  return `${formatted} ${units[unitIndex]}`;
 }

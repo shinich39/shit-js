@@ -6,9 +6,7 @@ import {
   getContainedSize,
   getCoveredSize,
   getAdjustedSize,
-  humanizeFileSize,
   toFileSize,
-  toBytes,
   generateInt,
   generateFloat,
   getIntSize,
@@ -17,6 +15,22 @@ import {
   getPowerScore,
   getBitSize,
   generateTypingDelay,
+  fromMegabyte,
+  fromGigabyte,
+  fromKilobyte,
+  fromTerabyte,
+  fromPetabyte,
+  fromExabyte,
+  fromZettabyte,
+  fromYottabyte,
+  toKilobyte,
+  toMegabyte,
+  toGigabyte,
+  toTerabyte,
+  toPetabyte,
+  toExabyte,
+  toZettabyte,
+  toYottabyte,
 } from "./number";
 import { sleep } from "./promise";
 
@@ -92,25 +106,6 @@ test("getLoopedNumber", () => {
   eq(getLoopedNumber(10, 5, 10), 5);
 });
 
-test("toBytes", () => {
-  eq(toBytes(1, "MB"), 1024 * 1024);
-  eq(toBytes(1, "GB"), 1024 * 1024 * 1024);
-});
-
-test("toFileSize", () => {
-  eq(toFileSize(1024 * 1024, "MB"), 1);
-  eq(toFileSize(1024 * 1024 * 1024, "GB"), 1);
-});
-
-test("humanizeFileSize", () => {
-  eq(humanizeFileSize(1024 * 1024, "Bytes"), "1.00 MB");
-  eq(humanizeFileSize(1024 * 1024 * 1024, "Bytes"), "1.00 GB");
-  eq(
-    humanizeFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512, "Bytes"),
-    "1.50 GB"
-  );
-});
-
 test("getContainedSize", () => {
   eq(getContainedSize(1, 1, 2, 1), [1, 1]);
   eq(getContainedSize(100, 100, 200, 100), [100, 100]);
@@ -144,4 +139,76 @@ test("getPowerScore", () => {
   eq(getPowerScore(100, 50).toFixed(4), 0.7071067811865476.toFixed(4));
   eq(getPowerScore(100, 75).toFixed(4), 0.8660254037844387.toFixed(4));
   eq(getPowerScore(100, 100), 1);
+});
+
+test("fromKilobyte", () => {
+  eq(fromKilobyte(1), Math.pow(1024, 1));
+});
+
+test("fromMegabyte", () => {
+  eq(fromMegabyte(1), Math.pow(1024, 2));
+});
+
+test("fromGigabyte", () => {
+  eq(fromGigabyte(1), Math.pow(1024, 3));
+});
+
+test("fromTerabyte", () => {
+  eq(fromTerabyte(1), Math.pow(1024, 4));
+});
+
+test("fromPetabyte", () => {
+  eq(fromPetabyte(1), Math.pow(1024, 5));
+});
+
+test("fromExabyte", () => {
+  eq(fromExabyte(1), Math.pow(1024, 6));
+});
+
+test("fromZettabyte", () => {
+  eq(fromZettabyte(1), Math.pow(1024, 7));
+});
+
+test("fromYottabyte", () => {
+  eq(fromYottabyte(1), Math.pow(1024, 8));
+});
+
+test("toKilobyte", () => {
+  eq(toKilobyte(Math.pow(1024, 1)), 1);
+});
+
+test("toMegabyte", () => {
+  eq(toMegabyte(Math.pow(1024, 2)), 1);
+});
+
+test("toGigabyte", () => {
+  eq(toGigabyte(Math.pow(1024, 3)), 1);
+});
+
+test("toTerabyte", () => {
+  eq(toTerabyte(Math.pow(1024, 4)), 1);
+});
+
+test("toPetabyte", () => {
+  eq(toPetabyte(Math.pow(1024, 5)), 1);
+});
+
+test("toExabyte", () => {
+  eq(toExabyte(Math.pow(1024, 6)), 1);
+});
+
+test("toZettabyte", () => {
+  eq(toZettabyte(Math.pow(1024, 7)), 1);
+});
+
+test("toYottabyte", () => {
+  eq(toYottabyte(Math.pow(1024, 8)), 1);
+});
+
+test("toFileSize", () => {
+  eq(toFileSize(1024), "1 KB");
+  eq(toFileSize(1024 + 768), "1.75 KB");
+  eq(toFileSize(1024 * 1024), "1 MB");
+  eq(toFileSize(1024 * 1024 * 1024), "1 GB");
+  eq(toFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512), "1.5 GB");
 });

@@ -874,35 +874,6 @@ function getLoopedNumber(num, min, max) {
   }
   return num + min;
 }
-function toBytes(bytes, format) {
-  if (format === "Bytes") {
-    return bytes;
-  }
-  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
-  if (i === -1) {
-    throw new Error(`Invalid argument: ${format} is not supported format`);
-  }
-  return bytes * Math.pow(1024, i + 1);
-}
-function toFileSize(bytes, format) {
-  if (format === "Bytes") {
-    return bytes;
-  }
-  const i = ["KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].indexOf(format);
-  if (i === -1) {
-    throw new Error(`Invalid argument: ${format} is not supported format`);
-  }
-  return bytes * Math.pow(1024, -(i + 1));
-}
-function humanizeFileSize(num, format) {
-  const bytes = toBytes(num, format);
-  if (bytes === 0) {
-    return "0 Bytes";
-  }
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  const size = (bytes / Math.pow(1024, i)).toFixed(2);
-  return size + " " + ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"][i];
-}
 function getContainedSize(srcWidth, srcHeight, dstWidth, dstHeight) {
   const aspectRatio = srcWidth / srcHeight;
   return aspectRatio < dstWidth / dstHeight ? [dstHeight * aspectRatio, dstHeight] : [dstWidth, dstWidth / aspectRatio];
@@ -938,6 +909,85 @@ function getLogScore(total, current) {
 }
 function getPowerScore(total, current, alpha = 0.5) {
   return Math.pow(current, alpha) / Math.pow(total, alpha);
+}
+function fromKilobyte(kb) {
+  return kb * Math.pow(1024, 1);
+}
+function fromMegabyte(mb) {
+  return mb * Math.pow(1024, 2);
+}
+function fromGigabyte(gb) {
+  return gb * Math.pow(1024, 3);
+}
+function fromTerabyte(tb) {
+  return tb * Math.pow(1024, 4);
+}
+function fromPetabyte(pt) {
+  return pt * Math.pow(1024, 5);
+}
+function fromExabyte(eb) {
+  return eb * Math.pow(1024, 6);
+}
+function fromZettabyte(zb) {
+  return zb * Math.pow(1024, 7);
+}
+function fromYottabyte(yb) {
+  return yb * Math.pow(1024, 8);
+}
+function toKilobyte(bytes) {
+  return bytes * Math.pow(1024, -1);
+}
+function toMegabyte(bytes) {
+  return bytes * Math.pow(1024, -2);
+}
+function toGigabyte(bytes) {
+  return bytes * Math.pow(1024, -3);
+}
+function toTerabyte(bytes) {
+  return bytes * Math.pow(1024, -4);
+}
+function toPetabyte(bytes) {
+  return bytes * Math.pow(1024, -5);
+}
+function toExabyte(bytes) {
+  return bytes * Math.pow(1024, -6);
+}
+function toZettabyte(bytes) {
+  return bytes * Math.pow(1024, -7);
+}
+function toYottabyte(bytes) {
+  return bytes * Math.pow(1024, -8);
+}
+function toFileSize(bytes) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  const units = [
+    "B",
+    "KB",
+    "MB",
+    "GB",
+    "TB",
+    "PB",
+    "EB",
+    "ZB",
+    "YB"
+  ];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex++;
+  }
+  let formatted;
+  if (value >= 100) {
+    formatted = Math.round(value);
+  } else if (value >= 10) {
+    formatted = Math.round(value * 10) / 10;
+  } else {
+    formatted = Math.round(value * 100) / 100;
+  }
+  return `${formatted} ${units[unitIndex]}`;
 }
 
 // src/modules/object.ts
@@ -1503,7 +1553,15 @@ export {
   clearBit,
   copyObject,
   createStore,
+  fromExabyte,
+  fromGigabyte,
+  fromKilobyte,
   fromLzw,
+  fromMegabyte,
+  fromPetabyte,
+  fromTerabyte,
+  fromYottabyte,
+  fromZettabyte,
   generateFloat,
   generateInt,
   generateString,
@@ -1538,7 +1596,6 @@ export {
   getSumValue,
   getType,
   groupBy,
-  humanizeFileSize,
   isBuffer,
   isNumber,
   isNumeric,
@@ -1554,20 +1611,27 @@ export {
   splitArray,
   toBitString,
   toBuffer,
-  toBytes,
   toCamelCase,
   toError,
+  toExabyte,
   toFileSize,
   toFullWidthString,
+  toGigabyte,
   toHalfWidthString,
+  toKilobyte,
   toLzw,
+  toMegabyte,
   toNumber,
   toPascalCase,
+  toPetabyte,
   toRegExp,
   toSentenceCase,
   toSlug,
+  toTerabyte,
   toTitleCase,
   toXor,
+  toYottabyte,
+  toZettabyte,
   toggleBit,
   uniqueBy
 };
