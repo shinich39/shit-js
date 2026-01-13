@@ -1307,7 +1307,7 @@ function toRegExp(str) {
   const pattern = parts.slice(1).join("/");
   return new RegExp(pattern, flags);
 }
-function getStringDiffs(from, to) {
+function getDiffs(from, to) {
   const backtrack = function(from2, to2, trace2, d) {
     const result = [];
     let x = from2.length;
@@ -1383,8 +1383,8 @@ function getStringDiffs(from, to) {
   }
   return [];
 }
-function matchStrings(from, to) {
-  const diffs = getStringDiffs(from, to);
+function compareStrings(from, to) {
+  const diffs = getDiffs(from, to);
   let matches = 0;
   let insertions = 0;
   let deletions = 0;
@@ -1433,6 +1433,31 @@ function getStringSize(str) {
     }
   }
   return result;
+}
+function createTemplate(template) {
+  const parts = template.split(/\$\{([\w.]+)\}/).map(
+    (part, i) => i % 2 ? part.split(".") : part
+  );
+  return (obj) => {
+    let result = "";
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (i % 2 === 0) {
+        result += part;
+        continue;
+      }
+      let cur = obj;
+      for (const key of part) {
+        if (cur == null) {
+          cur = "";
+          break;
+        }
+        cur = cur[key];
+      }
+      result += cur ?? "";
+    }
+    return result;
+  };
 }
 
 // src/modules/type.ts
@@ -1560,8 +1585,10 @@ export {
   QueueWorker,
   checkBit,
   clearBit,
+  compareStrings,
   copyObject,
   createStore,
+  createTemplate,
   fromExabyte,
   fromGigabyte,
   fromKilobyte,
@@ -1584,6 +1611,7 @@ export {
   getCombinations,
   getContainedSize,
   getCoveredSize,
+  getDiffs,
   getDirName,
   getExtName,
   getFloatSize,
@@ -1601,7 +1629,6 @@ export {
   getPowerScore,
   getRelativePath,
   getRootPath,
-  getStringDiffs,
   getStringSize,
   getSumValue,
   getType,
@@ -1611,7 +1638,6 @@ export {
   isNumeric,
   joinArray,
   joinPaths,
-  matchStrings,
   parseDate,
   parseDom,
   retry,

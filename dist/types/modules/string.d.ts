@@ -126,14 +126,14 @@ export declare function toRegExp(str: string): RegExp;
  * 1: Number of inserted characters
  *
  * @example
- * getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export declare function getStringDiffs(from: string, to: string): [number, string][];
+export declare function getDiffs(from: string, to: string): [number, string][];
 /**
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
  * const b = "sit amet, adipiscing";
- * matchStrings(a, b);
+ * compareStrings(a, b);
  * // {
  * //   matchRate: 0.35714285714285715,
  * //   similarity: 0.35714285714285715,
@@ -146,7 +146,7 @@ export declare function getStringDiffs(from: string, to: string): [number, strin
  * //   deletions: 36
  * // }
  */
-export declare function matchStrings(from: string, to: string): {
+export declare function compareStrings(from: string, to: string): {
     matchRate: number;
     similarity: number;
     diceSimilarity: number;
@@ -164,4 +164,12 @@ export declare function matchStrings(from: string, to: string): {
  * getStringSize("ㄱㄴㄷ"); // 9
  */
 export declare function getStringSize(str: string): number;
+/**
+ * Support dot-notation
+ *
+ * @example
+ * const template = createTemplate("Lorem ipsum dolor ${a.b.c}");
+ * template({ a: { b: { c: "sit amet" } } }); // "Lorem ipsum dolor sit amet"
+ */
+export declare function createTemplate(template: string): (obj: Record<string, any>) => string;
 //# sourceMappingURL=string.d.ts.map

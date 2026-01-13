@@ -27,8 +27,10 @@ var shitJs = (() => {
     QueueWorker: () => QueueWorker,
     checkBit: () => checkBit,
     clearBit: () => clearBit,
+    compareStrings: () => compareStrings,
     copyObject: () => copyObject,
     createStore: () => createStore,
+    createTemplate: () => createTemplate,
     fromExabyte: () => fromExabyte,
     fromGigabyte: () => fromGigabyte,
     fromKilobyte: () => fromKilobyte,
@@ -51,6 +53,7 @@ var shitJs = (() => {
     getCombinations: () => getCombinations,
     getContainedSize: () => getContainedSize,
     getCoveredSize: () => getCoveredSize,
+    getDiffs: () => getDiffs,
     getDirName: () => getDirName,
     getExtName: () => getExtName,
     getFloatSize: () => getFloatSize,
@@ -68,7 +71,6 @@ var shitJs = (() => {
     getPowerScore: () => getPowerScore,
     getRelativePath: () => getRelativePath,
     getRootPath: () => getRootPath,
-    getStringDiffs: () => getStringDiffs,
     getStringSize: () => getStringSize,
     getSumValue: () => getSumValue,
     getType: () => getType,
@@ -78,7 +80,6 @@ var shitJs = (() => {
     isNumeric: () => isNumeric,
     joinArray: () => joinArray,
     joinPaths: () => joinPaths,
-    matchStrings: () => matchStrings,
     parseDate: () => parseDate,
     parseDom: () => parseDom,
     retry: () => retry,
@@ -1424,7 +1425,7 @@ var shitJs = (() => {
     const pattern = parts.slice(1).join("/");
     return new RegExp(pattern, flags);
   }
-  function getStringDiffs(from, to) {
+  function getDiffs(from, to) {
     const backtrack = function(from2, to2, trace2, d) {
       const result = [];
       let x = from2.length;
@@ -1500,8 +1501,8 @@ var shitJs = (() => {
     }
     return [];
   }
-  function matchStrings(from, to) {
-    const diffs = getStringDiffs(from, to);
+  function compareStrings(from, to) {
+    const diffs = getDiffs(from, to);
     let matches = 0;
     let insertions = 0;
     let deletions = 0;
@@ -1550,6 +1551,31 @@ var shitJs = (() => {
       }
     }
     return result;
+  }
+  function createTemplate(template) {
+    const parts = template.split(/\$\{([\w.]+)\}/).map(
+      (part, i) => i % 2 ? part.split(".") : part
+    );
+    return (obj) => {
+      let result = "";
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (i % 2 === 0) {
+          result += part;
+          continue;
+        }
+        let cur = obj;
+        for (const key of part) {
+          if (cur == null) {
+            cur = "";
+            break;
+          }
+          cur = cur[key];
+        }
+        result += cur ?? "";
+      }
+      return result;
+    };
   }
 
   // src/modules/type.ts

@@ -199,9 +199,9 @@ export function toRegExp(str: string): RegExp {
  * 1: Number of inserted characters
  * 
  * @example
- * getStringDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
-export function getStringDiffs(from: string, to: string): [number, string][] {
+export function getDiffs(from: string, to: string): [number, string][] {
   const backtrack = function(
     from: string,
     to: string,
@@ -321,7 +321,7 @@ export function getStringDiffs(from: string, to: string): [number, string][] {
  * @example
  * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
  * const b = "sit amet, adipiscing";
- * matchStrings(a, b);
+ * compareStrings(a, b);
  * // {
  * //   matchRate: 0.35714285714285715,
  * //   similarity: 0.35714285714285715,
@@ -334,7 +334,7 @@ export function getStringDiffs(from: string, to: string): [number, string][] {
  * //   deletions: 36
  * // }
  */
-export function matchStrings(from: string, to: string): {
+export function compareStrings(from: string, to: string): {
   matchRate: number,
   similarity: number,
   diceSimilarity: number,
@@ -345,7 +345,7 @@ export function matchStrings(from: string, to: string): {
   insertions: number,
   deletions: number,
 } {
-  const diffs = getStringDiffs(from, to);
+  const diffs = getDiffs(from, to);
   
   let matches = 0;
   let insertions = 0;
@@ -427,4 +427,48 @@ export function getStringSize(str: string): number {
   }
   
   return result;
+}
+/**
+ * Support dot-notation
+ * 
+ * @example
+ * const template = createTemplate("Lorem ipsum dolor ${a.b.c}");
+ * template({ a: { b: { c: "sit amet" } } }); // "Lorem ipsum dolor sit amet"
+ */
+export function createTemplate(template: string): (obj: Record<string, any>) => string {
+  const parts = template
+    .split(/\$\{([\w.]+)\}/)
+    .map((part, i) =>
+      i % 2 
+        ? part.split(".") 
+        : part
+    );
+
+  return (obj: Record<string, any>): string => {
+    let result = "";
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+
+      if (i % 2 === 0) {
+        result += part;
+        continue;
+      }
+      
+      let cur: any = obj;
+      
+      for (const key of (part as string[])) {
+        if (cur == null) {
+          cur = "";
+          break;
+        }
+
+        cur = cur[key];
+      }
+
+      result += cur ?? "";
+    }
+
+    return result;
+  }
 }

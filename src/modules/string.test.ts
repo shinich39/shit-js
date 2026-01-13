@@ -4,14 +4,14 @@ import {
   BRACKETS,
   QUOTES,
   toCamelCase,
-  getStringDiffs,
+  getDiffs,
   getFloats,
   getInts,
   generateString,
   getStringSize,
   generateUuid,
   toXor,
-  matchStrings,
+  compareStrings,
   toHalfWidthString,
   toSlug,
   toRegExp,
@@ -19,6 +19,7 @@ import {
   toPascalCase,
   toSentenceCase,
   toTitleCase,
+  createTemplate,
 } from "./string";
 
 test("toSentenceCase", () => {
@@ -88,10 +89,10 @@ test("toRegExp", () => {
   eq(toRegExp("/a[\\\\\/]c/gi"), /a[\\/]c/gi);
 });
 
-test("getStringDiffs", () => {
+test("getDiffs", () => {
   const b = "sit amet, adipiscing";
   const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-  const result = getStringDiffs(a, b);
+  const result = getDiffs(a, b);
 
   eq(result, [
     [ -1, 'Lorem ip' ],
@@ -104,10 +105,10 @@ test("getStringDiffs", () => {
   ]);
 });
 
-test("matchStrings", () => {
+test("compareStrings", () => {
   const b = "sit amet, adipiscing";
   const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-  const result = matchStrings(a, b);
+  const result = compareStrings(a, b);
 
   eq(result, {
     matchRate: 0.35714285714285715,
@@ -141,4 +142,11 @@ test("getStringSize", () => {
   eq(getStringSize("abc"), 3);
   eq(getStringSize("ㄱㄴㄷ"), 9);
   eq(getStringSize("가나다"), 9);
+});
+
+test("createTemplate", () => {
+  eq(createTemplate("${a} != ${b}")({ a: "1", b: "2" }), "1 != 2");
+  eq(createTemplate("Lorem ipsum dolor ${a.b.c}")({ a: { b: { c: "sit amet" } } }), "Lorem ipsum dolor sit amet");
+  eq(createTemplate("Lorem ipsum dolor ${a.b.c}")({ }), "Lorem ipsum dolor ");
+  eq(createTemplate("Lorem ipsum dolor ${a.b.c}")({ a: { b: { c: { d: "NULL" }}}}), "Lorem ipsum dolor [object Object]");
 });
