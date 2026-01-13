@@ -45,6 +45,7 @@ __export(shit_exports, {
   getAdjustedSize: () => getAdjustedSize,
   getBaseName: () => getBaseName,
   getBitSize: () => getBitSize,
+  getClampedDegree: () => getClampedDegree,
   getClampedNumber: () => getClampedNumber,
   getCombinations: () => getCombinations,
   getContainedSize: () => getContainedSize,
@@ -87,6 +88,7 @@ __export(shit_exports, {
   toBitString: () => toBitString,
   toBuffer: () => toBuffer,
   toCamelCase: () => toCamelCase,
+  toDegree: () => toDegree,
   toError: () => toError,
   toExabyte: () => toExabyte,
   toFileSize: () => toFileSize,
@@ -99,6 +101,7 @@ __export(shit_exports, {
   toNumber: () => toNumber,
   toPascalCase: () => toPascalCase,
   toPetabyte: () => toPetabyte,
+  toRadian: () => toRadian,
   toRegExp: () => toRegExp,
   toSentenceCase: () => toSentenceCase,
   toSlug: () => toSlug,
@@ -988,6 +991,15 @@ function getLoopedNumber(num, min, max) {
   }
   return num + min;
 }
+function getClampedDegree(degree) {
+  return (degree % 360 + 360) % 360;
+}
+function toRadian(degree) {
+  return degree * (Math.PI / 180);
+}
+function toDegree(radian) {
+  return radian * (180 / Math.PI);
+}
 function getContainedSize(srcWidth, srcHeight, dstWidth, dstHeight) {
   const aspectRatio = srcWidth / srcHeight;
   return aspectRatio < dstWidth / dstHeight ? [dstHeight * aspectRatio, dstHeight] : [dstWidth, dstWidth / aspectRatio];
@@ -1685,6 +1697,7 @@ function toError(err) {
   getAdjustedSize,
   getBaseName,
   getBitSize,
+  getClampedDegree,
   getClampedNumber,
   getCombinations,
   getContainedSize,
@@ -1727,6 +1740,7 @@ function toError(err) {
   toBitString,
   toBuffer,
   toCamelCase,
+  toDegree,
   toError,
   toExabyte,
   toFileSize,
@@ -1739,6 +1753,7 @@ function toError(err) {
   toNumber,
   toPascalCase,
   toPetabyte,
+  toRadian,
   toRegExp,
   toSentenceCase,
   toSlug,

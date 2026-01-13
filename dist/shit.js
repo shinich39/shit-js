@@ -46,6 +46,7 @@ var shitJs = (() => {
     getAdjustedSize: () => getAdjustedSize,
     getBaseName: () => getBaseName,
     getBitSize: () => getBitSize,
+    getClampedDegree: () => getClampedDegree,
     getClampedNumber: () => getClampedNumber,
     getCombinations: () => getCombinations,
     getContainedSize: () => getContainedSize,
@@ -88,6 +89,7 @@ var shitJs = (() => {
     toBitString: () => toBitString,
     toBuffer: () => toBuffer,
     toCamelCase: () => toCamelCase,
+    toDegree: () => toDegree,
     toError: () => toError,
     toExabyte: () => toExabyte,
     toFileSize: () => toFileSize,
@@ -100,6 +102,7 @@ var shitJs = (() => {
     toNumber: () => toNumber,
     toPascalCase: () => toPascalCase,
     toPetabyte: () => toPetabyte,
+    toRadian: () => toRadian,
     toRegExp: () => toRegExp,
     toSentenceCase: () => toSentenceCase,
     toSlug: () => toSlug,
@@ -987,6 +990,15 @@ var shitJs = (() => {
       num = num % max;
     }
     return num + min;
+  }
+  function getClampedDegree(degree) {
+    return (degree % 360 + 360) % 360;
+  }
+  function toRadian(degree) {
+    return degree * (Math.PI / 180);
+  }
+  function toDegree(radian) {
+    return radian * (180 / Math.PI);
   }
   function getContainedSize(srcWidth, srcHeight, dstWidth, dstHeight) {
     const aspectRatio = srcWidth / srcHeight;

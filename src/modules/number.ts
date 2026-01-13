@@ -143,6 +143,42 @@ export function getLoopedNumber(num: number, min: number, max: number): number {
   return num + min;
 }
 /**
+ * To 0 - 360
+ * 
+ * @example
+ * getClampedDegree(0); // 0
+ * getClampedDegree(180); // 180
+ * getClampedDegree(450); // 90
+ * getClampedDegree(540); // 180
+ * getClampedDegree(-90); // 270
+ * getClampedDegree(-360); // 0
+ * getClampedDegree(-540); // 180
+ */
+export function getClampedDegree(degree: number): number {
+  return ((degree % 360) + 360) % 360;
+}
+/**
+ * Degree → Radian
+ * 
+ * @example
+ * toRadian(90); // 1.5708...
+ * toRadian(180); // 3.1416...
+ * ctx.rotate(toRadian(45)); // Rotate 45 degree in Canvas, WebGL, Three.js...
+ */
+export function toRadian(degree: number): number {
+  return degree * (Math.PI / 180);
+}
+/**
+ * Radian → Degree
+ * 
+ * @example
+ * toDegree(Math.PI); // 180
+ * toDegree(Math.PI * 2); // 360
+ */
+export function toDegree(radian: number): number {
+  return radian * (180 / Math.PI);
+}
+/**
  * @example
  * getContainedSize(100, 100, 200, 100); // [100, 100]
  */

@@ -874,6 +874,15 @@ function getLoopedNumber(num, min, max) {
   }
   return num + min;
 }
+function getClampedDegree(degree) {
+  return (degree % 360 + 360) % 360;
+}
+function toRadian(degree) {
+  return degree * (Math.PI / 180);
+}
+function toDegree(radian) {
+  return radian * (180 / Math.PI);
+}
 function getContainedSize(srcWidth, srcHeight, dstWidth, dstHeight) {
   const aspectRatio = srcWidth / srcHeight;
   return aspectRatio < dstWidth / dstHeight ? [dstHeight * aspectRatio, dstHeight] : [dstWidth, dstWidth / aspectRatio];
@@ -1570,6 +1579,7 @@ export {
   getAdjustedSize,
   getBaseName,
   getBitSize,
+  getClampedDegree,
   getClampedNumber,
   getCombinations,
   getContainedSize,
@@ -1612,6 +1622,7 @@ export {
   toBitString,
   toBuffer,
   toCamelCase,
+  toDegree,
   toError,
   toExabyte,
   toFileSize,
@@ -1624,6 +1635,7 @@ export {
   toNumber,
   toPascalCase,
   toPetabyte,
+  toRadian,
   toRegExp,
   toSentenceCase,
   toSlug,

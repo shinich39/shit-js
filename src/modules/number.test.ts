@@ -31,6 +31,9 @@ import {
   toExabyte,
   toZettabyte,
   toYottabyte,
+  toRadian,
+  toDegree,
+  getClampedDegree,
 } from "./number";
 import { sleep } from "./promise";
 
@@ -104,6 +107,26 @@ test("getLoopedNumber", () => {
   eq(getLoopedNumber(-2.5, 5, 10), 7.5);
   eq(getLoopedNumber(7.5, 5, 10), 7.5);
   eq(getLoopedNumber(10, 5, 10), 5);
+});
+
+test("getClampedDegree", () => {
+  eq(getClampedDegree(0), 0);
+  eq(getClampedDegree(180), 180);
+  eq(getClampedDegree(450), 90);
+  eq(getClampedDegree(540), 180);
+  eq(getClampedDegree(-90), 270);
+  eq(getClampedDegree(-360), 0);
+  eq(getClampedDegree(-540), 180);
+});
+
+test("toRadian", () => {
+  eq(toRadian(90).toFixed(4), "1.5708");
+  eq(toRadian(180).toFixed(4), "3.1416");
+});
+
+test("toDegree", () => {
+  eq(toDegree(Math.PI), 180);
+  eq(toDegree(Math.PI * 2), 360);
 });
 
 test("getContainedSize", () => {
