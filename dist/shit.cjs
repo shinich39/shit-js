@@ -29,6 +29,7 @@ __export(shit_exports, {
   compareStrings: () => compareStrings,
   copyObject: () => copyObject,
   createStore: () => createStore,
+  createTable: () => createTable,
   createTemplate: () => createTemplate,
   fromExabyte: () => fromExabyte,
   fromGigabyte: () => fromGigabyte,
@@ -1145,6 +1146,9 @@ function copyObject(obj) {
   };
   return fn(obj);
 }
+function createTable(obj, defaultPrimaryKey) {
+  return (primaryKey, secondaryKey) => obj[primaryKey ?? ""]?.[secondaryKey] ?? obj[defaultPrimaryKey]?.[secondaryKey] ?? secondaryKey;
+}
 function createStore(initial, handlers) {
   return new Proxy({ ...initial }, {
     set(target, key, value) {
@@ -1707,6 +1711,7 @@ function toError(err) {
   compareStrings,
   copyObject,
   createStore,
+  createTable,
   createTemplate,
   fromExabyte,
   fromGigabyte,

@@ -42,6 +42,27 @@ export function copyObject<T>(obj: T): T {
 
   return fn(obj);
 }
+/**
+ * @example
+ * const t = createTable({
+ *   en: { heading: "Hello, world!" },
+ *   ko: { heading: "세상아, 안녕!" }
+ * }, "en");
+ * 
+ * t("en", "heading"); // "Hello, world!"
+ * t(null, "heading"); // "Hello, world!"
+ * t("ko", "heading"); // "세상아, 안녕!"
+ * t("en", "missing"); // "missing"
+ */
+export function createTable(
+  obj: Record<string, Record<string, string>>,
+  defaultPrimaryKey: string,
+): (primaryKey: string | null | undefined, secondaryKey: string) => string {
+  return (primaryKey, secondaryKey) => 
+    obj[primaryKey ?? ""]?.[secondaryKey] ??
+    obj[defaultPrimaryKey]?.[secondaryKey] ??
+    secondaryKey;
+}
 
 type StoreHandlers<T extends object> = {
   [K in keyof T]?: (
@@ -49,7 +70,6 @@ type StoreHandlers<T extends object> = {
     newValue: T[K],
   ) => void | Promise<void>;
 }
-
 /**
  * Create an observed object
  * 

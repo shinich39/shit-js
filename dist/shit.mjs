@@ -1027,6 +1027,9 @@ function copyObject(obj) {
   };
   return fn(obj);
 }
+function createTable(obj, defaultPrimaryKey) {
+  return (primaryKey, secondaryKey) => obj[primaryKey ?? ""]?.[secondaryKey] ?? obj[defaultPrimaryKey]?.[secondaryKey] ?? secondaryKey;
+}
 function createStore(initial, handlers) {
   return new Proxy({ ...initial }, {
     set(target, key, value) {
@@ -1588,6 +1591,7 @@ export {
   compareStrings,
   copyObject,
   createStore,
+  createTable,
   createTemplate,
   fromExabyte,
   fromGigabyte,

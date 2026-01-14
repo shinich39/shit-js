@@ -7,6 +7,19 @@
  * a == b; // false
  */
 export declare function copyObject<T>(obj: T): T;
+/**
+ * @example
+ * const t = createTable({
+ *   en: { heading: "Hello, world!" },
+ *   ko: { heading: "세상아, 안녕!" }
+ * }, "en");
+ *
+ * t("en", "heading"); // "Hello, world!"
+ * t(null, "heading"); // "Hello, world!"
+ * t("ko", "heading"); // "세상아, 안녕!"
+ * t("en", "missing"); // "missing"
+ */
+export declare function createTable(obj: Record<string, Record<string, string>>, defaultPrimaryKey: string): (primaryKey: string | null | undefined, secondaryKey: string) => string;
 type StoreHandlers<T extends object> = {
     [K in keyof T]?: (oldValue: T[K], newValue: T[K]) => void | Promise<void>;
 };
