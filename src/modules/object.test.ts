@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
-import { copyObject, createStore, createTable } from "./object";
+import { copyObject, createStore, createI18n } from "./object";
 
 test("copyObject", () => {
   const a = { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } };
@@ -11,8 +11,8 @@ test("copyObject", () => {
   eq(b, { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } });
 });
 
-test("createTable", () => {
-  const t = createTable({
+test("createI18n", () => {
+  const t = createI18n({
     en: {
       heading: "Hello, world!"
     },

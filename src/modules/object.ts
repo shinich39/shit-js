@@ -43,8 +43,10 @@ export function copyObject<T>(obj: T): T {
   return fn(obj);
 }
 /**
+ * Create internationalization(i18n) object
+ * 
  * @example
- * const t = createTable({
+ * const t = createI18n({
  *   en: { heading: "Hello, world!" },
  *   ko: { heading: "세상아, 안녕!" }
  * }, "en");
@@ -54,14 +56,14 @@ export function copyObject<T>(obj: T): T {
  * t("ko", "heading"); // "세상아, 안녕!"
  * t("en", "missing"); // "missing"
  */
-export function createTable(
+export function createI18n(
   obj: Record<string, Record<string, string>>,
-  defaultPrimaryKey: string,
-): (primaryKey: string | null | undefined, secondaryKey: string) => string {
-  return (primaryKey, secondaryKey) => 
-    obj[primaryKey ?? ""]?.[secondaryKey] ??
-    obj[defaultPrimaryKey]?.[secondaryKey] ??
-    secondaryKey;
+  defaultLocale: string,
+): (locale: string | null | undefined, key: string) => string {
+  return (locale, key) => 
+    obj[locale ?? ""]?.[key] ??
+    obj[defaultLocale]?.[key] ??
+    key;
 }
 
 type StoreHandlers<T extends object> = {

@@ -29,8 +29,8 @@ var shitJs = (() => {
     clearBit: () => clearBit,
     compareStrings: () => compareStrings,
     copyObject: () => copyObject,
+    createI18n: () => createI18n,
     createStore: () => createStore,
-    createTable: () => createTable,
     createTemplate: () => createTemplate,
     fromExabyte: () => fromExabyte,
     fromGigabyte: () => fromGigabyte,
@@ -1146,8 +1146,8 @@ var shitJs = (() => {
     };
     return fn(obj);
   }
-  function createTable(obj, defaultPrimaryKey) {
-    return (primaryKey, secondaryKey) => obj[primaryKey ?? ""]?.[secondaryKey] ?? obj[defaultPrimaryKey]?.[secondaryKey] ?? secondaryKey;
+  function createI18n(obj, defaultLocale) {
+    return (locale, key) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
   }
   function createStore(initial, handlers) {
     return new Proxy({ ...initial }, {

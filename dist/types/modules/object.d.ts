@@ -8,8 +8,10 @@
  */
 export declare function copyObject<T>(obj: T): T;
 /**
+ * Create internationalization(i18n) object
+ *
  * @example
- * const t = createTable({
+ * const t = createI18n({
  *   en: { heading: "Hello, world!" },
  *   ko: { heading: "세상아, 안녕!" }
  * }, "en");
@@ -19,7 +21,7 @@ export declare function copyObject<T>(obj: T): T;
  * t("ko", "heading"); // "세상아, 안녕!"
  * t("en", "missing"); // "missing"
  */
-export declare function createTable(obj: Record<string, Record<string, string>>, defaultPrimaryKey: string): (primaryKey: string | null | undefined, secondaryKey: string) => string;
+export declare function createI18n(obj: Record<string, Record<string, string>>, defaultLocale: string): (locale: string | null | undefined, key: string) => string;
 type StoreHandlers<T extends object> = {
     [K in keyof T]?: (oldValue: T[K], newValue: T[K]) => void | Promise<void>;
 };

@@ -28,8 +28,8 @@ __export(shit_exports, {
   clearBit: () => clearBit,
   compareStrings: () => compareStrings,
   copyObject: () => copyObject,
+  createI18n: () => createI18n,
   createStore: () => createStore,
-  createTable: () => createTable,
   createTemplate: () => createTemplate,
   fromExabyte: () => fromExabyte,
   fromGigabyte: () => fromGigabyte,
@@ -1146,8 +1146,8 @@ function copyObject(obj) {
   };
   return fn(obj);
 }
-function createTable(obj, defaultPrimaryKey) {
-  return (primaryKey, secondaryKey) => obj[primaryKey ?? ""]?.[secondaryKey] ?? obj[defaultPrimaryKey]?.[secondaryKey] ?? secondaryKey;
+function createI18n(obj, defaultLocale) {
+  return (locale, key) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
 }
 function createStore(initial, handlers) {
   return new Proxy({ ...initial }, {
@@ -1710,8 +1710,8 @@ function toError(err) {
   clearBit,
   compareStrings,
   copyObject,
+  createI18n,
   createStore,
-  createTable,
   createTemplate,
   fromExabyte,
   fromGigabyte,
