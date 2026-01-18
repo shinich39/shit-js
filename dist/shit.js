@@ -35,7 +35,6 @@ var shitJs = (() => {
     fromExabyte: () => fromExabyte,
     fromGigabyte: () => fromGigabyte,
     fromKilobyte: () => fromKilobyte,
-    fromLzw: () => fromLzw,
     fromMegabyte: () => fromMegabyte,
     fromPetabyte: () => fromPetabyte,
     fromTerabyte: () => fromTerabyte,
@@ -47,7 +46,7 @@ var shitJs = (() => {
     generateTypingDelay: () => generateTypingDelay,
     generateUuid: () => generateUuid,
     getAdjustedSize: () => getAdjustedSize,
-    getBaseName: () => getBaseName,
+    getBasename: () => getBasename,
     getBitSize: () => getBitSize,
     getClampedDegree: () => getClampedDegree,
     getClampedNumber: () => getClampedNumber,
@@ -55,8 +54,9 @@ var shitJs = (() => {
     getContainedSize: () => getContainedSize,
     getCoveredSize: () => getCoveredSize,
     getDiffs: () => getDiffs,
-    getDirName: () => getDirName,
-    getExtName: () => getExtName,
+    getDirname: () => getDirname,
+    getExtname: () => getExtname,
+    getFilename: () => getFilename,
     getFloatSize: () => getFloatSize,
     getFloats: () => getFloats,
     getIntSize: () => getIntSize,
@@ -99,13 +99,13 @@ var shitJs = (() => {
     toGigabyte: () => toGigabyte,
     toHalfWidthString: () => toHalfWidthString,
     toKilobyte: () => toKilobyte,
-    toLzw: () => toLzw,
     toMegabyte: () => toMegabyte,
     toNumber: () => toNumber,
     toPascalCase: () => toPascalCase,
     toPetabyte: () => toPetabyte,
     toRadian: () => toRadian,
     toRegExp: () => toRegExp,
+    toSafeFilename: () => toSafeFilename,
     toSentenceCase: () => toSentenceCase,
     toSlug: () => toSlug,
     toTerabyte: () => toTerabyte,
@@ -209,23 +209,6 @@ var shitJs = (() => {
       }
     }
     return result;
-  }
-
-  // src/modules/bit.ts
-  function checkBit(a, b) {
-    return (a & b) !== 0;
-  }
-  function setBit(a, b) {
-    return a | b;
-  }
-  function clearBit(a, b) {
-    return a & ~b;
-  }
-  function toggleBit(a, b) {
-    return a ^ b;
-  }
-  function toBitString(bit, size) {
-    return bit.toString(2).padStart(Math.max(bit === 0 ? 1 : Math.floor(Math.log2(bit)) + 1, size || 1), "0");
   }
 
   // src/modules/date.ts
@@ -886,61 +869,27 @@ var shitJs = (() => {
     static parse = parseStr;
   };
 
-  // src/modules/lzw.ts
-  function toLzw(input) {
-    const dict = {};
-    const result = [];
-    let dictSize = 256;
-    for (let i = 0; i < dictSize; i++) {
-      dict[String.fromCharCode(i)] = i;
-    }
-    let w = "";
-    for (const c of input) {
-      const wc = w + c;
-      if (dict[wc] !== void 0) {
-        w = wc;
-      } else {
-        result.push(dict[w]);
-        dict[wc] = dictSize++;
-        w = c;
-      }
-    }
-    if (w !== "") {
-      result.push(dict[w]);
-    }
-    return result;
-  }
-  function fromLzw(compressed) {
-    const dict = [];
-    let dictSize = 256;
-    for (let i = 0; i < dictSize; i++) {
-      dict[i] = String.fromCharCode(i);
-    }
-    let w = String.fromCharCode(compressed[0]);
-    let result = w;
-    for (let i = 1; i < compressed.length; i++) {
-      const k = compressed[i];
-      let entry;
-      if (dict[k]) {
-        entry = dict[k];
-      } else if (k === dictSize) {
-        entry = w + w[0];
-      } else {
-        throw new Error("Invalid LZW code: " + k);
-      }
-      result += entry;
-      dict[dictSize++] = w + entry[0];
-      w = entry;
-    }
-    return result;
-  }
-
   // src/modules/number.ts
   function mulberry32(seed) {
     let t = seed += 1831565813;
     t = Math.imul(t ^ t >>> 15, t | 1);
     t ^= t + Math.imul(t ^ t >>> 7, t | 61);
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+  function checkBit(a, b) {
+    return (a & b) !== 0;
+  }
+  function setBit(a, b) {
+    return a | b;
+  }
+  function clearBit(a, b) {
+    return a & ~b;
+  }
+  function toggleBit(a, b) {
+    return a ^ b;
+  }
+  function toBitString(bit, size) {
+    return bit.toString(2).padStart(Math.max(bit === 0 ? 1 : Math.floor(Math.log2(bit)) + 1, size || 1), "0");
   }
   function generateFloat(min, max, seed) {
     return typeof seed === "number" ? mulberry32(seed) * (max - min) + min : Math.random() * (max - min) + min;
@@ -1186,7 +1135,7 @@ var shitJs = (() => {
     }
     return resolved.join("/");
   }
-  function getBaseName(str, suffix) {
+  function getBasename(str, suffix) {
     str = str.replace(/[\\/]$/, "");
     let i = str.length - 1;
     while (i >= 0) {
@@ -1201,7 +1150,7 @@ var shitJs = (() => {
     }
     return str;
   }
-  function getExtName(str) {
+  function getExtname(str) {
     let i = str.length - 1;
     while (i >= 0) {
       if (str[i] === ".") {
@@ -1214,7 +1163,10 @@ var shitJs = (() => {
     }
     return "";
   }
-  function getDirName(str) {
+  function getFilename(str) {
+    return getBasename(str, getExtname(str));
+  }
+  function getDirname(str) {
     str = str.replace(/[\\/]$/, "");
     let i = str.length - 1;
     while (i >= 0) {
@@ -1274,6 +1226,9 @@ var shitJs = (() => {
       j++;
     }
     return resolved.join("/");
+  }
+  function toSafeFilename(str, replacement = "_") {
+    return str.replace(/[\\/:*?"<>|]/g, replacement).replace(/[\u0000-\u001F\u007F]/g, replacement).replace(/[. ]+$/, "") || replacement;
   }
 
   // src/modules/promise.ts

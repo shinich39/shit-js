@@ -34,8 +34,52 @@ import {
   toRadian,
   toDegree,
   getClampedDegree,
+  checkBit,
+  setBit,
+  clearBit,
+  toggleBit,
+  toBitString,
 } from "./number";
 import { sleep } from "./promise";
+
+test("checkBit", () => {
+  eq(checkBit(0b1100, 0b1000), true);
+  eq(checkBit(0b1100, 0b0100), true);
+  eq(checkBit(0b1100, 0b1100), true);
+
+  eq(checkBit(0b1100, 0b0001), false);
+  eq(checkBit(0b1100, 0b0010), false);
+  eq(checkBit(0b1100, 0b0011), false);
+});
+
+test("setBit", () => {
+  eq(setBit(0b1100, 0b1000), 0b1100);
+  eq(setBit(0b1100, 0b1100), 0b1100);
+  eq(setBit(0b1100, 0b1110), 0b1110);
+  eq(setBit(0b1100, 0b1111), 0b1111);
+});
+
+test("clearBit", () => {
+  eq(clearBit(0b1100, 0b1000), 0b0100);
+  eq(clearBit(0b1100, 0b1100), 0b0000);
+  eq(clearBit(0b1100, 0b1110), 0b0000);
+  eq(clearBit(0b1100, 0b1111), 0b0000);
+});
+
+test("toggleBit", () => {
+  eq(toggleBit(0b1100, 0b1000), 0b0100);
+  eq(toggleBit(0b1100, 0b1100), 0b0000);
+  eq(toggleBit(0b1100, 0b1110), 0b0010);
+  eq(toggleBit(0b1100, 0b1111), 0b0011);
+});
+
+test("toBitString", () => {
+  eq(toBitString(0b1100), "1100");
+  eq(toBitString(0b1111), "1111");
+  eq(toBitString(0b1111, 4), "1111");
+  eq(toBitString(0b1111, 8), "00001111");
+  eq(toBitString(0b10101010), "10101010");
+});
 
 test("generateFloat", () => {
   eq(generateFloat(0, 1) < 1, true);

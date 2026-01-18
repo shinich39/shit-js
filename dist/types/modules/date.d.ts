@@ -1,6 +1,6 @@
 /**
  * @example
- * parseDate(new Date());
+ * parseDate(new Date()); // { YYYY: 2026, ... }
  */
 export declare function parseDate(date: Date | number | string): {
     YYYY: string;

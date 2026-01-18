@@ -30,10 +30,10 @@ export function joinPaths(...args: string[]): string {
 }
 /**
  * @example
- * getBaseName("./project/package.json"); // "package.json"
- * getBaseName("./project/package.json", ".json"); // "package"
+ * getBasename("./project/package.json"); // "package.json"
+ * getBasename("./project/package.json", ".json"); // "package"
  */
-export function getBaseName(str: string, suffix?: string): string {
+export function getBasename(str: string, suffix?: string): string {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 1;
@@ -56,9 +56,9 @@ export function getBaseName(str: string, suffix?: string): string {
 }
 /**
  * @example
- * getExtName("./project/package.json"); // ".json"
+ * getExtname("./project/package.json"); // ".json"
  */
-export function getExtName(str: string): string {
+export function getExtname(str: string): string {
   let i = str.length - 1;
 
   while (i >= 0) {
@@ -78,9 +78,16 @@ export function getExtName(str: string): string {
 }
 /**
  * @example
- * getDirName("./project/package.json"); // "./project"
+ * getFilename("./project/package.json"); // "package"
  */
-export function getDirName(str: string): string {
+export function getFilename(str: string): string {
+  return getBasename(str, getExtname(str));
+}
+/**
+ * @example
+ * getDirname("./project/package.json"); // "./project"
+ */
+export function getDirname(str: string): string {
   str = str.replace(/[\\/]$/, "");
 
   let i = str.length - 1;
@@ -185,4 +192,16 @@ export function getRootPath(...args: string[]): string {
   }
 
   return resolved.join("/");
+}
+
+export function toSafeFilename(str: string, replacement = "_"): string {
+  return str
+    // Remove windows restricts specific characters: \ / : * ? " < > |
+    .replace(/[\\/:*?"<>|]/g, replacement)
+    // Remove control characters: 0x00 ~ 0x1F
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001F\u007F]/g, replacement)
+    // Remove trailing dot
+    .replace(/[. ]+$/, "")
+    || replacement;
 }

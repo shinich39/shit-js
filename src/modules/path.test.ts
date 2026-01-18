@@ -2,12 +2,13 @@ import { describe, test } from "node:test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
 import path from "node:path";
 import {
-  getBaseName,
-  getDirName,
-  getExtName,
+  getBasename,
+  getDirname,
+  getExtname,
   getRelativePath,
   getRootPath,
   joinPaths,
+  toSafeFilename,
 } from "./path";
 
 test("joinPaths", () => {
@@ -28,7 +29,7 @@ test("joinPaths", () => {
   }
 });
 
-test("getBaseName", () => {
+test("getBasename", () => {
   const arrs = [
     ["./project/package.json", "package.json", "package"],
     ["./project/", "project", "project"],
@@ -36,13 +37,13 @@ test("getBaseName", () => {
   ];
 
   for (const arr of arrs) {
-    eq(path.basename(arr[0]), getBaseName(arr[0]), arr[0]);
-    eq(getBaseName(arr[0], getExtName(arr[0])), arr[2], arr[0]);
-    eq(arr[1], getBaseName(arr[0]), arr[0]);
+    eq(path.basename(arr[0]), getBasename(arr[0]), arr[0]);
+    eq(getBasename(arr[0], getExtname(arr[0])), arr[2], arr[0]);
+    eq(arr[1], getBasename(arr[0]), arr[0]);
   }
 });
 
-test("getExtName", () => {
+test("getExtname", () => {
   const arrs = [
     ["./project/package.json", ".json"],
     ["./project/package", ""],
@@ -51,12 +52,12 @@ test("getExtName", () => {
   ];
 
   for (const arr of arrs) {
-    eq(path.extname(arr[0]), getExtName(arr[0]), arr[0]);
-    eq(arr[1], getExtName(arr[0]), arr[0]);
+    eq(path.extname(arr[0]), getExtname(arr[0]), arr[0]);
+    eq(arr[1], getExtname(arr[0]), arr[0]);
   }
 });
 
-test("getDirName", () => {
+test("getDirname", () => {
   const arrs = [
     ["./project/package.json", "./project"],
     ["./project/", "."],
@@ -64,8 +65,8 @@ test("getDirName", () => {
   ];
 
   for (const arr of arrs) {
-    eq(path.dirname(arr[0]), getDirName(arr[0]), arr[0]);
-    eq(arr[1], getDirName(arr[0]), arr[0]);
+    eq(path.dirname(arr[0]), getDirname(arr[0]), arr[0]);
+    eq(arr[1], getDirname(arr[0]), arr[0]);
   }
 });
 
@@ -120,4 +121,11 @@ test("getRootPath", () => {
   ];
 
   eq("/project/abc/def", getRootPath(...arrs));
+});
+
+test("toSafeFilename", () => {
+  eq("hello_world", toSafeFilename("hello/world"));
+  eq("abc_def", toSafeFilename("abc\u0000def"));
+  eq("file", toSafeFilename("file."));
+  eq("---", toSafeFilename("///", "-"));
 });

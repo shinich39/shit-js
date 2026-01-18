@@ -5,20 +5,25 @@
 export declare function joinPaths(...args: string[]): string;
 /**
  * @example
- * getBaseName("./project/package.json"); // "package.json"
- * getBaseName("./project/package.json", ".json"); // "package"
+ * getBasename("./project/package.json"); // "package.json"
+ * getBasename("./project/package.json", ".json"); // "package"
  */
-export declare function getBaseName(str: string, suffix?: string): string;
+export declare function getBasename(str: string, suffix?: string): string;
 /**
  * @example
- * getExtName("./project/package.json"); // ".json"
+ * getExtname("./project/package.json"); // ".json"
  */
-export declare function getExtName(str: string): string;
+export declare function getExtname(str: string): string;
 /**
  * @example
- * getDirName("./project/package.json"); // "./project"
+ * getFilename("./project/package.json"); // "package"
  */
-export declare function getDirName(str: string): string;
+export declare function getFilename(str: string): string;
+/**
+ * @example
+ * getDirname("./project/package.json"); // "./project"
+ */
+export declare function getDirname(str: string): string;
 /**
  * @example
  * getRelativePath("./project/", "./package.json"); // "../package.json"
@@ -37,4 +42,5 @@ export declare function getRelativePath(from: string, to: string): string;
  * // "project/abc"
  */
 export declare function getRootPath(...args: string[]): string;
+export declare function toSafeFilename(str: string, replacement?: string): string;
 //# sourceMappingURL=path.d.ts.map
