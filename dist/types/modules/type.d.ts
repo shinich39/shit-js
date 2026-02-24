@@ -37,8 +37,8 @@ export declare function toNumber(e: any): number;
 export declare function isBuffer(e: any): boolean;
 /**
  * @example
- * const u8 = new Uint8Array([255, 128, 64]);
- * toBuffer(u8); // <Buffer 68 65 6c 6c 6f>
+ * const view = new Uint8Array([255, 128, 64]);
+ * toBuffer(view); // <Buffer 68 65 6c 6c 6f>
  *
  * const ab = new ArrayBuffer(4);
  * const view = new Uint8Array(ab);
@@ -46,9 +46,4 @@ export declare function isBuffer(e: any): boolean;
  * toBuffer(ab); // <Buffer 01 02 03 04>
  */
 export declare function toBuffer(e: any): Buffer;
-/**
- * @example
- * toError("MESSAGE"); // new Error("MESSAGE");
- */
-export declare function toError(err: any): Error;
 //# sourceMappingURL=type.d.ts.map

@@ -118,8 +118,8 @@ export function isBuffer(e: any): boolean {
 }
 /**
  * @example
- * const u8 = new Uint8Array([255, 128, 64]);
- * toBuffer(u8); // <Buffer 68 65 6c 6c 6f>
+ * const view = new Uint8Array([255, 128, 64]);
+ * toBuffer(view); // <Buffer 68 65 6c 6c 6f>
  * 
  * const ab = new ArrayBuffer(4);
  * const view = new Uint8Array(ab);
@@ -148,63 +148,4 @@ export function toBuffer(e: any): Buffer {
   }
 
   throw new TypeError("Not binary data");
-}
-/**
- * @example
- * toError("MESSAGE"); // new Error("MESSAGE");
- */
-export function toError(err: any): Error {
-  if (err instanceof Error) {
-    return err;
-  }
-
-  if (typeof err === "string") {
-    return new Error(err);
-  }
-
-  if (typeof err === "number") {
-    return new Error(
-      {
-        400: "Bad Request",
-        401: "Unauthorized",
-        402: "Payment Required",
-        403: "Forbidden",
-        404: "Not Found",
-        405: "Method Not Allowed",
-        406: "Not Acceptable",
-        408: "Request Timeout",
-        409: "Conflict",
-        410: "Gone",
-        412: "Precondition Failed",
-        413: "Payload Too Large",
-        415: "Unsupported Media Type",
-        418: "I'm a teapot",
-        422: "Unprocessable Entity",
-        429: "Too Many Requests",
-        500: "Internal Server Error",
-        501: "Not Implemented",
-        502: "Bad Gateway",
-        503: "Service Unavailable",
-        504: "Gateway Timeout",
-      }[err] || "An unexpected error occurred."
-    );
-  }
-  
-  if (
-    typeof err === "object" &&
-    typeof err.name === "string" &&
-    typeof err.message === "string"
-  ) {
-    const error = new Error(err);
-    error.name = err.name;
-    error.message = err.message;
-
-    if (typeof err.stack === "string") {
-      error.stack = err.stack;
-    }
-
-    return error;
-  }
-
-  return new Error("An unexpected error occurred.");
 }
