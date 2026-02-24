@@ -10,15 +10,15 @@ export function sleep(ms: number): Promise<void> {
  * @example
  * const fn = async () => { ... };
  * const wrappedFn = retry(fn, 10, 1000);
- * await wrappedFn((count) => {
- *   console.log(count); // 1...2...3...
+ * await wrappedFn((index) => {
+ *   console.log(index); // 0...1...2
  * });
  */
 export function retry<T>(
   fn: () => Promise<T>,
   count: number,
   delay: number,
-): (callback?: (count: number) => void | Promise<void>) => Promise<T> {
+): (callback?: (index: number, error: unknown) => void | Promise<void>) => Promise<T> {
   return async function wrapped(cb): Promise<T> {
     let lastError: unknown;
 
@@ -26,9 +26,9 @@ export function retry<T>(
       try {
         return await fn();
       } catch (err) {
-        lastError = err
+        lastError = err;
         if (i < count - 1) {
-          await cb?.(i);
+          await cb?.(i, err);
           await new Promise((resolve) => setTimeout(resolve, delay))
         }
       }

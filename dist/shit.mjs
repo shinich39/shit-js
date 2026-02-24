@@ -1122,7 +1122,7 @@ function retry(fn, count, delay) {
       } catch (err) {
         lastError = err;
         if (i < count - 1) {
-          await cb?.(i);
+          await cb?.(i, err);
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
