@@ -6,11 +6,13 @@
 export declare function sleep(ms: number): Promise<void>;
 /**
  * @example
- * const fn = await (arg: any) => arg;
+ * const fn = async () => { ... };
  * const wrappedFn = retry(fn, 10, 1000);
- * await wrappedFn(1); // 1
+ * await wrappedFn((count) => {
+ *   console.log(count); // 1...2...3...
+ * });
  */
-export declare function retry<T extends (...args: any[]) => any>(fn: T, count: number, delay: number): (...args: Parameters<T>) => Promise<ReturnType<T>>;
+export declare function retry<T>(fn: () => Promise<T>, count: number, delay: number): (callback?: (count: number) => void | Promise<void>) => Promise<T>;
 type QueueFunction<T = void> = () => T | Promise<T>;
 interface QueueItem<T> {
     fn: QueueFunction<T>;

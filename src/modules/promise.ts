@@ -8,32 +8,33 @@ export function sleep(ms: number): Promise<void> {
 }
 /**
  * @example
- * const fn = await (arg: any) => arg;
+ * const fn = async () => { ... };
  * const wrappedFn = retry(fn, 10, 1000);
- * await wrappedFn(1); // 1
+ * await wrappedFn((count) => {
+ *   console.log(count); // 1...2...3...
+ * });
  */
-export function retry<T extends (...args: any[]) => any>(
-  fn: T,
+export function retry<T>(
+  fn: () => Promise<T>,
   count: number,
   delay: number,
-): (...args: Parameters<T>) => Promise<ReturnType<T>> {
-  return async function wrapped(
-    ...args: Parameters<T>
-  ): Promise<ReturnType<T>> {
-    let error: any;
+): (callback?: (count: number) => void | Promise<void>) => Promise<T> {
+  return async function wrapped(cb): Promise<T> {
+    let lastError: unknown;
 
-    for (let i = 1; i <= count; i++) {
+    for (let i = 0; i < count; i++) {
       try {
-        return await fn(...args);
+        return await fn();
       } catch (err) {
-        error = err;
-        if (i < count) {
-          await new Promise((resolve) => setTimeout(resolve, delay));
+        lastError = err
+        if (i < count - 1) {
+          await cb?.(i);
+          await new Promise((resolve) => setTimeout(resolve, delay))
         }
       }
     }
 
-    throw error;
+    throw lastError;
   };
 }
 

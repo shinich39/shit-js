@@ -1232,19 +1232,20 @@ var shitJs = (() => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   function retry(fn, count, delay) {
-    return async function wrapped(...args) {
-      let error;
-      for (let i = 1; i <= count; i++) {
+    return async function wrapped(cb) {
+      let lastError;
+      for (let i = 0; i < count; i++) {
         try {
-          return await fn(...args);
+          return await fn();
         } catch (err) {
-          error = err;
-          if (i < count) {
+          lastError = err;
+          if (i < count - 1) {
+            await cb?.(i);
             await new Promise((resolve) => setTimeout(resolve, delay));
           }
         }
       }
-      throw error;
+      throw lastError;
     };
   }
   var QueueWorker = class {

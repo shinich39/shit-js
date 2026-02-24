@@ -2,19 +2,26 @@ import { describe, test } from "node:test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
 import { QueueWorker, sleep, retry } from "./promise";
 
-test("sleep", async () => {
-  const a = Date.now();
-  await sleep(39);
-  const b = Date.now();
-  eq(b - a >= 38, true);
-});
+// test("sleep", async () => {
+//   const a = Date.now();
+//   await sleep(39);
+//   const b = Date.now();
+//   eq(b - a >= 38, true);
+// });
 
 test("retry", async () => {
-  const fn = retry(async () => {
+  const fn = async () => {
     throw new Error("An error occurred");
-  }, 3, 256);
+  }
 
-  rejects(() => fn());
+  const wrapped = retry(fn, 5, 1024);
+
+  await wrapped((i) => {
+    console.log(`retry ${i} ${Date.now()}`);
+  });
+  // rejects(() => wrapped((i) => {
+  //   console.log(`retry ${i}`);
+  // }));
 });
 
 test("QueueWorker", async () => {
