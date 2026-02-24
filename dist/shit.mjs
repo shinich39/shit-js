@@ -1108,9 +1108,6 @@ function getRootPath(...args) {
   }
   return resolved.join("/");
 }
-function toSafeFilename(str, replacement = "_") {
-  return str.replace(/[\\/:*?"<>|]/g, replacement).replace(/[\u0000-\u001F\u007F]/g, replacement).replace(/[. ]+$/, "") || replacement;
-}
 
 // src/modules/promise.ts
 function sleep(ms) {
@@ -1217,6 +1214,9 @@ function toCamelCase(str) {
 }
 function toPascalCase(str) {
   return str.replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : "").replace(/^./, (m) => m.toUpperCase());
+}
+function toSafeFilename(str, replacement = "_") {
+  return str.replace(/[\\/:*?"<>|]/g, replacement).replace(/[\u0000-\u001F\u007F]/g, replacement).replace(/[. ]+$/, "") || replacement;
 }
 function generateUuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {

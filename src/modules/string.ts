@@ -89,6 +89,24 @@ export function toPascalCase(str: string): string {
 }
 /**
  * @example
+ * toSafeFilename("hello/world"); // "hello_world"
+ * toSafeFilename("abc\u0000def"); // "abc_def"
+ * toSafeFilename("file."); // "file"
+ * toSafeFilename("///", "-"); // "---"
+ */
+export function toSafeFilename(str: string, replacement = "_"): string {
+  return str
+    // Remove windows restricts specific characters: \ / : * ? " < > |
+    .replace(/[\\/:*?"<>|]/g, replacement)
+    // Remove control characters: 0x00 ~ 0x1F
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001F\u007F]/g, replacement)
+    // Remove trailing dot
+    .replace(/[. ]+$/, "")
+    || replacement;
+}
+/**
+ * @example
  * generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export function generateUuid(): string {

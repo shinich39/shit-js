@@ -42,5 +42,4 @@ export declare function getRelativePath(from: string, to: string): string;
  * // "project/abc"
  */
 export declare function getRootPath(...args: string[]): string;
-export declare function toSafeFilename(str: string, replacement?: string): string;
 //# sourceMappingURL=path.d.ts.map

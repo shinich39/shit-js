@@ -193,15 +193,3 @@ export function getRootPath(...args: string[]): string {
 
   return resolved.join("/");
 }
-
-export function toSafeFilename(str: string, replacement = "_"): string {
-  return str
-    // Remove windows restricts specific characters: \ / : * ? " < > |
-    .replace(/[\\/:*?"<>|]/g, replacement)
-    // Remove control characters: 0x00 ~ 0x1F
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001F\u007F]/g, replacement)
-    // Remove trailing dot
-    .replace(/[. ]+$/, "")
-    || replacement;
-}

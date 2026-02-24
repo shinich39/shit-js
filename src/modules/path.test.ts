@@ -8,7 +8,6 @@ import {
   getRelativePath,
   getRootPath,
   joinPaths,
-  toSafeFilename,
 } from "./path";
 
 test("joinPaths", () => {
@@ -121,11 +120,4 @@ test("getRootPath", () => {
   ];
 
   eq("/project/abc/def", getRootPath(...arrs));
-});
-
-test("toSafeFilename", () => {
-  eq("hello_world", toSafeFilename("hello/world"));
-  eq("abc_def", toSafeFilename("abc\u0000def"));
-  eq("file", toSafeFilename("file."));
-  eq("---", toSafeFilename("///", "-"));
 });

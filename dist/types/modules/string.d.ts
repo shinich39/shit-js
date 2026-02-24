@@ -72,6 +72,14 @@ export declare function toCamelCase(str: string): string;
 export declare function toPascalCase(str: string): string;
 /**
  * @example
+ * toSafeFilename("hello/world"); // "hello_world"
+ * toSafeFilename("abc\u0000def"); // "abc_def"
+ * toSafeFilename("file."); // "file"
+ * toSafeFilename("///", "-"); // "---"
+ */
+export declare function toSafeFilename(str: string, replacement?: string): string;
+/**
+ * @example
  * generateUuid(); // "ce0e915d-0b16-473c-bd89-d3d7492bb1b9"
  */
 export declare function generateUuid(): string;

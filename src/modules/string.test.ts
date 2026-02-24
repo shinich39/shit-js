@@ -20,7 +20,14 @@ import {
   toSentenceCase,
   toTitleCase,
   createTemplate,
+  toSafeFilename,
 } from "./string";
+
+test("toTitleCase", () => {
+  eq(toTitleCase("lorem ipsum"), "Lorem Ipsum");
+  eq(toTitleCase("lorem-ipsum"), "Lorem Ipsum");
+  eq(toTitleCase("lorem_ipsum"), "Lorem Ipsum");
+});
 
 test("toSentenceCase", () => {
   eq(toSentenceCase("lorem ipsum"), "Lorem ipsum");
@@ -42,10 +49,11 @@ test("toPascalCase", () => {
   eq(toPascalCase("lorem_ipsum"), "LoremIpsum");
 });
 
-test("toTitleCase", () => {
-  eq(toTitleCase("lorem ipsum"), "Lorem Ipsum");
-  eq(toTitleCase("lorem-ipsum"), "Lorem Ipsum");
-  eq(toTitleCase("lorem_ipsum"), "Lorem Ipsum");
+test("toSafeFilename", () => {
+  eq("hello_world", toSafeFilename("hello/world"));
+  eq("abc_def", toSafeFilename("abc\u0000def"));
+  eq("file", toSafeFilename("file."));
+  eq("---", toSafeFilename("///", "-"));
 });
 
 test("generateUuid", () => {
