@@ -23,7 +23,7 @@ import * as shit from "shit-js";
 </script>
 ```
 
-## Built With
+## Tech Stack
 
 - Node.js
 - TypeScript
