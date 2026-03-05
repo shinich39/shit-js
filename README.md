@@ -26,10 +26,4 @@ import * as shit from "shit-js";
 ## Built With
 
 - Node.js
-- esbuild
-- ESLint
-- Husky
-- lint-staged
-- Nodemon
 - TypeScript
-- tsx
