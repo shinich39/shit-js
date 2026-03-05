@@ -25,11 +25,11 @@ import * as shit from "shit-js";
 
 ## Acknowledgements
 
-- [nodejs](https://nodejs.org/)
+- [Node.js](https://nodejs.org/)
 - [esbuild](https://esbuild.github.io/)
-- [eslint](https://eslint.org/)
-- [husky](https://github.com/typicode/husky/)
+- [ESLint](https://eslint.org/)
+- [Husky](https://github.com/typicode/husky/)
 - [lint-staged](https://github.com/lint-staged/lint-staged)
-- [nodemon](https://github.com/remy/nodemon)
-- [typescript](https://www.typescriptlang.org/tsconfig/)
+- [Nodemon](https://github.com/remy/nodemon)
+- [TypeScript](https://www.typescriptlang.org/)
 - [tsx](https://tsx.is/)
