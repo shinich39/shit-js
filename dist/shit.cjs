@@ -1477,19 +1477,19 @@ function compareStrings(from, to) {
   }
   const totalOperations = matches + insertions + deletions;
   return {
-    // Proportion of matching characters
+    // proportion of matching characters
     matchRate: totalOperations > 0 ? matches / totalOperations : 1,
-    // Similarity based on longer string
+    // similarity based on longer string
     similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
-    // Sørensen-dice similarity coefficient
+    // sørensen-dice similarity coefficient
     diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
-    // Jaccard similarity coefficient
+    // jaccard similarity coefficient
     jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
-    // Levenshtein distance (edit distance)
+    // levenshtein distance (edit distance)
     distance: insertions + deletions,
-    // Normalized edit distance (0 = identical, 1 = completely different)
+    // normalized edit distance (0 = identical, 1 = completely different)
     normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
-    // Detailed counts
+    // detailed counts
     matches,
     insertions,
     deletions
@@ -1581,9 +1581,6 @@ function isBuffer(e) {
   if (!e) {
     return false;
   }
-  if (typeof Buffer !== "undefined" && Buffer.isBuffer(e)) {
-    return true;
-  }
   if (e instanceof ArrayBuffer) {
     return true;
   }
@@ -1603,12 +1600,12 @@ function toBuffer(e) {
     return Buffer.from(e);
   }
   if (typeof SharedArrayBuffer !== "undefined" && e instanceof SharedArrayBuffer) {
-    return Buffer.from(e);
+    return Buffer.from(new Uint8Array(e));
   }
   if (ArrayBuffer.isView(e)) {
     return Buffer.from(e.buffer, e.byteOffset, e.byteLength);
   }
-  throw new TypeError("Not binary data");
+  throw new Error(`Cannot convert to Buffer: ${Object.prototype.toString.call(e)}`);
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

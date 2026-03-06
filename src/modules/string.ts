@@ -96,12 +96,12 @@ export function toPascalCase(str: string): string {
  */
 export function toSafeFilename(str: string, replacement = "_"): string {
   return str
-    // Remove windows restricts specific characters: \ / : * ? " < > |
+    // remove windows restricts specific characters: \ / : * ? " < > |
     .replace(/[\\/:*?"<>|]/g, replacement)
-    // Remove control characters: 0x00 ~ 0x1F
+    // remove control characters: 0x00 ~ 0x1F
     // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001F\u007F]/g, replacement)
-    // Remove trailing dot
+    // remove trailing dot
     .replace(/[. ]+$/, "")
     || replacement;
 }
@@ -232,16 +232,16 @@ export function getDiffs(from: string, to: string): [number, string][] {
     let y = to.length;
     const max = from.length + to.length;
     
-    // Current operation being accumulated
+    // current operation being accumulated
     let currentOp: -1 | 0 | 1 | null = null;
     let currentStr = '';
     
     const push = (op: -1 | 0 | 1, char: string) => {
       if (currentOp === op) {
-        // If same operation, prepend character
+        // if same operation, prepend character
         currentStr = char + currentStr;
       } else {
-        // If different operation, push previous to result and start new
+        // if different operation, push previous to result and start new
         if (currentOp !== null && currentStr) {
           result.push([currentOp, currentStr]);
         }
@@ -250,7 +250,7 @@ export function getDiffs(from: string, to: string): [number, string][] {
       }
     };
     
-    // Trace path in reverse
+    // trace path in reverse
     for (let depth = d; depth >= 0; depth--) {
       const v = trace[depth];
       const k = x - y;
@@ -266,7 +266,7 @@ export function getDiffs(from: string, to: string): [number, string][] {
       const prevX = v[prevK + max];
       const prevY = prevX - prevK;
       
-      // Diagonal move (match)
+      // diagonal move (match)
       while (x > prevX && y > prevY) {
         x--;
         y--;
@@ -275,18 +275,18 @@ export function getDiffs(from: string, to: string): [number, string][] {
       
       if (depth === 0) break;
       
-      // Vertical move (insertion)
+      // vertical move (insertion)
       if (x === prevX) {
         y--;
         push(1, to[y]);
-      } // Horizontal move (deletion)
+      } // horizontal move (deletion)
       else {
         x--;
         push(-1, from[x]);
       }
     }
     
-    // Add last accumulated operation
+    // add last accumulated operation
     if (currentOp !== null && currentStr) {
       result.push([currentOp, currentStr]);
     }
@@ -298,13 +298,13 @@ export function getDiffs(from: string, to: string): [number, string][] {
   const m = to.length;
   const max = n + m;
   
-  // V array: maximum x coordinate reachable on each k-line
+  // v array: maximum x coordinate reachable on each k-line
   const v: number[] = Array(2 * max + 1).fill(0);
   
-  // Array for path tracing
+  // array for path tracing
   const trace: number[][] = [];
   
-  // Find shortest edit path
+  // find shortest edit path
   for (let d = 0; d <= max; d++) {
     trace.push([...v]);
     
@@ -332,7 +332,7 @@ export function getDiffs(from: string, to: string): [number, string][] {
     }
   }
   
-  // In theory, does not reach here.
+  // in theory, does not reach here.
   return [];
 }
 /**
@@ -382,37 +382,37 @@ export function compareStrings(from: string, to: string): {
   
   const totalOperations = matches + insertions + deletions;
   
-  // Various similarity metrics
+  // various similarity metrics
   return {
-    // Proportion of matching characters
+    // proportion of matching characters
     matchRate: totalOperations > 0 
       ? matches / totalOperations 
       : 1,
     
-    // Similarity based on longer string
+    // similarity based on longer string
     similarity: Math.max(from.length, to.length) > 0 
       ? matches / Math.max(from.length, to.length) 
       : 1,
 
-    // Sørensen-dice similarity coefficient
+    // sørensen-dice similarity coefficient
     diceSimilarity: (from.length + to.length) > 0
       ? (2 * matches) / (from.length + to.length)
       : 1,
     
-    // Jaccard similarity coefficient
+    // jaccard similarity coefficient
     jaccardSimilarity: (from.length + to.length - matches) > 0
       ? matches / (from.length + to.length - matches)
       : 1,
     
-    // Levenshtein distance (edit distance)
+    // levenshtein distance (edit distance)
     distance: insertions + deletions,
     
-    // Normalized edit distance (0 = identical, 1 = completely different)
+    // normalized edit distance (0 = identical, 1 = completely different)
     normalizedDistance: Math.max(from.length, to.length) > 0
       ? (insertions + deletions) / Math.max(from.length, to.length)
       : 0,
     
-    // Detailed counts
+    // detailed counts
     matches,
     insertions,
     deletions,

@@ -1,7 +1,7 @@
 /**
  * @example
  * await sleep(1000);
- * // Wait 1s...
+ * // wait 1s...
  */
 export declare function sleep(ms: number): Promise<void>;
 /**

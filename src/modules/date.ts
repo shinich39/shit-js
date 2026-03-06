@@ -40,48 +40,48 @@ export function parseDate(date: Date|number|string): {
     throw new Error(`Invalid date: ${date}`);
   }
 
-  // Year
+  // year
   const YYYY = String(ensuredDate.getFullYear()); // 2025
   const YY = YYYY.slice(-2); // 25
 
-  // Month
+  // month
   const M = String(ensuredDate.getMonth() + 1); // 1 ~ 12
   const MM = M.padStart(2, "0"); // 01 ~ 12
 
-  // Day
+  // day
   const D = String(ensuredDate.getDate()); // 1 ~ 31
   const DD = D.padStart(2, "0"); // 01 ~ 31
 
-  // Weekday (0: Sunday)
+  // weekday (0 == sunday)
   const d = String(ensuredDate.getDay()); // 0 ~ 6
   const E = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][ensuredDate.getDay()];
   const EEEE = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][ensuredDate.getDay()];
 
-  // Hour
+  // hour
   const H = String(ensuredDate.getHours()); // 0 ~ 23
   const HH = H.padStart(2, "0"); // 00 ~ 23
   const h = String((ensuredDate.getHours() % 12) || 12); // 1 ~ 12
   const hh = h.padStart(2, "0"); // 01 ~ 12
 
-  // Minute
+  // minute
   const m = String(ensuredDate.getMinutes()); // 0 ~ 59
   const mm = m.padStart(2, "0"); // 00 ~ 59
 
-  // Second
+  // second
   const s = String(ensuredDate.getSeconds()); // 0 ~ 59
   const ss = s.padStart(2, "0"); // 00 ~ 59
 
-  // Millisecond
+  // millisecond
   const SSS = String(ensuredDate.getMilliseconds()).padStart(3, "0"); // 000 ~ 999
 
   // AM / PM
   const A = ensuredDate.getHours() < 12 ? "AM" : "PM";
   const a = A.toLowerCase(); // am / pm
 
-  // Quarter
+  // quarter
   const Q = String(Math.floor((ensuredDate.getMonth() + 3) / 3)); // 1 ~ 4
 
-  // Timezone offset
+  // timezone offset
   const tzOffset = -ensuredDate.getTimezoneOffset(); // in minutes
   const tzSign = tzOffset >= 0 ? "+" : "-";
   const tzHour = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, "0");

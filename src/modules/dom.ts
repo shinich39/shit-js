@@ -51,7 +51,7 @@ function splitTags(str: string) {
   while(i < str.length) {
     const ch = str[i];
 
-    // Find "<"
+    // find "<"
     if (!head) {
       if (ch === "<") {
         flush();
@@ -60,7 +60,7 @@ function splitTags(str: string) {
       } else {
         buffer += ch;
       }
-    } // Find ">"
+    } // find ">"
     else {
       if (ch === "\\") {
         buffer += ch;
@@ -74,7 +74,7 @@ function splitTags(str: string) {
         } else if (ch === ">") {
           buffer += ch;
 
-          // If tail does exists and buffer does not close with tail, do not stop accumulate
+          // no tail or tail != buffer
           if (tail) {
             if (!buffer.endsWith(tail)) {
               i++;
@@ -100,11 +100,11 @@ function splitTags(str: string) {
             tail = "</style>";
           }
         }
-      } // End of quotes
+      } // end of quotes
       else if (ch === quotes) {
         buffer += ch;
         quotes = null;
-      } // In quotes
+      } // in quotes
       else {
         buffer += ch;
       }
@@ -137,7 +137,7 @@ function parseTag(str: string) {
 
   const re = /\s|>|\//;
 
-  // Find tag name
+  // find tag
   while (i < str.length) {
     const ch = str[i];
 
@@ -152,7 +152,7 @@ function parseTag(str: string) {
   tag = buffer;
   buffer = "";
 
-  // Find attributes
+  // find attributes
   while (i < str.length) {
     const ch = str[i];
 
@@ -162,12 +162,12 @@ function parseTag(str: string) {
       if (ch === ">") {
         if (buffer === "/" || buffer === "?") {
           closer = /\s/.test(str[i - 2])
-            ? " " + buffer // With space
+            ? " " + buffer // with space
             : buffer;
         } else {
           flush();
         }
-        break; // End task
+        break; // end task
       } else if (ch === " " || ch === "\n") {
         flush();
       } else if (ch === `"` || ch === `'`) {
@@ -176,12 +176,12 @@ function parseTag(str: string) {
       } else {
         buffer += ch;
       }
-    } // End of quotes
+    } // end of quotes
     else if (ch === quotes) {
       quotes = null;
       buffer += ch;
       flush();
-    } // In quotes
+    } // in quotes
     else {
       buffer += ch;
     }
@@ -196,7 +196,7 @@ function parseTag(str: string) {
       attributes[key] = null;
     } else {
       let value = values.join("=");
-      // Remove quotes
+      // remove quotes
       attributes[key] = value.substring(1, value.length - 1);
     }
   }
@@ -225,8 +225,7 @@ function parseStr(str: string) {
   const parts = splitTags(str);
 
   for (const part of parts) {
-
-    // Text
+    // text
     const isTag = part.startsWith("<") && part.endsWith(">");
     if (!isTag) {
       stacks.push({
@@ -256,7 +255,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // Comment
+    // comment
     const isComment = part.startsWith("<!--") && part.endsWith("-->");
     if (isComment) {
       stacks.push({
@@ -270,7 +269,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // Script
+    // script
     const isScript = part.startsWith("<script") && part.endsWith("</script>");
     if (isScript) {
       const { endIndex, attributes } = parseTag(part);
@@ -286,7 +285,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // Style
+    // style
     const isStyle = part.startsWith("<style") && part.endsWith("</style>");
     if (isStyle) {
       const { endIndex, attributes } = parseTag(part);
@@ -302,7 +301,7 @@ function parseStr(str: string) {
       continue;
     }
 
-    // Tags
+    // tags
     const { tag, isClosing, closer, attributes } = parseTag(part);
 
     if (isClosing) {
@@ -316,7 +315,7 @@ function parseStr(str: string) {
           if (stack.tag === tag) {
             stack.children = children.reverse();
 
-            // Set children parent
+            // set children parent
             for (const child of children) {
               child.parent = stack;
             }
@@ -324,11 +323,11 @@ function parseStr(str: string) {
             break;
           }
 
-          // Close self-closing tag
+          // close self-closing tag
           stack.closer = "";
         }
 
-        // Current element included in same parent
+        // current element included in same parent
         if (!stack.parent) {
           children.push(stack);
         }
@@ -351,28 +350,28 @@ function parseStr(str: string) {
   }
 
   for (const stack of stacks) {
-    // Add root children
+    // add root children
     if (stack.type !== "root" && !stack.parent) {
       stack.parent = root;
       root.children.push(stack);
     }
 
-    // Set closer to self-closing tag
+    // set closer to self-closing tag
     if (stack.type === "tag" && !stack.isClosed) {
       stack.closer = "";
     }
 
-    // @ts-expect-error: Remove unused property
+    // @ts-expect-error: remove unused property
     delete stack.isClosed;
 
-    // @ts-expect-error: Remove unused property
+    // @ts-expect-error: remove unused property
     delete stack.depth;
   }
 
-  // @ts-expect-error: Remove unused property
+  // @ts-expect-error: remove unused property
   delete root.isClosed;
 
-  // @ts-expect-error: Remove unused property
+  // @ts-expect-error: remove unused property
   delete root.depth;
 
   return root as {
@@ -432,7 +431,7 @@ export class Dom implements DomImpl {
       this.content = src.content || "";
       this.attributes = src.attributes || {};
 
-      // Tag with content
+      // tag with content
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
           new Dom({
@@ -443,7 +442,7 @@ export class Dom implements DomImpl {
             children: [],
           }, this)
         ];
-      } // Tag with children
+      } // tag with children
       else if (src.children) {
         this.children = src.children.map((child) => new Dom(child, this));
       }

@@ -61,27 +61,27 @@ export function isNumber(e: any): e is number | string | boolean | null | undefi
  * toNumber(1.1); // 1.1
  */
 export function toNumber(e: any): number {
-  // String
+  // string
   if (isNumeric(e)) {
     return parseFloat(e);
   }
   
-  // Number
+  // number
   if (typeof e === "number") {
     return e;
   }
   
-  // Boolean
+  // boolean
   if (typeof e === "boolean") {
     return e ? 1 : 0;
   }
   
-  // Null, undefined
+  // null, undefined
   if (!e) {
     return 0;
   }
 
-  // Invalid string, object, Array, function
+  // string, object, Array, function
   throw new Error(`Invalid argument type: ${typeof e}`);
 }
 /**
@@ -94,11 +94,6 @@ export function isBuffer(e: any): boolean {
     return false;
   }
 
-  // Node Buffer
-  if (typeof Buffer !== "undefined" && Buffer.isBuffer(e)) {
-    return true;
-  }
-
   // ArrayBuffer
   if (e instanceof ArrayBuffer) {
     return true;
@@ -109,7 +104,7 @@ export function isBuffer(e: any): boolean {
     return true;
   }
 
-  // TypedArray / DataView
+  // Buffer, TypedArray, DataView
   if (ArrayBuffer.isView(e)) {
     return true;
   }
@@ -139,7 +134,7 @@ export function toBuffer(e: any): Buffer {
 
   // SharedArrayBuffer
   if (typeof SharedArrayBuffer !== "undefined" && e instanceof SharedArrayBuffer) {
-    return Buffer.from(e);
+    return Buffer.from(new Uint8Array(e)); // safer copy
   }
 
   // TypedArray / DataView
@@ -147,5 +142,5 @@ export function toBuffer(e: any): Buffer {
     return Buffer.from(e.buffer, e.byteOffset, e.byteLength);
   }
 
-  throw new TypeError("Not binary data");
+  throw new Error(`Cannot convert to Buffer: ${Object.prototype.toString.call(e)}`);
 }

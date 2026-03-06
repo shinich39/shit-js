@@ -93,13 +93,13 @@ export function generateTypingDelay(
 
       let base: number;
 
-      // Sentence
+      // sentence
       if (/[.,!?]/.test(char)) {
         base = generateInt(scale(300), scale(480));
-      } // Word
+      } // word
       else if (char === " ") {
         base = generateInt(scale(180), scale(300));
-      } // Character
+      } // character
       else {
         base = generateInt(scale(85), scale(130));
       }
@@ -114,7 +114,7 @@ export function generateTypingDelay(
 
       base -= accel;
 
-      // Clamp
+      // clamp
       return Math.max(scale(45), Math.min(base, scale(520)));
   })();
 }
@@ -212,7 +212,7 @@ export function getClampedDegree(degree: number): number {
  * @example
  * toRadian(90); // 1.5708...
  * toRadian(180); // 3.1416...
- * ctx.rotate(toRadian(45)); // Rotate 45 degree in Canvas, WebGL, Three.js...
+ * ctx.rotate(toRadian(45)); // rotate 45 degree in Canvas, WebGL, Three.js...
  */
 export function toRadian(degree: number): number {
   return degree * (Math.PI / 180);

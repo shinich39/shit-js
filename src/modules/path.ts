@@ -126,24 +126,24 @@ export function getRelativePath(from: string, to: string): string {
     return "./" + str;
   };
 
-  // Normalize paths
+  // normalize
   const a = normalize(from).split("/").filter(Boolean);
   const b = normalize(to).split("/").filter(Boolean);
 
-  // Find root
+  // find root
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) {
     i++;
   }
 
-  // Get relative paths from root
+  // get relative paths from root
   const up = Array(a.length - i)
     .fill("..")
     .join("/");
 
   const down = b.slice(i).join("/");
 
-  // Join up and down paths
+  // join up and down paths
   return up + (up && down ? "/" : "") + down;
 }
 /**

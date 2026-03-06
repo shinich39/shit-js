@@ -111,17 +111,17 @@ if (options.browser) {
   );
 }
 
-// Clear dist directory
+// clear ./dist
 if (fs.existsSync("./dist")) {
   fs.rmSync("./dist", { recursive: true });
 }
 
-// Create script files
+// create scripts
 for (const option of buildOptions) {
   await esbuild.build(option);
 }
 
-// Update package.json
+// update package.json
 if (isPackageChanged) {
   pkg["main"] = paths.esmMin;
   pkg["module"] = paths.esmMin;
