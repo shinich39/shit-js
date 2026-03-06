@@ -86,8 +86,13 @@ export function toNumber(e: any): number {
 }
 /**
  * @example
- * isNumber("1"); // true
- * isNumber(1); // true
+ * isBuffer(Buffer.from("hello")); // true
+ * isBuffer(new Uint8Array([1, 2, 3])); // true
+ * isBuffer(new ArrayBuffer(8)); // true
+ * isBuffer(new DataView(new ArrayBuffer(8))); // true
+ * isBuffer("hello"); // false
+ * isBuffer(1); // false
+ * isBuffer(null); // false
  */
 export function isBuffer(e: any): boolean {
   if (!e) {
