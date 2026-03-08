@@ -15,7 +15,7 @@ const BROWSER_GLOBAL_NAME = "shitJs";
 const EXTERNAL_PACKAGES = [];
 
 const paths = {
-  type: `./dist/types/${FILENAME}.d.ts`,
+  type: `./dist/types/index.d.ts`,
   esm: `./dist/${FILENAME}.mjs`,
   esmMin: `./dist/${FILENAME}.min.mjs`,
   cjs: `./dist/${FILENAME}.cjs`,

@@ -10,10 +10,10 @@
   "type": "module",
   "main": "./dist/shit.min.mjs",
   "module": "./dist/shit.min.mjs",
-  "types": "./dist/types/shit.d.ts",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/shit.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/shit.min.mjs",
       "require": "./dist/shit.min.cjs"
     }
