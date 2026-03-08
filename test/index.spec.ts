@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
 import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
-import * as shit from "../src/shit.js";
+import * as shit from "../src/index.js";
 
 declare global {
   interface Window {
