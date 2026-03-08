@@ -3,12 +3,13 @@ import * as esbuild from "esbuild";
 
 const pkg = JSON.parse(fs.readFileSync("./package.json"));
 
+const ENTRY_POINTS = ["./src/index.ts"];
+const FILENAME = "shit";
+
 const ESM = true;
 const CJS = true;
 const BROWSER = true;
 const BROWSER_GLOBAL_NAME = "shitJs";
-const ENTRY_POINT = "./src/index.ts";
-const FILENAME = "shit";
 
 /** @see https://esbuild.github.io/api/#external */
 const EXTERNAL_PACKAGES = [];
@@ -36,7 +37,7 @@ const buildOptions = [];
 if (ESM) {
   buildOptions.push(
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: ENTRY_POINTS,
       platform: "node",
       format: 'esm',
       bundle: true,
@@ -45,7 +46,7 @@ if (ESM) {
       external: EXTERNAL_PACKAGES,
     },
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: ENTRY_POINTS,
       platform: "node",
       format: 'esm',
       bundle: true,
@@ -60,7 +61,7 @@ if (ESM) {
 if (CJS) {
   buildOptions.push(
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: ENTRY_POINTS,
       platform: "node",
       format: 'cjs',
       bundle: true,
@@ -69,7 +70,7 @@ if (CJS) {
       external: EXTERNAL_PACKAGES,
     },
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: ENTRY_POINTS,
       platform: "node",
       format: 'cjs',
       bundle: true,
@@ -84,7 +85,7 @@ if (CJS) {
 if (BROWSER) {
   buildOptions.push(
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: ENTRY_POINTS,
       platform: "browser",
       format: "iife",
       globalName: BROWSER_GLOBAL_NAME,
@@ -94,7 +95,7 @@ if (BROWSER) {
       external: EXTERNAL_PACKAGES,
     },
     {
-      entryPoints: [ENTRY_POINT],
+      entryPoints: ENTRY_POINTS,
       platform: "browser",
       format: "iife",
       globalName: BROWSER_GLOBAL_NAME,
