@@ -20,6 +20,7 @@
   },
   "scripts": {
     "test": "tsx --test \"**/*.test.{js,jsx,ts,tsx}\"",
+    "test:b": "playwright test",
     "dev": "nodemon --config nodemon.config.json",
     "build": "node esbuild.config.js && tsc",
     "lint": "eslint \"src/**/*\"",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@playwright/test": "^1.58.2",
     "@types/node": "^22.14.0",
     "esbuild": "^0.25.2",
     "eslint": "^9.24.0",
