@@ -18,9 +18,9 @@ var shitJs = (() => {
   };
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-  // src/shit.ts
-  var shit_exports = {};
-  __export(shit_exports, {
+  // src/index.ts
+  var index_exports = {};
+  __export(index_exports, {
     BRACKETS: () => BRACKETS,
     Dom: () => Dom,
     QUOTES: () => QUOTES,
@@ -1607,6 +1607,6 @@ var shitJs = (() => {
     }
     throw new Error(`Cannot convert to Buffer: ${Object.prototype.toString.call(e)}`);
   }
-  return __toCommonJS(shit_exports);
+  return __toCommonJS(index_exports);
 })();
 //# sourceMappingURL=shit.js.map

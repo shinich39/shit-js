@@ -17,9 +17,9 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/shit.ts
-var shit_exports = {};
-__export(shit_exports, {
+// src/index.ts
+var index_exports = {};
+__export(index_exports, {
   BRACKETS: () => BRACKETS,
   Dom: () => Dom,
   QUOTES: () => QUOTES,
@@ -114,7 +114,7 @@ __export(shit_exports, {
   toggleBit: () => toggleBit,
   uniqueBy: () => uniqueBy
 });
-module.exports = __toCommonJS(shit_exports);
+module.exports = __toCommonJS(index_exports);
 
 // src/modules/array.ts
 function getMaxValue(arr) {

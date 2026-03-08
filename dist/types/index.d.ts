@@ -7,4 +7,4 @@ export * from "./modules/path.js";
 export * from "./modules/promise.js";
 export * from "./modules/string.js";
 export * from "./modules/type.js";
-//# sourceMappingURL=shit.d.ts.map
+//# sourceMappingURL=index.d.ts.map

@@ -1,27 +1,26 @@
-import path from "node:path";
 import fs from "node:fs";
-import * as esbuild from 'esbuild';
+import * as esbuild from "esbuild";
 
 const pkg = JSON.parse(fs.readFileSync("./package.json"));
 
-const options = {
-  esm: true,
-  cjs: true,
-  browser: true,
-  globalName: "shitJs",
-  entryPoint: "./src/shit.ts",
-}
+const ESM = true;
+const CJS = true;
+const BROWSER = true;
+const BROWSER_GLOBAL_NAME = "shitJs";
+const ENTRY_POINT = "./src/index.ts";
+const FILENAME = "shit";
 
-const filename = path.basename(options.entryPoint, path.extname(options.entryPoint));
+/** @see https://esbuild.github.io/api/#external */
+const EXTERNAL_PACKAGES = [];
 
 const paths = {
-  esm: `./dist/${filename}.mjs`,
-  esmMin: `./dist/${filename}.min.mjs`,
-  cjs: `./dist/${filename}.cjs`,
-  cjsMin: `./dist/${filename}.min.cjs`,
-  browser: `./dist/${filename}.js`,
-  browserMin: `./dist/${filename}.min.js`,
-  type: `./dist/types/${filename}.d.ts`,
+  type: `./dist/types/${FILENAME}.d.ts`,
+  esm: `./dist/${FILENAME}.mjs`,
+  esmMin: `./dist/${FILENAME}.min.mjs`,
+  cjs: `./dist/${FILENAME}.cjs`,
+  cjsMin: `./dist/${FILENAME}.min.cjs`,
+  browser: `./dist/${FILENAME}.js`,
+  browserMin: `./dist/${FILENAME}.min.js`,
 }
 
 const isPackageChanged = pkg["main"] !== paths.esmMin ||
@@ -30,83 +29,80 @@ const isPackageChanged = pkg["main"] !== paths.esmMin ||
   pkg["exports"]["."]["types"] !== paths.type ||
   pkg["exports"]["."]["import"] !== paths.esmMin ||
   pkg["exports"]["."]["require"] !== paths.cjsMin;
-  
-/** @see https://esbuild.github.io/api/#external */
-const externalPackages = [];
 
 /** @type {import("esbuild").BuildOptions[]} */
 const buildOptions = [];
 
-if (options.esm) {
+if (ESM) {
   buildOptions.push(
     {
-      entryPoints: [options.entryPoint],
+      entryPoints: [ENTRY_POINT],
       platform: "node",
       format: 'esm',
       bundle: true,
       sourcemap: true,
       outfile: paths.esm,
-      external: externalPackages,
+      external: EXTERNAL_PACKAGES,
     },
     {
-      entryPoints: [options.entryPoint],
+      entryPoints: [ENTRY_POINT],
       platform: "node",
       format: 'esm',
       bundle: true,
       minify: true,
       sourcemap: true,
       outfile: paths.esmMin,
-      external: externalPackages,
+      external: EXTERNAL_PACKAGES,
     },
   );
 }
 
-if (options.cjs) {
+if (CJS) {
   buildOptions.push(
     {
-      entryPoints: [options.entryPoint],
+      entryPoints: [ENTRY_POINT],
       platform: "node",
       format: 'cjs',
       bundle: true,
       sourcemap: true,
       outfile: paths.cjs,
-      external: externalPackages,
+      external: EXTERNAL_PACKAGES,
     },
     {
-      entryPoints: [options.entryPoint],
+      entryPoints: [ENTRY_POINT],
       platform: "node",
       format: 'cjs',
       bundle: true,
       minify: true,
       sourcemap: true,
       outfile: paths.cjsMin,
-      external: externalPackages,
+      external: EXTERNAL_PACKAGES,
     },
   );
 }
 
-if (options.browser) {
+if (BROWSER) {
   buildOptions.push(
     {
-      entryPoints: [options.entryPoint],
+      entryPoints: [ENTRY_POINT],
       platform: "browser",
       format: "iife",
-      globalName: options.globalName,
+      globalName: BROWSER_GLOBAL_NAME,
       bundle: true,
       sourcemap: true,
       outfile: paths.browser,
-      external: externalPackages,
+      external: EXTERNAL_PACKAGES,
     },
     {
-      entryPoints: [options.entryPoint],
+      entryPoints: [ENTRY_POINT],
       platform: "browser",
       format: "iife",
-      globalName: options.globalName,
+      globalName: BROWSER_GLOBAL_NAME,
       bundle: true,
       minify: true,
       sourcemap: true,
       outfile: paths.browserMin,
-      external: externalPackages,
+      external: EXTERNAL_PACKAGES,
     },
   );
 }
