@@ -35,7 +35,7 @@ test("retry", async () => {
   });
 });
 
-test("QueueWorker - seq", async () => {
+test("QueueWorker", async () => {
   const worker = new QueueWorker();
   const results: number[] = [];
 
@@ -54,10 +54,7 @@ test("QueueWorker - seq", async () => {
   ]);
 
   eq(results, [1, 2, 3]);
-});
 
-test("QueueWorker - wait", async () => {
-  const worker = new QueueWorker();
   const startedAt = Date.now();
 
   worker.add(async () => {
