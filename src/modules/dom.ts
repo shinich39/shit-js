@@ -8,7 +8,7 @@ export type DomImpl = {
   content?: string;
   attributes?: DomAttrs;
   children?: DomImpl[];
-}
+};
 
 type Stack = {
   isClosed: boolean;
@@ -19,23 +19,23 @@ type Stack = {
   content?: string;
   attributes?: DomAttrs;
   children?: DomImpl[];
-}
+};
 
 function splitTags(str: string) {
   const result: string[] = [];
 
   let i = 0,
-      buffer = "",
-      head = false,
-      tail: string | null = null,
-      quotes: string | null = null;
+    buffer = "",
+    head = false,
+    tail: string | null = null,
+    quotes: string | null = null;
 
   const flush = () => {
     if (buffer !== "") {
       result.push(buffer);
       buffer = "";
     }
-  }
+  };
 
   const join = () => {
     if (buffer !== "") {
@@ -46,9 +46,9 @@ function splitTags(str: string) {
       }
       buffer = "";
     }
-  }
+  };
 
-  while(i < str.length) {
+  while (i < str.length) {
     const ch = str[i];
 
     // find "<"
@@ -93,7 +93,7 @@ function splitTags(str: string) {
           if (ch === `"` || ch === `'`) {
             quotes = ch;
           } else if (buffer === "<!--") {
-            tail = "-->"
+            tail = "-->";
           } else if (buffer === "<script") {
             tail = "</script>";
           } else if (buffer === "<style") {
@@ -128,7 +128,7 @@ function parseTag(str: string) {
     quotes: string | null = null,
     closer: string | undefined;
 
-  const flush = function () {
+  const flush = () => {
     if (buffer !== "") {
       parts.push(buffer);
       buffer = "";
@@ -209,7 +209,7 @@ function parseTag(str: string) {
     tag,
     closer,
     attributes,
-  }
+  };
 }
 
 function parseStr(str: string) {
@@ -218,10 +218,10 @@ function parseStr(str: string) {
       isClosed: false,
       type: "root",
       children: [],
-    }
+    },
   ];
 
-  const root = stacks[0] as Stack & { children: DomImpl[], };
+  const root = stacks[0] as Stack & { children: DomImpl[] };
   const parts = splitTags(str);
 
   for (const part of parts) {
@@ -319,7 +319,7 @@ function parseStr(str: string) {
             for (const child of children) {
               child.parent = stack;
             }
-            
+
             break;
           }
 
@@ -375,8 +375,8 @@ function parseStr(str: string) {
   delete root.depth;
 
   return root as {
-    type: "root",
-    children: DomImpl[],
+    type: "root";
+    children: DomImpl[];
   };
 }
 
@@ -391,9 +391,9 @@ function stringifyAttrs(attrs: DomAttrs) {
       result += ` ${k}="${v}"`;
     } else if (v === null) {
       result += ` ${k}`;
-    } 
+    }
   }
-  
+
   return result;
 }
 
@@ -434,13 +434,16 @@ export class Dom implements DomImpl {
       // tag with content
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
-          new Dom({
-            type: "text",
-            tag: "",
-            content: src.content,
-            attributes: {},
-            children: [],
-          }, this)
+          new Dom(
+            {
+              type: "text",
+              tag: "",
+              content: src.content,
+              attributes: {},
+              children: [],
+            },
+            this,
+          ),
         ];
       } // tag with children
       else if (src.children) {
@@ -457,7 +460,7 @@ export class Dom implements DomImpl {
         const { children } = Dom.parse(arg);
         result.push(...children.map((child) => new Dom(child, this)));
       } else if (arg.type === "root") {
-        result.push(...(new Dom(arg, this)).children);
+        result.push(...new Dom(arg, this).children);
       } else {
         result.push(new Dom(arg, this));
       }
@@ -466,23 +469,39 @@ export class Dom implements DomImpl {
     return result;
   }
 
-  isRoot(): boolean { return this.type === "root"; }
-  isComment(): boolean { return this.type === "comment"; }
-  isStyle(): boolean { return this.type === "style"; }
-  isScript(): boolean { return this.type === "script"; }
-  isText(): boolean { return this.type === "text"; }
-  isTag(): boolean { return this.type === "tag"; }
+  isRoot(): boolean {
+    return this.type === "root";
+  }
+  isComment(): boolean {
+    return this.type === "comment";
+  }
+  isStyle(): boolean {
+    return this.type === "style";
+  }
+  isScript(): boolean {
+    return this.type === "script";
+  }
+  isText(): boolean {
+    return this.type === "text";
+  }
+  isTag(): boolean {
+    return this.type === "tag";
+  }
 
-  getParent(): Dom | undefined { return this.parent; }
-  hasParent(): boolean { return !!this.parent; }
+  getParent(): Dom | undefined {
+    return this.parent;
+  }
+  hasParent(): boolean {
+    return !!this.parent;
+  }
 
   /**
    * Get all parent elements from target to root
    */
   getParents(): Dom[] {
     const result: Dom[] = [];
-    
-    const fn = function (child: Dom) {
+
+    const fn = (child: Dom) => {
       if (!child.parent) {
         return;
       }
@@ -503,7 +522,7 @@ export class Dom implements DomImpl {
   getChildren(): Dom[] {
     const result: Dom[] = [];
 
-    const fn = function (parent: Dom) {
+    const fn = (parent: Dom) => {
       for (const child of parent.children) {
         result.push(child);
         if (child.type === "tag") {
@@ -516,16 +535,30 @@ export class Dom implements DomImpl {
 
     return result;
   }
-  hasChildren(): boolean { return this.children.length > 1; }
+  hasChildren(): boolean {
+    return this.children.length > 1;
+  }
 
-  getSiblings(): Dom[] { return (this.parent?.children || []).filter((sibling) => sibling != this); }
-  hasSiblings(): boolean { return (this.parent?.children || []).length > 1; }
+  getSiblings(): Dom[] {
+    return (this.parent?.children || []).filter((sibling) => sibling !== this);
+  }
+  hasSiblings(): boolean {
+    return (this.parent?.children || []).length > 1;
+  }
 
-  getTag(): string { return this.tag; }
-  setTag(value: string): void { this.tag = value; }
-  hasTag(): boolean { return this.tag !== ""; }
-  
-  getCloser(): string | undefined { return this.closer; }
+  getTag(): string {
+    return this.tag;
+  }
+  setTag(value: string): void {
+    this.tag = value;
+  }
+  hasTag(): boolean {
+    return this.tag !== "";
+  }
+
+  getCloser(): string | undefined {
+    return this.closer;
+  }
   setCloser(value: string | null | undefined): void {
     if (typeof value === "string") {
       this.closer = value;
@@ -533,11 +566,19 @@ export class Dom implements DomImpl {
       delete this.closer;
     }
   }
-  hasCloser(): boolean { return typeof this.closer === "string"; }
+  hasCloser(): boolean {
+    return typeof this.closer === "string";
+  }
 
-  getContent(): string { return this.content || ""; }
-  setContent(value: string): void { this.content = value; }
-  hasContent(): boolean { return this.content !== ""; }
+  getContent(): string {
+    return this.content || "";
+  }
+  setContent(value: string): void {
+    this.content = value;
+  }
+  hasContent(): boolean {
+    return this.content !== "";
+  }
 
   getContents(): string[] {
     const result: string[] = [];
@@ -547,22 +588,33 @@ export class Dom implements DomImpl {
         result.push(child.content || "");
         continue;
       }
-      
+
       if (child.type === "tag") {
         result.push(...child.getContents());
-        continue;
       }
     }
-    
+
     return result;
   }
 
-  getAttribute(key: string): string | null | undefined { return this.attributes[key]; }
-  setAttribute(key: string, value: string | null | undefined): void { this.attributes[key] = value; }
-  hasAttribute(key: string): boolean { return typeof this.attributes[key] !== "undefined"; }
+  getAttribute(key: string): string | null | undefined {
+    return this.attributes[key];
+  }
+  setAttribute(key: string, value: string | null | undefined): void {
+    this.attributes[key] = value;
+  }
+  hasAttribute(key: string): boolean {
+    return typeof this.attributes[key] !== "undefined";
+  }
 
-  getAttributes(): DomAttrs { return this.attributes; }
-  setAttributes(attrs: DomAttrs): void { Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k])); };
+  getAttributes(): DomAttrs {
+    return this.attributes;
+  }
+  setAttributes(attrs: DomAttrs): void {
+    for (const k of Object.keys(attrs)) {
+      this.setAttribute(k, attrs[k]);
+    }
+  }
   hasAttributes(attrs: DomAttrs): boolean {
     for (const k of Object.keys(attrs)) {
       if (this.getAttribute(k) !== attrs[k]) {
@@ -575,9 +627,7 @@ export class Dom implements DomImpl {
   getRoot(this: Dom): Dom | undefined {
     const parents = this.getParents();
     const root = parents.pop();
-    return root && root.type === "root"
-      ? root 
-      : undefined;
+    return root && root.type === "root" ? root : undefined;
   }
 
   getDepth(this: Dom): number {
@@ -601,11 +651,11 @@ export class Dom implements DomImpl {
       throw new Error("Parent not found");
     }
 
-    const index = this.parent.children.findIndex((child) => child == this);
+    const index = this.parent.children.indexOf(this);
     if (index === -1) {
       throw new Error("This element not included in it's parent");
     }
-    
+
     const newSiblings = this.parent.createChildren(args);
     this.parent.children.splice(index, 0, ...newSiblings);
   }
@@ -615,7 +665,7 @@ export class Dom implements DomImpl {
       throw new Error("Parent not found");
     }
 
-    const index = this.parent.children.findIndex((child) => child == this);
+    const index = this.parent.children.indexOf(this);
     if (index === -1) {
       throw new Error("This element not included in its parent");
     }
@@ -624,60 +674,36 @@ export class Dom implements DomImpl {
     this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
 
-  forEach(
-    callback: (child: Dom, index: number, children: Dom[]) => void
-  ): void {
+  forEach(callback: (child: Dom, index: number, children: Dom[]) => void): void {
     this.getChildren().forEach(callback);
   }
 
-  find(
-    callback: (child: Dom, index: number, children: Dom[]) => any
-  ): Dom | undefined {
+  find(callback: (child: Dom, index: number, children: Dom[]) => any): Dom | undefined {
     return this.getChildren().find(callback);
   }
 
-  findLast(
-    callback: (parent: Dom, index: number, parents: Dom[]) => any
-  ): Dom | undefined {
+  findLast(callback: (parent: Dom, index: number, parents: Dom[]) => any): Dom | undefined {
     return this.getParents().find(callback);
   }
 
-  filter(
-    callback: (child: Dom, index: number, children: Dom[]) => any
-  ): Dom[] {
+  filter(callback: (child: Dom, index: number, children: Dom[]) => any): Dom[] {
     return this.getChildren().filter(callback);
   }
 
-  map<T>(
-    callback: (
-      child: Dom,
-      index: number,
-      children: Dom[],
-    ) => T
-  ): T[] {
+  map<T>(callback: (child: Dom, index: number, children: Dom[]) => T): T[] {
     return this.children.map<T>(callback);
   }
 
   reduce<T>(
-    callback: (
-      previousValue: T,
-      currentValue: Dom,
-      currentIndex: number,
-      array: Dom[],
-    ) => T,
-    initialValue: T
+    callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T,
+    initialValue: T,
   ): T {
     return this.children.reduce<T>(callback, initialValue);
   }
 
   reduceRight<T>(
-    callback: (
-      previousValue: T,
-      currentValue: Dom,
-      currentIndex: number,
-      array: Dom[],
-    ) => T,
-    initialValue: T
+    callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T,
+    initialValue: T,
   ): T {
     return this.children.reduceRight<T>(callback, initialValue);
   }

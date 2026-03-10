@@ -2,41 +2,41 @@
  * @example
  * parseDate(new Date()); // { YYYY: 2026, ... }
  */
-export function parseDate(date: Date|number|string): {
-  YYYY: string,
-  YY: string,
-  M: string,
-  MM: string,
-  D: string,
-  DD: string,
-  d: string,
-  E: string,
-  EEEE: string,
-  H: string,
-  HH: string,
-  h: string,
-  hh: string,
-  m: string,
-  mm: string,
-  s: string,
-  ss: string,
-  SSS: string,
-  A: string,
-  a: string,
-  Q: string,
-  Z: string,
-  ZZ: string,
-  W: string,
-  WW: string,
+export function parseDate(date: Date | number | string): {
+  YYYY: string;
+  YY: string;
+  M: string;
+  MM: string;
+  D: string;
+  DD: string;
+  d: string;
+  E: string;
+  EEEE: string;
+  H: string;
+  HH: string;
+  h: string;
+  hh: string;
+  m: string;
+  mm: string;
+  s: string;
+  ss: string;
+  SSS: string;
+  A: string;
+  a: string;
+  Q: string;
+  Z: string;
+  ZZ: string;
+  W: string;
+  WW: string;
 } {
-  let ensuredDate;
+  let ensuredDate: Date;
   if (date instanceof Date) {
     ensuredDate = date;
   } else {
     ensuredDate = new Date(date);
   }
 
-  if (isNaN(ensuredDate.getTime())) {
+  if (Number.isNaN(ensuredDate.getTime())) {
     throw new Error(`Invalid date: ${date}`);
   }
 
@@ -55,12 +55,14 @@ export function parseDate(date: Date|number|string): {
   // weekday (0 == sunday)
   const d = String(ensuredDate.getDay()); // 0 ~ 6
   const E = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][ensuredDate.getDay()];
-  const EEEE = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][ensuredDate.getDay()];
+  const EEEE = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][
+    ensuredDate.getDay()
+  ];
 
   // hour
   const H = String(ensuredDate.getHours()); // 0 ~ 23
   const HH = H.padStart(2, "0"); // 00 ~ 23
-  const h = String((ensuredDate.getHours() % 12) || 12); // 1 ~ 12
+  const h = String(ensuredDate.getHours() % 12 || 12); // 1 ~ 12
   const hh = h.padStart(2, "0"); // 01 ~ 12
 
   // minute
@@ -98,8 +100,30 @@ export function parseDate(date: Date|number|string): {
   const WW = W.padStart(2, "0");
 
   return {
-    YYYY, YY, M, MM, D, DD, d, E, EEEE,
-    H, HH, h, hh, m, mm, s, ss, SSS,
-    A, a, Q, Z, ZZ, W, WW,
+    YYYY,
+    YY,
+    M,
+    MM,
+    D,
+    DD,
+    d,
+    E,
+    EEEE,
+    H,
+    HH,
+    h,
+    hh,
+    m,
+    mm,
+    s,
+    ss,
+    SSS,
+    A,
+    a,
+    Q,
+    Z,
+    ZZ,
+    W,
+    WW,
   };
 }

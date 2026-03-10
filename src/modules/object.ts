@@ -1,6 +1,6 @@
 /**
  * Deep clone
- * 
+ *
  * @example
  * const a = {};
  * const b = copyObject(a);
@@ -38,19 +38,19 @@ export function copyObject<T>(obj: T): T {
     }
 
     return result;
-  }
+  };
 
   return fn(obj);
 }
 /**
  * Create internationalization(i18n) object
- * 
+ *
  * @example
  * const t = createI18n({
  *   en: { heading: "Hello, world!" },
  *   ko: { heading: "세상아, 안녕!" }
  * }, "en");
- * 
+ *
  * t("en", "heading"); // "Hello, world!"
  * t(null, "heading"); // "Hello, world!"
  * t("ko", "heading"); // "세상아, 안녕!"
@@ -60,21 +60,15 @@ export function createI18n(
   obj: Record<string, Record<string, string>>,
   defaultLocale: string,
 ): (locale: string | null | undefined, key: string) => string {
-  return (locale, key) => 
-    obj[locale ?? ""]?.[key] ??
-    obj[defaultLocale]?.[key] ??
-    key;
+  return (locale, key) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
 }
 
 type StoreHandlers<T extends object> = {
-  [K in keyof T]?: (
-    oldValue: T[K],
-    newValue: T[K],
-  ) => void | Promise<void>;
-}
+  [K in keyof T]?: (oldValue: T[K], newValue: T[K]) => void | Promise<void>;
+};
 /**
  * Create an observed object
- * 
+ *
  * @example
  * const initial = { count: 1 };
  * const store = createStore<typeof initial>(initial, {
@@ -82,26 +76,26 @@ type StoreHandlers<T extends object> = {
  * });
  * store.count++;
  */
-export function createStore<T extends object>(
-  initial: T,
-  handlers: StoreHandlers<T>,
-): T {
-  return new Proxy({ ...initial }, {
-    set(target, key, value) {
-      const typedKey = key as keyof T;
-      const oldValue = target[typedKey];
+export function createStore<T extends object>(initial: T, handlers: StoreHandlers<T>): T {
+  return new Proxy(
+    { ...initial },
+    {
+      set(target, key, value) {
+        const typedKey = key as keyof T;
+        const oldValue = target[typedKey];
 
-      if (oldValue !== value) {
-        target[typedKey] = value;
+        if (oldValue !== value) {
+          target[typedKey] = value;
 
-        const handler = handlers[typedKey];
-        
-        if (handler) {
-          handler(oldValue, value);
+          const handler = handlers[typedKey];
+
+          if (handler) {
+            handler(oldValue, value);
+          }
         }
-      }
 
-      return true;
+        return true;
+      },
     },
-  });
+  );
 }

@@ -1,44 +1,44 @@
-import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
+import { deepStrictEqual as eq } from "node:assert";
+import { test } from "node:test";
 import {
-  getClampedNumber,
-  getLoopedNumber,
-  getContainedSize,
-  getCoveredSize,
-  getAdjustedSize,
-  toFileSize,
-  generateInt,
-  generateFloat,
-  getIntSize,
-  getFloatSize,
-  getLogScore,
-  getPowerScore,
-  getBitSize,
-  generateTypingDelay,
-  fromMegabyte,
+  checkBit,
+  clearBit,
+  fromExabyte,
   fromGigabyte,
   fromKilobyte,
-  fromTerabyte,
+  fromMegabyte,
   fromPetabyte,
-  fromExabyte,
-  fromZettabyte,
+  fromTerabyte,
   fromYottabyte,
+  fromZettabyte,
+  generateFloat,
+  generateInt,
+  generateTypingDelay,
+  getAdjustedSize,
+  getBitSize,
+  getClampedDegree,
+  getClampedNumber,
+  getContainedSize,
+  getCoveredSize,
+  getFloatSize,
+  getIntSize,
+  getLogScore,
+  getLoopedNumber,
+  getPowerScore,
+  setBit,
+  toBitString,
+  toDegree,
+  toExabyte,
+  toFileSize,
+  toGigabyte,
+  toggleBit,
   toKilobyte,
   toMegabyte,
-  toGigabyte,
-  toTerabyte,
   toPetabyte,
-  toExabyte,
-  toZettabyte,
-  toYottabyte,
   toRadian,
-  toDegree,
-  getClampedDegree,
-  checkBit,
-  setBit,
-  clearBit,
-  toggleBit,
-  toBitString,
+  toTerabyte,
+  toYottabyte,
+  toZettabyte,
 } from "./number";
 import { sleep } from "./promise";
 
@@ -194,82 +194,82 @@ test("getAdjustedSize", () => {
 
 test("getLogScore", () => {
   eq(getLogScore(100, 0), 0);
-  eq(getLogScore(100, 25).toFixed(4), 0.7059613126314263.toFixed(4));
-  eq(getLogScore(100, 50).toFixed(4), 0.8519443031609923.toFixed(4));
-  eq(getLogScore(100, 75).toFixed(4), 0.9383792523906672.toFixed(4));
+  eq(getLogScore(100, 25).toFixed(4), (0.7059613126314263).toFixed(4));
+  eq(getLogScore(100, 50).toFixed(4), (0.8519443031609923).toFixed(4));
+  eq(getLogScore(100, 75).toFixed(4), (0.9383792523906672).toFixed(4));
   eq(getLogScore(100, 100), 1);
 });
 
 test("getPowerScore", () => {
   eq(getPowerScore(100, 0), 0);
-  eq(getPowerScore(100, 25).toFixed(4), 0.5.toFixed(4)); 
-  eq(getPowerScore(100, 50).toFixed(4), 0.7071067811865476.toFixed(4));
-  eq(getPowerScore(100, 75).toFixed(4), 0.8660254037844387.toFixed(4));
+  eq(getPowerScore(100, 25).toFixed(4), (0.5).toFixed(4));
+  eq(getPowerScore(100, 50).toFixed(4), Math.SQRT1_2.toFixed(4));
+  eq(getPowerScore(100, 75).toFixed(4), (0.8660254037844387).toFixed(4));
   eq(getPowerScore(100, 100), 1);
 });
 
 test("fromKilobyte", () => {
-  eq(fromKilobyte(1), Math.pow(1024, 1));
+  eq(fromKilobyte(1), 1024 ** 1);
 });
 
 test("fromMegabyte", () => {
-  eq(fromMegabyte(1), Math.pow(1024, 2));
+  eq(fromMegabyte(1), 1024 ** 2);
 });
 
 test("fromGigabyte", () => {
-  eq(fromGigabyte(1), Math.pow(1024, 3));
+  eq(fromGigabyte(1), 1024 ** 3);
 });
 
 test("fromTerabyte", () => {
-  eq(fromTerabyte(1), Math.pow(1024, 4));
+  eq(fromTerabyte(1), 1024 ** 4);
 });
 
 test("fromPetabyte", () => {
-  eq(fromPetabyte(1), Math.pow(1024, 5));
+  eq(fromPetabyte(1), 1024 ** 5);
 });
 
 test("fromExabyte", () => {
-  eq(fromExabyte(1), Math.pow(1024, 6));
+  eq(fromExabyte(1), 1024 ** 6);
 });
 
 test("fromZettabyte", () => {
-  eq(fromZettabyte(1), Math.pow(1024, 7));
+  eq(fromZettabyte(1), 1024 ** 7);
 });
 
 test("fromYottabyte", () => {
-  eq(fromYottabyte(1), Math.pow(1024, 8));
+  eq(fromYottabyte(1), 1024 ** 8);
 });
 
 test("toKilobyte", () => {
-  eq(toKilobyte(Math.pow(1024, 1)), 1);
+  eq(toKilobyte(1024 ** 1), 1);
 });
 
 test("toMegabyte", () => {
-  eq(toMegabyte(Math.pow(1024, 2)), 1);
+  eq(toMegabyte(1024 ** 2), 1);
 });
 
 test("toGigabyte", () => {
-  eq(toGigabyte(Math.pow(1024, 3)), 1);
+  eq(toGigabyte(1024 ** 3), 1);
 });
 
 test("toTerabyte", () => {
-  eq(toTerabyte(Math.pow(1024, 4)), 1);
+  eq(toTerabyte(1024 ** 4), 1);
 });
 
 test("toPetabyte", () => {
-  eq(toPetabyte(Math.pow(1024, 5)), 1);
+  eq(toPetabyte(1024 ** 5), 1);
 });
 
 test("toExabyte", () => {
-  eq(toExabyte(Math.pow(1024, 6)), 1);
+  eq(toExabyte(1024 ** 6), 1);
 });
 
 test("toZettabyte", () => {
-  eq(toZettabyte(Math.pow(1024, 7)), 1);
+  eq(toZettabyte(1024 ** 7), 1);
 });
 
 test("toYottabyte", () => {
-  eq(toYottabyte(Math.pow(1024, 8)), 1);
+  eq(toYottabyte(1024 ** 8), 1);
 });
 
 test("toFileSize", () => {

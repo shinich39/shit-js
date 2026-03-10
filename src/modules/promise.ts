@@ -1,6 +1,6 @@
 /**
  * @example
- * await sleep(1000); 
+ * await sleep(1000);
  * // wait 1s...
  */
 export function sleep(ms: number): Promise<void> {
@@ -14,74 +14,48 @@ export function sleep(ms: number): Promise<void> {
  *   console.log(index); // 0...1...2
  * });
  */
-export function retry<T>(
+export async function retry<T>(
   fn: () => Promise<T>,
   count: number,
   delay: number,
-): (callback?: (index: number, error: unknown) => void | Promise<void>) => Promise<T> {
-  return async function wrapped(cb): Promise<T> {
-    let lastError: unknown;
+  callback?: (index: number, error: unknown) => void | Promise<void>,
+): Promise<T> {
+  let lastError: unknown;
 
-    for (let i = 0; i < count; i++) {
-      try {
-        return await fn();
-      } catch (err) {
-        lastError = err;
-        if (i < count - 1) {
-          await cb?.(i, err);
-          await new Promise((resolve) => setTimeout(resolve, delay))
-        }
+  for (let i = 0; i < count; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < count - 1) {
+        await callback?.(i, err);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
+  }
 
-    throw lastError;
-  };
+  throw lastError;
 }
 
-type QueueFunction<T = void> = () => T | Promise<T>;
-
-interface QueueItem<T> {
-  fn: QueueFunction<T>,
-  resolve: (value: T) => void;
-  reject: (reason?: any) => void;
-}
 /**
  * @example
  * const worker = new QueueWorker();
- * worker.add(() => console.log(`Task 0`));
- * worker.add(async () => { await fetch('/api/data'); });
+ *
+ * worker.add(() => console.log("Task 0"));
+ *
+ * worker.add(async () => {
+ *   await fetch("/api/data");
+ * });
+ *
+ * worker.add(async () => { await sleep(100); console.log("1"); });
+ * worker.add(async () => { await sleep(50);  console.log("2"); });
  */
 export class QueueWorker {
-  queue: QueueItem<any>[] = [];
-  running: boolean = false;
-  /**
-   * @example
-   * worker.add(() => console.log(`Task 0`));
-   * worker.add(async () => { await fetch(`/api/data`); })
-   */
-  add<T>(fn: QueueFunction<T>): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      this.queue.push({ fn, resolve, reject });
+  _: Promise<void> = Promise.resolve();
 
-      if (!this.running) {
-        this.running = true;
-        this.run();
-      }
+  add(fn: () => Promise<void>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._ = this._.then(fn).then(resolve).catch(reject);
     });
-  }
-
-  private async run(): Promise<void> {
-    while (this.queue.length > 0) {
-      const item = this.queue.shift()!;
-
-      try {
-        const result = await item.fn();
-        item.resolve(result);
-      } catch (err) {
-        item.reject(err);
-      }
-    }
-
-    this.running = false;
   }
 }

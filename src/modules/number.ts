@@ -1,17 +1,17 @@
 /**
  * Mulberry32 PRNG (Pseudo Random Number Generator)
- * 
+ *
  * https://github.com/cprosche/mulberry32
  */
 function mulberry32(seed: number): number {
-  let t = seed += 0x6D2B79F5;
+  let t = seed + 0x6d2b79f5;
   t = Math.imul(t ^ (t >>> 15), t | 1);
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 /**
  * AND gate
- * 
+ *
  * @example
  * checkBit(0b1100, 0b1000); // true
  */
@@ -20,7 +20,7 @@ export function checkBit(a: number, b: number): boolean {
 }
 /**
  * OR gate
- * 
+ *
  * @example
  * setBit(0b1100, 0b1000); // 0b1100
  */
@@ -29,7 +29,7 @@ export function setBit(a: number, b: number): number {
 }
 /**
  * AND-NOT gate
- * 
+ *
  * @example
  * clearBit(0b1100, 0b1110); // 0b0000
  */
@@ -38,7 +38,7 @@ export function clearBit(a: number, b: number): number {
 }
 /**
  * XOR gate
- * 
+ *
  * @example
  * toggleBit(0b1100, 0b1110); // 0b0010
  */
@@ -60,7 +60,7 @@ export function toBitString(bit: number, size?: number): string {
 }
 /**
  * @returns min <= n < max
- * 
+ *
  * @example
  * generateFloat(0, 1); // 0.12451251251251
  * generateFloat(0, 1, 0); // 0.26642920868471265
@@ -81,46 +81,43 @@ export function generateFloat(min: number, max: number, seed?: number | null | u
  *   await sleep(delay);
  * }
  */
-export function generateTypingDelay(
-  char: string,
-  speed = 1,
-): number {
+export function generateTypingDelay(char: string, speed = 1): number {
   let velocity = 0;
   let drift = 0;
 
   return (() => {
     const scale = (v: number) => v / speed;
 
-      let base: number;
+    let base: number;
 
-      // sentence
-      if (/[.,!?]/.test(char)) {
-        base = generateInt(scale(300), scale(480));
-      } // word
-      else if (char === " ") {
-        base = generateInt(scale(180), scale(300));
-      } // character
-      else {
-        base = generateInt(scale(85), scale(130));
-      }
+    // sentence
+    if (/[.,!?]/.test(char)) {
+      base = generateInt(scale(300), scale(480));
+    } // word
+    else if (char === " ") {
+      base = generateInt(scale(180), scale(300));
+    } // character
+    else {
+      base = generateInt(scale(85), scale(130));
+    }
 
-      velocity += (Math.random() - 0.5) * scale(1.1);
-      velocity *= 0.8;
+    velocity += (Math.random() - 0.5) * scale(1.1);
+    velocity *= 0.8;
 
-      drift += (Math.random() - 0.5) * scale(0.3);
-      drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
+    drift += (Math.random() - 0.5) * scale(0.3);
+    drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
 
-      const accel = velocity * scale(4.5) + drift;
+    const accel = velocity * scale(4.5) + drift;
 
-      base -= accel;
+    base -= accel;
 
-      // clamp
-      return Math.max(scale(45), Math.min(base, scale(520)));
+    // clamp
+    return Math.max(scale(45), Math.min(base, scale(520)));
   })();
 }
 /**
  * @returns min <= n < max
- * 
+ *
  * @example
  * generateInt(0, 10); // 5
  * generateInt(0, 10, 0); // 2
@@ -146,7 +143,7 @@ export function getBitSize(num: number): number {
  * getIntSize(100); // 3
  */
 export function getIntSize(num: number): number {
-  return Math.log(num) * Math.LOG10E + 1 | 0;
+  return (Math.log(num) * Math.LOG10E + 1) | 0;
 }
 /**
  * @example
@@ -158,7 +155,7 @@ export function getFloatSize(num: number): number {
 }
 /**
  * @returns min <= n <= max
- * 
+ *
  * @example
  * getClampedNumber(5, 0, 10); // 5
  * getClampedNumber(10, 0, 10); // 10
@@ -168,7 +165,7 @@ export function getClampedNumber(num: number, min: number, max: number): number 
 }
 /**
  * @returns min <= n < max
- * 
+ *
  * @example
  * getLoopedNumber(-5, 0, 10); // 5
  * getLoopedNumber(-2.5, 0, 10); // 7.5
@@ -193,7 +190,7 @@ export function getLoopedNumber(num: number, min: number, max: number): number {
 }
 /**
  * To 0 - 360
- * 
+ *
  * @example
  * getClampedDegree(0); // 0
  * getClampedDegree(180); // 180
@@ -208,7 +205,7 @@ export function getClampedDegree(degree: number): number {
 }
 /**
  * Degree → Radian
- * 
+ *
  * @example
  * toRadian(90); // 1.5708...
  * toRadian(180); // 3.1416...
@@ -219,7 +216,7 @@ export function toRadian(degree: number): number {
 }
 /**
  * Radian → Degree
- * 
+ *
  * @example
  * toDegree(Math.PI); // 180
  * toDegree(Math.PI * 2); // 360
@@ -235,7 +232,7 @@ export function getContainedSize(
   srcWidth: number,
   srcHeight: number,
   dstWidth: number,
-  dstHeight: number
+  dstHeight: number,
 ): [number, number] {
   const aspectRatio = srcWidth / srcHeight;
   return aspectRatio < dstWidth / dstHeight
@@ -250,7 +247,7 @@ export function getCoveredSize(
   srcWidth: number,
   srcHeight: number,
   dstWidth: number,
-  dstHeight: number
+  dstHeight: number,
 ): [number, number] {
   const aspectRatio = srcWidth / srcHeight;
   return aspectRatio < dstWidth / dstHeight
@@ -267,7 +264,7 @@ export function getAdjustedSize(
   maxWidth: number,
   maxHeight: number,
   minWidth: number,
-  minHeight: number
+  minHeight: number,
 ): [number, number] {
   const aspectRatio = srcWidth / srcHeight;
 
@@ -316,119 +313,119 @@ export function getLogScore(total: number, current: number): number {
  * getPowerScore(100, 100); // 1
  */
 export function getPowerScore(total: number, current: number, alpha: number = 0.5): number {
-  return Math.pow(current, alpha) / Math.pow(total, alpha);
+  return current ** alpha / total ** alpha;
 }
 /**
  * @example
  * fromKilobyte(1); // Math.pow(1024, 1)
  */
 export function fromKilobyte(kb: number): number {
-  return kb * Math.pow(1024, 1);
+  return kb * 1024 ** 1;
 }
 /**
  * @example
  * fromMegabyte(1); // Math.pow(1024, 2)
  */
 export function fromMegabyte(mb: number): number {
-  return mb * Math.pow(1024, 2);
+  return mb * 1024 ** 2;
 }
 /**
  * @example
  * fromGigabyte(1); // Math.pow(1024, 3)
  */
 export function fromGigabyte(gb: number): number {
-  return gb * Math.pow(1024, 3);
+  return gb * 1024 ** 3;
 }
 /**
  * @example
  * fromTerabyte(1); // Math.pow(1024, 4)
  */
 export function fromTerabyte(tb: number): number {
-  return tb * Math.pow(1024, 4);
+  return tb * 1024 ** 4;
 }
 /**
  * @example
  * fromPetabyte(1); // Math.pow(1024, 5)
  */
 export function fromPetabyte(pt: number): number {
-  return pt * Math.pow(1024, 5);
+  return pt * 1024 ** 5;
 }
 /**
  * @example
  * fromExabyte(1); // Math.pow(1024, 6)
  */
 export function fromExabyte(eb: number): number {
-  return eb * Math.pow(1024, 6);
+  return eb * 1024 ** 6;
 }
 /**
  * @example
  * fromZettabyte(1); // Math.pow(1024, 7)
  */
 export function fromZettabyte(zb: number): number {
-  return zb * Math.pow(1024, 7);
+  return zb * 1024 ** 7;
 }
 /**
  * @example
  * fromYottabyte(1); // Math.pow(1024, 8)
  */
 export function fromYottabyte(yb: number): number {
-  return yb * Math.pow(1024, 8);
+  return yb * 1024 ** 8;
 }
 /**
  * @example
  * toKilobyte(Math.pow(1024, 1)); // 1
  */
 export function toKilobyte(bytes: number): number {
-  return bytes * Math.pow(1024, -1);
+  return bytes * 1024 ** -1;
 }
 /**
  * @example
  * toMegabyte(Math.pow(1024, 2)); // 1
  */
 export function toMegabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -2);
+  return bytes * 1024 ** -2;
 }
 /**
  * @example
  * toGigabyte(Math.pow(1024, 3)); // 1
  */
 export function toGigabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -3);
+  return bytes * 1024 ** -3;
 }
 /**
  * @example
  * toTerabyte(Math.pow(1024, 4)); // 1
  */
 export function toTerabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -4);
+  return bytes * 1024 ** -4;
 }
 /**
  * @example
  * toPetabyte(Math.pow(1024, 5)); // 1
  */
 export function toPetabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -5);
+  return bytes * 1024 ** -5;
 }
 /**
  * @example
  * toExabyte(Math.pow(1024, 6)); // 1
  */
 export function toExabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -6);
+  return bytes * 1024 ** -6;
 }
 /**
  * @example
  * toZettabyte(Math.pow(1024, 7)); // 1
  */
 export function toZettabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -7);
+  return bytes * 1024 ** -7;
 }
 /**
  * @example
  * toYottabyte(Math.pow(1024, 8)); // 1
  */
 export function toYottabyte(bytes: number): number {
-  return bytes * Math.pow(1024, -8);
+  return bytes * 1024 ** -8;
 }
 /**
  * @example
@@ -441,17 +438,7 @@ export function toFileSize(bytes: number): string {
     return `${bytes} B`;
   }
 
-  const units = [
-    "B",
-    "KB",
-    "MB",
-    "GB",
-    "TB",
-    "PB",
-    "EB",
-    "ZB",
-    "YB",
-  ];
+  const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
   let value = bytes;
   let unitIndex = 0;

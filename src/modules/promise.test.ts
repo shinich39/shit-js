@@ -1,6 +1,6 @@
-import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
-import { QueueWorker, sleep, retry } from "./promise";
+import { doesNotReject, deepStrictEqual as eq, rejects } from "node:assert";
+import { test } from "node:test";
+import { QueueWorker, retry, sleep } from "./promise";
 
 test("sleep", async () => {
   const a = Date.now();
@@ -9,32 +9,65 @@ test("sleep", async () => {
   eq(b - a >= 38, true);
 });
 
-// test("retry", async () => {
-//   const fn = async () => {
-//     throw new Error("An error occurred");
-//   }
+test("retry", async () => {
+  rejects(async () => {
+    const fn = async () => {
+      throw new Error("An error occurred");
+    };
 
-//   const wrapped = retry(fn, 3, 256);
+    await retry(fn, 3, 10, () => {
+      // ...
+    });
+  });
 
-//   rejects(() => wrapped((i) => {
-//     console.log(`retry ${i}`);
-//   }));
-// });
+  doesNotReject(async () => {
+    let j = 2;
 
-test("QueueWorker", async () => {
+    const fn = async () => {
+      if (j > 0) {
+        throw new Error("An error occurred");
+      }
+    };
+
+    await retry(fn, 3, 10, () => {
+      j--;
+    });
+  });
+});
+
+test("QueueWorker - seq", async () => {
   const worker = new QueueWorker();
+  const results: number[] = [];
 
+  await Promise.all([
+    worker.add(async () => {
+      await sleep(30);
+      results.push(1);
+    }),
+    worker.add(async () => {
+      await sleep(10);
+      results.push(2);
+    }),
+    worker.add(async () => {
+      results.push(3);
+    }),
+  ]);
+
+  eq(results, [1, 2, 3]);
+});
+
+test("QueueWorker - wait", async () => {
+  const worker = new QueueWorker();
   const startedAt = Date.now();
 
-  for (let i = 0; i < 3; i++) {
-    const index = i;
-    worker.add(async function () {
-      await sleep(10);
-      // console.log(`Task ${index}, Queue: ${worker.queue.length}, Time: ${Date.now() - startedAt}ms`);
-    }).then(() => {
-      if (!worker.running) {
-        eq(Date.now() - startedAt >= 30, true);
-      }
-    })
-  }
+  worker.add(async () => {
+    await sleep(10);
+  });
+  worker.add(async () => {
+    await sleep(10);
+  });
+  worker.add(async () => {
+    await sleep(10);
+    eq(Date.now() - startedAt >= 30, true);
+  });
 });

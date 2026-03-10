@@ -12,10 +12,7 @@ export function joinPaths(...args: string[]): string {
     }
 
     if (part === "..") {
-      if (
-        !resolved[resolved.length - 1] ||
-        resolved[resolved.length - 1] === ".."
-      ) {
+      if (!resolved[resolved.length - 1] || resolved[resolved.length - 1] === "..") {
         resolved.push("..");
       } else {
         resolved.pop();
@@ -39,7 +36,6 @@ export function getBasename(str: string, suffix?: string): string {
   let i = str.length - 1;
 
   while (i >= 0) {
-
     if (str[i] === "/" || str[i] === "\\") {
       str = str.substring(i + 1);
       break;
@@ -62,7 +58,6 @@ export function getExtname(str: string): string {
   let i = str.length - 1;
 
   while (i >= 0) {
-
     if (str[i] === ".") {
       return str.substring(i);
     }
@@ -93,7 +88,6 @@ export function getDirname(str: string): string {
   let i = str.length - 1;
 
   while (i >= 0) {
-
     if (str[i] === "/" || str[i] === "\\") {
       return str.substring(0, i);
     }
@@ -123,7 +117,7 @@ export function getRelativePath(from: string, to: string): string {
       return str;
     }
 
-    return "./" + str;
+    return `./${str}`;
   };
 
   // normalize

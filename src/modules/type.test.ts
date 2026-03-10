@@ -1,5 +1,5 @@
-import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
+import { deepStrictEqual as eq, throws } from "node:assert";
+import { test } from "node:test";
 import { getType, isBuffer, isNumber, isNumeric, toBuffer, toNumber } from "./type";
 
 test("getType", () => {
@@ -35,8 +35,12 @@ test("toNumber", () => {
   eq(toNumber(false), 0);
   eq(toNumber(null), 0);
   eq(toNumber(undefined), 0);
-  throws(() => { toNumber({}); });
-  throws(() => { toNumber([]); });
+  throws(() => {
+    toNumber({});
+  });
+  throws(() => {
+    toNumber([]);
+  });
 });
 
 test("isBuffer", () => {

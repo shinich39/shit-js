@@ -1,5 +1,5 @@
-import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
+import { deepStrictEqual as eq } from "node:assert";
+import { test } from "node:test";
 import {
   getCombinations,
   getMaxValue,
@@ -9,11 +9,11 @@ import {
   getModeValue,
   getModeValueWithCount,
   getSumValue,
-  shuffleArray,
   groupBy,
-  uniqueBy,
-  splitArray,
   joinArray,
+  shuffleArray,
+  splitArray,
+  uniqueBy,
 } from "./array";
 
 const arr = [0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9];
@@ -47,32 +47,44 @@ test("getModeCount", () => {
 });
 
 test("splitArray", () => {
-  eq(splitArray([1,2,3,4,5], 3), [[1,2,3],[4,5]]);
+  eq(splitArray([1, 2, 3, 4, 5], 3), [
+    [1, 2, 3],
+    [4, 5],
+  ]);
 });
 
 test("joinArray", () => {
-  eq(joinArray([1,2,3,[4,5]]), [1,2,3,4,5]);
+  eq(joinArray([1, 2, 3, [4, 5]]), [1, 2, 3, 4, 5]);
 });
 
 test("getCombinations", () => {
   eq(getCombinations(), []);
 
-  eq(getCombinations<string|number>(["a", "b", "c"], [1]), [
+  eq(getCombinations<string | number>(["a", "b", "c"], [1]), [
     ["a", 1],
     ["b", 1],
     ["c", 1],
   ]);
 
   eq(getCombinations(["a", "b", "c"], ["a", "c"], ["a", "b", "c"]), [
-    [ 'a', 'a', 'a' ], [ 'a', 'a', 'b' ],
-    [ 'a', 'a', 'c' ], [ 'a', 'c', 'a' ],
-    [ 'a', 'c', 'b' ], [ 'a', 'c', 'c' ],
-    [ 'b', 'a', 'a' ], [ 'b', 'a', 'b' ],
-    [ 'b', 'a', 'c' ], [ 'b', 'c', 'a' ],
-    [ 'b', 'c', 'b' ], [ 'b', 'c', 'c' ],
-    [ 'c', 'a', 'a' ], [ 'c', 'a', 'b' ],
-    [ 'c', 'a', 'c' ], [ 'c', 'c', 'a' ],
-    [ 'c', 'c', 'b' ], [ 'c', 'c', 'c' ]
+    ["a", "a", "a"],
+    ["a", "a", "b"],
+    ["a", "a", "c"],
+    ["a", "c", "a"],
+    ["a", "c", "b"],
+    ["a", "c", "c"],
+    ["b", "a", "a"],
+    ["b", "a", "b"],
+    ["b", "a", "c"],
+    ["b", "c", "a"],
+    ["b", "c", "b"],
+    ["b", "c", "c"],
+    ["c", "a", "a"],
+    ["c", "a", "b"],
+    ["c", "a", "c"],
+    ["c", "c", "a"],
+    ["c", "c", "b"],
+    ["c", "c", "c"],
   ]);
 });
 
@@ -89,9 +101,7 @@ test("uniqueBy", () => {
   }
 
   const u1 = uniqueBy(arr, (item) => item.age);
-  const u2 = arr.filter(
-    (a, i, array) => i === array.findIndex((b) => a.age === b.age)
-  );
+  const u2 = arr.filter((a, i, array) => i === array.findIndex((b) => a.age === b.age));
 
   eq(u1, u2);
 

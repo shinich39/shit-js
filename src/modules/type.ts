@@ -7,23 +7,37 @@
  * getType(new RegExp()); // "regexp"
  * getType(new RegExp()); // "regexp"
  */
-export function getType(e: unknown): "string" | "number" | "bigint" | "boolean" | "symbol" | "undefined" | "object" | "function" | "null" | "array" | "date" | "regexp" {
+export function getType(
+  e: unknown,
+):
+  | "string"
+  | "number"
+  | "bigint"
+  | "boolean"
+  | "symbol"
+  | "undefined"
+  | "object"
+  | "function"
+  | "null"
+  | "array"
+  | "date"
+  | "regexp" {
   if (e === undefined) {
     return "undefined";
   }
-  
+
   if (e === null) {
     return "null";
   }
-  
+
   if (Array.isArray(e)) {
     return "array";
   }
-  
+
   if (e instanceof Date) {
     return "date";
   }
-  
+
   if (e instanceof RegExp) {
     return "regexp";
   }
@@ -36,9 +50,7 @@ export function getType(e: unknown): "string" | "number" | "bigint" | "boolean" 
  * isNumeric(1); // false
  */
 export function isNumeric(e: any): e is string {
-  return typeof e === "string"
-    && !Number.isNaN(parseFloat(e))
-    && Number.isFinite(parseFloat(e));
+  return typeof e === "string" && !Number.isNaN(parseFloat(e)) && Number.isFinite(parseFloat(e));
 }
 /**
  * @example
@@ -49,11 +61,13 @@ export function isNumeric(e: any): e is string {
  * isNumber(undefined); // true
  */
 export function isNumber(e: any): e is number | string | boolean | null | undefined {
-  return typeof e === "number"
-    || isNumeric(e)
-    || typeof e === "boolean"
-    || e === null
-    || typeof e === "undefined";
+  return (
+    typeof e === "number" ||
+    isNumeric(e) ||
+    typeof e === "boolean" ||
+    e === null ||
+    typeof e === "undefined"
+  );
 }
 /**
  * @example
@@ -65,17 +79,17 @@ export function toNumber(e: any): number {
   if (isNumeric(e)) {
     return parseFloat(e);
   }
-  
+
   // number
   if (typeof e === "number") {
     return e;
   }
-  
+
   // boolean
   if (typeof e === "boolean") {
     return e ? 1 : 0;
   }
-  
+
   // null, undefined
   if (!e) {
     return 0;
@@ -120,7 +134,7 @@ export function isBuffer(e: any): boolean {
  * @example
  * const view = new Uint8Array([255, 128, 64]);
  * toBuffer(view); // <Buffer 68 65 6c 6c 6f>
- * 
+ *
  * const ab = new ArrayBuffer(4);
  * const view = new Uint8Array(ab);
  * view.set([1, 2, 3, 4]);

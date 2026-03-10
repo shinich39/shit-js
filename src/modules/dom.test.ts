@@ -1,5 +1,5 @@
-import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
+import { deepStrictEqual as eq } from "node:assert";
+import { test } from "node:test";
 import { Dom } from "./dom";
 
 const html = `<?xml version="1.0" encoding="UTF-8"?>
@@ -80,7 +80,7 @@ test("new Dom(): Parse object", () => {
 
 test("new Dom().getContents()", () => {
   const root = new Dom(
-`
+    `
 <div>
   Level 1
   <div>
@@ -90,12 +90,15 @@ test("new Dom().getContents()", () => {
     </div>
   </div>  
 </div>
-`
+`,
   );
 
   eq(
-    root.getContents().map((c) => c.trim()).join(""),
-    `Level 1Level 2Level 3`
+    root
+      .getContents()
+      .map((c) => c.trim())
+      .join(""),
+    `Level 1Level 2Level 3`,
   );
 });
 
@@ -106,7 +109,7 @@ test("new Dom().remove()", () => {
 
   eq(
     root.toString(),
-`<?xml version="1.0" encoding="UTF-8"?>
+    `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
 <head>
@@ -115,6 +118,6 @@ test("new Dom().remove()", () => {
 </head>
 <body>
 </body>
-</html>`
+</html>`,
   );
 });

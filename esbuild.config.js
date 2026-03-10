@@ -22,14 +22,15 @@ const paths = {
   cjsMin: `./dist/${FILENAME}.min.cjs`,
   browser: `./dist/${FILENAME}.js`,
   browserMin: `./dist/${FILENAME}.min.js`,
-}
+};
 
-const isPackageChanged = pkg["main"] !== paths.esmMin ||
-  pkg["module"] !== paths.esmMin ||
-  pkg["types"] !== paths.type ||
-  pkg["exports"]["."]["types"] !== paths.type ||
-  pkg["exports"]["."]["import"] !== paths.esmMin ||
-  pkg["exports"]["."]["require"] !== paths.cjsMin;
+const isPackageChanged =
+  pkg.main !== paths.esmMin ||
+  pkg.module !== paths.esmMin ||
+  pkg.types !== paths.type ||
+  pkg.exports["."].types !== paths.type ||
+  pkg.exports["."].import !== paths.esmMin ||
+  pkg.exports["."].require !== paths.cjsMin;
 
 /** @type {import("esbuild").BuildOptions[]} */
 const buildOptions = [];
@@ -39,7 +40,7 @@ if (ESM) {
     {
       entryPoints: ENTRY_POINTS,
       platform: "node",
-      format: 'esm',
+      format: "esm",
       bundle: true,
       sourcemap: true,
       outfile: paths.esm,
@@ -48,7 +49,7 @@ if (ESM) {
     {
       entryPoints: ENTRY_POINTS,
       platform: "node",
-      format: 'esm',
+      format: "esm",
       bundle: true,
       minify: true,
       sourcemap: true,
@@ -63,7 +64,7 @@ if (CJS) {
     {
       entryPoints: ENTRY_POINTS,
       platform: "node",
-      format: 'cjs',
+      format: "cjs",
       bundle: true,
       sourcemap: true,
       outfile: paths.cjs,
@@ -72,7 +73,7 @@ if (CJS) {
     {
       entryPoints: ENTRY_POINTS,
       platform: "node",
-      format: 'cjs',
+      format: "cjs",
       bundle: true,
       minify: true,
       sourcemap: true,
@@ -120,11 +121,11 @@ for (const option of buildOptions) {
 
 // update package.json
 if (isPackageChanged) {
-  pkg["main"] = paths.esmMin;
-  pkg["module"] = paths.esmMin;
-  pkg["types"] = paths.type;
-  pkg["exports"]["."]["types"] = paths.type;
-  pkg["exports"]["."]["import"] = paths.esmMin;
-  pkg["exports"]["."]["require"] = paths.cjsMin;
+  pkg.main = paths.esmMin;
+  pkg.module = paths.esmMin;
+  pkg.types = paths.type;
+  pkg.exports["."].types = paths.type;
+  pkg.exports["."].import = paths.esmMin;
+  pkg.exports["."].require = paths.cjsMin;
   fs.writeFileSync("./package.json", JSON.stringify(pkg, null, 2), "utf8");
 }

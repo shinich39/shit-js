@@ -36,7 +36,7 @@ export declare const BRACKETS: {
  */
 export declare const QUOTES: {
     readonly "'": "'";
-    readonly "\"": "\"";
+    readonly '"': "\"";
     readonly "`": "`";
     readonly "\u2018": "’";
     readonly "\u201C": "”";
@@ -176,7 +176,7 @@ export declare function getStringSize(str: string): number;
  * Support dot-notation
  *
  * @example
- * const template = createTemplate("Lorem ipsum dolor ${a.b.c}");
+ * const template = createTemplate("Lorem ipsum dolor {a.b.c}");
  * template({ a: { b: { c: "sit amet" } } }); // "Lorem ipsum dolor sit amet"
  */
 export declare function createTemplate(template: string): (obj: Record<string, any>) => string;

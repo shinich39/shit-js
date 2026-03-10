@@ -1,26 +1,26 @@
-import { describe, test } from "node:test";
-import { deepStrictEqual as eq, notDeepEqual as neq, throws, doesNotThrow, rejects, doesNotReject } from "node:assert";
+import { deepStrictEqual as eq } from "node:assert";
+import { test } from "node:test";
 import {
   BRACKETS,
-  QUOTES,
-  toCamelCase,
+  compareStrings,
+  createTemplate,
+  generateString,
+  generateUuid,
   getDiffs,
   getFloats,
   getInts,
-  generateString,
   getStringSize,
-  generateUuid,
-  toXor,
-  compareStrings,
-  toHalfWidthString,
-  toSlug,
-  toRegExp,
+  QUOTES,
+  toCamelCase,
   toFullWidthString,
+  toHalfWidthString,
   toPascalCase,
-  toSentenceCase,
-  toTitleCase,
-  createTemplate,
+  toRegExp,
   toSafeFilename,
+  toSentenceCase,
+  toSlug,
+  toTitleCase,
+  toXor,
 } from "./string";
 
 test("toTitleCase", () => {
@@ -94,7 +94,7 @@ test("toFullWidthString", () => {
 test("toRegExp", () => {
   eq(toRegExp("/abc/gi"), /abc/gi);
   eq(toRegExp("/a/bc/gi"), /a\/bc/gi);
-  eq(toRegExp("/a[\\\\\/]c/gi"), /a[\\/]c/gi);
+  eq(toRegExp("/a[\\\\/]c/gi"), /a[\\/]c/gi);
 });
 
 test("getDiffs", () => {
@@ -103,13 +103,13 @@ test("getDiffs", () => {
   const result = getDiffs(a, b);
 
   eq(result, [
-    [ -1, 'Lorem ip' ],
-    [ 0, 's' ],
-    [ -1, 'um dolor s' ],
-    [ 0, 'it amet, ' ],
-    [ -1, 'consectetur ' ],
-    [ 0, 'adipiscing' ],
-    [ -1, ' elit.' ]
+    [-1, "Lorem ip"],
+    [0, "s"],
+    [-1, "um dolor s"],
+    [0, "it amet, "],
+    [-1, "consectetur "],
+    [0, "adipiscing"],
+    [-1, " elit."],
   ]);
 });
 
@@ -127,21 +127,22 @@ test("compareStrings", () => {
     normalizedDistance: 0.6428571428571429,
     matches: 20,
     insertions: 0,
-    deletions: 36
+    deletions: 36,
   });
 });
 
 test("BRACKETS", () => {
-  const result = "()[]{}<>〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳".split(
-    new RegExp(
-      Object.entries(BRACKETS)
-        .reduce<string[]>((acc, cur) => [...acc, ...cur], [])
-        .map((e) => `\\${e}`)
-        .join("|")
+  const result = "()[]{}<>〈〉《》《》「」「」『』『』『』【】【】〔〕〘〙〚〛｢｣⟨⟩❨❩❪❫❴❵❬❭❮❯❰❱❲❳"
+    .split(
+      new RegExp(
+        Object.entries(BRACKETS)
+          .reduce<string[]>((acc, cur) => acc.concat(cur), [])
+          .map((e) => `\\${e}`)
+          .join("|"),
+      ),
     )
-  )
-  .join("")
-  .trim();
+    .join("")
+    .trim();
 
   eq(result, "");
 });
@@ -153,8 +154,14 @@ test("getStringSize", () => {
 });
 
 test("createTemplate", () => {
-  eq(createTemplate("${a} != ${b}")({ a: "1", b: "2" }), "1 != 2");
-  eq(createTemplate("Lorem ipsum dolor ${a.b.c}")({ a: { b: { c: "sit amet" } } }), "Lorem ipsum dolor sit amet");
-  eq(createTemplate("Lorem ipsum dolor ${a.b.c}")({ }), "Lorem ipsum dolor ");
-  eq(createTemplate("Lorem ipsum dolor ${a.b.c}")({ a: { b: { c: { d: "NULL" }}}}), "Lorem ipsum dolor [object Object]");
+  eq(createTemplate("{a} != {b}")({ a: "1", b: "2" }), "1 != 2");
+  eq(
+    createTemplate("Lorem ipsum dolor {a.b.c}")({ a: { b: { c: "sit amet" } } }),
+    "Lorem ipsum dolor sit amet",
+  );
+  eq(createTemplate("Lorem ipsum dolor {a.b.c}")({}), "Lorem ipsum dolor ");
+  eq(
+    createTemplate("Lorem ipsum dolor {a.b.c}")({ a: { b: { c: { d: "NULL" } } } }),
+    "Lorem ipsum dolor [object Object]",
+  );
 });

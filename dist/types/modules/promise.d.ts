@@ -12,29 +12,22 @@ export declare function sleep(ms: number): Promise<void>;
  *   console.log(index); // 0...1...2
  * });
  */
-export declare function retry<T>(fn: () => Promise<T>, count: number, delay: number): (callback?: (index: number, error: unknown) => void | Promise<void>) => Promise<T>;
-type QueueFunction<T = void> = () => T | Promise<T>;
-interface QueueItem<T> {
-    fn: QueueFunction<T>;
-    resolve: (value: T) => void;
-    reject: (reason?: any) => void;
-}
+export declare function retry<T>(fn: () => Promise<T>, count: number, delay: number, callback?: (index: number, error: unknown) => void | Promise<void>): Promise<T>;
 /**
  * @example
  * const worker = new QueueWorker();
- * worker.add(() => console.log(`Task 0`));
- * worker.add(async () => { await fetch('/api/data'); });
+ *
+ * worker.add(() => console.log("Task 0"));
+ *
+ * worker.add(async () => {
+ *   await fetch("/api/data");
+ * });
+ *
+ * worker.add(async () => { await sleep(100); console.log("1"); });
+ * worker.add(async () => { await sleep(50);  console.log("2"); });
  */
 export declare class QueueWorker {
-    queue: QueueItem<any>[];
-    running: boolean;
-    /**
-     * @example
-     * worker.add(() => console.log(`Task 0`));
-     * worker.add(async () => { await fetch(`/api/data`); })
-     */
-    add<T>(fn: QueueFunction<T>): Promise<T>;
-    private run;
+    _: Promise<void>;
+    add(fn: () => Promise<void>): Promise<void>;
 }
-export {};
 //# sourceMappingURL=promise.d.ts.map

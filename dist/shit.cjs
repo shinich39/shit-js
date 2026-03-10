@@ -175,7 +175,10 @@ function getCombinations(...arrays) {
   if (filtered.length < 1) {
     return [];
   }
-  return filtered.reduce((acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])), [[]]);
+  return filtered.reduce(
+    (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
+    [[]]
+  );
 }
 function shuffleArray(arr) {
   let i = arr.length;
@@ -218,7 +221,7 @@ function parseDate(date) {
   } else {
     ensuredDate = new Date(date);
   }
-  if (isNaN(ensuredDate.getTime())) {
+  if (Number.isNaN(ensuredDate.getTime())) {
     throw new Error(`Invalid date: ${date}`);
   }
   const YYYY = String(ensuredDate.getFullYear());
@@ -362,7 +365,7 @@ function splitTags(str) {
 function parseTag(str) {
   const parts = [];
   let isClosing = str[1] === "/", i = isClosing ? 2 : 1, tag = "", buffer = "", quotes = null, closer;
-  const flush = function() {
+  const flush = () => {
     if (buffer !== "") {
       parts.push(buffer);
       buffer = "";
@@ -596,13 +599,16 @@ var Dom = class _Dom {
       this.attributes = src.attributes || {};
       if (this.type === "tag" && this.content.length > 0) {
         this.children = [
-          new _Dom({
-            type: "text",
-            tag: "",
-            content: src.content,
-            attributes: {},
-            children: []
-          }, this)
+          new _Dom(
+            {
+              type: "text",
+              tag: "",
+              content: src.content,
+              attributes: {},
+              children: []
+            },
+            this
+          )
         ];
       } else if (src.children) {
         this.children = src.children.map((child) => new _Dom(child, this));
@@ -652,7 +658,7 @@ var Dom = class _Dom {
    */
   getParents() {
     const result = [];
-    const fn = function(child) {
+    const fn = (child) => {
       if (!child.parent) {
         return;
       }
@@ -667,7 +673,7 @@ var Dom = class _Dom {
    */
   getChildren() {
     const result = [];
-    const fn = function(parent) {
+    const fn = (parent) => {
       for (const child of parent.children) {
         result.push(child);
         if (child.type === "tag") {
@@ -682,7 +688,7 @@ var Dom = class _Dom {
     return this.children.length > 1;
   }
   getSiblings() {
-    return (this.parent?.children || []).filter((sibling) => sibling != this);
+    return (this.parent?.children || []).filter((sibling) => sibling !== this);
   }
   hasSiblings() {
     return (this.parent?.children || []).length > 1;
@@ -727,7 +733,6 @@ var Dom = class _Dom {
       }
       if (child.type === "tag") {
         result.push(...child.getContents());
-        continue;
       }
     }
     return result;
@@ -745,7 +750,9 @@ var Dom = class _Dom {
     return this.attributes;
   }
   setAttributes(attrs) {
-    Object.keys(attrs).forEach((k) => this.setAttribute(k, attrs[k]));
+    for (const k of Object.keys(attrs)) {
+      this.setAttribute(k, attrs[k]);
+    }
   }
   hasAttributes(attrs) {
     for (const k of Object.keys(attrs)) {
@@ -777,7 +784,7 @@ var Dom = class _Dom {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
-    const index = this.parent.children.findIndex((child) => child == this);
+    const index = this.parent.children.indexOf(this);
     if (index === -1) {
       throw new Error("This element not included in it's parent");
     }
@@ -788,7 +795,7 @@ var Dom = class _Dom {
     if (!this.parent) {
       throw new Error("Parent not found");
     }
-    const index = this.parent.children.findIndex((child) => child == this);
+    const index = this.parent.children.indexOf(this);
     if (index === -1) {
       throw new Error("This element not included in its parent");
     }
@@ -870,7 +877,7 @@ var Dom = class _Dom {
 
 // src/modules/number.ts
 function mulberry32(seed) {
-  let t = seed += 1831565813;
+  let t = seed + 1831565813;
   t = Math.imul(t ^ t >>> 15, t | 1);
   t ^= t + Math.imul(t ^ t >>> 7, t | 61);
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
@@ -984,71 +991,61 @@ function getLogScore(total, current) {
   return Math.log(current + 1) / Math.log(total + 1);
 }
 function getPowerScore(total, current, alpha = 0.5) {
-  return Math.pow(current, alpha) / Math.pow(total, alpha);
+  return current ** alpha / total ** alpha;
 }
 function fromKilobyte(kb) {
-  return kb * Math.pow(1024, 1);
+  return kb * 1024 ** 1;
 }
 function fromMegabyte(mb) {
-  return mb * Math.pow(1024, 2);
+  return mb * 1024 ** 2;
 }
 function fromGigabyte(gb) {
-  return gb * Math.pow(1024, 3);
+  return gb * 1024 ** 3;
 }
 function fromTerabyte(tb) {
-  return tb * Math.pow(1024, 4);
+  return tb * 1024 ** 4;
 }
 function fromPetabyte(pt) {
-  return pt * Math.pow(1024, 5);
+  return pt * 1024 ** 5;
 }
 function fromExabyte(eb) {
-  return eb * Math.pow(1024, 6);
+  return eb * 1024 ** 6;
 }
 function fromZettabyte(zb) {
-  return zb * Math.pow(1024, 7);
+  return zb * 1024 ** 7;
 }
 function fromYottabyte(yb) {
-  return yb * Math.pow(1024, 8);
+  return yb * 1024 ** 8;
 }
 function toKilobyte(bytes) {
-  return bytes * Math.pow(1024, -1);
+  return bytes * 1024 ** -1;
 }
 function toMegabyte(bytes) {
-  return bytes * Math.pow(1024, -2);
+  return bytes * 1024 ** -2;
 }
 function toGigabyte(bytes) {
-  return bytes * Math.pow(1024, -3);
+  return bytes * 1024 ** -3;
 }
 function toTerabyte(bytes) {
-  return bytes * Math.pow(1024, -4);
+  return bytes * 1024 ** -4;
 }
 function toPetabyte(bytes) {
-  return bytes * Math.pow(1024, -5);
+  return bytes * 1024 ** -5;
 }
 function toExabyte(bytes) {
-  return bytes * Math.pow(1024, -6);
+  return bytes * 1024 ** -6;
 }
 function toZettabyte(bytes) {
-  return bytes * Math.pow(1024, -7);
+  return bytes * 1024 ** -7;
 }
 function toYottabyte(bytes) {
-  return bytes * Math.pow(1024, -8);
+  return bytes * 1024 ** -8;
 }
 function toFileSize(bytes) {
   if (bytes < 1024) {
     return `${bytes} B`;
   }
-  const units = [
-    "B",
-    "KB",
-    "MB",
-    "GB",
-    "TB",
-    "PB",
-    "EB",
-    "ZB",
-    "YB"
-  ];
+  const units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   let value = bytes;
   let unitIndex = 0;
   while (value >= 1024 && unitIndex < units.length - 1) {
@@ -1098,20 +1095,23 @@ function createI18n(obj, defaultLocale) {
   return (locale, key) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
 }
 function createStore(initial, handlers) {
-  return new Proxy({ ...initial }, {
-    set(target, key, value) {
-      const typedKey = key;
-      const oldValue = target[typedKey];
-      if (oldValue !== value) {
-        target[typedKey] = value;
-        const handler = handlers[typedKey];
-        if (handler) {
-          handler(oldValue, value);
+  return new Proxy(
+    { ...initial },
+    {
+      set(target, key, value) {
+        const typedKey = key;
+        const oldValue = target[typedKey];
+        if (oldValue !== value) {
+          target[typedKey] = value;
+          const handler = handlers[typedKey];
+          if (handler) {
+            handler(oldValue, value);
+          }
         }
+        return true;
       }
-      return true;
     }
-  });
+  );
 }
 
 // src/modules/path.ts
@@ -1188,7 +1188,7 @@ function getRelativePath(from, to) {
     if (str.charAt(0) === "." && str.charAt(1) === "/") {
       return str;
     }
-    return "./" + str;
+    return `./${str}`;
   };
   const a = normalize(from).split("/").filter(Boolean);
   const b = normalize(to).split("/").filter(Boolean);
@@ -1231,51 +1231,27 @@ function getRootPath(...args) {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-function retry(fn, count, delay) {
-  return async function wrapped(cb) {
-    let lastError;
-    for (let i = 0; i < count; i++) {
-      try {
-        return await fn();
-      } catch (err) {
-        lastError = err;
-        if (i < count - 1) {
-          await cb?.(i, err);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
+async function retry(fn, count, delay, callback) {
+  let lastError;
+  for (let i = 0; i < count; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < count - 1) {
+        await callback?.(i, err);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    throw lastError;
-  };
+  }
+  throw lastError;
 }
 var QueueWorker = class {
-  queue = [];
-  running = false;
-  /**
-   * @example
-   * worker.add(() => console.log(`Task 0`));
-   * worker.add(async () => { await fetch(`/api/data`); })
-   */
+  _ = Promise.resolve();
   add(fn) {
     return new Promise((resolve, reject) => {
-      this.queue.push({ fn, resolve, reject });
-      if (!this.running) {
-        this.running = true;
-        this.run();
-      }
+      this._ = this._.then(fn).then(resolve).catch(reject);
     });
-  }
-  async run() {
-    while (this.queue.length > 0) {
-      const item = this.queue.shift();
-      try {
-        const result = await item.fn();
-        item.resolve(result);
-      } catch (err) {
-        item.reject(err);
-      }
-    }
-    this.running = false;
   }
 };
 
@@ -1364,7 +1340,7 @@ function toXor(str, salt) {
   return result;
 }
 function getInts(str) {
-  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
 }
 function getFloats(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
@@ -1385,7 +1361,7 @@ function toRegExp(str) {
   return new RegExp(pattern, flags);
 }
 function getDiffs(from, to) {
-  const backtrack = function(from2, to2, trace2, d) {
+  const backtrack = (from2, to2, trace2, d) => {
     const result = [];
     let x = from2.length;
     let y = to2.length;
@@ -1512,9 +1488,7 @@ function getStringSize(str) {
   return result;
 }
 function createTemplate(template) {
-  const parts = template.split(/\$\{([\w.]+)\}/).map(
-    (part, i) => i % 2 ? part.split(".") : part
-  );
+  const parts = template.split(/\{([\w.]+)\}/).map((part, i) => i % 2 ? part.split(".") : part);
   return (obj) => {
     let result = "";
     for (let i = 0; i < parts.length; i++) {

@@ -36,7 +36,7 @@ export const BRACKETS = {
  */
 export const QUOTES = {
   "'": "'",
-  "\"": "\"",
+  '"': '"',
   "`": "`",
   "‘": "’",
   "“": "”",
@@ -52,7 +52,7 @@ export const QUOTES = {
 export function toTitleCase(str: string): string {
   return str
     .split(/[\s_-]+/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
 /**
@@ -67,7 +67,7 @@ export function toSentenceCase(str: string): string {
  * toSlug(" Lorem  ipsum "); // "lorem-ipsum"
  */
 export function toSlug(str: string): string {
-  return str.toLowerCase().replace(/\s+/g, '-');
+  return str.toLowerCase().replace(/\s+/g, "-");
 }
 /**
  * @example
@@ -75,8 +75,8 @@ export function toSlug(str: string): string {
  */
 export function toCamelCase(str: string): string {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
-    .replace(/^(.)/, (m) => m.toLowerCase()); 
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
+    .replace(/^(.)/, (m) => m.toLowerCase());
 }
 /**
  * @example
@@ -84,8 +84,8 @@ export function toCamelCase(str: string): string {
  */
 export function toPascalCase(str: string): string {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
-    .replace(/^./, (m) => m.toUpperCase()); 
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
+    .replace(/^./, (m) => m.toUpperCase());
 }
 /**
  * @example
@@ -95,15 +95,16 @@ export function toPascalCase(str: string): string {
  * toSafeFilename("///", "-"); // "---"
  */
 export function toSafeFilename(str: string, replacement = "_"): string {
-  return str
-    // remove windows restricts specific characters: \ / : * ? " < > |
-    .replace(/[\\/:*?"<>|]/g, replacement)
-    // remove control characters: 0x00 ~ 0x1F
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001F\u007F]/g, replacement)
-    // remove trailing dot
-    .replace(/[. ]+$/, "")
-    || replacement;
+  return (
+    str
+      // remove windows restricts specific characters: \ / : * ? " < > |
+      .replace(/[\\/:*?"<>|]/g, replacement)
+      // remove control characters: 0x00 ~ 0x1F
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: nope
+      .replace(/[\u0000-\u001F\u007F]/g, replacement)
+      // remove trailing dot
+      .replace(/[. ]+$/, "") || replacement
+  );
 }
 /**
  * @example
@@ -126,7 +127,7 @@ export function generateString(
   size: number = 1,
 ): string {
   let result = "";
-  
+
   const charsetSize = charset.length;
 
   for (let i = 0; i < size; i++) {
@@ -161,7 +162,7 @@ export function toXor(str: string, salt: string): string {
  * getInts("ftp://192.168.0.1"); // [192, 168, 0, 1]
  */
 export function getInts(str: string): number[] {
-  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item)) || [];
+  return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
 }
 /**
  * @example
@@ -173,13 +174,13 @@ export function getFloats(str: string): number[] {
 /**
  * 1. Change full-width characters to half-width characters
  * 2. Change all type of whitespaces to " "
- * 
+ *
  * @example
  * toHalfWidthString("Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"); // "Hello, world!"
  */
 export function toHalfWidthString(str: string): string {
   return str
-    .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+    .replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
     .replace(/[^\S\r\n]/g, " ");
 }
 /**
@@ -188,7 +189,7 @@ export function toHalfWidthString(str: string): string {
  */
 export function toFullWidthString(str: string): string {
   return str
-    .replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0xFEE0))
+    .replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 0xfee0))
     .replace(/ /g, "　");
 }
 /**
@@ -215,27 +216,27 @@ export function toRegExp(str: string): RegExp {
  * 0: Number of matched characters
  *
  * 1: Number of inserted characters
- * 
+ *
  * @example
  * getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
 export function getDiffs(from: string, to: string): [number, string][] {
-  const backtrack = function(
+  const backtrack = (
     from: string,
     to: string,
     trace: number[][],
-    d: number
-  ): [-1 | 0 | 1, string][] {
+    d: number,
+  ): [-1 | 0 | 1, string][] => {
     const result: [-1 | 0 | 1, string][] = [];
-    
+
     let x = from.length;
     let y = to.length;
     const max = from.length + to.length;
-    
+
     // current operation being accumulated
     let currentOp: -1 | 0 | 1 | null = null;
-    let currentStr = '';
-    
+    let currentStr = "";
+
     const push = (op: -1 | 0 | 1, char: string) => {
       if (currentOp === op) {
         // if same operation, prepend character
@@ -249,32 +250,32 @@ export function getDiffs(from: string, to: string): [number, string][] {
         currentStr = char;
       }
     };
-    
+
     // trace path in reverse
     for (let depth = d; depth >= 0; depth--) {
       const v = trace[depth];
       const k = x - y;
-      
+
       let prevK: number;
-      
+
       if (k === -depth || (k !== depth && v[k - 1 + max] < v[k + 1 + max])) {
         prevK = k + 1;
       } else {
         prevK = k - 1;
       }
-      
+
       const prevX = v[prevK + max];
       const prevY = prevX - prevK;
-      
+
       // diagonal move (match)
       while (x > prevX && y > prevY) {
         x--;
         y--;
         push(0, from[x]);
       }
-      
+
       if (depth === 0) break;
-      
+
       // vertical move (insertion)
       if (x === prevX) {
         y--;
@@ -285,53 +286,53 @@ export function getDiffs(from: string, to: string): [number, string][] {
         push(-1, from[x]);
       }
     }
-    
+
     // add last accumulated operation
     if (currentOp !== null && currentStr) {
       result.push([currentOp, currentStr]);
     }
-    
+
     return result.reverse();
-  }
+  };
 
   const n = from.length;
   const m = to.length;
   const max = n + m;
-  
+
   // v array: maximum x coordinate reachable on each k-line
   const v: number[] = Array(2 * max + 1).fill(0);
-  
+
   // array for path tracing
   const trace: number[][] = [];
-  
+
   // find shortest edit path
   for (let d = 0; d <= max; d++) {
     trace.push([...v]);
-    
+
     for (let k = -d; k <= d; k += 2) {
       let x: number;
-      
+
       if (k === -d || (k !== d && v[k - 1 + max] < v[k + 1 + max])) {
         x = v[k + 1 + max];
       } else {
         x = v[k - 1 + max] + 1;
       }
-      
+
       let y = x - k;
-      
+
       while (x < n && y < m && from[x] === to[y]) {
         x++;
         y++;
       }
-      
+
       v[k + max] = x;
-      
+
       if (x >= n && y >= m) {
         return backtrack(from, to, trace, d);
       }
     }
   }
-  
+
   // in theory, does not reach here.
   return [];
 }
@@ -352,23 +353,26 @@ export function getDiffs(from: string, to: string): [number, string][] {
  * //   deletions: 36
  * // }
  */
-export function compareStrings(from: string, to: string): {
-  matchRate: number,
-  similarity: number,
-  diceSimilarity: number,
-  jaccardSimilarity: number,
-  distance: number,
-  normalizedDistance: number,
-  matches: number,
-  insertions: number,
-  deletions: number,
+export function compareStrings(
+  from: string,
+  to: string,
+): {
+  matchRate: number;
+  similarity: number;
+  diceSimilarity: number;
+  jaccardSimilarity: number;
+  distance: number;
+  normalizedDistance: number;
+  matches: number;
+  insertions: number;
+  deletions: number;
 } {
   const diffs = getDiffs(from, to);
-  
+
   let matches = 0;
   let insertions = 0;
   let deletions = 0;
-  
+
   for (const [op, str] of diffs) {
     const len = str.length;
     if (op === 0) {
@@ -379,39 +383,34 @@ export function compareStrings(from: string, to: string): {
       deletions += len;
     }
   }
-  
+
   const totalOperations = matches + insertions + deletions;
-  
+
   // various similarity metrics
   return {
     // proportion of matching characters
-    matchRate: totalOperations > 0 
-      ? matches / totalOperations 
-      : 1,
-    
+    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
+
     // similarity based on longer string
-    similarity: Math.max(from.length, to.length) > 0 
-      ? matches / Math.max(from.length, to.length) 
-      : 1,
+    similarity:
+      Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
 
     // sørensen-dice similarity coefficient
-    diceSimilarity: (from.length + to.length) > 0
-      ? (2 * matches) / (from.length + to.length)
-      : 1,
-    
+    diceSimilarity: from.length + to.length > 0 ? (2 * matches) / (from.length + to.length) : 1,
+
     // jaccard similarity coefficient
-    jaccardSimilarity: (from.length + to.length - matches) > 0
-      ? matches / (from.length + to.length - matches)
-      : 1,
-    
+    jaccardSimilarity:
+      from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
+
     // levenshtein distance (edit distance)
     distance: insertions + deletions,
-    
+
     // normalized edit distance (0 = identical, 1 = completely different)
-    normalizedDistance: Math.max(from.length, to.length) > 0
-      ? (insertions + deletions) / Math.max(from.length, to.length)
-      : 0,
-    
+    normalizedDistance:
+      Math.max(from.length, to.length) > 0
+        ? (insertions + deletions) / Math.max(from.length, to.length)
+        : 0,
+
     // detailed counts
     matches,
     insertions,
@@ -443,24 +442,18 @@ export function getStringSize(str: string): number {
       result += 4;
     }
   }
-  
+
   return result;
 }
 /**
  * Support dot-notation
- * 
+ *
  * @example
- * const template = createTemplate("Lorem ipsum dolor ${a.b.c}");
+ * const template = createTemplate("Lorem ipsum dolor {a.b.c}");
  * template({ a: { b: { c: "sit amet" } } }); // "Lorem ipsum dolor sit amet"
  */
 export function createTemplate(template: string): (obj: Record<string, any>) => string {
-  const parts = template
-    .split(/\$\{([\w.]+)\}/)
-    .map((part, i) =>
-      i % 2 
-        ? part.split(".") 
-        : part
-    );
+  const parts = template.split(/\{([\w.]+)\}/).map((part, i) => (i % 2 ? part.split(".") : part));
 
   return (obj: Record<string, any>): string => {
     let result = "";
@@ -472,10 +465,10 @@ export function createTemplate(template: string): (obj: Record<string, any>) => 
         result += part;
         continue;
       }
-      
+
       let cur: any = obj;
-      
-      for (const key of (part as string[])) {
+
+      for (const key of part as string[]) {
         if (cur == null) {
           cur = "";
           break;
@@ -488,5 +481,5 @@ export function createTemplate(template: string): (obj: Record<string, any>) => 
     }
 
     return result;
-  }
+  };
 }
