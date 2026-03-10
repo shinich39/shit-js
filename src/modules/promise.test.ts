@@ -9,7 +9,7 @@ test("sleep", async () => {
   eq(b - a >= 38, true);
 });
 
-test("retry", async () => {
+test("retry: reject", async () => {
   rejects(async () => {
     const fn = async () => {
       throw new Error("An error occurred");
@@ -19,7 +19,9 @@ test("retry", async () => {
       // ...
     });
   });
+});
 
+test("retry: resolve", async () => {
   doesNotReject(async () => {
     let j = 2;
 
@@ -35,7 +37,7 @@ test("retry", async () => {
   });
 });
 
-test("QueueWorker", async () => {
+test("QueueWorker: sequence", async () => {
   const worker = new QueueWorker();
   const results: number[] = [];
 
@@ -54,7 +56,10 @@ test("QueueWorker", async () => {
   ]);
 
   eq(results, [1, 2, 3]);
+});
 
+test("QueueWorker: wait", async () => {
+  const worker = new QueueWorker();
   const startedAt = Date.now();
 
   worker.add(async () => {
