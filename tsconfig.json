@@ -3,17 +3,21 @@
     "target": "es2022",
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "rootDir": "./src",
 
     "declaration": true,
     "declarationMap": true,
+    "declarationDir": "./dist/types",
     "emitDeclarationOnly": true,
     "isolatedDeclarations": true,
-    "declarationDir": "./dist/types",
-    "rootDir": "./src",
 
     "verbatimModuleSyntax": true,
-    "erasableSyntaxOnly": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
     "strict": true,
+    "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
