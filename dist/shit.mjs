@@ -782,6 +782,9 @@ function toBitString(bit, size) {
 function generateFloat(min, max, seed) {
   return typeof seed === "number" ? mulberry32(seed) * (max - min) + min : Math.random() * (max - min) + min;
 }
+function generateInt(min, max, seed) {
+  return Math.floor(generateFloat(min, max, seed));
+}
 function generateTypingDelay(char, speed = 1) {
   let velocity = 0;
   let drift = 0;
@@ -803,9 +806,6 @@ function generateTypingDelay(char, speed = 1) {
     base -= accel;
     return Math.max(scale(45), Math.min(base, scale(520)));
   })();
-}
-function generateInt(min, max, seed) {
-  return Math.floor(generateFloat(min, max, seed));
 }
 function getBitSize(num) {
   return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;

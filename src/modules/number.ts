@@ -73,6 +73,18 @@ export function generateFloat(min: number, max: number, seed?: number | null | u
     : Math.random() * (max - min) + min;
 }
 /**
+ * @returns min <= n < max
+ *
+ * @example
+ * generateInt(0, 10); // 5
+ * generateInt(0, 10, 0); // 2
+ * generateInt(0, 10, 10); // 5
+ * generateInt(0, 10, 100); // 2
+ */
+export function generateInt(min: number, max: number, seed?: number | null | undefined): number {
+  return Math.floor(generateFloat(min, max, seed));
+}
+/**
  * @example
  * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
  * for (cosnt char of str) {
@@ -114,18 +126,6 @@ export function generateTypingDelay(char: string, speed = 1): number {
     // clamp
     return Math.max(scale(45), Math.min(base, scale(520)));
   })();
-}
-/**
- * @returns min <= n < max
- *
- * @example
- * generateInt(0, 10); // 5
- * generateInt(0, 10, 0); // 2
- * generateInt(0, 10, 10); // 5
- * generateInt(0, 10, 100); // 2
- */
-export function generateInt(min: number, max: number, seed?: number | null | undefined): number {
-  return Math.floor(generateFloat(min, max, seed));
 }
 /**
  * @example

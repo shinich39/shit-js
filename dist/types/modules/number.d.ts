@@ -46,16 +46,6 @@ export declare function toBitString(bit: number, size?: number): string;
  */
 export declare function generateFloat(min: number, max: number, seed?: number | null | undefined): number;
 /**
- * @example
- * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
- * for (cosnt char of str) {
- *   const delay = generateTypingDelay(char, 1);
- *   process.stdout.write(char);
- *   await sleep(delay);
- * }
- */
-export declare function generateTypingDelay(char: string, speed?: number): number;
-/**
  * @returns min <= n < max
  *
  * @example
@@ -65,6 +55,16 @@ export declare function generateTypingDelay(char: string, speed?: number): numbe
  * generateInt(0, 10, 100); // 2
  */
 export declare function generateInt(min: number, max: number, seed?: number | null | undefined): number;
+/**
+ * @example
+ * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+ * for (cosnt char of str) {
+ *   const delay = generateTypingDelay(char, 1);
+ *   process.stdout.write(char);
+ *   await sleep(delay);
+ * }
+ */
+export declare function generateTypingDelay(char: string, speed?: number): number;
 /**
  * @example
  * getBitSize(1); // 1;
