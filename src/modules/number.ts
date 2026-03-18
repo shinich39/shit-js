@@ -1,15 +1,4 @@
 /**
- * Mulberry32 PRNG (Pseudo Random Number Generator)
- *
- * https://github.com/cprosche/mulberry32
- */
-function mulberry32(seed: number): number {
-  let t = seed + 0x6d2b79f5;
-  t = Math.imul(t ^ (t >>> 15), t | 1);
-  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-}
-/**
  * AND gate
  *
  * @example
@@ -57,6 +46,17 @@ export function toBitString(bit: number, size?: number): string {
   return bit
     .toString(2)
     .padStart(Math.max(bit === 0 ? 1 : Math.floor(Math.log2(bit)) + 1, size || 1), "0");
+}
+/**
+ * Mulberry32 PRNG (Pseudo Random Number Generator)
+ *
+ * https://github.com/cprosche/mulberry32
+ */
+function mulberry32(seed: number): number {
+  let t = seed + 0x6d2b79f5;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 /**
  * @returns min <= n < max

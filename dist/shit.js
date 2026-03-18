@@ -876,12 +876,6 @@ var shitJs = (() => {
   };
 
   // src/modules/number.ts
-  function mulberry32(seed) {
-    let t = seed + 1831565813;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  }
   function checkBit(a, b) {
     return (a & b) !== 0;
   }
@@ -896,6 +890,12 @@ var shitJs = (() => {
   }
   function toBitString(bit, size) {
     return bit.toString(2).padStart(Math.max(bit === 0 ? 1 : Math.floor(Math.log2(bit)) + 1, size || 1), "0");
+  }
+  function mulberry32(seed) {
+    let t = seed + 1831565813;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
   }
   function generateFloat(min, max, seed) {
     return typeof seed === "number" ? mulberry32(seed) * (max - min) + min : Math.random() * (max - min) + min;
