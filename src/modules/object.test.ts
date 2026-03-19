@@ -31,15 +31,14 @@ test("createI18n", () => {
 });
 
 test("createStore", () => {
-  const initial = {
-    count: 1,
-  };
-
-  const store = createStore<typeof initial>(initial, {
-    count: (oldValue, newValue) => {
-      eq(oldValue, newValue - 1);
+  const store = createStore(
+    { count: 1 },
+    {
+      count: (oldValue, newValue) => {
+        eq(oldValue, newValue - 1);
+      },
     },
-  });
+  );
 
   eq(store.count, 1);
 

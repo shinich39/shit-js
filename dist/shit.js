@@ -24,14 +24,15 @@ var shitJs = (() => {
     BRACKETS: () => BRACKETS,
     Dom: () => Dom,
     QUOTES: () => QUOTES,
-    QueueWorker: () => QueueWorker,
     checkBit: () => checkBit,
     clearBit: () => clearBit,
     compareStrings: () => compareStrings,
     copyObject: () => copyObject,
     createI18n: () => createI18n,
+    createQueue: () => createQueue,
     createStore: () => createStore,
     createTemplate: () => createTemplate,
+    createTypingDelay: () => createTypingDelay,
     fromExabyte: () => fromExabyte,
     fromGigabyte: () => fromGigabyte,
     fromKilobyte: () => fromKilobyte,
@@ -44,7 +45,6 @@ var shitJs = (() => {
     generateInt: () => generateInt,
     generateSeed: () => generateSeed,
     generateString: () => generateString,
-    generateTypingDelay: () => generateTypingDelay,
     generateUuid: () => generateUuid,
     getAdjustedSize: () => getAdjustedSize,
     getBasename: () => getBasename,
@@ -908,28 +908,6 @@ var shitJs = (() => {
   function generateInt(min, max, seed) {
     return Math.floor(generateFloat(min, max, seed));
   }
-  function generateTypingDelay(char, speed = 1) {
-    let velocity = 0;
-    let drift = 0;
-    return (() => {
-      const scale = (v) => v / speed;
-      let base;
-      if (/[.,!?]/.test(char)) {
-        base = generateInt(scale(300), scale(480));
-      } else if (char === " ") {
-        base = generateInt(scale(180), scale(300));
-      } else {
-        base = generateInt(scale(85), scale(130));
-      }
-      velocity += (Math.random() - 0.5) * scale(1.1);
-      velocity *= 0.8;
-      drift += (Math.random() - 0.5) * scale(0.3);
-      drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
-      const accel = velocity * scale(4.5) + drift;
-      base -= accel;
-      return Math.max(scale(45), Math.min(base, scale(520)));
-    })();
-  }
   function getBitSize(num) {
     return num === 0 ? 1 : Math.floor(Math.log2(num)) + 1;
   }
@@ -1066,6 +1044,28 @@ var shitJs = (() => {
       formatted = Math.round(value * 100) / 100;
     }
     return `${formatted} ${units[unitIndex]}`;
+  }
+  function createTypingDelay() {
+    let velocity = 0;
+    let drift = 0;
+    return (char, speed = 1) => {
+      const scale = (v) => v / speed;
+      let base;
+      if (/[.,!?]/.test(char)) {
+        base = generateInt(scale(300), scale(480));
+      } else if (char === " ") {
+        base = generateInt(scale(180), scale(300));
+      } else {
+        base = generateInt(scale(85), scale(130));
+      }
+      velocity += (Math.random() - 0.5) * scale(1.1);
+      velocity *= 0.8;
+      drift += (Math.random() - 0.5) * scale(0.3);
+      drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
+      const accel = velocity * scale(4.5) + drift;
+      base -= accel;
+      return Math.max(scale(45), Math.min(base, scale(520)));
+    };
   }
 
   // src/modules/object.ts
@@ -1251,14 +1251,14 @@ var shitJs = (() => {
     }
     throw lastError;
   }
-  var QueueWorker = class {
-    _ = Promise.resolve();
-    add(fn) {
+  function createQueue() {
+    let queue = Promise.resolve();
+    return (fn) => {
       return new Promise((resolve, reject) => {
-        this._ = this._.then(fn).then(resolve).catch(reject);
+        queue = queue.then(fn).then(resolve).catch(reject);
       });
-    }
-  };
+    };
+  }
 
   // src/modules/string.ts
   var BRACKETS = {

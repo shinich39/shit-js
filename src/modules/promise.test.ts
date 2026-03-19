@@ -1,6 +1,6 @@
 import { doesNotReject, deepStrictEqual as eq, rejects } from "node:assert";
 import { test } from "node:test";
-import { QueueWorker, retry, sleep } from "./promise";
+import { createQueue, retry, sleep } from "./promise";
 
 test("sleep", async () => {
   const a = Date.now();
@@ -37,20 +37,20 @@ test("retry: resolve", async () => {
   });
 });
 
-test("QueueWorker: sequence", async () => {
-  const worker = new QueueWorker();
+test("createQueue: sequence", async () => {
+  const queue = createQueue();
   const results: number[] = [];
 
   await Promise.all([
-    worker.add(async () => {
+    queue(async () => {
       await sleep(30);
       results.push(1);
     }),
-    worker.add(async () => {
+    queue(async () => {
       await sleep(10);
       results.push(2);
     }),
-    worker.add(async () => {
+    queue(async () => {
       results.push(3);
     }),
   ]);
@@ -58,17 +58,17 @@ test("QueueWorker: sequence", async () => {
   eq(results, [1, 2, 3]);
 });
 
-test("QueueWorker: wait", async () => {
-  const worker = new QueueWorker();
+test("createQueue: wait", async () => {
+  const queue = createQueue();
   const startedAt = Date.now();
 
-  worker.add(async () => {
+  queue(async () => {
     await sleep(10);
   });
-  worker.add(async () => {
+  queue(async () => {
     await sleep(10);
   });
-  worker.add(async () => {
+  queue(async () => {
     await sleep(10);
     eq(Date.now() - startedAt >= 30, true);
   });

@@ -15,19 +15,9 @@ export declare function sleep(ms: number): Promise<void>;
 export declare function retry<T>(fn: () => Promise<T>, count: number, delay: number, callback?: (index: number, error: unknown) => void | Promise<void>): Promise<T>;
 /**
  * @example
- * const worker = new QueueWorker();
- *
- * worker.add(() => console.log("Task 0"));
- *
- * worker.add(async () => {
- *   await fetch("/api/data");
- * });
- *
- * worker.add(async () => { await sleep(100); console.log("1"); });
- * worker.add(async () => { await sleep(50);  console.log("2"); });
+ * const queue = createQueue();
+ * queue(() => console.log("Task 0"));
+ * queue(async () => { await fetch("/api/data"); });
  */
-export declare class QueueWorker {
-    _: Promise<void>;
-    add(fn: () => Promise<void>): Promise<void>;
-}
+export declare function createQueue(): (fn: () => Promise<void>) => Promise<void>;
 //# sourceMappingURL=promise.d.ts.map

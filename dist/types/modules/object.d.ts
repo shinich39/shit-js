@@ -29,8 +29,7 @@ type StoreHandlers<T extends object> = {
  * Create an observed object
  *
  * @example
- * const initial = { count: 1 };
- * const store = createStore<typeof initial>(initial, {
+ * const store = createStore<typeof initial>({ count: 1 }, {
  *   count: (oldValue, newValue) => { ... },
  * });
  * store.count++;

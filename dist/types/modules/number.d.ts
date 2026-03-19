@@ -65,16 +65,6 @@ export declare function generateFloat(min: number, max: number, seed?: number | 
 export declare function generateInt(min: number, max: number, seed?: number | null | undefined): number;
 /**
  * @example
- * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
- * for (cosnt char of str) {
- *   const delay = generateTypingDelay(char, 1);
- *   process.stdout.write(char);
- *   await sleep(delay);
- * }
- */
-export declare function generateTypingDelay(char: string, speed?: number): number;
-/**
- * @example
  * getBitSize(1); // 1;
  * getBitSize(2); // 2;
  * getBitSize(4); // 3;
@@ -263,4 +253,17 @@ export declare function toYottabyte(bytes: number): number;
  * toFileSize(1024 * 1024 * 1024 + 1024 * 1024 * 512); // "1.5 GB"
  */
 export declare function toFileSize(bytes: number): string;
+/**
+ * @param speed default: 1, slow < 1 < fast
+ *
+ * @example
+ * const gen = createTypingDelay();
+ * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+ * for (cosnt char of str) {
+ *   const delay = gen(char, 1);
+ *   process.stdout.write(char);
+ *   await sleep(delay);
+ * }
+ */
+export declare function createTypingDelay(): (char: string, speed: number) => number;
 //# sourceMappingURL=number.d.ts.map

@@ -36,26 +36,17 @@ export async function retry<T>(
 
   throw lastError;
 }
-
 /**
  * @example
- * const worker = new QueueWorker();
- *
- * worker.add(() => console.log("Task 0"));
- *
- * worker.add(async () => {
- *   await fetch("/api/data");
- * });
- *
- * worker.add(async () => { await sleep(100); console.log("1"); });
- * worker.add(async () => { await sleep(50);  console.log("2"); });
+ * const queue = createQueue();
+ * queue(() => console.log("Task 0"));
+ * queue(async () => { await fetch("/api/data"); });
  */
-export class QueueWorker {
-  _: Promise<void> = Promise.resolve();
-
-  add(fn: () => Promise<void>): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this._ = this._.then(fn).then(resolve).catch(reject);
+export function createQueue(): (fn: () => Promise<void>) => Promise<void> {
+  let queue: Promise<void> = Promise.resolve();
+  return (fn) => {
+    return new Promise<void>((resolve, reject) => {
+      queue = queue.then(fn).then(resolve).catch(reject);
     });
-  }
+  };
 }

@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   checkBit,
   clearBit,
+  createTypingDelay,
   fromExabyte,
   fromGigabyte,
   fromKilobyte,
@@ -14,7 +15,6 @@ import {
   generateFloat,
   generateInt,
   generateSeed,
-  generateTypingDelay,
   getAdjustedSize,
   getBitSize,
   getClampedDegree,
@@ -100,10 +100,11 @@ test("generateInt", () => {
 });
 
 test("generateTypingDelay", async () => {
+  // const gen = createTypingDelay();
   // const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
   // await sleep(100);
   // for (const char of str) {
-  //   const delay = generateTypingDelay(char, 1);
+  //   const delay = gen(char, 1);
   //   process.stdout.write(char);
   //   await sleep(delay);
   // }
