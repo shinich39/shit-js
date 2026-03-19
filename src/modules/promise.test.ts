@@ -1,6 +1,6 @@
 import { doesNotReject, deepStrictEqual as eq, rejects } from "node:assert";
 import { test } from "node:test";
-import { createQueue, retry, sleep } from "./promise";
+import { createQueue, type RetryHandler, retry, sleep } from "./promise";
 
 test("sleep", async () => {
   const a = Date.now();
@@ -16,8 +16,7 @@ test("retry: reject", async () => {
     };
     const count = 3;
     const delay = 10;
-    const onRetry = () => {};
-
+    const onRetry: RetryHandler = (error, index) => {};
     await retry(fn, { count, delay, onRetry });
   });
 });
@@ -34,7 +33,7 @@ test("retry: resolve", async () => {
 
     const count = 3;
     const delay = 10;
-    const onRetry = () => {
+    const onRetry: RetryHandler = () => {
       j--;
     };
 
