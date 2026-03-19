@@ -53,10 +53,21 @@ export function toBitString(bit: number, size?: number): string {
  * https://github.com/cprosche/mulberry32
  */
 function mulberry32(seed: number): number {
-  let t = seed + 0x6d2b79f5;
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = seed;
   t = Math.imul(t ^ (t >>> 15), t | 1);
   t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+/**
+ * @example
+ * generateSeed(); // Date.now()
+ * generateSeed(1); // 1831565814
+ * generateSeed(2); // 1831565815
+ * generateSeed(3); // 1831565816
+ */
+export function generateSeed(seed?: number): number {
+  return typeof seed === "number" ? (seed + 0x6d2b79f5) >>> 0 : Date.now() >>> 0;
 }
 /**
  * @returns min <= n < max

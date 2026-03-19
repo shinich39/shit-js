@@ -13,6 +13,7 @@ import {
   fromZettabyte,
   generateFloat,
   generateInt,
+  generateSeed,
   generateTypingDelay,
   getAdjustedSize,
   getBitSize,
@@ -79,6 +80,13 @@ test("toBitString", () => {
   eq(toBitString(0b1111, 4), "1111");
   eq(toBitString(0b1111, 8), "00001111");
   eq(toBitString(0b10101010), "10101010");
+});
+
+test("generateSeed", () => {
+  eq(!!generateSeed(), true);
+  eq(generateSeed(1), 1831565814);
+  eq(generateSeed(2), 1831565815);
+  eq(generateSeed(3), 1831565816);
 });
 
 test("generateFloat", () => {

@@ -36,6 +36,14 @@ export declare function toggleBit(a: number, b: number): number;
  */
 export declare function toBitString(bit: number, size?: number): string;
 /**
+ * @example
+ * generateSeed(); // Date.now()
+ * generateSeed(1); // 1831565814
+ * generateSeed(2); // 1831565815
+ * generateSeed(3); // 1831565816
+ */
+export declare function generateSeed(seed?: number): number;
+/**
  * @returns min <= n < max
  *
  * @example
