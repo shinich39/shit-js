@@ -5,6 +5,8 @@
  */
 export declare function sleep(ms: number): Promise<void>;
 /**
+ * @param options.count default: 3
+ * @param options.delay default: 1000
  * @example
  * const fn = async () => { ... };
  * const wrappedFn = retry(fn, 10, 1000);
@@ -12,7 +14,11 @@ export declare function sleep(ms: number): Promise<void>;
  *   console.log(index); // 0...1...2
  * });
  */
-export declare function retry<T>(fn: () => Promise<T>, count: number, delay: number, callback?: (index: number, error: unknown) => void | Promise<void>): Promise<T>;
+export declare function retry<T>(fn: () => Promise<T>, options?: {
+    count?: number;
+    delay?: number;
+    onRetry?: (error: unknown, index: number) => void | Promise<void>;
+}): Promise<T>;
 /**
  * @example
  * const queue = createQueue();

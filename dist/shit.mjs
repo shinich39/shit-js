@@ -1117,7 +1117,8 @@ function getRootPath(...args) {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-async function retry(fn, count, delay, callback) {
+async function retry(fn, options) {
+  const { count = 3, delay = 1e3, onRetry } = options ?? {};
   let lastError;
   for (let i = 0; i < count; i++) {
     try {
@@ -1125,7 +1126,7 @@ async function retry(fn, count, delay, callback) {
     } catch (err) {
       lastError = err;
       if (i < count - 1) {
-        await callback?.(i, err);
+        await onRetry?.(err, i);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }

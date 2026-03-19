@@ -14,10 +14,11 @@ test("retry: reject", async () => {
     const fn = async () => {
       throw new Error("An error occurred");
     };
+    const count = 3;
+    const delay = 10;
+    const onRetry = () => {};
 
-    await retry(fn, 3, 10, () => {
-      // ...
-    });
+    await retry(fn, { count, delay, onRetry });
   });
 });
 
@@ -31,9 +32,13 @@ test("retry: resolve", async () => {
       }
     };
 
-    await retry(fn, 3, 10, () => {
+    const count = 3;
+    const delay = 10;
+    const onRetry = () => {
       j--;
-    });
+    };
+
+    await retry(fn, { count, delay, onRetry });
   });
 });
 

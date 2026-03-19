@@ -7,6 +7,8 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 /**
+ * @param options.count default: 3
+ * @param options.delay default: 1000
  * @example
  * const fn = async () => { ... };
  * const wrappedFn = retry(fn, 10, 1000);
@@ -16,10 +18,13 @@ export function sleep(ms: number): Promise<void> {
  */
 export async function retry<T>(
   fn: () => Promise<T>,
-  count: number,
-  delay: number,
-  callback?: (index: number, error: unknown) => void | Promise<void>,
+  options?: {
+    count?: number;
+    delay?: number;
+    onRetry?: (error: unknown, index: number) => void | Promise<void>;
+  },
 ): Promise<T> {
+  const { count = 3, delay = 1000, onRetry } = options ?? {};
   let lastError: unknown;
 
   for (let i = 0; i < count; i++) {
@@ -28,7 +33,7 @@ export async function retry<T>(
     } catch (err) {
       lastError = err;
       if (i < count - 1) {
-        await callback?.(i, err);
+        await onRetry?.(err, i);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
