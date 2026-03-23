@@ -80,8 +80,7 @@ test("dom: to string", () => {
 
 test("dom: get contents", () => {
   const root = new Dom(
-    `
-<div>
+    `<div>
   Level 1
   <div>
     Level 2
@@ -89,8 +88,7 @@ test("dom: get contents", () => {
       Level 3
     </div>
   </div>  
-</div>
-`,
+</div>`,
   );
 
   eq(

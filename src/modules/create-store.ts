@@ -6,10 +6,10 @@ export type StoreHandlers<T extends object> = {
  * Create an observed object
  *
  * @example
- * const store = createStore<typeof initial>({ count: 1 }, {
+ * const store = createStore({ count: 1 }, {
  *   count: (oldValue, newValue) => { ... },
  * });
- * store.count++;
+ * store.count++; // call count handler
  */
 export function createStore<T extends object>(initial: T, handlers: StoreHandlers<T>): T {
   return new Proxy(
