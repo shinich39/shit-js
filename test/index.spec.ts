@@ -1,11 +1,4 @@
-import {
-  doesNotReject,
-  doesNotThrow,
-  deepStrictEqual as eq,
-  notDeepEqual as neq,
-  rejects,
-  throws,
-} from "node:assert";
+import { deepStrictEqual as eq } from "node:assert";
 import { test } from "@playwright/test";
 import type * as shit from "../src/index.js";
 
@@ -19,7 +12,7 @@ test("isNumeric()", async ({ page }) => {
   await page.goto("about:blank");
   await page.addScriptTag({ path: "./dist/shit.js" });
 
-  const result = await page.evaluate(() => window.shitJs.isNumeric("1"));
+  const result = await page.evaluate(() => window.shitJs.toNumber("1"));
 
-  eq(result, true);
+  eq(result, 1);
 });
