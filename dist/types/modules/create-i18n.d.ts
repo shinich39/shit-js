@@ -12,5 +12,5 @@
  * t("ko", "heading"); // "세상아, 안녕!"
  * t("en", "missing"); // "missing"
  */
-export declare function createI18n(obj: Record<string, Record<string, string>>, defaultLocale: string): (locale: string | null | undefined, key: string) => string;
+export declare function createI18n(obj: Record<string, Record<string, string>>, defaultLocale: string): (key: string, locale?: string) => string;
 //# sourceMappingURL=create-i18n.d.ts.map

@@ -257,7 +257,7 @@ var shitJs = (() => {
 
   // src/modules/create-i18n.ts
   function createI18n(obj, defaultLocale) {
-    return (locale, key) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
+    return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
   }
 
   // src/modules/create-mulberry32.ts
@@ -1396,7 +1396,7 @@ var shitJs = (() => {
 
   // src/modules/to-half-width.ts
   function toHalfWidth(str) {
-    return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/[^\S\r\n]/g, " ");
+    return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/　/g, " ");
   }
 
   // src/modules/to-number.ts

@@ -12,22 +12,21 @@ test("createI18n", () => {
   );
 
   // basic usage
-  eq(t("en", "heading"), "Hello, world!");
-  eq(t("ko", "heading"), "세상아, 안녕!");
+  eq(t("heading"), "Hello, world!");
+  eq(t("heading", "en"), "Hello, world!");
+  eq(t("heading", "ko"), "세상아, 안녕!");
 
-  // null/undefined → defaultLocale
-  eq(t(null, "heading"), "Hello, world!");
-  eq(t(undefined, "heading"), "Hello, world!");
+  // no locale => defaultLocale
+  eq(t("heading"), "Hello, world!");
+  eq(t("heading"), "Hello, world!");
+  eq(t("heading", "ja"), "Hello, world!");
 
-  // no locale → defaultLocale
-  eq(t("ja", "heading"), "Hello, world!");
+  // no key => key
+  eq(t("missing", "en"), "missing");
 
-  // no key → key
-  eq(t("en", "missing"), "missing");
+  // no key in locale => defaultLocale fallback
+  eq(t("desc", "ko"), "Description");
 
-  // no key in locale → defaultLocale fallback
-  eq(t("ko", "desc"), "Description");
-
-  // no key in defaultLocale → key
-  eq(t("ko", "missing"), "missing");
+  // no key in defaultLocale => key
+  eq(t("missing", "ko"), "missing");
 });

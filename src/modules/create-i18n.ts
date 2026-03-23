@@ -15,6 +15,6 @@
 export function createI18n(
   obj: Record<string, Record<string, string>>,
   defaultLocale: string,
-): (locale: string | null | undefined, key: string) => string {
-  return (locale, key) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
+): (key: string, locale?: string) => string {
+  return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
 }
