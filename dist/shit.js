@@ -84,6 +84,8 @@ var shitJs = (() => {
     joinPaths: () => joinPaths,
     parseDate: () => parseDate,
     parseDom: () => parseDom,
+    pick: () => pick,
+    pickBy: () => pickBy,
     retry: () => retry,
     setBit: () => setBit,
     shuffleArray: () => shuffleArray,
@@ -193,9 +195,10 @@ var shitJs = (() => {
   function uniqueBy(arr, fn) {
     const map = /* @__PURE__ */ new Map();
     for (let i = 0; i < arr.length; i++) {
+      const item = arr[i];
       const key = fn(arr[i], i, arr);
       if (!map.has(key)) {
-        map.set(key, arr[i]);
+        map.set(key, item);
       }
     }
     return Array.from(map.values());
@@ -1117,6 +1120,18 @@ var shitJs = (() => {
         }
       }
     );
+  }
+  function pick(obj, keys) {
+    return Object.fromEntries(keys.map((k) => [k, obj[k]]));
+  }
+  function pickBy(obj, fn) {
+    const result = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (fn(v, k, obj)) {
+        result[k] = v;
+      }
+    }
+    return result;
   }
 
   // src/modules/path.ts

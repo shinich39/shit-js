@@ -71,8 +71,8 @@ export declare class Dom implements DomImpl {
     findLast(callback: (parent: Dom, index: number, parents: Dom[]) => any): Dom | undefined;
     filter(callback: (child: Dom, index: number, children: Dom[]) => any): Dom[];
     map<T>(callback: (child: Dom, index: number, children: Dom[]) => T): T[];
-    reduce<T>(callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T, initialValue: T): T;
-    reduceRight<T>(callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T, initialValue: T): T;
+    reduce<T>(callback: (previousValue: T, child: Dom, index: number, children: Dom[]) => T, initialValue: T): T;
+    reduceRight<T>(callback: (previousValue: T, child: Dom, index: number, children: Dom[]) => T, initialValue: T): T;
     remove(): void;
     removeChild(arg: Dom): void;
     removeChildren(...args: Dom[]): void;

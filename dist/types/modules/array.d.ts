@@ -68,12 +68,12 @@ export declare function getCombinations<T>(...arrays: T[][]): T[][];
 export declare function shuffleArray<T>(arr: T[]): T[];
 /**
  * @example
- * uniqueBy([1, 2, 2, 3], (item) => item); // [1, 2, 3]
+ * uniqueBy([1, 2, 2, 3], (value) => value); // [1, 2, 3]
  */
-export declare function uniqueBy<T>(arr: T[], fn: (item: T, index: number, array: T[]) => any): T[];
+export declare function uniqueBy<T>(arr: T[], fn: (value: T, index: number, array: T[]) => any): T[];
 /**
  * @example
- * groupBy([1, 2, 2, 3], (item) => item); // { 1: [1], 2: [2, 2], 3: [3]}
+ * groupBy([1, 2, 2, 3], (value) => String(value)); // { 1: [1], 2: [2, 2], 3: [3]}
  */
-export declare function groupBy<T>(arr: T[], fn: (item: T, index: number, array: T[]) => string): Record<string, T[]>;
+export declare function groupBy<T>(arr: T[], fn: (value: T, index: number, array: T[]) => string): Record<string, T[]>;
 //# sourceMappingURL=array.d.ts.map

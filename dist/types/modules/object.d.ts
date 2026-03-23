@@ -35,5 +35,16 @@ type StoreHandlers<T extends object> = {
  * store.count++;
  */
 export declare function createStore<T extends object>(initial: T, handlers: StoreHandlers<T>): T;
+/**
+ * @example
+ * pick({ a: 1, b: 2, c: 3 }, ["a", "c"]); // { a: 1, c: 3 }
+ */
+export declare function pick<T>(obj: T, keys: (keyof T)[]): Pick<T, keyof T>;
+/**
+ * @example
+ * pickBy({ a: 1, b: 2, c: 3 }, (value) => value > 1); // { b: 2, c: 3 }
+ * pickBy({ a: 1, b: null, c: "x" }, (value) => value); // { a: 1, c: "x" }
+ */
+export declare function pickBy<T>(obj: Record<string, T>, fn: (value: T, key: string, object: Record<string, T>) => unknown): Record<string, T>;
 export {};
 //# sourceMappingURL=object.d.ts.map

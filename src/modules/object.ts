@@ -98,3 +98,29 @@ export function createStore<T extends object>(initial: T, handlers: StoreHandler
     },
   );
 }
+/**
+ * @example
+ * pick({ a: 1, b: 2, c: 3 }, ["a", "c"]); // { a: 1, c: 3 }
+ */
+export function pick<T>(obj: T, keys: (keyof T)[]): Pick<T, keyof T> {
+  return Object.fromEntries(keys.map((k) => [k, obj[k]])) as Pick<T, keyof T>;
+}
+/**
+ * @example
+ * pickBy({ a: 1, b: 2, c: 3 }, (value) => value > 1); // { b: 2, c: 3 }
+ * pickBy({ a: 1, b: null, c: "x" }, (value) => value); // { a: 1, c: "x" }
+ */
+export function pickBy<T>(
+  obj: Record<string, T>,
+  fn: (value: T, key: string, object: Record<string, T>) => unknown,
+): Record<string, T> {
+  const result: Record<string, T> = {};
+
+  for (const [k, v] of Object.entries(obj)) {
+    if (fn(v, k, obj)) {
+      result[k] = v;
+    }
+  }
+
+  return result;
+}

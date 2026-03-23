@@ -695,14 +695,14 @@ export class Dom implements DomImpl {
   }
 
   reduce<T>(
-    callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T,
+    callback: (previousValue: T, child: Dom, index: number, children: Dom[]) => T,
     initialValue: T,
   ): T {
     return this.children.reduce<T>(callback, initialValue);
   }
 
   reduceRight<T>(
-    callback: (previousValue: T, currentValue: Dom, currentIndex: number, array: Dom[]) => T,
+    callback: (previousValue: T, child: Dom, index: number, children: Dom[]) => T,
     initialValue: T,
   ): T {
     return this.children.reduceRight<T>(callback, initialValue);

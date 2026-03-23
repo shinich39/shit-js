@@ -254,7 +254,7 @@ export declare function toYottabyte(bytes: number): number;
  */
 export declare function toFileSize(bytes: number): string;
 /**
- * @param speed default: 1, slow < 1 < fast
+ * @param speed slow < 1 < fast (default: 1)
  *
  * @example
  * const gen = createTypingDelay();

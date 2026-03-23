@@ -429,7 +429,7 @@ export function toFileSize(bytes: number): string {
   return `${formatted} ${units[unitIndex]}`;
 }
 /**
- * @param speed default: 1, slow < 1 < fast
+ * @param speed slow < 1 < fast (default: 1)
  *
  * @example
  * const gen = createTypingDelay();

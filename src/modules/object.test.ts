@@ -1,6 +1,6 @@
 import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
-import { copyObject, createI18n, createStore } from "./object";
+import { copyObject, createI18n, createStore, pick, pickBy } from "./object";
 
 test("copyObject", () => {
   const a = { arr: [1, 2, 3], obj: { o: 1, b: 2, j: 3 } };
@@ -45,4 +45,14 @@ test("createStore", () => {
   store.count++;
 
   eq(store.count, 2);
+});
+
+test("pick", () => {
+  const result = pick({ a: 1, b: 2, c: 3 }, ["a", "c"]);
+  eq(result, { a: 1, c: 3 });
+});
+
+test("pickBy", () => {
+  const result = pickBy({ a: 1, b: 2, c: 3 }, (value) => value > 1);
+  eq(result, { b: 2, c: 3 });
 });
