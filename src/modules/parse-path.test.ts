@@ -3,7 +3,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { parsePath } from "./parse-path";
 
-test("parsePath - base", () => {
+test("parsePath: base", () => {
   const arrs = [
     ["./project/package.json", "package.json", "package"],
     ["./project/", "project", "project"],
@@ -19,7 +19,7 @@ test("parsePath - base", () => {
   }
 });
 
-test("parsePath - ext", () => {
+test("parsePath: ext", () => {
   const arrs = [
     ["./project/package.json", ".json"],
     ["./project/package", ""],
@@ -35,7 +35,7 @@ test("parsePath - ext", () => {
   }
 });
 
-test("parsePath - dir", () => {
+test("parsePath: dir", () => {
   const arrs = [
     ["./project/package.json", "./project"],
     ["./project/", "."],

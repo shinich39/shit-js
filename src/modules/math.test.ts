@@ -2,13 +2,13 @@ import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
 import { clamp, lerp, mode, wrap } from "./math";
 
-test("math - mode", () => {
+test("mode", () => {
   eq(mode([0, 0, 2, 3, 4, 5, 6, 7.5, 8.5, 9]), { value: 0, count: 2 });
   eq(mode(["a", "a", "b"]), { count: 2, value: "a" });
   eq(mode(["a", "a", "b", "b", "b"]), { count: 3, value: "b" });
 });
 
-test("math - clamp", () => {
+test("clamp", () => {
   eq(clamp(5, 0, 10), 5);
   eq(clamp(-1, 0, 10), 0);
   eq(clamp(11, 0, 10), 10);
@@ -17,7 +17,7 @@ test("math - clamp", () => {
   eq(clamp(5, 5, 5), 5);
 });
 
-test("math - wrap", () => {
+test("wrap", () => {
   eq(wrap(5, 0, 10), 5);
   eq(wrap(-1, 0, 10), 9);
   eq(wrap(10, 0, 10), 0);
@@ -29,7 +29,7 @@ test("math - wrap", () => {
   eq(wrap(1, 2, 5), 4);
 });
 
-test("math - lerp", () => {
+test("lerp", () => {
   eq(lerp(0, 100, 0), 0);
   eq(lerp(0, 100, 0.5), 50);
   eq(lerp(0, 100, 1), 100);

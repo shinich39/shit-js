@@ -4,7 +4,7 @@ import { createQueue } from "./create-queue";
 
 const sleep = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
 
-test("createQueue - sequence", async () => {
+test("createQueue: sequence", async () => {
   const queue = createQueue();
   const results: number[] = [];
 
@@ -25,7 +25,7 @@ test("createQueue - sequence", async () => {
   eq(results, [1, 2, 3]);
 });
 
-test("createQueue - wait", async () => {
+test("createQueue: wait", async () => {
   const queue = createQueue();
   const startedAt = Date.now();
 

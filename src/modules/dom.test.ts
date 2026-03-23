@@ -61,14 +61,14 @@ const html2 = `<?xml version="1.0" encoding="UTF-8"?>
 </body>
 </html>`;
 
-test("dom - parse html string", () => {
+test("dom: parse html string", () => {
   const root = new Dom(html);
   eq(root.toString(), html);
   const root2 = new Dom(root.toString());
   eq(root2.toString(), html);
 });
 
-test("dom - to string", () => {
+test("dom: to string", () => {
   const root = new Dom({
     type: "tag",
     tag: "div",
@@ -78,7 +78,7 @@ test("dom - to string", () => {
   eq(root.toString(), "<div>CONVERT TO TEXT</div>");
 });
 
-test("dom - get contents", () => {
+test("dom: get contents", () => {
   const root = new Dom(
     `
 <div>
@@ -102,7 +102,7 @@ test("dom - get contents", () => {
   );
 });
 
-test("dom - remove element", () => {
+test("dom: remove element", () => {
   const root = new Dom(html2);
 
   root.find((c) => c.tag === "title")?.remove();
