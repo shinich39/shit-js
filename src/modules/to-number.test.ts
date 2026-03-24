@@ -5,8 +5,10 @@ import { toNumber } from "./to-number";
 test("toNumber", () => {
   eq(toNumber(0), 0);
   eq(toNumber(1), 1);
+  eq(toNumber(1.1), 1.1);
   eq(toNumber("0"), 0);
   eq(toNumber("1"), 1);
+  eq(toNumber("1.1"), 1.1);
   eq(toNumber(true), 1);
   eq(toNumber(false), 0);
   eq(toNumber(null), 0);

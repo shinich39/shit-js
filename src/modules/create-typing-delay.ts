@@ -11,7 +11,7 @@
  * }
  */
 export function createTypingDelay(): (char: string, speed: number) => number {
-  const generateBase = (min: number, max: number) => Math.random() * (max - min) + min;
+  const rand = (min: number, max: number) => Math.random() * (max - min) + min;
   let velocity = 0;
   let drift = 0;
   return (char, speed = 1) => {
@@ -21,13 +21,13 @@ export function createTypingDelay(): (char: string, speed: number) => number {
 
     // sentence
     if (/[.,!?]/.test(char)) {
-      base = generateBase(scale(300), scale(480));
+      base = rand(scale(300), scale(480));
     } // word
     else if (char === " ") {
-      base = generateBase(scale(180), scale(300));
+      base = rand(scale(180), scale(300));
     } // character
     else {
-      base = generateBase(scale(85), scale(130));
+      base = rand(scale(85), scale(130));
     }
 
     velocity += (Math.random() - 0.5) * scale(1.1);

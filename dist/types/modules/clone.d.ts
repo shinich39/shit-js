@@ -1,5 +1,14 @@
 /**
- * Deep clone
+ * Deep clones a value.
+ *
+ * Prefer the native `structuredClone` if available (Node.js 17+, modern browsers).
+ *
+ * This function is a fallback for environments where `structuredClone` is not supported.
+ *
+ * @example
+ * const a = {};
+ * const b = structuredClone(a);
+ * a == b; // false
  *
  * @example
  * const a = {};

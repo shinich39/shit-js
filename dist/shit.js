@@ -39,10 +39,10 @@ var shitJs = (() => {
     fromKb: () => fromKb,
     fromMb: () => fromMb,
     fromTb: () => fromTb,
-    getCombinations: () => getCombinations,
     getCommonPath: () => getCommonPath,
-    getDiffs: () => getDiffs2,
+    getDiffs: () => getDiffs,
     getRelativePath: () => getRelativePath,
+    getStringWidth: () => getStringWidth,
     groupBy: () => groupBy,
     lerp: () => lerp,
     mode: () => mode,
@@ -50,6 +50,7 @@ var shitJs = (() => {
     parseDom: () => parseDom,
     parsePath: () => parsePath,
     pickBy: () => pickBy,
+    product: () => product,
     randomFloat: () => randomFloat,
     randomInt: () => randomInt,
     randomString: () => randomString,
@@ -142,119 +143,6 @@ var shitJs = (() => {
     return fn(obj);
   }
 
-  // src/modules/compare-strings.ts
-  function compareStrings(from, to) {
-    const diffs = getDiffs(from, to);
-    let matches = 0;
-    let insertions = 0;
-    let deletions = 0;
-    for (const [op, str] of diffs) {
-      const len = str.length;
-      if (op === 0) {
-        matches += len;
-      } else if (op === 1) {
-        insertions += len;
-      } else {
-        deletions += len;
-      }
-    }
-    const totalOperations = matches + insertions + deletions;
-    return {
-      // proportion of matching characters
-      matchRate: totalOperations > 0 ? matches / totalOperations : 1,
-      // similarity based on longer string
-      similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
-      // sørensen-dice similarity coefficient
-      diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
-      // jaccard similarity coefficient
-      jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
-      // levenshtein distance (edit distance)
-      distance: insertions + deletions,
-      // normalized edit distance (0 = identical, 1 = completely different)
-      normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
-      // detailed counts
-      matches,
-      insertions,
-      deletions
-    };
-  }
-  function getDiffs(from, to) {
-    const backtrack = (from2, to2, trace2, d) => {
-      const result = [];
-      let x = from2.length;
-      let y = to2.length;
-      const max2 = from2.length + to2.length;
-      let currentOp = null;
-      let currentStr = "";
-      const push = (op, char) => {
-        if (currentOp === op) {
-          currentStr = char + currentStr;
-        } else {
-          if (currentOp !== null && currentStr) {
-            result.push([currentOp, currentStr]);
-          }
-          currentOp = op;
-          currentStr = char;
-        }
-      };
-      for (let depth = d; depth >= 0; depth--) {
-        const v2 = trace2[depth];
-        const k = x - y;
-        let prevK;
-        if (k === -depth || k !== depth && v2[k - 1 + max2] < v2[k + 1 + max2]) {
-          prevK = k + 1;
-        } else {
-          prevK = k - 1;
-        }
-        const prevX = v2[prevK + max2];
-        const prevY = prevX - prevK;
-        while (x > prevX && y > prevY) {
-          x--;
-          y--;
-          push(0, from2[x]);
-        }
-        if (depth === 0) break;
-        if (x === prevX) {
-          y--;
-          push(1, to2[y]);
-        } else {
-          x--;
-          push(-1, from2[x]);
-        }
-      }
-      if (currentOp !== null && currentStr) {
-        result.push([currentOp, currentStr]);
-      }
-      return result.reverse();
-    };
-    const n = from.length;
-    const m = to.length;
-    const max = n + m;
-    const v = Array(2 * max + 1).fill(0);
-    const trace = [];
-    for (let d = 0; d <= max; d++) {
-      trace.push([...v]);
-      for (let k = -d; k <= d; k += 2) {
-        let x;
-        if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
-          x = v[k + 1 + max];
-        } else {
-          x = v[k - 1 + max] + 1;
-        }
-        let y = x - k;
-        while (x < n && y < m && from[x] === to[y]) {
-          x++;
-          y++;
-        }
-        v[k + max] = x;
-        if (x >= n && y >= m) {
-          return backtrack(from, to, trace, d);
-        }
-      }
-    }
-    return [];
-  }
-
   // src/modules/create-i18n.ts
   function createI18n(obj, defaultLocale) {
     return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
@@ -333,18 +221,18 @@ var shitJs = (() => {
 
   // src/modules/create-typing-delay.ts
   function createTypingDelay() {
-    const generateBase = (min, max) => Math.random() * (max - min) + min;
+    const rand = (min, max) => Math.random() * (max - min) + min;
     let velocity = 0;
     let drift = 0;
     return (char, speed = 1) => {
       const scale = (v) => v / speed;
       let base;
       if (/[.,!?]/.test(char)) {
-        base = generateBase(scale(300), scale(480));
+        base = rand(scale(300), scale(480));
       } else if (char === " ") {
-        base = generateBase(scale(180), scale(300));
+        base = rand(scale(180), scale(300));
       } else {
-        base = generateBase(scale(85), scale(130));
+        base = rand(scale(85), scale(130));
       }
       velocity += (Math.random() - 0.5) * scale(1.1);
       velocity *= 0.8;
@@ -354,6 +242,119 @@ var shitJs = (() => {
       base -= accel;
       return Math.max(scale(45), Math.min(base, scale(520)));
     };
+  }
+
+  // src/modules/diff.ts
+  function getDiffs(from, to) {
+    const n = from.length;
+    const m = to.length;
+    const max = n + m;
+    const v = Array(2 * max + 1).fill(0);
+    const trace = [];
+    for (let d = 0; d <= max; d++) {
+      trace.push([...v]);
+      for (let k = -d; k <= d; k += 2) {
+        let x;
+        if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+          x = v[k + 1 + max];
+        } else {
+          x = v[k - 1 + max] + 1;
+        }
+        let y = x - k;
+        while (x < n && y < m && from[x] === to[y]) {
+          x++;
+          y++;
+        }
+        v[k + max] = x;
+        if (x >= n && y >= m) {
+          return backtrack(from, to, trace, d);
+        }
+      }
+    }
+    return [];
+  }
+  function compareStrings(from, to) {
+    const diffs = getDiffs(from, to);
+    let matches = 0;
+    let insertions = 0;
+    let deletions = 0;
+    for (const [op, str] of diffs) {
+      const len = str.length;
+      if (op === 0) {
+        matches += len;
+      } else if (op === 1) {
+        insertions += len;
+      } else {
+        deletions += len;
+      }
+    }
+    const totalOperations = matches + insertions + deletions;
+    return {
+      // proportion of matching characters
+      matchRate: totalOperations > 0 ? matches / totalOperations : 1,
+      // similarity based on longer string
+      similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
+      // sørensen-dice similarity coefficient
+      diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
+      // jaccard similarity coefficient
+      jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
+      // levenshtein distance (edit distance)
+      distance: insertions + deletions,
+      // normalized edit distance (0 = identical, 1 = completely different)
+      normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
+      // detailed counts
+      matches,
+      insertions,
+      deletions
+    };
+  }
+  function backtrack(from, to, trace, depth) {
+    const result = [];
+    let x = from.length;
+    let y = to.length;
+    const max = from.length + to.length;
+    let currentOp = null;
+    let currentStr = "";
+    const push = (op, char) => {
+      if (currentOp === op) {
+        currentStr = char + currentStr;
+      } else {
+        if (currentOp !== null && currentStr) {
+          result.push([currentOp, currentStr]);
+        }
+        currentOp = op;
+        currentStr = char;
+      }
+    };
+    for (let d = depth; d >= 0; d--) {
+      const v = trace[d];
+      const k = x - y;
+      let prevK;
+      if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+        prevK = k + 1;
+      } else {
+        prevK = k - 1;
+      }
+      const prevX = v[prevK + max];
+      const prevY = prevX - prevK;
+      while (x > prevX && y > prevY) {
+        x--;
+        y--;
+        push(0, from[x]);
+      }
+      if (d === 0) break;
+      if (x === prevX) {
+        y--;
+        push(1, to[y]);
+      } else {
+        x--;
+        push(-1, from[x]);
+      }
+    }
+    if (currentOp !== null && currentStr) {
+      result.push([currentOp, currentStr]);
+    }
+    return result.reverse();
   }
 
   // src/modules/dom.ts
@@ -945,171 +946,23 @@ var shitJs = (() => {
     static parse = parseStr;
   };
 
-  // src/modules/extract-floats.ts
-  function extractFloats(str) {
-    return str.match(/[0-9]+\.[0-9]+/g)?.map((item) => parseFloat(item)) || [];
-  }
-
-  // src/modules/extract-ints.ts
-  function extractInts(str) {
-    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
-  }
-
   // src/modules/extract-numbers.ts
   function extractNumbers(str) {
     return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
   }
-
-  // src/modules/get-combinations.ts
-  function getCombinations(...arrays) {
-    const filtered = arrays.filter((arr) => arr.length > 0);
-    if (filtered.length < 1) {
-      return [];
-    }
-    return filtered.reduce(
-      (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
-      [[]]
-    );
+  function extractFloats(str) {
+    return str.match(/[0-9]+\.[0-9]+/g)?.map((item) => parseFloat(item)) || [];
   }
-
-  // src/modules/get-common-path.ts
-  function getCommonPath(args) {
-    if (args.length === 0) {
-      return "";
-    }
-    const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
-    const resolved = [];
-    let j = 0;
-    while (true) {
-      let seg = parts[0][j];
-      if (typeof seg !== "string") {
-        break;
-      }
-      for (let i = 1; i < parts.length; i++) {
-        if (seg !== parts[i][j]) {
-          seg = null;
-          break;
-        }
-      }
-      if (seg === null) {
-        break;
-      }
-      resolved.push(seg);
-      j++;
-    }
-    return resolved.join("/");
-  }
-
-  // src/modules/get-diffs.ts
-  function getDiffs2(from, to) {
-    const backtrack = (from2, to2, trace2, d) => {
-      const result = [];
-      let x = from2.length;
-      let y = to2.length;
-      const max2 = from2.length + to2.length;
-      let currentOp = null;
-      let currentStr = "";
-      const push = (op, char) => {
-        if (currentOp === op) {
-          currentStr = char + currentStr;
-        } else {
-          if (currentOp !== null && currentStr) {
-            result.push([currentOp, currentStr]);
-          }
-          currentOp = op;
-          currentStr = char;
-        }
-      };
-      for (let depth = d; depth >= 0; depth--) {
-        const v2 = trace2[depth];
-        const k = x - y;
-        let prevK;
-        if (k === -depth || k !== depth && v2[k - 1 + max2] < v2[k + 1 + max2]) {
-          prevK = k + 1;
-        } else {
-          prevK = k - 1;
-        }
-        const prevX = v2[prevK + max2];
-        const prevY = prevX - prevK;
-        while (x > prevX && y > prevY) {
-          x--;
-          y--;
-          push(0, from2[x]);
-        }
-        if (depth === 0) break;
-        if (x === prevX) {
-          y--;
-          push(1, to2[y]);
-        } else {
-          x--;
-          push(-1, from2[x]);
-        }
-      }
-      if (currentOp !== null && currentStr) {
-        result.push([currentOp, currentStr]);
-      }
-      return result.reverse();
-    };
-    const n = from.length;
-    const m = to.length;
-    const max = n + m;
-    const v = Array(2 * max + 1).fill(0);
-    const trace = [];
-    for (let d = 0; d <= max; d++) {
-      trace.push([...v]);
-      for (let k = -d; k <= d; k += 2) {
-        let x;
-        if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
-          x = v[k + 1 + max];
-        } else {
-          x = v[k - 1 + max] + 1;
-        }
-        let y = x - k;
-        while (x < n && y < m && from[x] === to[y]) {
-          x++;
-          y++;
-        }
-        v[k + max] = x;
-        if (x >= n && y >= m) {
-          return backtrack(from, to, trace, d);
-        }
-      }
-    }
-    return [];
-  }
-
-  // src/modules/get-relative-path.ts
-  function getRelativePath(from, to) {
-    const normalize = (str) => {
-      str = str.replace(/\\/g, "/").replace(/\/$/, "");
-      if (str.charAt(0) === "/") {
-        throw new Error(`Invalid argument: ${str}`);
-      }
-      if (str === ".") {
-        return str;
-      }
-      if (str.charAt(0) === "." && str.charAt(1) === "/") {
-        return str;
-      }
-      return `./${str}`;
-    };
-    const a = normalize(from).split("/").filter(Boolean);
-    const b = normalize(to).split("/").filter(Boolean);
-    let i = 0;
-    while (i < a.length && i < b.length && a[i] === b[i]) {
-      i++;
-    }
-    const up = Array(a.length - i).fill("..").join("/");
-    const down = b.slice(i).join("/");
-    return up + (up && down ? "/" : "") + down;
+  function extractInts(str) {
+    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
   }
 
   // src/modules/group-by.ts
   function groupBy(arr, fn) {
     const result = {};
-    for (let i = 0; i < arr.length; i++) {
-      const item = arr[i];
-      const key = fn(item, i, arr);
+    let i = 0;
+    for (const item of arr) {
+      const key = fn(item, i++);
       if (!result[key]) {
         result[key] = [item];
       } else {
@@ -1226,61 +1079,7 @@ var shitJs = (() => {
     };
   }
 
-  // src/modules/parse-path.ts
-  function parsePath(str) {
-    str = str.replace(/\\/g, "/").replace(/\/+$/, "");
-    let dirEnd = -1;
-    let extStart = -1;
-    for (let i = str.length - 1; i >= 0; i--) {
-      const c = str[i];
-      if (c === "/") {
-        dirEnd = i;
-        break;
-      }
-      if (extStart === -1 && c === "." && i > 0) {
-        extStart = i;
-      }
-    }
-    const dir = dirEnd >= 0 ? str.substring(0, dirEnd) : ".";
-    const dirs = dir.split("/").filter(Boolean);
-    const base = dirEnd >= 0 ? str.substring(dirEnd + 1) : str;
-    const ext = extStart > dirEnd ? str.substring(extStart) : "";
-    const name = ext ? base.substring(0, base.length - ext.length) : base;
-    return { dir, dirs, base, name, ext };
-  }
-
-  // src/modules/pick-by.ts
-  function pickBy(obj, fn) {
-    const result = {};
-    for (const key in obj) {
-      if (fn(key, obj[key], obj)) {
-        result[key] = obj[key];
-      }
-    }
-    return result;
-  }
-
-  // src/modules/random-float.ts
-  function randomFloat(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  // src/modules/random-int.ts
-  function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
-  }
-
-  // src/modules/random-string.ts
-  function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
-    const charsetSize = charset.length;
-    let result = "";
-    for (let i = 0; i < size; i++) {
-      result += charset.charAt(Math.floor(Math.random() * charsetSize));
-    }
-    return result;
-  }
-
-  // src/modules/resolve-path.ts
+  // src/modules/path.ts
   function resolvePath(...args) {
     const isAbsolute = args[0]?.startsWith("/");
     const parts = args.join("/").split(/[\\/]+/);
@@ -1302,6 +1101,116 @@ var shitJs = (() => {
       resolved.push(part);
     }
     return (isAbsolute ? "/" : "") + resolved.join("/");
+  }
+  function parsePath(str) {
+    str = str.replace(/\\/g, "/").replace(/\/+$/, "");
+    let dirEnd = -1;
+    let extStart = -1;
+    for (let i = str.length - 1; i >= 0; i--) {
+      const c = str[i];
+      if (c === "/") {
+        dirEnd = i;
+        break;
+      }
+      if (extStart === -1 && c === "." && i > 0) {
+        extStart = i;
+      }
+    }
+    const dir = dirEnd >= 0 ? str.substring(0, dirEnd) : ".";
+    const dirs = dir.split("/").filter(Boolean);
+    const base = dirEnd >= 0 ? str.substring(dirEnd + 1) : str;
+    const ext = extStart > dirEnd ? str.substring(extStart) : "";
+    const name = ext ? base.substring(0, base.length - ext.length) : base;
+    return { dir, dirs, base, name, ext };
+  }
+  function getRelativePath(from, to) {
+    const normalize = (str) => {
+      str = str.replace(/\\/g, "/").replace(/\/$/, "");
+      if (str.charAt(0) === "/") {
+        throw new Error(`Invalid argument: ${str}`);
+      }
+      if (str === ".") {
+        return str;
+      }
+      if (str.charAt(0) === "." && str.charAt(1) === "/") {
+        return str;
+      }
+      return `./${str}`;
+    };
+    const a = normalize(from).split("/").filter(Boolean);
+    const b = normalize(to).split("/").filter(Boolean);
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) {
+      i++;
+    }
+    const up = Array(a.length - i).fill("..").join("/");
+    const down = b.slice(i).join("/");
+    return up + (up && down ? "/" : "") + down;
+  }
+  function getCommonPath(args) {
+    if (args.length === 0) {
+      return "";
+    }
+    const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
+    const resolved = [];
+    let j = 0;
+    while (true) {
+      let seg = parts[0][j];
+      if (typeof seg !== "string") {
+        break;
+      }
+      for (let i = 1; i < parts.length; i++) {
+        if (seg !== parts[i][j]) {
+          seg = null;
+          break;
+        }
+      }
+      if (seg === null) {
+        break;
+      }
+      resolved.push(seg);
+      j++;
+    }
+    return resolved.join("/");
+  }
+
+  // src/modules/pick-by.ts
+  function pickBy(obj, fn) {
+    const result = {};
+    for (const key in obj) {
+      if (fn(key, obj[key], obj)) {
+        result[key] = obj[key];
+      }
+    }
+    return result;
+  }
+
+  // src/modules/product.ts
+  function product(...arrays) {
+    const filtered = arrays.filter((arr) => arr.length > 0);
+    if (filtered.length < 1) {
+      return [];
+    }
+    return filtered.reduce(
+      (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
+      [[]]
+    );
+  }
+
+  // src/modules/random.ts
+  function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+  function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
+    const charsetSize = charset.length;
+    let result = "";
+    for (let i = 0; i < size; i++) {
+      result += charset.charAt(Math.floor(Math.random() * charsetSize));
+    }
+    return result;
   }
 
   // src/modules/retry.ts
@@ -1327,7 +1236,7 @@ var shitJs = (() => {
     return str.replace(/[\\/:*?"<>|]+/g, replacement).replace(/[\u0000-\u001F\u007F]+/g, replacement).replace(/[. ]+$/, "") || replacement;
   }
 
-  // src/modules/scale-to-contain.ts
+  // src/modules/scale.ts
   function scaleToContain(srcWidth, srcHeight, dstWidth, dstHeight) {
     const srcAspectRatio = srcWidth / srcHeight;
     const dstAspectRatio = dstWidth / dstHeight;
@@ -1337,8 +1246,6 @@ var shitJs = (() => {
       return [dstWidth, dstWidth / srcAspectRatio];
     }
   }
-
-  // src/modules/scale-to-cover.ts
   function scaleToCover(srcWidth, srcHeight, dstWidth, dstHeight) {
     const srcAspectRatio = srcWidth / srcHeight;
     const dstAspectRatio = dstWidth / dstHeight;
@@ -1348,8 +1255,6 @@ var shitJs = (() => {
       return [dstHeight * srcAspectRatio, dstHeight];
     }
   }
-
-  // src/modules/scale-to-fit.ts
   function scaleToFit(srcWidth, srcHeight, maxWidth, maxHeight, minWidth, minHeight) {
     const aspectRatio = srcWidth / srcHeight;
     let w = srcWidth;
@@ -1389,14 +1294,33 @@ var shitJs = (() => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  // src/modules/to-full-width.ts
-  function toFullWidth(str) {
-    return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
+  // src/modules/string-width.ts
+  function getStringWidth(str) {
+    let width = 0;
+    for (const char of str) {
+      const code = char.codePointAt(0);
+      if (code === void 0) {
+        width += 1;
+        continue;
+      }
+      const isFullWidth = code >= 19968 && code <= 40959 || // CJK Unified Ideographs
+      code >= 44032 && code <= 55203 || // Hangul Syllables
+      code >= 4352 && code <= 4607 || // Hangul Jamo
+      code >= 65281 && code <= 65376 || // Full-width Forms
+      code >= 63744 && code <= 64255 || // CJK Compatibility Ideographs
+      code >= 12352 && code <= 12543 || // Hiragana / Katakana
+      code >= 12288 && code <= 12351 || // CJK Symbols and Punctuation
+      code >= 12800 && code <= 13055 || // Enclosed CJK
+      code >= 13056 && code <= 13311;
+      width += isFullWidth ? 2 : 1;
+    }
+    return width;
   }
-
-  // src/modules/to-half-width.ts
   function toHalfWidth(str) {
     return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/　/g, " ");
+  }
+  function toFullWidth(str) {
+    return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
   }
 
   // src/modules/to-number.ts

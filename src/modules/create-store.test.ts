@@ -2,13 +2,13 @@ import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
 import { createStore } from "./create-store";
 
-test("createStore", () => {
-  // basic usage
+test("createStore: basic", () => {
   const store = createStore({ count: 1 }, {});
   store.count = 2;
   eq(store.count, 2);
+});
 
-  // call handler
+test("createStore: handler", () => {
   let oldVal: number | undefined;
   let newVal: number | undefined;
   const store2 = createStore(
@@ -23,8 +23,9 @@ test("createStore", () => {
   store2.count = 5;
   eq(oldVal, 1);
   eq(newVal, 5);
+});
 
-  // same value: does not call handler
+test("createStore: same value", () => {
   let called = false;
   const store3 = createStore(
     { count: 1 },
@@ -36,7 +37,9 @@ test("createStore", () => {
   );
   store3.count = 1;
   eq(called, false);
+});
 
+test("createStore: multi keys", () => {
   // multi keys
   const changes: string[] = [];
   const store4 = createStore(
@@ -53,14 +56,13 @@ test("createStore", () => {
   store4.a = 10;
   store4.b = 20;
   eq(changes, ["a", "b"]);
+});
 
-  // no handler in key
+test("createStore: no key", () => {
   const store5 = createStore(
     { a: 1, b: 2 },
     {
-      a: () => {
-        changes.push("a2");
-      },
+      a: () => {},
     },
   );
   store5.b = 99;
