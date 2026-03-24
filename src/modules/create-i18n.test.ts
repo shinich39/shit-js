@@ -33,6 +33,6 @@ test("createI18n: no key in locale", () => {
   eq(t("desc", "ko"), "Description");
 });
 
-test("createI18n: no key in locale and defaultLocale", () => {
+test("createI18n: no key in defaultLocale", () => {
   eq(t("missing", "ko"), "missing");
 });

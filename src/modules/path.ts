@@ -124,10 +124,7 @@ export function getRelativePath(from: string, to: string): string {
  * @example
  * getCommonPath([
  *   "./project/abc/package.json",
- *   "./project/abc/def",
  *   "./project/abc/def/package.json",
- *   "./project/abc/def/ghi/package.json",
- *   "./project/abc/ghi/package.json",
  *   "project/abc/def/ghi/package.json",
  * ]);
  * // "project/abc"
