@@ -1,6 +1,6 @@
 import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
-import { Dom } from "./dom";
+import { Dom, parseDom } from "./dom";
 
 const html = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -66,9 +66,11 @@ test("dom: parse html string", () => {
   eq(root.toString(), html);
   const root2 = new Dom(root.toString());
   eq(root2.toString(), html);
+  const root3 = parseDom(html);
+  eq(root3.toString(), html);
 });
 
-test("dom: to string", () => {
+test("dom: parse object", () => {
   const root = new Dom({
     type: "tag",
     tag: "div",
@@ -76,6 +78,19 @@ test("dom: to string", () => {
   });
 
   eq(root.toString(), "<div>CONVERT TO TEXT</div>");
+});
+
+test("dom: parse Dom", () => {
+  const dom = new Dom({
+    type: "tag",
+    tag: "div",
+    content: "CONVERT TO TEXT",
+  });
+
+  const dom2 = new Dom(dom);
+
+  eq(dom.toString(), dom2.toString());
+  eq("<div>CONVERT TO TEXT</div>", dom2.toString());
 });
 
 test("dom: get contents", () => {
@@ -91,13 +106,10 @@ test("dom: get contents", () => {
 </div>`,
   );
 
-  eq(
-    root
-      .getContents()
-      .map((c) => c.trim())
-      .join(""),
-    `Level 1Level 2Level 3`,
-  );
+  const contents = root.getContents();
+  const str = contents.map((c) => c.trim()).join("");
+
+  eq(str, `Level 1Level 2Level 3`);
 });
 
 test("dom: remove element", () => {
@@ -113,6 +125,27 @@ test("dom: remove element", () => {
 <head>
   <meta charset="utf-8" />
   
+</head>
+<body>
+</body>
+</html>`,
+  );
+});
+
+test("dom: append element", () => {
+  const root = new Dom(html2);
+
+  root.find((c) => c.tag === "title")?.after("\n  <title>Subtitle</title>");
+
+  eq(
+    root.toString(),
+    `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+  <meta charset="utf-8" />
+  <title>Untitled</title>
+  <title>Subtitle</title>
 </head>
 <body>
 </body>

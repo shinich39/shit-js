@@ -13,7 +13,7 @@ declare function parseStr(str: string): {
     type: "root";
     children: DomImpl[];
 };
-export declare const parseDom: (src: string | DomImpl | Dom, parent?: Dom) => Dom;
+export declare function parseDom(src: string | DomImpl | Dom, parent?: Dom): Dom;
 export declare class Dom implements DomImpl {
     parent?: Dom;
     type: DomType;

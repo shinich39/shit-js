@@ -638,7 +638,9 @@ var shitJs = (() => {
     }
     return result;
   }
-  var parseDom = (src, parent) => new Dom(src, parent);
+  function parseDom(src, parent) {
+    return new Dom(src, parent);
+  }
   var Dom = class _Dom {
     parent;
     type;

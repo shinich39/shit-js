@@ -21,7 +21,7 @@ type Stack = {
   children?: DomImpl[];
 };
 
-function splitTags(str: string) {
+function splitTags(str: string): string[] {
   const result: string[] = [];
 
   let i = 0,
@@ -118,7 +118,13 @@ function splitTags(str: string) {
   return result;
 }
 
-function parseTag(str: string) {
+function parseTag(str: string): {
+  endIndex: number;
+  isClosing: boolean;
+  tag: string;
+  closer: string | undefined;
+  attributes: DomAttrs;
+} {
   const parts: string[] = [];
 
   let isClosing = str[1] === "/",
@@ -212,7 +218,10 @@ function parseTag(str: string) {
   };
 }
 
-function parseStr(str: string) {
+function parseStr(str: string): {
+  type: "root";
+  children: DomImpl[];
+} {
   const stacks: Stack[] = [
     {
       isClosed: false,
@@ -380,7 +389,7 @@ function parseStr(str: string) {
   };
 }
 
-function stringifyAttrs(attrs: DomAttrs) {
+function stringifyAttrs(attrs: DomAttrs): string {
   let result = "";
 
   // "undefined" will be skip
@@ -397,7 +406,9 @@ function stringifyAttrs(attrs: DomAttrs) {
   return result;
 }
 
-export const parseDom = (src: string | DomImpl | Dom, parent?: Dom): Dom => new Dom(src, parent);
+export function parseDom(src: string | DomImpl | Dom, parent?: Dom): Dom {
+  return new Dom(src, parent);
+}
 
 export class Dom implements DomImpl {
   parent?: Dom;
