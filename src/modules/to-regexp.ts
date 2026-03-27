@@ -1,16 +1,20 @@
 /**
  * @example
+ * toRegExp("abc"); // /abc/
  * toRegExp("/abc/gi"); // /abc/gi
  */
 export function toRegExp(str: string): RegExp {
-  const parts = str.split("/");
+  if (str.startsWith("/")) {
+    const patternEnd = str.lastIndexOf("/");
 
-  if (parts.length < 3) {
-    throw new Error(`Invalid argument: ${str}`);
+    if (patternEnd === -1) {
+      throw new Error("Invalid RegExp literal: missing '/'");
+    }
+
+    const pattern = str.substring(1, patternEnd);
+    const flags = str.substring(patternEnd + 1);
+    return new RegExp(pattern, flags);
   }
 
-  const flags = parts.pop();
-  const pattern = parts.slice(1).join("/");
-
-  return new RegExp(pattern, flags);
+  return new RegExp(str);
 }

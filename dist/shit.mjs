@@ -1,3 +1,914 @@
+// src/modules/ast.ts
+function isWhitespace(char) {
+  switch (char) {
+    case " ":
+    case "\n":
+    case "\r":
+    case "	":
+      return true;
+    default:
+      return false;
+  }
+}
+function parseEndTag(str, i) {
+  let name = "", skip = false;
+  while (i < str.length) {
+    if (str[i] === ">") {
+      i++;
+      break;
+    }
+    if (skip) {
+      i++;
+      continue;
+    }
+    if (isWhitespace(str[i])) {
+      skip = true;
+      i++;
+      continue;
+    }
+    name += str[i];
+    i++;
+  }
+  return {
+    token: {
+      type: "element",
+      isClosed: true,
+      isClosing: true,
+      name,
+      attributes: {},
+      children: []
+    },
+    nextIndex: i
+  };
+}
+function parseComment(str, i) {
+  let value = "";
+  while (i < str.length) {
+    if (str[i] === "-" && str[i + 1] === "-" && str[i + 2] === ">") {
+      i += 3;
+      break;
+    }
+    value += str[i];
+    i++;
+  }
+  return {
+    token: {
+      type: "comment",
+      isClosed: true,
+      isClosing: false,
+      value
+    },
+    nextIndex: i
+  };
+}
+function parseDoctype(str, i) {
+  let quotes = null, value = "", depth = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if (quotes) {
+      if (ch === quotes) {
+        quotes = null;
+      }
+      value += ch;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quotes = ch;
+      value += ch;
+      i++;
+      continue;
+    }
+    if (ch === "[") {
+      depth++;
+      value += ch;
+      i++;
+      continue;
+    }
+    if (ch === "]") {
+      depth--;
+      value += ch;
+      i++;
+      continue;
+    }
+    if (depth > 0) {
+      value += ch;
+      i++;
+      continue;
+    }
+    if (ch === ">") {
+      i++;
+      break;
+    }
+    value += ch;
+    i++;
+  }
+  return {
+    token: {
+      type: "doctype",
+      isClosed: true,
+      isClosing: false,
+      value
+    },
+    nextIndex: i
+  };
+}
+function parseCdata(str, i) {
+  let value = "";
+  while (i < str.length) {
+    if (str[i] === "]" && str[i + 1] === "]" && str[i + 2] === ">") {
+      i += 3;
+      break;
+    }
+    value += str[i];
+    i++;
+  }
+  return {
+    token: {
+      type: "cdata",
+      isClosed: true,
+      isClosing: false,
+      value
+    },
+    nextIndex: i
+  };
+}
+function parsePi(str, i) {
+  let target = "", value = "";
+  while (i < str.length) {
+    const ch = str[i];
+    if (isWhitespace(ch)) {
+      i++;
+      break;
+    }
+    if (ch === "?") {
+      break;
+    }
+    target += ch;
+    i++;
+  }
+  while (i < str.length) {
+    if (str[i] === "?" && str[i + 1] === ">") {
+      i += 2;
+      break;
+    }
+    value += str[i];
+    i++;
+  }
+  return {
+    token: {
+      type: "pi",
+      isClosed: true,
+      isClosing: false,
+      target,
+      value
+    },
+    nextIndex: i
+  };
+}
+function parseAttributes(str, i) {
+  const attributes = {};
+  let quotes = null, buffer = "", isClosed = false;
+  const flush = () => {
+    if (!buffer) {
+      return;
+    }
+    const keyEnd = buffer.indexOf("=");
+    if (keyEnd === -1) {
+      attributes[buffer] = true;
+    } else {
+      attributes[buffer.substring(0, keyEnd)] = buffer.substring(keyEnd + 1);
+    }
+    buffer = "";
+  };
+  while (i < str.length) {
+    const ch = str[i];
+    if (quotes) {
+      if (ch === "\\") {
+        buffer += str[i] + (str[i + 1] ?? "");
+        i += 2;
+        continue;
+      }
+      if (ch === quotes) {
+        flush();
+        quotes = null;
+        i++;
+        continue;
+      }
+      buffer += ch;
+      i++;
+      continue;
+    }
+    if (ch === `"` || ch === `'`) {
+      quotes = ch;
+      i++;
+      continue;
+    }
+    if (ch === "/") {
+      isClosed = true;
+      i++;
+      continue;
+    }
+    if (ch === ">") {
+      i++;
+      break;
+    }
+    if (isWhitespace(ch)) {
+      flush();
+      i++;
+      continue;
+    }
+    buffer += ch;
+    isClosed = false;
+    i++;
+  }
+  flush();
+  return {
+    attributes,
+    isClosed,
+    nextIndex: i
+  };
+}
+function parseScript(str, i) {
+  const { attributes, nextIndex } = parseAttributes(str, i);
+  i = nextIndex;
+  let closingStart = str.indexOf("</script", i);
+  if (closingStart === -1) {
+    closingStart = str.length;
+  }
+  const value = str.substring(i, closingStart);
+  i = closingStart + 8;
+  while (i < str.length) {
+    if (str[i] === ">") {
+      i++;
+      break;
+    }
+    i++;
+  }
+  return {
+    tokens: [
+      {
+        type: "element",
+        isClosed: false,
+        isClosing: false,
+        name: "script",
+        attributes,
+        children: []
+      },
+      {
+        type: "text",
+        isClosed: true,
+        isClosing: false,
+        value
+      },
+      {
+        type: "element",
+        isClosed: true,
+        isClosing: true,
+        name: "script",
+        attributes,
+        children: []
+      }
+    ],
+    nextIndex: i
+  };
+}
+function parseStyle(str, i) {
+  const { attributes, nextIndex } = parseAttributes(str, i);
+  i = nextIndex;
+  let closingStart = str.indexOf("</style", i);
+  if (closingStart === -1) {
+    closingStart = str.length;
+  }
+  const value = str.substring(i, closingStart);
+  i = closingStart + 7;
+  while (i < str.length) {
+    if (str[i] === ">") {
+      i++;
+      break;
+    }
+    i++;
+  }
+  return {
+    tokens: [
+      {
+        type: "element",
+        isClosed: false,
+        isClosing: false,
+        name: "style",
+        attributes,
+        children: []
+      },
+      {
+        type: "text",
+        isClosed: true,
+        isClosing: false,
+        value
+      },
+      {
+        type: "element",
+        isClosed: true,
+        isClosing: true,
+        name: "style",
+        attributes,
+        children: []
+      }
+    ],
+    nextIndex: i
+  };
+}
+function parseStartTag(buffer) {
+  let i = 1, name = "";
+  while (i < buffer.length) {
+    const ch = buffer[i];
+    if (isWhitespace(ch)) {
+      i++;
+      break;
+    }
+    name += ch;
+    i++;
+  }
+  const { attributes, isClosed, nextIndex } = parseAttributes(buffer, i);
+  return {
+    token: {
+      type: "element",
+      isClosed,
+      isClosing: false,
+      name,
+      attributes,
+      children: []
+    },
+    nextIndex
+  };
+}
+function normalize(str) {
+  return str.replace(/\r\n?/g, "\n");
+}
+function tokenize(str) {
+  const tokens = [];
+  let i = 0, toggle = false, buffer = "";
+  while (i < str.length) {
+    const ch = str[i];
+    if (!toggle) {
+      if (ch === "<") {
+        if (buffer) {
+          tokens.push({
+            type: "text",
+            isClosed: true,
+            isClosing: false,
+            value: buffer
+          });
+        }
+        toggle = true;
+        buffer = ch;
+        i++;
+        continue;
+      }
+      buffer += ch;
+      i++;
+      continue;
+    }
+    if (buffer === "</") {
+      const { token, nextIndex } = parseEndTag(str, i);
+      tokens.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (buffer === "<!--") {
+      const { token, nextIndex } = parseComment(str, i);
+      tokens.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (buffer === "<!DOCTYPE" || buffer === "<DOCTYPE") {
+      const { token, nextIndex } = parseDoctype(str, i + 1);
+      tokens.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (buffer === "<![CDATA[") {
+      const { token, nextIndex } = parseCdata(str, i);
+      tokens.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (buffer === "<?") {
+      const { token, nextIndex } = parsePi(str, i);
+      tokens.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (buffer === "<script") {
+      const { tokens: tokens2, nextIndex } = parseScript(str, i);
+      for (const token of tokens2) {
+        tokens2.push(token);
+      }
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (buffer === "<style") {
+      const { tokens: tokens2, nextIndex } = parseStyle(str, i);
+      for (const token of tokens2) {
+        tokens2.push(token);
+      }
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+    if (ch === ">") {
+      const { token } = parseStartTag(buffer);
+      tokens.push(token);
+      toggle = false;
+      buffer = "";
+      i++;
+      continue;
+    }
+    buffer += ch;
+    i++;
+  }
+  if (buffer) {
+    tokens.push({
+      type: "text",
+      isClosed: true,
+      isClosing: false,
+      value: buffer
+    });
+  }
+  return tokens;
+}
+function parseStr(str) {
+  str = normalize(str);
+  const tokens = tokenize(str);
+  const stack = [];
+  const root = {
+    type: "root",
+    children: []
+  };
+  const nodes = [];
+  for (const token of tokens) {
+    if (token.type !== "element") {
+      nodes.push(token);
+      const top2 = stack.length > 0 ? stack[stack.length - 1] : root;
+      top2.children.push(token);
+      continue;
+    }
+    if (token.isClosing) {
+      while (stack.length > 0) {
+        const top2 = stack.pop();
+        top2.isClosed = true;
+        if (top2.name === token.name) {
+          break;
+        }
+      }
+      continue;
+    }
+    nodes.push(token);
+    const top = stack.length > 0 ? stack[stack.length - 1] : root;
+    top.children.push(token);
+    if (!token.isClosed) {
+      stack.push(token);
+    }
+  }
+  nodes.forEach((item) => {
+    delete item.isClosed;
+    delete item.isClosing;
+  });
+  return {
+    root,
+    nodes
+  };
+}
+function stringifyAttrs(attrs) {
+  let result = "";
+  for (const k of Object.keys(attrs)) {
+    const v = attrs[k];
+    if (typeof v === "string") {
+      result += ` ${k}="${v}"`;
+    } else if (v === true) {
+      result += ` ${k}`;
+    }
+  }
+  return result;
+}
+function createChildren(parent, nodes) {
+  const result = [];
+  for (const node of nodes) {
+    if (typeof node === "string") {
+      const { root } = Ast.parse(node);
+      for (const child of root.children) {
+        result.push(new Ast(child, parent));
+      }
+    } else if (node.type === "root") {
+      for (const child of node.children) {
+        result.push(new Ast(child, parent));
+      }
+    } else {
+      result.push(new Ast(node, parent));
+    }
+  }
+  return result;
+}
+function createAst(src, parent) {
+  return new Ast(src, parent);
+}
+var Ast = class _Ast {
+  parent;
+  type;
+  name;
+  /** PITarget */
+  target;
+  value;
+  attributes;
+  children;
+  constructor(src, parent) {
+    this.type = "root";
+    this.name = "";
+    this.target = "";
+    this.value = "";
+    this.attributes = {};
+    this.children = [];
+    if (src) {
+      this.init(src, parent);
+    }
+  }
+  static parse = parseStr;
+  /**
+   * If src is string, always ast.type is root.
+   */
+  init(src, parent) {
+    if (typeof src === "string") {
+      const { root } = _Ast.parse(src);
+      this.children = root.children.map((child) => new _Ast(child, this));
+      return;
+    }
+    this.parent = parent;
+    this.type = src.type;
+    this.name = "";
+    this.value = "";
+    this.attributes = {};
+    this.children = [];
+    switch (src.type) {
+      case "root":
+        this.children = src.children.map((child) => new _Ast(child, this));
+        break;
+      case "element":
+        this.name = src.name;
+        this.attributes = { ...src.attributes };
+        this.children = src.children.map((child) => new _Ast(child, this));
+        break;
+      case "pi":
+        this.target = src.target;
+        this.value = src.value;
+        break;
+      case "doctype":
+      case "text":
+      case "comment":
+      case "cdata":
+        this.value = src.value;
+        break;
+    }
+  }
+  isRoot() {
+    return this.type === "root";
+  }
+  isText() {
+    return this.type === "text";
+  }
+  isElement() {
+    return this.type === "element";
+  }
+  isComment() {
+    return this.type === "comment";
+  }
+  isDoctype() {
+    return this.type === "doctype";
+  }
+  isCdata() {
+    return this.type === "cdata";
+  }
+  isPi() {
+    return this.type === "pi";
+  }
+  isStyle() {
+    return this.isElement() && this.name === "style";
+  }
+  isScript() {
+    return this.isElement() && this.name === "script";
+  }
+  getParent() {
+    return this.parent;
+  }
+  hasParent() {
+    return !!this.parent;
+  }
+  // biome-ignore lint: STFU
+  _walk(callback) {
+    const stack = [];
+    const rootChildren = this.children;
+    if (!rootChildren?.length) {
+      return;
+    }
+    for (let i = rootChildren.length - 1; i >= 0; i--) {
+      stack.push([rootChildren[i], i, rootChildren]);
+    }
+    while (stack.length) {
+      const [node, index, siblings] = stack.pop();
+      const res = callback(node, index, siblings);
+      if (res === "skip") {
+        continue;
+      }
+      if (res === "break") {
+        return;
+      }
+      const nodeChildren = node.children;
+      if (!nodeChildren?.length) {
+        continue;
+      }
+      for (let i = nodeChildren.length - 1; i >= 0; i--) {
+        stack.push([nodeChildren[i], i, nodeChildren]);
+      }
+    }
+  }
+  /**
+   * @example
+   * const ancestors = target.getAncestors(); // Ast[]
+   * ancestors.indexOf(target); // -1
+   * ancestors.indexOf(target.parent); // 0
+   */
+  getAncestors() {
+    const result = [];
+    let parent = this.parent;
+    while (parent) {
+      result.push(parent);
+      parent = parent.parent;
+    }
+    return result;
+  }
+  /**
+   * @example
+   * const descendants = target.getDescendants(); // Ast[]
+   * const grandchild = target.children[0].children[0];
+   * descendants.includes(grandchild); // true
+   */
+  getDescendants() {
+    const result = [];
+    this._walk((n) => {
+      result.push(n);
+    });
+    return result;
+  }
+  hasChildren() {
+    return this.children.length > 1;
+  }
+  getSiblings() {
+    return (this.parent?.children || []).filter((sibling) => sibling !== this);
+  }
+  getPrevSibling() {
+    const parentChidlren = this.parent?.children || [];
+    const i = parentChidlren.indexOf(this);
+    return i === -1 ? void 0 : parentChidlren[i - 1];
+  }
+  getNextSibling() {
+    const parentChidlren = this.parent?.children || [];
+    const i = parentChidlren.indexOf(this);
+    return i === -1 ? void 0 : parentChidlren[i + 1];
+  }
+  hasSibling() {
+    return (this.parent?.children || []).length > 1;
+  }
+  getAttribute(key) {
+    return this.attributes[key];
+  }
+  setAttribute(key, value) {
+    this.attributes[key] = value;
+  }
+  hasAttribute(key) {
+    return typeof this.attributes[key] !== "undefined";
+  }
+  getValue() {
+    const values = [];
+    this._walk((n) => {
+      if (n.type === "text") {
+        values.push(n.value);
+      }
+    });
+    return values.join("");
+  }
+  getValues() {
+    const values = [];
+    this._walk((n) => {
+      if (n.type === "text") {
+        values.push(n.value);
+      }
+    });
+    return values;
+  }
+  getRoot() {
+    const parents = this.getAncestors();
+    const root = parents.pop();
+    return root && root.type === "root" ? root : void 0;
+  }
+  getDepth() {
+    return this.getAncestors().length;
+  }
+  append(...nodes) {
+    const newChildren = createChildren(this, nodes);
+    for (const el of newChildren) {
+      this.children.push(el);
+    }
+  }
+  prepend(...nodes) {
+    const newChildren = createChildren(this, nodes);
+    this.children.splice(0, 0, ...newChildren);
+  }
+  before(...nodes) {
+    if (!this.parent) {
+      throw new Error("No parent.");
+    }
+    const index = this.parent.children.indexOf(this);
+    if (index === -1) {
+      throw new Error("Not a child.");
+    }
+    const newSiblings = createChildren(this.parent, nodes);
+    this.parent.children.splice(index, 0, ...newSiblings);
+  }
+  after(...nodes) {
+    if (!this.parent) {
+      throw new Error("No parent node.");
+    }
+    const index = this.parent.children.indexOf(this);
+    if (index === -1) {
+      throw new Error("Not a child.");
+    }
+    const newSiblings = createChildren(this.parent, nodes);
+    this.parent.children.splice(index + 1, 0, ...newSiblings);
+  }
+  // biome-ignore lint: STFU
+  forEach(callback) {
+    this._walk(callback);
+  }
+  find(callback) {
+    let found;
+    this._walk((node, index, siblings) => {
+      if (callback(node, index, siblings)) {
+        found = node;
+        return "break";
+      }
+    });
+    return found;
+  }
+  filter(callback) {
+    const result = [];
+    this._walk((node, index, siblings) => {
+      if (callback(node, index, siblings)) {
+        result.push(node);
+      }
+    });
+    return result;
+  }
+  map(callback) {
+    const result = [];
+    this._walk((node, index, siblings) => {
+      result.push(callback(node, index, siblings));
+    });
+    return result;
+  }
+  reduce(callback, initialValue) {
+    let acc = initialValue;
+    this._walk((node, index, siblings) => {
+      acc = callback(acc, node, index, siblings);
+    });
+    return acc;
+  }
+  remove() {
+    this.parent?.removeChild(this);
+  }
+  removeChild(node) {
+    this.children = this.children.filter((child) => {
+      if (child === node) {
+        delete child.parent;
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+  removeChildren(nodes) {
+    const set = new Set(nodes);
+    this.children = this.children.filter((child) => {
+      if (set.has(child)) {
+        delete child.parent;
+        return false;
+      } else {
+        return true;
+      }
+    });
+  }
+  /**
+   * Convert ast to html string.
+   */
+  toString() {
+    const { type, name, value } = this;
+    if (type === "root") {
+      return this.children.map((child) => child.toString()).join("");
+    }
+    if (type === "comment") {
+      return `<!--${value}-->`;
+    }
+    if (type === "text") {
+      return value;
+    }
+    if (type === "doctype") {
+      return `<!DOCTYPE ${value}>`;
+    }
+    if (type === "cdata") {
+      return `<![CDATA[${value}]]>`;
+    }
+    if (type === "pi") {
+      return `<?${name} ${value}?>`;
+    }
+    const isEmpty = this.children.length === 0;
+    const attrs = stringifyAttrs(this.attributes);
+    if (isEmpty) {
+      return `<${name}${attrs} />`;
+    }
+    const joinedValue = this.children.map((node) => node.toString()).join("");
+    return `<${name}${attrs}>${joinedValue}</${name}>`;
+  }
+  /**
+   * Get all nodes with self
+   */
+  toArray() {
+    return [this, ...this.getDescendants()];
+  }
+  toObject() {
+    const fn = (ast) => {
+      const { type, name, target, value, children, attributes } = ast;
+      if (type === "root") {
+        return {
+          type,
+          children: children.map(fn)
+        };
+      }
+      if (type === "doctype") {
+        return {
+          type,
+          value
+        };
+      }
+      if (type === "text") {
+        return {
+          type,
+          value
+        };
+      }
+      if (type === "element") {
+        return {
+          type,
+          name,
+          value,
+          attributes: { ...attributes },
+          children: children.map(fn)
+        };
+      }
+      if (type === "comment") {
+        return {
+          type,
+          value
+        };
+      }
+      if (type === "cdata") {
+        return {
+          type,
+          value
+        };
+      }
+      if (type === "pi") {
+        return {
+          type,
+          target,
+          value
+        };
+      }
+      throw new Error(`Invalid ast type: ${type}`);
+    };
+    return fn(this);
+  }
+};
+
 // src/modules/bytes.ts
 function fromKb(kb) {
   return kb * 1024;
@@ -279,597 +1190,6 @@ function backtrack(from, to, trace, depth) {
   return result.reverse();
 }
 
-// src/modules/dom.ts
-function splitTags(str) {
-  const result = [];
-  let i = 0, buffer = "", head = false, tail = null, quotes = null;
-  const flush = () => {
-    if (buffer !== "") {
-      result.push(buffer);
-      buffer = "";
-    }
-  };
-  const join = () => {
-    if (buffer !== "") {
-      if (result.length > 0) {
-        result[result.length - 1] += buffer;
-      } else {
-        result.push(buffer);
-      }
-      buffer = "";
-    }
-  };
-  while (i < str.length) {
-    const ch = str[i];
-    if (!head) {
-      if (ch === "<") {
-        flush();
-        buffer += ch;
-        head = true;
-      } else {
-        buffer += ch;
-      }
-    } else {
-      if (ch === "\\") {
-        buffer += ch;
-      } else if (!quotes) {
-        if (ch === "<") {
-          if (!tail) {
-            join();
-          }
-          buffer += ch;
-        } else if (ch === ">") {
-          buffer += ch;
-          if (tail) {
-            if (!buffer.endsWith(tail)) {
-              i++;
-              continue;
-            }
-          }
-          flush();
-          head = false;
-          tail = null;
-        } else if (tail) {
-          buffer += ch;
-        } else {
-          buffer += ch;
-          if (ch === `"` || ch === `'`) {
-            quotes = ch;
-          } else if (buffer === "<!--") {
-            tail = "-->";
-          } else if (buffer === "<script") {
-            tail = "</script>";
-          } else if (buffer === "<style") {
-            tail = "</style>";
-          }
-        }
-      } else if (ch === quotes) {
-        buffer += ch;
-        quotes = null;
-      } else {
-        buffer += ch;
-      }
-    }
-    i++;
-  }
-  flush();
-  return result;
-}
-function parseTag(str) {
-  const parts = [];
-  let isClosing = str[1] === "/", i = isClosing ? 2 : 1, tag = "", buffer = "", quotes = null, closer;
-  const flush = () => {
-    if (buffer !== "") {
-      parts.push(buffer);
-      buffer = "";
-    }
-  };
-  const re = /\s|>|\//;
-  while (i < str.length) {
-    const ch = str[i];
-    if (re.test(ch)) {
-      break;
-    }
-    buffer += ch;
-    i++;
-  }
-  tag = buffer;
-  buffer = "";
-  while (i < str.length) {
-    const ch = str[i];
-    if (ch === "\\") {
-      buffer += ch;
-    } else if (!quotes) {
-      if (ch === ">") {
-        if (buffer === "/" || buffer === "?") {
-          closer = /\s/.test(str[i - 2]) ? " " + buffer : buffer;
-        } else {
-          flush();
-        }
-        break;
-      } else if (ch === " " || ch === "\n") {
-        flush();
-      } else if (ch === `"` || ch === `'`) {
-        quotes = ch;
-        buffer += ch;
-      } else {
-        buffer += ch;
-      }
-    } else if (ch === quotes) {
-      quotes = null;
-      buffer += ch;
-      flush();
-    } else {
-      buffer += ch;
-    }
-    i++;
-  }
-  const attributes = {};
-  for (const part of parts) {
-    const [key, ...values] = part.split("=");
-    if (values.length === 0) {
-      attributes[key] = null;
-    } else {
-      let value = values.join("=");
-      attributes[key] = value.substring(1, value.length - 1);
-    }
-  }
-  const endIndex = i + 1;
-  return {
-    endIndex,
-    isClosing,
-    tag,
-    closer,
-    attributes
-  };
-}
-function parseStr(str) {
-  const stacks = [
-    {
-      isClosed: false,
-      type: "root",
-      children: []
-    }
-  ];
-  const root = stacks[0];
-  const parts = splitTags(str);
-  for (const part of parts) {
-    const isTag = part.startsWith("<") && part.endsWith(">");
-    if (!isTag) {
-      stacks.push({
-        isClosed: true,
-        type: "text",
-        tag: "",
-        content: part,
-        attributes: {},
-        children: []
-      });
-      continue;
-    }
-    const isXMLDeclaration = part.startsWith("<?xml") && part.endsWith("?>");
-    if (isXMLDeclaration) {
-      const { attributes: attributes2 } = parseTag(part);
-      stacks.push({
-        isClosed: true,
-        type: "tag",
-        tag: "?xml",
-        closer: "?",
-        content: "",
-        attributes: attributes2,
-        children: []
-      });
-      continue;
-    }
-    const isComment = part.startsWith("<!--") && part.endsWith("-->");
-    if (isComment) {
-      stacks.push({
-        isClosed: true,
-        type: "comment",
-        tag: "",
-        content: part.substring(4, part.length - 3),
-        attributes: {},
-        children: []
-      });
-      continue;
-    }
-    const isScript = part.startsWith("<script") && part.endsWith("</script>");
-    if (isScript) {
-      const { endIndex, attributes: attributes2 } = parseTag(part);
-      const content = part.substring(endIndex, part.length - 9);
-      stacks.push({
-        isClosed: true,
-        type: "script",
-        tag: "script",
-        content,
-        attributes: attributes2,
-        children: []
-      });
-      continue;
-    }
-    const isStyle = part.startsWith("<style") && part.endsWith("</style>");
-    if (isStyle) {
-      const { endIndex, attributes: attributes2 } = parseTag(part);
-      const content = part.substring(endIndex, part.length - 8);
-      stacks.push({
-        isClosed: false,
-        type: "style",
-        tag: "style",
-        content,
-        attributes: attributes2,
-        children: []
-      });
-      continue;
-    }
-    const { tag, isClosing, closer, attributes } = parseTag(part);
-    if (isClosing) {
-      const children = [];
-      for (let i = stacks.length - 1; i >= 0; i--) {
-        const stack = stacks[i];
-        if (!stack.isClosed) {
-          stack.isClosed = true;
-          if (stack.tag === tag) {
-            stack.children = children.reverse();
-            for (const child of children) {
-              child.parent = stack;
-            }
-            break;
-          }
-          stack.closer = "";
-        }
-        if (!stack.parent) {
-          children.push(stack);
-        }
-      }
-      continue;
-    }
-    const isClosed = typeof closer === "string";
-    stacks.push({
-      isClosed,
-      type: "tag",
-      tag,
-      content: "",
-      closer,
-      attributes,
-      children: []
-    });
-  }
-  for (const stack of stacks) {
-    if (stack.type !== "root" && !stack.parent) {
-      stack.parent = root;
-      root.children.push(stack);
-    }
-    if (stack.type === "tag" && !stack.isClosed) {
-      stack.closer = "";
-    }
-    delete stack.isClosed;
-    delete stack.depth;
-  }
-  delete root.isClosed;
-  delete root.depth;
-  return root;
-}
-function stringifyAttrs(attrs) {
-  let result = "";
-  for (const k of Object.keys(attrs)) {
-    const v = attrs[k];
-    if (typeof v === "string") {
-      result += ` ${k}="${v}"`;
-    } else if (v === null) {
-      result += ` ${k}`;
-    }
-  }
-  return result;
-}
-function parseDom(src, parent) {
-  return new Dom(src, parent);
-}
-var Dom = class _Dom {
-  parent;
-  type;
-  tag;
-  closer;
-  content;
-  attributes;
-  children;
-  constructor(src, parent) {
-    this.type = "root";
-    this.tag = "";
-    this.content = "";
-    this.attributes = {};
-    this.children = [];
-    if (src) {
-      this.init(src, parent);
-    }
-  }
-  init(src, parent) {
-    if (typeof src === "string") {
-      const { children } = _Dom.parse(src);
-      this.children = children.map((child) => new _Dom(child, this));
-    } else {
-      this.parent = parent;
-      this.type = src.type;
-      this.tag = src.tag || "";
-      this.closer = src.closer;
-      this.content = src.content || "";
-      this.attributes = src.attributes || {};
-      if (this.type === "tag" && this.content.length > 0) {
-        this.children = [
-          new _Dom(
-            {
-              type: "text",
-              tag: "",
-              content: src.content,
-              attributes: {},
-              children: []
-            },
-            this
-          )
-        ];
-      } else if (src.children) {
-        this.children = src.children.map((child) => new _Dom(child, this));
-      }
-    }
-  }
-  createChildren(args) {
-    const result = [];
-    for (const arg of args) {
-      if (typeof arg === "string") {
-        const { children } = _Dom.parse(arg);
-        result.push(...children.map((child) => new _Dom(child, this)));
-      } else if (arg.type === "root") {
-        result.push(...new _Dom(arg, this).children);
-      } else {
-        result.push(new _Dom(arg, this));
-      }
-    }
-    return result;
-  }
-  isRoot() {
-    return this.type === "root";
-  }
-  isComment() {
-    return this.type === "comment";
-  }
-  isStyle() {
-    return this.type === "style";
-  }
-  isScript() {
-    return this.type === "script";
-  }
-  isText() {
-    return this.type === "text";
-  }
-  isTag() {
-    return this.type === "tag";
-  }
-  getParent() {
-    return this.parent;
-  }
-  hasParent() {
-    return !!this.parent;
-  }
-  /**
-   * Get all parent elements from target to root
-   */
-  getParents() {
-    const result = [];
-    const fn = (child) => {
-      if (!child.parent) {
-        return;
-      }
-      result.push(child.parent);
-      fn(child.parent);
-    };
-    fn(this);
-    return result;
-  }
-  /**
-   * Get all children regardless of depth
-   */
-  getChildren() {
-    const result = [];
-    const fn = (parent) => {
-      for (const child of parent.children) {
-        result.push(child);
-        if (child.type === "tag") {
-          fn(child);
-        }
-      }
-    };
-    fn(this);
-    return result;
-  }
-  hasChildren() {
-    return this.children.length > 1;
-  }
-  getSiblings() {
-    return (this.parent?.children || []).filter((sibling) => sibling !== this);
-  }
-  hasSiblings() {
-    return (this.parent?.children || []).length > 1;
-  }
-  getTag() {
-    return this.tag;
-  }
-  setTag(value) {
-    this.tag = value;
-  }
-  hasTag() {
-    return this.tag !== "";
-  }
-  getCloser() {
-    return this.closer;
-  }
-  setCloser(value) {
-    if (typeof value === "string") {
-      this.closer = value;
-    } else {
-      delete this.closer;
-    }
-  }
-  hasCloser() {
-    return typeof this.closer === "string";
-  }
-  getContent() {
-    return this.content || "";
-  }
-  setContent(value) {
-    this.content = value;
-  }
-  hasContent() {
-    return this.content !== "";
-  }
-  getContents() {
-    const result = [];
-    for (const child of this.children) {
-      if (child.type === "text") {
-        result.push(child.content || "");
-        continue;
-      }
-      if (child.type === "tag") {
-        result.push(...child.getContents());
-      }
-    }
-    return result;
-  }
-  getAttribute(key) {
-    return this.attributes[key];
-  }
-  setAttribute(key, value) {
-    this.attributes[key] = value;
-  }
-  hasAttribute(key) {
-    return typeof this.attributes[key] !== "undefined";
-  }
-  getAttributes() {
-    return this.attributes;
-  }
-  setAttributes(attrs) {
-    for (const k of Object.keys(attrs)) {
-      this.setAttribute(k, attrs[k]);
-    }
-  }
-  hasAttributes(attrs) {
-    for (const k of Object.keys(attrs)) {
-      if (this.getAttribute(k) !== attrs[k]) {
-        return false;
-      }
-    }
-    return true;
-  }
-  getRoot() {
-    const parents = this.getParents();
-    const root = parents.pop();
-    return root && root.type === "root" ? root : void 0;
-  }
-  getDepth() {
-    return this.getParents().length;
-  }
-  append(...args) {
-    const newChildren = this.createChildren(args);
-    for (const el of newChildren) {
-      this.children.push(el);
-    }
-  }
-  prepend(...args) {
-    const newChildren = this.createChildren(args);
-    this.children.splice(0, 0, ...newChildren);
-  }
-  before(...args) {
-    if (!this.parent) {
-      throw new Error("Parent not found");
-    }
-    const index = this.parent.children.indexOf(this);
-    if (index === -1) {
-      throw new Error("This element not included in it's parent");
-    }
-    const newSiblings = this.parent.createChildren(args);
-    this.parent.children.splice(index, 0, ...newSiblings);
-  }
-  after(...args) {
-    if (!this.parent) {
-      throw new Error("Parent not found");
-    }
-    const index = this.parent.children.indexOf(this);
-    if (index === -1) {
-      throw new Error("This element not included in its parent");
-    }
-    const newSiblings = this.parent.createChildren(args);
-    this.parent.children.splice(index + 1, 0, ...newSiblings);
-  }
-  forEach(callback) {
-    this.getChildren().forEach(callback);
-  }
-  find(callback) {
-    return this.getChildren().find(callback);
-  }
-  findLast(callback) {
-    return this.getParents().find(callback);
-  }
-  filter(callback) {
-    return this.getChildren().filter(callback);
-  }
-  map(callback) {
-    return this.children.map(callback);
-  }
-  reduce(callback, initialValue) {
-    return this.children.reduce(callback, initialValue);
-  }
-  reduceRight(callback, initialValue) {
-    return this.children.reduceRight(callback, initialValue);
-  }
-  remove() {
-    this.parent?.removeChild(this);
-  }
-  removeChild(arg) {
-    this.removeChildren(arg);
-  }
-  removeChildren(...args) {
-    const set = new Set(args);
-    this.children = this.children.filter((child) => {
-      if (set.has(child)) {
-        delete child.parent;
-        return false;
-      } else {
-        return true;
-      }
-    });
-  }
-  /**
-   * Get html string
-   */
-  toString() {
-    const { type, tag, closer, children } = this;
-    if (type === "root") {
-      return children.map((child) => child.toString()).join("");
-    }
-    if (type === "comment") {
-      return `<!--${this.getContent()}-->`;
-    }
-    if (type === "text") {
-      return this.getContent();
-    }
-    const attrs = stringifyAttrs(this.attributes);
-    if (type === "script") {
-      return `<script${attrs}>${this.getContent()}</script>`;
-    }
-    if (type === "style") {
-      return `<style${attrs}>${this.getContent()}</style>`;
-    }
-    if (!tag) {
-      throw new Error("This element must have a value of tag attribute");
-    }
-    return this.hasCloser() ? `<${tag}${attrs}${closer}>` : `<${tag}${attrs}>${children.map((child) => child.toString()).join("")}</${tag}>`;
-  }
-  /**
-   * Get children array contains this element
-   */
-  toArray() {
-    return [this, ...this.getChildren()];
-  }
-  static parse = parseStr;
-};
-
 // src/modules/extract-numbers.ts
 function extractNumbers(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
@@ -1048,7 +1368,7 @@ function parsePath(str) {
   return { dir, dirs, base, name, ext };
 }
 function getRelativePath(from, to) {
-  const normalize = (str) => {
+  const normalize2 = (str) => {
     str = str.replace(/\\/g, "/").replace(/\/$/, "");
     if (str.charAt(0) === "/") {
       throw new Error(`Invalid argument: ${str}`);
@@ -1061,8 +1381,8 @@ function getRelativePath(from, to) {
     }
     return `./${str}`;
   };
-  const a = normalize(from).split("/").filter(Boolean);
-  const b = normalize(to).split("/").filter(Boolean);
+  const a = normalize2(from).split("/").filter(Boolean);
+  const b = normalize2(to).split("/").filter(Boolean);
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) {
     i++;
@@ -1275,13 +1595,16 @@ function toRadians(degree) {
 
 // src/modules/to-regexp.ts
 function toRegExp(str) {
-  const parts = str.split("/");
-  if (parts.length < 3) {
-    throw new Error(`Invalid argument: ${str}`);
+  if (str.startsWith("/")) {
+    const patternEnd = str.lastIndexOf("/");
+    if (patternEnd === -1) {
+      throw new Error("Invalid RegExp literal: missing '/'");
+    }
+    const pattern = str.substring(1, patternEnd);
+    const flags = str.substring(patternEnd + 1);
+    return new RegExp(pattern, flags);
   }
-  const flags = parts.pop();
-  const pattern = parts.slice(1).join("/");
-  return new RegExp(pattern, flags);
+  return new RegExp(str);
 }
 
 // src/modules/unique-by.ts
@@ -1301,7 +1624,7 @@ function uniqueBy(arr, fn) {
 function xor(str, salt) {
   const saltSize = salt.length;
   if (saltSize === 0) {
-    throw new Error(`Invalid argument: salt.length === 0`);
+    throw new Error(`The salt must be at least 1.`);
   }
   let result = "";
   for (let i = 0; i < str.length; i++) {
@@ -1310,11 +1633,12 @@ function xor(str, salt) {
   return result;
 }
 export {
-  Dom,
+  Ast,
   chunkArray,
   clamp,
   clone,
   compareStrings,
+  createAst,
   createI18n,
   createMulberry32,
   createQueue,
@@ -1336,7 +1660,6 @@ export {
   lerp,
   mode,
   parseDate,
-  parseDom,
   parsePath,
   pickBy,
   product,

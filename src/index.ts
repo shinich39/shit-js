@@ -1,3 +1,4 @@
+export * from "./modules/ast";
 export * from "./modules/bytes";
 export * from "./modules/chunk-array";
 export * from "./modules/clone";
@@ -8,7 +9,6 @@ export * from "./modules/create-store";
 export * from "./modules/create-template";
 export * from "./modules/create-typing-delay";
 export * from "./modules/diff";
-export * from "./modules/dom";
 export * from "./modules/extract-numbers";
 export * from "./modules/group-by";
 export * from "./modules/math";

@@ -9,7 +9,7 @@ export function xor(str: string, salt: string): string {
   const saltSize = salt.length;
 
   if (saltSize === 0) {
-    throw new Error(`Invalid argument: salt.length === 0`);
+    throw new Error(`The salt must be at least 1.`);
   }
 
   let result = "";
