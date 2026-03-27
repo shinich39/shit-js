@@ -27,7 +27,7 @@ const raw = `<?xml version="1.0" encoding="UTF-8"?>
 test("ast: parse", () => {
   const root = new Ast(raw);
 
-  const xmlPi = root.find((n) => n.type === "pi");
+  const pi = root.find((n) => n.type === "pi");
   const doctype = root.find((n) => n.type === "doctype");
   const head = root.find((n) => n.name === "head");
   const title = head?.find((n) => n.name === "title");
@@ -36,8 +36,11 @@ test("ast: parse", () => {
   const h1 = root.find((n) => n.name === "h1");
   const missing = root.find((n) => n.name === "missing");
 
-  ok(!!xmlPi);
+  ok(!!pi);
+  eq(pi?.name, "xml");
+  eq(pi?.value, `version="1.0" encoding="UTF-8"`);
   ok(!!doctype);
+  eq(doctype?.value, `html`);
   ok(!!head);
   ok(!!title);
   eq(title?.type, "element");

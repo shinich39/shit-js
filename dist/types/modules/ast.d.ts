@@ -17,7 +17,7 @@ export type AstNode = {
     value: string;
 } | {
     type: "pi";
-    target: string;
+    name: string;
     value: string;
 } | {
     type: "cdata";
@@ -34,13 +34,14 @@ declare function parseStr(str: string): {
 export declare function createAst(src: string | AstNode | Ast, parent?: Ast): Ast;
 /**
  * Abstract Syntax Tree (AST)
+ *
+ * @example
+ * const ast = Ast(`<div>abc</div>`);
  */
 export declare class Ast {
     parent?: Ast;
     type: AstType;
     name: string;
-    /** PITarget */
-    target: string;
     value: string;
     attributes: AstAttributes;
     children: Ast[];

@@ -238,7 +238,7 @@ var shitJs = (() => {
         type: "pi",
         isClosed: true,
         isClosing: false,
-        target,
+        name: target,
         value
       },
       nextIndex: i
@@ -606,15 +606,12 @@ var shitJs = (() => {
     parent;
     type;
     name;
-    /** PITarget */
-    target;
     value;
     attributes;
     children;
     constructor(src, parent) {
       this.type = "root";
       this.name = "";
-      this.target = "";
       this.value = "";
       this.attributes = {};
       this.children = [];
@@ -648,7 +645,7 @@ var shitJs = (() => {
           this.children = src.children.map((child) => new _Ast(child, this));
           break;
         case "pi":
-          this.target = src.target;
+          this.name = src.name;
           this.value = src.value;
           break;
         case "doctype":
@@ -934,7 +931,7 @@ var shitJs = (() => {
     }
     toObject() {
       const fn = (ast) => {
-        const { type, name, target, value, children, attributes } = ast;
+        const { type, name, value, children, attributes } = ast;
         if (type === "root") {
           return {
             type,
@@ -977,7 +974,7 @@ var shitJs = (() => {
         if (type === "pi") {
           return {
             type,
-            target,
+            name,
             value
           };
         }

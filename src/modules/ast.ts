@@ -4,7 +4,7 @@ export type AstNode =
   | { type: "element"; name: string; attributes: AstAttributes; children: AstNode[] }
   | { type: "comment"; value: string }
   | { type: "doctype"; value: string }
-  | { type: "pi"; target: string; value: string }
+  | { type: "pi"; name: string; value: string }
   | { type: "cdata"; value: string };
 
 export type AstType = "root" | "text" | "element" | "comment" | "doctype" | "pi" | "cdata";
@@ -242,7 +242,7 @@ function parsePi(
       type: "pi",
       isClosed: true,
       isClosing: false,
-      target,
+      name: target,
       value,
     },
     nextIndex: i,
@@ -749,13 +749,14 @@ export function createAst(src: string | AstNode | Ast, parent?: Ast): Ast {
 
 /**
  * Abstract Syntax Tree (AST)
+ *
+ * @example
+ * const ast = Ast(`<div>abc</div>`);
  */
 export class Ast {
   parent?: Ast;
   type: AstType;
   name: string;
-  /** PITarget */
-  target: string;
   value: string;
   attributes: AstAttributes;
   children: Ast[];
@@ -763,7 +764,6 @@ export class Ast {
   constructor(src?: string | AstNode | Ast, parent?: Ast) {
     this.type = "root";
     this.name = "";
-    this.target = "";
     this.value = "";
     this.attributes = {};
     this.children = [];
@@ -807,7 +807,7 @@ export class Ast {
         break;
 
       case "pi":
-        this.target = src.target;
+        this.name = src.name;
         this.value = src.value;
         break;
 
@@ -1169,7 +1169,7 @@ export class Ast {
 
   toObject(): AstNode {
     const fn = (ast: Ast): AstNode => {
-      const { type, name, target, value, children, attributes } = ast;
+      const { type, name, value, children, attributes } = ast;
 
       if (type === "root") {
         return {
@@ -1219,7 +1219,7 @@ export class Ast {
       if (type === "pi") {
         return {
           type,
-          target,
+          name,
           value,
         } as Extract<AstNode, { type: "pi" }>;
       }

@@ -160,7 +160,7 @@ function parsePi(str, i) {
       type: "pi",
       isClosed: true,
       isClosing: false,
-      target,
+      name: target,
       value
     },
     nextIndex: i
@@ -528,15 +528,12 @@ var Ast = class _Ast {
   parent;
   type;
   name;
-  /** PITarget */
-  target;
   value;
   attributes;
   children;
   constructor(src, parent) {
     this.type = "root";
     this.name = "";
-    this.target = "";
     this.value = "";
     this.attributes = {};
     this.children = [];
@@ -570,7 +567,7 @@ var Ast = class _Ast {
         this.children = src.children.map((child) => new _Ast(child, this));
         break;
       case "pi":
-        this.target = src.target;
+        this.name = src.name;
         this.value = src.value;
         break;
       case "doctype":
@@ -856,7 +853,7 @@ var Ast = class _Ast {
   }
   toObject() {
     const fn = (ast) => {
-      const { type, name, target, value, children, attributes } = ast;
+      const { type, name, value, children, attributes } = ast;
       if (type === "root") {
         return {
           type,
@@ -899,7 +896,7 @@ var Ast = class _Ast {
       if (type === "pi") {
         return {
           type,
-          target,
+          name,
           value
         };
       }
