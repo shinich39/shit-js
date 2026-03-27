@@ -482,10 +482,10 @@ function parseStr(str) {
       stack.push(token);
     }
   }
-  nodes.forEach((item) => {
-    delete item.isClosed;
-    delete item.isClosing;
-  });
+  for (const node of nodes) {
+    delete node.isClosed;
+    delete node.isClosing;
+  }
   return {
     root,
     nodes

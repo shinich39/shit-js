@@ -694,10 +694,10 @@ function parseStr(str: string): {
   }
 
   // delete unused properties
-  nodes.forEach((item: any) => {
-    delete item.isClosed;
-    delete item.isClosing;
-  });
+  for (const node of nodes as any[]) {
+    delete node.isClosed;
+    delete node.isClosing;
+  }
 
   return {
     root,
