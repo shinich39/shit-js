@@ -621,7 +621,7 @@ var Ast = class _Ast {
   }
   static parse = parseStr;
   /**
-   * If src is string, always ast.type is root.
+   * If src is string, always type is root.
    */
   init(src, parent) {
     if (typeof src === "string") {

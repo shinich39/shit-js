@@ -498,7 +498,6 @@ function normalize(str: string): string {
   return str.replace(/\r\n?/g, "\n");
 }
 
-/** @see https://www.w3.org/TR/xml */
 function tokenize(input: string): Token[] {
   const result: Token[] = [];
 
@@ -753,7 +752,10 @@ export function createAst(src: string | AstNode | Ast, parent?: Ast): Ast {
  * Abstract Syntax Tree (AST)
  *
  * @example
- * const ast = Ast(`<div>abc</div>`);
+ * const ast = new Ast(`<div>abc</div>`);
+ * atr.type; // "root"
+ * atr.children; // [{ type: "element", name: "div", attributes: {}, children: [ ... ] }]
+ * atr.children[0].children; // [{ type: "text", value: "abc" }]
  */
 export class Ast {
   parent?: Ast;
@@ -777,7 +779,7 @@ export class Ast {
   static parse = parseStr as typeof parseStr;
 
   /**
-   * If src is string, always ast.type is root.
+   * If src is string, always type is root.
    */
   init(src: string | AstNode | Ast, parent?: Ast): void {
     // parse string

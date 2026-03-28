@@ -36,7 +36,10 @@ export declare function createAst(src: string | AstNode | Ast, parent?: Ast): As
  * Abstract Syntax Tree (AST)
  *
  * @example
- * const ast = Ast(`<div>abc</div>`);
+ * const ast = new Ast(`<div>abc</div>`);
+ * atr.type; // "root"
+ * atr.children; // [{ type: "element", name: "div", attributes: {}, children: [ ... ] }]
+ * atr.children[0].children; // [{ type: "text", value: "abc" }]
  */
 export declare class Ast {
     parent?: Ast;
@@ -48,7 +51,7 @@ export declare class Ast {
     constructor(src?: string | AstNode | Ast, parent?: Ast);
     static parse: typeof parseStr;
     /**
-     * If src is string, always ast.type is root.
+     * If src is string, always type is root.
      */
     init(src: string | AstNode | Ast, parent?: Ast): void;
     isRoot(): boolean;
