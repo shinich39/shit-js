@@ -422,85 +422,85 @@ var shitJs = (() => {
   function normalize(str) {
     return str.replace(/\r\n?/g, "\n");
   }
-  function tokenize(str) {
-    const tokens = [];
+  function tokenize(input) {
+    const result = [];
     let i = 0, toggle = false, buffer = "";
-    while (i < str.length) {
-      const ch = str[i];
+    while (i < input.length) {
+      const ch = input[i];
       if (!toggle) {
-        if (ch === "<") {
-          if (buffer) {
-            tokens.push({
-              type: "text",
-              isClosed: true,
-              isClosing: false,
-              value: buffer
-            });
-          }
-          toggle = true;
-          buffer = ch;
+        if (ch !== "<") {
+          buffer += ch;
           i++;
           continue;
         }
-        buffer += ch;
+        if (buffer) {
+          result.push({
+            type: "text",
+            isClosed: true,
+            isClosing: false,
+            value: buffer
+          });
+          buffer = "";
+        }
+        toggle = true;
+        buffer = ch;
         i++;
         continue;
       }
-      if (buffer === "</") {
-        const { token, nextIndex } = parseEndTag(str, i);
-        tokens.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
-      }
-      if (buffer === "<!--") {
-        const { token, nextIndex } = parseComment(str, i);
-        tokens.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
-      }
-      if (buffer === "<!DOCTYPE" || buffer === "<DOCTYPE") {
-        const { token, nextIndex } = parseDoctype(str, i + 1);
-        tokens.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
-      }
-      if (buffer === "<![CDATA[") {
-        const { token, nextIndex } = parseCdata(str, i);
-        tokens.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
-      }
-      if (buffer === "<?") {
-        const { token, nextIndex } = parsePi(str, i);
-        tokens.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
+      if (buffer.length === 9) {
+        const upper = buffer.toUpperCase();
+        if (upper === "<!DOCTYPE") {
+          const { token, nextIndex } = parseDoctype(input, i + 1);
+          result.push(token);
+          i = nextIndex;
+          toggle = false;
+          buffer = "";
+          continue;
+        }
+        if (upper === "<![CDATA[") {
+          const { token, nextIndex } = parseCdata(input, i);
+          result.push(token);
+          i = nextIndex;
+          toggle = false;
+          buffer = "";
+          continue;
+        }
       }
       if (buffer === "<script") {
-        const { tokens: tokens2, nextIndex } = parseScript(str, i);
-        for (const token of tokens2) {
-          tokens2.push(token);
-        }
+        const { tokens, nextIndex } = parseScript(input, i);
+        result.push(...tokens);
         i = nextIndex;
         toggle = false;
         buffer = "";
         continue;
       }
       if (buffer === "<style") {
-        const { tokens: tokens2, nextIndex } = parseStyle(str, i);
-        for (const token of tokens2) {
-          tokens2.push(token);
-        }
+        const { tokens, nextIndex } = parseStyle(input, i);
+        result.push(...tokens);
+        i = nextIndex;
+        toggle = false;
+        buffer = "";
+        continue;
+      }
+      if (buffer === "<!--") {
+        const { token, nextIndex } = parseComment(input, i);
+        result.push(token);
+        i = nextIndex;
+        toggle = false;
+        buffer = "";
+        continue;
+      }
+      if (buffer === "</") {
+        const { token, nextIndex } = parseEndTag(input, i);
+        result.push(token);
+        i = nextIndex;
+        toggle = false;
+        buffer = "";
+        continue;
+      }
+      if (buffer === "<?") {
+        const { token, nextIndex } = parsePi(input, i);
+        result.push(token);
         i = nextIndex;
         toggle = false;
         buffer = "";
@@ -508,7 +508,7 @@ var shitJs = (() => {
       }
       if (ch === ">") {
         const { token } = parseStartTag(buffer);
-        tokens.push(token);
+        result.push(token);
         toggle = false;
         buffer = "";
         i++;
@@ -518,14 +518,14 @@ var shitJs = (() => {
       i++;
     }
     if (buffer) {
-      tokens.push({
+      result.push({
         type: "text",
         isClosed: true,
         isClosing: false,
         value: buffer
       });
     }
-    return tokens;
+    return result;
   }
   function parseStr(str) {
     str = normalize(str);

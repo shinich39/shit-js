@@ -499,94 +499,68 @@ function normalize(str: string): string {
 }
 
 /** @see https://www.w3.org/TR/xml */
-function tokenize(str: string): Token[] {
-  const tokens: Token[] = [];
+function tokenize(input: string): Token[] {
+  const result: Token[] = [];
 
   let i = 0,
     toggle = false,
     buffer = "";
 
-  while (i < str.length) {
-    const ch = str[i];
+  while (i < input.length) {
+    const ch = input[i];
 
     if (!toggle) {
-      if (ch === "<") {
-        if (buffer) {
-          tokens.push({
-            type: "text",
-            isClosed: true,
-            isClosing: false,
-            value: buffer,
-          });
-        }
-
-        toggle = true;
-        buffer = ch;
+      if (ch !== "<") {
+        buffer += ch;
         i++;
         continue;
       }
 
-      buffer += ch;
+      if (buffer) {
+        result.push({
+          type: "text",
+          isClosed: true,
+          isClosing: false,
+          value: buffer,
+        });
+
+        buffer = "";
+      }
+
+      toggle = true;
+      buffer = ch;
       i++;
       continue;
     }
 
-    // end tag
-    if (buffer === "</") {
-      const { token, nextIndex } = parseEndTag(str, i);
-      tokens.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
+    if (buffer.length === 9) {
+      const upper = buffer.toUpperCase();
 
-    // comment
-    if (buffer === "<!--") {
-      const { token, nextIndex } = parseComment(str, i);
-      tokens.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
+      // doctype
+      if (upper === "<!DOCTYPE") {
+        const { token, nextIndex } = parseDoctype(input, i + 1);
+        result.push(token);
+        i = nextIndex;
+        toggle = false;
+        buffer = "";
+        continue;
+      }
 
-    // XML, HTML doctype
-    if (buffer === "<!DOCTYPE" || buffer === "<DOCTYPE") {
-      const { token, nextIndex } = parseDoctype(str, i + 1);
-      tokens.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // XML cdata
-    if (buffer === "<![CDATA[") {
-      const { token, nextIndex } = parseCdata(str, i);
-      tokens.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // XML PI (Processing Instruction)
-    if (buffer === "<?") {
-      const { token, nextIndex } = parsePi(str, i);
-      tokens.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
+      // XML cdata
+      if (upper === "<![CDATA[") {
+        const { token, nextIndex } = parseCdata(input, i);
+        result.push(token);
+        i = nextIndex;
+        toggle = false;
+        buffer = "";
+        continue;
+      }
     }
 
     // HTML script
     if (buffer === "<script") {
-      const { tokens, nextIndex } = parseScript(str, i);
-      for (const token of tokens) {
-        tokens.push(token);
-      }
+      const { tokens, nextIndex } = parseScript(input, i);
+      result.push(...tokens);
       i = nextIndex;
       toggle = false;
       buffer = "";
@@ -595,10 +569,38 @@ function tokenize(str: string): Token[] {
 
     // HTML style
     if (buffer === "<style") {
-      const { tokens, nextIndex } = parseStyle(str, i);
-      for (const token of tokens) {
-        tokens.push(token);
-      }
+      const { tokens, nextIndex } = parseStyle(input, i);
+      result.push(...tokens);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+
+    // comment
+    if (buffer === "<!--") {
+      const { token, nextIndex } = parseComment(input, i);
+      result.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+
+    // end tag
+    if (buffer === "</") {
+      const { token, nextIndex } = parseEndTag(input, i);
+      result.push(token);
+      i = nextIndex;
+      toggle = false;
+      buffer = "";
+      continue;
+    }
+
+    // XML PI (Processing Instruction)
+    if (buffer === "<?") {
+      const { token, nextIndex } = parsePi(input, i);
+      result.push(token);
       i = nextIndex;
       toggle = false;
       buffer = "";
@@ -608,7 +610,7 @@ function tokenize(str: string): Token[] {
     // start-tag
     if (ch === ">") {
       const { token } = parseStartTag(buffer);
-      tokens.push(token);
+      result.push(token);
       toggle = false;
       buffer = "";
       i++;
@@ -620,7 +622,7 @@ function tokenize(str: string): Token[] {
   }
 
   if (buffer) {
-    tokens.push({
+    result.push({
       type: "text",
       isClosed: true,
       isClosing: false,
@@ -628,7 +630,7 @@ function tokenize(str: string): Token[] {
     });
   }
 
-  return tokens;
+  return result;
 }
 
 function parseStr(str: string): {
