@@ -1,10 +1,11 @@
 /**
  * Returns the display width of a string based on East Asian Width.
+ *
  * Full-width characters (CJK, Hangul, etc.) count as 2, others as 1.
  *
  * @example
- * getStringWidth("hello"); // 5
- * getStringWidth("안녕"); // 4
+ * getStringWidth("hello");  // 5
+ * getStringWidth("안녕");    // 4
  * getStringWidth("abc안녕"); // 7
  */
 export declare function getStringWidth(str: string): number;

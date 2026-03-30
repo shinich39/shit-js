@@ -1,6 +1,4 @@
 /**
- * Degree => Radians
- *
  * @example
  * toRadians(0);   // 0
  * toRadians(90);  // Math.PI / 2

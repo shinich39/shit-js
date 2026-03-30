@@ -58,6 +58,7 @@ export function wrap(num: number, min: number, max: number): number {
 
   return num + min;
 }
+
 /**
  * @example
  * lerp(0, 100, 0);   // 0
