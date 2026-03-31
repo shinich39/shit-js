@@ -7,4 +7,12 @@
  * ctx.rotate(toRadians(45)); // rotate 45 degree in Canvas, WebGL, Three.js...
  */
 export declare function toRadians(degree: number): number;
-//# sourceMappingURL=to-radians.d.ts.map
+/**
+ * @example
+ * fromRadians(0);           // 0
+ * fromRadians(Math.PI / 2); // 90
+ * fromRadians(Math.PI);     // 180
+ * fromRadians(Math.PI * 2); // 360
+ */
+export declare function fromRadians(radians: number): number;
+//# sourceMappingURL=radians.d.ts.map

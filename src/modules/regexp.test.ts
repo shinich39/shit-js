@@ -1,6 +1,6 @@
 import { deepStrictEqual as eq, throws } from "node:assert";
 import { test } from "node:test";
-import { toRegExp } from "./to-regexp";
+import { fromRegExp, toRegExp } from "./regexp";
 
 test("toRegExp", () => {
   eq(toRegExp("abc"), /abc/);
@@ -8,4 +8,9 @@ test("toRegExp", () => {
   eq(toRegExp("/a/bc/gi"), /a\/bc/gi);
   eq(toRegExp("/a[\\\\/]c/gi"), /a[\\/]c/gi);
   throws(() => toRegExp("/abc"));
+});
+
+test("fromRegExp", () => {
+  eq(fromRegExp(/abc/), "/abc/");
+  eq(fromRegExp(/abc/gi), "/abc/gi");
 });

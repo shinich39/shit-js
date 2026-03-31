@@ -18,3 +18,12 @@ export function toRegExp(str: string): RegExp {
 
   return new RegExp(str);
 }
+
+/**
+ * @example
+ * fromRegExp(/abc/); // "/abc/"
+ * fromRegExp(/abc/gi); // "/abc/gi"
+ */
+export function fromRegExp(re: RegExp): string {
+  return `/${re.source}/${re.flags}`;
+}

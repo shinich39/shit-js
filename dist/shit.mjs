@@ -973,6 +973,120 @@ function clone(obj) {
   return fn(obj);
 }
 
+// src/modules/compare-string.ts
+function backtrack(from, to, trace, depth) {
+  const result = [];
+  let x = from.length;
+  let y = to.length;
+  const max = from.length + to.length;
+  let currentOp = null;
+  let currentStr = "";
+  const push = (op, char) => {
+    if (currentOp === op) {
+      currentStr = char + currentStr;
+    } else {
+      if (currentOp !== null && currentStr) {
+        result.push([currentOp, currentStr]);
+      }
+      currentOp = op;
+      currentStr = char;
+    }
+  };
+  for (let d = depth; d >= 0; d--) {
+    const v = trace[d];
+    const k = x - y;
+    let prevK;
+    if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+      prevK = k + 1;
+    } else {
+      prevK = k - 1;
+    }
+    const prevX = v[prevK + max];
+    const prevY = prevX - prevK;
+    while (x > prevX && y > prevY) {
+      x--;
+      y--;
+      push(0, from[x]);
+    }
+    if (d === 0) break;
+    if (x === prevX) {
+      y--;
+      push(1, to[y]);
+    } else {
+      x--;
+      push(-1, from[x]);
+    }
+  }
+  if (currentOp !== null && currentStr) {
+    result.push([currentOp, currentStr]);
+  }
+  return result.reverse();
+}
+function getDiffs(from, to) {
+  const n = from.length;
+  const m = to.length;
+  const max = n + m;
+  const v = Array(2 * max + 1).fill(0);
+  const trace = [];
+  for (let d = 0; d <= max; d++) {
+    trace.push([...v]);
+    for (let k = -d; k <= d; k += 2) {
+      let x;
+      if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+        x = v[k + 1 + max];
+      } else {
+        x = v[k - 1 + max] + 1;
+      }
+      let y = x - k;
+      while (x < n && y < m && from[x] === to[y]) {
+        x++;
+        y++;
+      }
+      v[k + max] = x;
+      if (x >= n && y >= m) {
+        return backtrack(from, to, trace, d);
+      }
+    }
+  }
+  return [];
+}
+function compareStrings(from, to) {
+  const diffs = getDiffs(from, to);
+  let matches = 0;
+  let insertions = 0;
+  let deletions = 0;
+  for (const [op, str] of diffs) {
+    const len = str.length;
+    if (op === 0) {
+      matches += len;
+    } else if (op === 1) {
+      insertions += len;
+    } else {
+      deletions += len;
+    }
+  }
+  const totalOperations = matches + insertions + deletions;
+  return {
+    diffs,
+    // proportion of matching characters
+    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
+    // similarity based on longer string
+    similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
+    // sørensen-dice similarity coefficient
+    diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
+    // jaccard similarity coefficient
+    jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
+    // levenshtein distance (edit distance)
+    distance: insertions + deletions,
+    // normalized edit distance (0 = identical, 1 = completely different)
+    normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
+    // detailed counts
+    matches,
+    insertions,
+    deletions
+  };
+}
+
 // src/modules/create-i18n.ts
 function createI18n(obj, defaultLocale) {
   return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
@@ -1072,119 +1186,6 @@ function createTypingDelay() {
     base -= accel;
     return Math.max(scale(45), Math.min(base, scale(520)));
   };
-}
-
-// src/modules/diff.ts
-function getDiffs(from, to) {
-  const n = from.length;
-  const m = to.length;
-  const max = n + m;
-  const v = Array(2 * max + 1).fill(0);
-  const trace = [];
-  for (let d = 0; d <= max; d++) {
-    trace.push([...v]);
-    for (let k = -d; k <= d; k += 2) {
-      let x;
-      if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
-        x = v[k + 1 + max];
-      } else {
-        x = v[k - 1 + max] + 1;
-      }
-      let y = x - k;
-      while (x < n && y < m && from[x] === to[y]) {
-        x++;
-        y++;
-      }
-      v[k + max] = x;
-      if (x >= n && y >= m) {
-        return backtrack(from, to, trace, d);
-      }
-    }
-  }
-  return [];
-}
-function compareStrings(from, to) {
-  const diffs = getDiffs(from, to);
-  let matches = 0;
-  let insertions = 0;
-  let deletions = 0;
-  for (const [op, str] of diffs) {
-    const len = str.length;
-    if (op === 0) {
-      matches += len;
-    } else if (op === 1) {
-      insertions += len;
-    } else {
-      deletions += len;
-    }
-  }
-  const totalOperations = matches + insertions + deletions;
-  return {
-    // proportion of matching characters
-    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
-    // similarity based on longer string
-    similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
-    // sørensen-dice similarity coefficient
-    diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
-    // jaccard similarity coefficient
-    jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
-    // levenshtein distance (edit distance)
-    distance: insertions + deletions,
-    // normalized edit distance (0 = identical, 1 = completely different)
-    normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
-    // detailed counts
-    matches,
-    insertions,
-    deletions
-  };
-}
-function backtrack(from, to, trace, depth) {
-  const result = [];
-  let x = from.length;
-  let y = to.length;
-  const max = from.length + to.length;
-  let currentOp = null;
-  let currentStr = "";
-  const push = (op, char) => {
-    if (currentOp === op) {
-      currentStr = char + currentStr;
-    } else {
-      if (currentOp !== null && currentStr) {
-        result.push([currentOp, currentStr]);
-      }
-      currentOp = op;
-      currentStr = char;
-    }
-  };
-  for (let d = depth; d >= 0; d--) {
-    const v = trace[d];
-    const k = x - y;
-    let prevK;
-    if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
-      prevK = k + 1;
-    } else {
-      prevK = k - 1;
-    }
-    const prevX = v[prevK + max];
-    const prevY = prevX - prevK;
-    while (x > prevX && y > prevY) {
-      x--;
-      y--;
-      push(0, from[x]);
-    }
-    if (d === 0) break;
-    if (x === prevX) {
-      y--;
-      push(1, to[y]);
-    } else {
-      x--;
-      push(-1, from[x]);
-    }
-  }
-  if (currentOp !== null && currentStr) {
-    result.push([currentOp, currentStr]);
-  }
-  return result.reverse();
 }
 
 // src/modules/extract-numbers.ts
@@ -1438,6 +1439,14 @@ function product(...arrays) {
   );
 }
 
+// src/modules/radians.ts
+function toRadians(degree) {
+  return degree * (Math.PI / 180);
+}
+function fromRadians(radians) {
+  return radians * (180 / Math.PI);
+}
+
 // src/modules/random.ts
 function randomFloat(min, max) {
   return Math.random() * (max - min) + min;
@@ -1452,6 +1461,23 @@ function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghij
     result += charset.charAt(Math.floor(Math.random() * charsetSize));
   }
   return result;
+}
+
+// src/modules/regexp.ts
+function toRegExp(str) {
+  if (str.startsWith("/")) {
+    const patternEnd = str.lastIndexOf("/");
+    if (patternEnd === -1) {
+      throw new Error("Invalid RegExp literal: missing '/'");
+    }
+    const pattern = str.substring(1, patternEnd);
+    const flags = str.substring(patternEnd + 1);
+    return new RegExp(pattern, flags);
+  }
+  return new RegExp(str);
+}
+function fromRegExp(re) {
+  return `/${re.source}/${re.flags}`;
 }
 
 // src/modules/retry.ts
@@ -1564,6 +1590,11 @@ function toFullWidth(str) {
   return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
 }
 
+// src/modules/to-fixed.ts
+function toFixed(value, digits = 0) {
+  return Number(Math.round(Number(`${value}e${digits}`)) + `e-${digits}`);
+}
+
 // src/modules/to-number.ts
 function toNumber(e) {
   if (typeof e === "number") {
@@ -1583,25 +1614,6 @@ function toNumber(e) {
     return 0;
   }
   throw new Error(`Invalid argument type: ${typeof e}`);
-}
-
-// src/modules/to-radians.ts
-function toRadians(degree) {
-  return degree * (Math.PI / 180);
-}
-
-// src/modules/to-regexp.ts
-function toRegExp(str) {
-  if (str.startsWith("/")) {
-    const patternEnd = str.lastIndexOf("/");
-    if (patternEnd === -1) {
-      throw new Error("Invalid RegExp literal: missing '/'");
-    }
-    const pattern = str.substring(1, patternEnd);
-    const flags = str.substring(patternEnd + 1);
-    return new RegExp(pattern, flags);
-  }
-  return new RegExp(str);
 }
 
 // src/modules/unique-by.ts
@@ -1648,6 +1660,8 @@ export {
   fromGb,
   fromKb,
   fromMb,
+  fromRadians,
+  fromRegExp,
   fromTb,
   getCommonPath,
   getDiffs,
@@ -1671,6 +1685,7 @@ export {
   scaleToFit,
   shuffle,
   sleep,
+  toFixed,
   toFullWidth,
   toGb,
   toHalfWidth,

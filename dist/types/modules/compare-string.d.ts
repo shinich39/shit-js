@@ -17,6 +17,7 @@ export declare function getDiffs(from: string, to: string): [number, string][];
  * const b = "sit amet, adipiscing";
  * compareStrings(a, b);
  * // {
+ * //   diffs: [[-1, "L"], [0, "ore"], [-1, "m"], ...],
  * //   matchRate: 0.35714285714285715,
  * //   similarity: 0.35714285714285715,
  * //   diceSimilarity: 0.5263157894736842,
@@ -29,6 +30,7 @@ export declare function getDiffs(from: string, to: string): [number, string][];
  * // }
  */
 export declare function compareStrings(from: string, to: string): {
+    diffs: [number, string][];
     matchRate: number;
     similarity: number;
     diceSimilarity: number;
@@ -39,4 +41,4 @@ export declare function compareStrings(from: string, to: string): {
     insertions: number;
     deletions: number;
 };
-//# sourceMappingURL=diff.d.ts.map
+//# sourceMappingURL=compare-string.d.ts.map

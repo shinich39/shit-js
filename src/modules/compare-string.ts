@@ -1,140 +1,3 @@
-/**
- * Myers algorithm
- *
- * \-1: Number of deleted characters
- *
- * 0: Number of matched characters
- *
- * 1: Number of inserted characters
- *
- * @example
- * getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
- */
-export function getDiffs(from: string, to: string): [number, string][] {
-  const n = from.length;
-  const m = to.length;
-  const max = n + m;
-
-  // v array: maximum x coordinate reachable on each k-line
-  const v: number[] = Array(2 * max + 1).fill(0);
-
-  // array for path tracing
-  const trace: number[][] = [];
-
-  // find shortest edit path
-  for (let d = 0; d <= max; d++) {
-    trace.push([...v]);
-
-    for (let k = -d; k <= d; k += 2) {
-      let x: number;
-
-      if (k === -d || (k !== d && v[k - 1 + max] < v[k + 1 + max])) {
-        x = v[k + 1 + max];
-      } else {
-        x = v[k - 1 + max] + 1;
-      }
-
-      let y = x - k;
-
-      while (x < n && y < m && from[x] === to[y]) {
-        x++;
-        y++;
-      }
-
-      v[k + max] = x;
-
-      if (x >= n && y >= m) {
-        return backtrack(from, to, trace, d);
-      }
-    }
-  }
-
-  // in theory, does not reach here.
-  return [];
-}
-
-/**
- * @example
- * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
- * const b = "sit amet, adipiscing";
- * compareStrings(a, b);
- * // {
- * //   matchRate: 0.35714285714285715,
- * //   similarity: 0.35714285714285715,
- * //   diceSimilarity: 0.5263157894736842,
- * //   jaccardSimilarity: 0.35714285714285715,
- * //   distance: 36,
- * //   normalizedDistance: 0.6428571428571429,
- * //   matches: 20,
- * //   insertions: 0,
- * //   deletions: 36
- * // }
- */
-export function compareStrings(
-  from: string,
-  to: string,
-): {
-  matchRate: number;
-  similarity: number;
-  diceSimilarity: number;
-  jaccardSimilarity: number;
-  distance: number;
-  normalizedDistance: number;
-  matches: number;
-  insertions: number;
-  deletions: number;
-} {
-  const diffs = getDiffs(from, to);
-
-  let matches = 0;
-  let insertions = 0;
-  let deletions = 0;
-
-  for (const [op, str] of diffs) {
-    const len = str.length;
-    if (op === 0) {
-      matches += len;
-    } else if (op === 1) {
-      insertions += len;
-    } else {
-      deletions += len;
-    }
-  }
-
-  const totalOperations = matches + insertions + deletions;
-
-  // various similarity metrics
-  return {
-    // proportion of matching characters
-    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
-
-    // similarity based on longer string
-    similarity:
-      Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
-
-    // sørensen-dice similarity coefficient
-    diceSimilarity: from.length + to.length > 0 ? (2 * matches) / (from.length + to.length) : 1,
-
-    // jaccard similarity coefficient
-    jaccardSimilarity:
-      from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
-
-    // levenshtein distance (edit distance)
-    distance: insertions + deletions,
-
-    // normalized edit distance (0 = identical, 1 = completely different)
-    normalizedDistance:
-      Math.max(from.length, to.length) > 0
-        ? (insertions + deletions) / Math.max(from.length, to.length)
-        : 0,
-
-    // detailed counts
-    matches,
-    insertions,
-    deletions,
-  };
-}
-
 function backtrack(
   from: string,
   to: string,
@@ -207,4 +70,145 @@ function backtrack(
   }
 
   return result.reverse();
+}
+
+/**
+ * Myers algorithm
+ *
+ * \-1: Number of deleted characters
+ *
+ * 0: Number of matched characters
+ *
+ * 1: Number of inserted characters
+ *
+ * @example
+ * getDiffs("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ */
+export function getDiffs(from: string, to: string): [number, string][] {
+  const n = from.length;
+  const m = to.length;
+  const max = n + m;
+
+  // v array: maximum x coordinate reachable on each k-line
+  const v: number[] = Array(2 * max + 1).fill(0);
+
+  // array for path tracing
+  const trace: number[][] = [];
+
+  // find shortest edit path
+  for (let d = 0; d <= max; d++) {
+    trace.push([...v]);
+
+    for (let k = -d; k <= d; k += 2) {
+      let x: number;
+
+      if (k === -d || (k !== d && v[k - 1 + max] < v[k + 1 + max])) {
+        x = v[k + 1 + max];
+      } else {
+        x = v[k - 1 + max] + 1;
+      }
+
+      let y = x - k;
+
+      while (x < n && y < m && from[x] === to[y]) {
+        x++;
+        y++;
+      }
+
+      v[k + max] = x;
+
+      if (x >= n && y >= m) {
+        return backtrack(from, to, trace, d);
+      }
+    }
+  }
+
+  // in theory, does not reach here.
+  return [];
+}
+
+/**
+ * @example
+ * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+ * const b = "sit amet, adipiscing";
+ * compareStrings(a, b);
+ * // {
+ * //   diffs: [[-1, "L"], [0, "ore"], [-1, "m"], ...],
+ * //   matchRate: 0.35714285714285715,
+ * //   similarity: 0.35714285714285715,
+ * //   diceSimilarity: 0.5263157894736842,
+ * //   jaccardSimilarity: 0.35714285714285715,
+ * //   distance: 36,
+ * //   normalizedDistance: 0.6428571428571429,
+ * //   matches: 20,
+ * //   insertions: 0,
+ * //   deletions: 36
+ * // }
+ */
+export function compareStrings(
+  from: string,
+  to: string,
+): {
+  diffs: [number, string][];
+  matchRate: number;
+  similarity: number;
+  diceSimilarity: number;
+  jaccardSimilarity: number;
+  distance: number;
+  normalizedDistance: number;
+  matches: number;
+  insertions: number;
+  deletions: number;
+} {
+  const diffs = getDiffs(from, to);
+
+  let matches = 0;
+  let insertions = 0;
+  let deletions = 0;
+
+  for (const [op, str] of diffs) {
+    const len = str.length;
+    if (op === 0) {
+      matches += len;
+    } else if (op === 1) {
+      insertions += len;
+    } else {
+      deletions += len;
+    }
+  }
+
+  const totalOperations = matches + insertions + deletions;
+
+  // various similarity metrics
+  return {
+    diffs,
+
+    // proportion of matching characters
+    matchRate: totalOperations > 0 ? matches / totalOperations : 1,
+
+    // similarity based on longer string
+    similarity:
+      Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
+
+    // sørensen-dice similarity coefficient
+    diceSimilarity: from.length + to.length > 0 ? (2 * matches) / (from.length + to.length) : 1,
+
+    // jaccard similarity coefficient
+    jaccardSimilarity:
+      from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
+
+    // levenshtein distance (edit distance)
+    distance: insertions + deletions,
+
+    // normalized edit distance (0 = identical, 1 = completely different)
+    normalizedDistance:
+      Math.max(from.length, to.length) > 0
+        ? (insertions + deletions) / Math.max(from.length, to.length)
+        : 0,
+
+    // detailed counts
+    matches,
+    insertions,
+    deletions,
+  };
 }

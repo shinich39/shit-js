@@ -1,6 +1,6 @@
 import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
-import { compareStrings, getDiffs } from "./diff";
+import { compareStrings, getDiffs } from "./compare-string";
 
 test("getDiffs", () => {
   const b = "sit amet, adipiscing";
@@ -24,6 +24,15 @@ test("compareStrings", () => {
   const result = compareStrings(a, b);
 
   eq(result, {
+    diffs: [
+      [-1, "Lorem ip"],
+      [0, "s"],
+      [-1, "um dolor s"],
+      [0, "it amet, "],
+      [-1, "consectetur "],
+      [0, "adipiscing"],
+      [-1, " elit."],
+    ],
     matchRate: 0.35714285714285715,
     similarity: 0.35714285714285715,
     diceSimilarity: 0.5263157894736842,

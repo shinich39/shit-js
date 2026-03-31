@@ -9,3 +9,14 @@
 export function toRadians(degree: number): number {
   return degree * (Math.PI / 180);
 }
+
+/**
+ * @example
+ * fromRadians(0);           // 0
+ * fromRadians(Math.PI / 2); // 90
+ * fromRadians(Math.PI);     // 180
+ * fromRadians(Math.PI * 2); // 360
+ */
+export function fromRadians(radians: number): number {
+  return radians * (180 / Math.PI);
+}
