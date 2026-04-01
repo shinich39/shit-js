@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { deepStrictEqual as eq, ok } from "node:assert";
 import { test } from "node:test";
 import { createTypingDelay } from "./create-typing-delay";

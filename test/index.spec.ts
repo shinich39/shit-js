@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { deepStrictEqual as eq } from "node:assert";
 import { test } from "@playwright/test";
 import type * as shit from "../src/index.js";

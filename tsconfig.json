@@ -12,9 +12,7 @@
     "isolatedDeclarations": true,
 
     "verbatimModuleSyntax": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "types": ["node"],
 
     "strict": true,
     "erasableSyntaxOnly": true,

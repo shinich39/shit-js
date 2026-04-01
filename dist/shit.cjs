@@ -39,12 +39,10 @@ __export(index_exports, {
   fromKb: () => fromKb,
   fromMb: () => fromMb,
   fromRadians: () => fromRadians,
-  fromRegExp: () => fromRegExp,
   fromTb: () => fromTb,
   getCommonPath: () => getCommonPath,
   getDiffs: () => getDiffs,
   getRelativePath: () => getRelativePath,
-  getStringWidth: () => getStringWidth,
   groupBy: () => groupBy,
   lerp: () => lerp,
   mode: () => mode,
@@ -71,7 +69,6 @@ __export(index_exports, {
   toMb: () => toMb,
   toNumber: () => toNumber,
   toRadians: () => toRadians,
-  toRegExp: () => toRegExp,
   toTb: () => toTb,
   uniqueBy: () => uniqueBy,
   wrap: () => wrap,
@@ -1054,7 +1051,7 @@ function clone(obj) {
   return fn(obj);
 }
 
-// src/modules/compare-string.ts
+// src/modules/compare-strings.ts
 function backtrack(from, to, trace, depth) {
   const result = [];
   let x = from.length;
@@ -1280,6 +1277,60 @@ function extractInts(str) {
   return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
 }
 
+// src/modules/get-common-path.ts
+function getCommonPath(args) {
+  if (args.length === 0) {
+    return "";
+  }
+  const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
+  const resolved = [];
+  let j = 0;
+  while (true) {
+    let seg = parts[0][j];
+    if (typeof seg !== "string") {
+      break;
+    }
+    for (let i = 1; i < parts.length; i++) {
+      if (seg !== parts[i][j]) {
+        seg = null;
+        break;
+      }
+    }
+    if (seg === null) {
+      break;
+    }
+    resolved.push(seg);
+    j++;
+  }
+  return resolved.join("/");
+}
+
+// src/modules/get-relative-path.ts
+function getRelativePath(from, to) {
+  const normalize2 = (str) => {
+    str = str.replace(/\\/g, "/").replace(/\/$/, "");
+    if (str.charAt(0) === "/") {
+      throw new Error(`Invalid argument: ${str}`);
+    }
+    if (str === ".") {
+      return str;
+    }
+    if (str.charAt(0) === "." && str.charAt(1) === "/") {
+      return str;
+    }
+    return `./${str}`;
+  };
+  const a = normalize2(from).split("/").filter(Boolean);
+  const b = normalize2(to).split("/").filter(Boolean);
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) {
+    i++;
+  }
+  const up = Array(a.length - i).fill("..").join("/");
+  const down = b.slice(i).join("/");
+  return up + (up && down ? "/" : "") + down;
+}
+
 // src/modules/group-by.ts
 function groupBy(arr, fn) {
   const result = {};
@@ -1326,6 +1377,12 @@ function wrap(num, min, max) {
 }
 function lerp(a, b, t) {
   return a + (b - a) * t;
+}
+function toRadians(degree) {
+  return degree * (Math.PI / 180);
+}
+function fromRadians(radians) {
+  return radians * (180 / Math.PI);
 }
 
 // src/modules/parse-date.ts
@@ -1402,29 +1459,7 @@ function parseDate(date) {
   };
 }
 
-// src/modules/path.ts
-function resolvePath(...args) {
-  const isAbsolute = args[0]?.startsWith("/");
-  const parts = args.join("/").split(/[\\/]+/);
-  const resolved = [];
-  for (const part of parts) {
-    if (!part || part === ".") {
-      continue;
-    }
-    if (part === "..") {
-      if (!resolved[resolved.length - 1] || resolved[resolved.length - 1] === "..") {
-        if (!isAbsolute) {
-          resolved.push("..");
-        }
-      } else {
-        resolved.pop();
-      }
-      continue;
-    }
-    resolved.push(part);
-  }
-  return (isAbsolute ? "/" : "") + resolved.join("/");
-}
+// src/modules/parse-path.ts
 function parsePath(str) {
   str = str.replace(/\\/g, "/").replace(/\/+$/, "");
   let dirEnd = -1;
@@ -1445,56 +1480,6 @@ function parsePath(str) {
   const ext = extStart > dirEnd ? str.substring(extStart) : "";
   const name = ext ? base.substring(0, base.length - ext.length) : base;
   return { dir, dirs, base, name, ext };
-}
-function getRelativePath(from, to) {
-  const normalize2 = (str) => {
-    str = str.replace(/\\/g, "/").replace(/\/$/, "");
-    if (str.charAt(0) === "/") {
-      throw new Error(`Invalid argument: ${str}`);
-    }
-    if (str === ".") {
-      return str;
-    }
-    if (str.charAt(0) === "." && str.charAt(1) === "/") {
-      return str;
-    }
-    return `./${str}`;
-  };
-  const a = normalize2(from).split("/").filter(Boolean);
-  const b = normalize2(to).split("/").filter(Boolean);
-  let i = 0;
-  while (i < a.length && i < b.length && a[i] === b[i]) {
-    i++;
-  }
-  const up = Array(a.length - i).fill("..").join("/");
-  const down = b.slice(i).join("/");
-  return up + (up && down ? "/" : "") + down;
-}
-function getCommonPath(args) {
-  if (args.length === 0) {
-    return "";
-  }
-  const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
-  const resolved = [];
-  let j = 0;
-  while (true) {
-    let seg = parts[0][j];
-    if (typeof seg !== "string") {
-      break;
-    }
-    for (let i = 1; i < parts.length; i++) {
-      if (seg !== parts[i][j]) {
-        seg = null;
-        break;
-      }
-    }
-    if (seg === null) {
-      break;
-    }
-    resolved.push(seg);
-    j++;
-  }
-  return resolved.join("/");
 }
 
 // src/modules/pick-by.ts
@@ -1520,21 +1505,17 @@ function product(...arrays) {
   );
 }
 
-// src/modules/radians.ts
-function toRadians(degree) {
-  return degree * (Math.PI / 180);
-}
-function fromRadians(radians) {
-  return radians * (180 / Math.PI);
-}
-
-// src/modules/random.ts
+// src/modules/random-float.ts
 function randomFloat(min, max) {
   return Math.random() * (max - min) + min;
 }
+
+// src/modules/random-int.ts
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
+
+// src/modules/random-string.ts
 function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
   const charsetSize = charset.length;
   let result = "";
@@ -1544,21 +1525,28 @@ function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghij
   return result;
 }
 
-// src/modules/regexp.ts
-function toRegExp(str) {
-  if (str.startsWith("/")) {
-    const patternEnd = str.lastIndexOf("/");
-    if (patternEnd === -1) {
-      throw new Error("Invalid RegExp literal: missing '/'");
+// src/modules/resolve-path.ts
+function resolvePath(...args) {
+  const isAbsolute = args[0]?.startsWith("/");
+  const parts = args.join("/").split(/[\\/]+/);
+  const resolved = [];
+  for (const part of parts) {
+    if (!part || part === ".") {
+      continue;
     }
-    const pattern = str.substring(1, patternEnd);
-    const flags = str.substring(patternEnd + 1);
-    return new RegExp(pattern, flags);
+    if (part === "..") {
+      if (!resolved[resolved.length - 1] || resolved[resolved.length - 1] === "..") {
+        if (!isAbsolute) {
+          resolved.push("..");
+        }
+      } else {
+        resolved.pop();
+      }
+      continue;
+    }
+    resolved.push(part);
   }
-  return new RegExp(str);
-}
-function fromRegExp(re) {
-  return `/${re.source}/${re.flags}`;
+  return (isAbsolute ? "/" : "") + resolved.join("/");
 }
 
 // src/modules/retry.ts
@@ -1584,7 +1572,7 @@ function sanitizeFilename(str, replacement = "_") {
   return str.replace(/[\\/:*?"<>|]+/g, replacement).replace(/[\u0000-\u001F\u007F]+/g, replacement).replace(/[. ]+$/, "") || replacement;
 }
 
-// src/modules/scale.ts
+// src/modules/scale-to-contain.ts
 function scaleToContain(srcWidth, srcHeight, dstWidth, dstHeight) {
   const srcAspectRatio = srcWidth / srcHeight;
   const dstAspectRatio = dstWidth / dstHeight;
@@ -1594,6 +1582,8 @@ function scaleToContain(srcWidth, srcHeight, dstWidth, dstHeight) {
     return [dstWidth, dstWidth / srcAspectRatio];
   }
 }
+
+// src/modules/scale-to-cover.ts
 function scaleToCover(srcWidth, srcHeight, dstWidth, dstHeight) {
   const srcAspectRatio = srcWidth / srcHeight;
   const dstAspectRatio = dstWidth / dstHeight;
@@ -1603,6 +1593,8 @@ function scaleToCover(srcWidth, srcHeight, dstWidth, dstHeight) {
     return [dstHeight * srcAspectRatio, dstHeight];
   }
 }
+
+// src/modules/scale-to-fit.ts
 function scaleToFit(srcWidth, srcHeight, maxWidth, maxHeight, minWidth, minHeight) {
   const aspectRatio = srcWidth / srcHeight;
   let w = srcWidth;
@@ -1642,38 +1634,19 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// src/modules/string-width.ts
-function getStringWidth(str) {
-  let width = 0;
-  for (const char of str) {
-    const code = char.codePointAt(0);
-    if (code === void 0) {
-      width += 1;
-      continue;
-    }
-    const isFullWidth = code >= 19968 && code <= 40959 || // CJK Unified Ideographs
-    code >= 44032 && code <= 55203 || // Hangul Syllables
-    code >= 4352 && code <= 4607 || // Hangul Jamo
-    code >= 65281 && code <= 65376 || // Full-width Forms
-    code >= 63744 && code <= 64255 || // CJK Compatibility Ideographs
-    code >= 12352 && code <= 12543 || // Hiragana / Katakana
-    code >= 12288 && code <= 12351 || // CJK Symbols and Punctuation
-    code >= 12800 && code <= 13055 || // Enclosed CJK
-    code >= 13056 && code <= 13311;
-    width += isFullWidth ? 2 : 1;
-  }
-  return width;
+// src/modules/to-fixed.ts
+function toFixed(value, digits = 0) {
+  return Number(Math.round(Number(`${value}e${digits}`)) + `e-${digits}`);
 }
-function toHalfWidth(str) {
-  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/　/g, " ");
-}
+
+// src/modules/to-full-width.ts
 function toFullWidth(str) {
   return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
 }
 
-// src/modules/to-fixed.ts
-function toFixed(value, digits = 0) {
-  return Number(Math.round(Number(`${value}e${digits}`)) + `e-${digits}`);
+// src/modules/to-half-width.ts
+function toHalfWidth(str) {
+  return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/　/g, " ");
 }
 
 // src/modules/to-number.ts
@@ -1743,12 +1716,10 @@ function xor(str, salt) {
   fromKb,
   fromMb,
   fromRadians,
-  fromRegExp,
   fromTb,
   getCommonPath,
   getDiffs,
   getRelativePath,
-  getStringWidth,
   groupBy,
   lerp,
   mode,
@@ -1775,7 +1746,6 @@ function xor(str, salt) {
   toMb,
   toNumber,
   toRadians,
-  toRegExp,
   toTb,
   uniqueBy,
   wrap,
