@@ -22,9 +22,11 @@ var shitJs = (() => {
   var index_exports = {};
   __export(index_exports, {
     Ast: () => Ast,
+    cartesianProduct: () => cartesianProduct,
     chunkArray: () => chunkArray,
     clamp: () => clamp,
     clone: () => clone,
+    compareObjects: () => compareObjects,
     compareStrings: () => compareStrings,
     createAst: () => createAst,
     createI18n: () => createI18n,
@@ -33,16 +35,18 @@ var shitJs = (() => {
     createStore: () => createStore,
     createTemplate: () => createTemplate,
     createTypingDelay: () => createTypingDelay,
+    debounce: () => debounce,
+    diffObjects: () => diffObjects,
+    diffStrings: () => diffStrings,
+    equal: () => equal,
     extractFloats: () => extractFloats,
     extractInts: () => extractInts,
     extractNumbers: () => extractNumbers,
     fromGb: () => fromGb,
     fromKb: () => fromKb,
     fromMb: () => fromMb,
-    fromRadians: () => fromRadians,
     fromTb: () => fromTb,
     getCommonPath: () => getCommonPath,
-    getDiffs: () => getDiffs,
     getRelativePath: () => getRelativePath,
     groupBy: () => groupBy,
     lerp: () => lerp,
@@ -50,7 +54,6 @@ var shitJs = (() => {
     parseDate: () => parseDate,
     parsePath: () => parsePath,
     pickBy: () => pickBy,
-    product: () => product,
     randomFloat: () => randomFloat,
     randomInt: () => randomInt,
     randomString: () => randomString,
@@ -62,6 +65,7 @@ var shitJs = (() => {
     scaleToFit: () => scaleToFit,
     shuffle: () => shuffle,
     sleep: () => sleep,
+    toDegrees: () => toDegrees,
     toFixed: () => toFixed,
     toFullWidth: () => toFullWidth,
     toGb: () => toGb,
@@ -70,13 +74,130 @@ var shitJs = (() => {
     toMb: () => toMb,
     toNumber: () => toNumber,
     toRadians: () => toRadians,
+    toRegExp: () => toRegExp,
     toTb: () => toTb,
     uniqueBy: () => uniqueBy,
     wrap: () => wrap,
     xor: () => xor
   });
 
-  // src/modules/ast.ts
+  // src/array/cartesian-product.ts
+  function cartesianProduct(...arrays) {
+    const filtered = arrays.filter((arr) => arr.length > 0);
+    if (filtered.length < 1) {
+      return [];
+    }
+    return filtered.reduce(
+      (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
+      [[]]
+    );
+  }
+
+  // src/array/chunk-array.ts
+  function chunkArray(arr, size) {
+    return arr.reduce((acc, curr) => {
+      if (!acc[acc.length - 1] || acc[acc.length - 1].length >= size) {
+        acc.push([curr]);
+      } else {
+        acc[acc.length - 1].push(curr);
+      }
+      return acc;
+    }, []);
+  }
+
+  // src/array/group-by.ts
+  function groupBy(arr, fn) {
+    const result = {};
+    let i = 0;
+    for (const item of arr) {
+      const key = fn(item, i++);
+      if (!result[key]) {
+        result[key] = [item];
+      } else {
+        result[key].push(item);
+      }
+    }
+    return result;
+  }
+
+  // src/array/mode.ts
+  function mode(arr) {
+    const seen = /* @__PURE__ */ new Map();
+    let maxValue;
+    let maxCount = 0;
+    for (const v of arr) {
+      const c = (seen.get(v) || 0) + 1;
+      seen.set(v, c);
+      if (maxCount < c) {
+        maxCount = c;
+        maxValue = v;
+      }
+    }
+    return { count: maxCount, value: maxValue };
+  }
+
+  // src/array/shuffle.ts
+  function shuffle(arr) {
+    let i = arr.length;
+    while (i > 0) {
+      const j = Math.floor(Math.random() * i);
+      i--;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // src/array/unique-by.ts
+  function uniqueBy(arr, fn) {
+    const map = /* @__PURE__ */ new Map();
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i];
+      const key = fn(arr[i], i, arr);
+      if (!map.has(key)) {
+        map.set(key, item);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  // src/async/debounce.ts
+  function debounce(fn, delay) {
+    let timer = null;
+    return (...args) => {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        fn(...args);
+        timer = null;
+      }, delay);
+    };
+  }
+
+  // src/async/retry.ts
+  async function retry(fn, options) {
+    const { count = 3, delay = 1e3, onRetry } = options ?? {};
+    let lastError;
+    for (let i = 0; i < count; i++) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastError = err;
+        if (i < count - 1) {
+          await onRetry?.(err, i);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+    throw lastError;
+  }
+
+  // src/async/sleep.ts
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  // src/class/ast.ts
   function isWhitespace(char) {
     switch (char) {
       case " ":
@@ -984,408 +1105,7 @@ var shitJs = (() => {
     }
   };
 
-  // src/modules/bytes.ts
-  function fromKb(kb) {
-    return kb * 1024;
-  }
-  function fromMb(mb) {
-    return mb * 1024 ** 2;
-  }
-  function fromGb(gb) {
-    return gb * 1024 ** 3;
-  }
-  function fromTb(tb) {
-    return tb * 1024 ** 4;
-  }
-  function toKb(bytes) {
-    return bytes / 1024;
-  }
-  function toMb(bytes) {
-    return bytes / 1024 ** 2;
-  }
-  function toGb(bytes) {
-    return bytes / 1024 ** 3;
-  }
-  function toTb(bytes) {
-    return bytes / 1024 ** 4;
-  }
-
-  // src/modules/chunk-array.ts
-  function chunkArray(arr, size) {
-    return arr.reduce((acc, curr) => {
-      if (!acc[acc.length - 1] || acc[acc.length - 1].length >= size) {
-        acc.push([curr]);
-      } else {
-        acc[acc.length - 1].push(curr);
-      }
-      return acc;
-    }, []);
-  }
-
-  // src/modules/clone.ts
-  function clone(obj) {
-    const cache = /* @__PURE__ */ new WeakMap();
-    const fn = (o) => {
-      if (o === null || typeof o !== "object") {
-        return o;
-      }
-      if (cache.has(o)) {
-        return cache.get(o);
-      }
-      if (o instanceof Date) {
-        return new Date(o.getTime());
-      }
-      if (o instanceof RegExp) {
-        return new RegExp(o.source, o.flags);
-      }
-      if (Array.isArray(o)) {
-        return o.map((item) => clone(item));
-      }
-      const result = Object.create(Object.getPrototypeOf(o));
-      cache.set(o, result);
-      for (const key of Object.keys(o)) {
-        result[key] = fn(o[key]);
-      }
-      return result;
-    };
-    return fn(obj);
-  }
-
-  // src/modules/compare-strings.ts
-  function backtrack(from, to, trace, depth) {
-    const result = [];
-    let x = from.length;
-    let y = to.length;
-    const max = from.length + to.length;
-    let currentOp = null;
-    let currentStr = "";
-    const push = (op, char) => {
-      if (currentOp === op) {
-        currentStr = char + currentStr;
-      } else {
-        if (currentOp !== null && currentStr) {
-          result.push([currentOp, currentStr]);
-        }
-        currentOp = op;
-        currentStr = char;
-      }
-    };
-    for (let d = depth; d >= 0; d--) {
-      const v = trace[d];
-      const k = x - y;
-      let prevK;
-      if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
-        prevK = k + 1;
-      } else {
-        prevK = k - 1;
-      }
-      const prevX = v[prevK + max];
-      const prevY = prevX - prevK;
-      while (x > prevX && y > prevY) {
-        x--;
-        y--;
-        push(0, from[x]);
-      }
-      if (d === 0) break;
-      if (x === prevX) {
-        y--;
-        push(1, to[y]);
-      } else {
-        x--;
-        push(-1, from[x]);
-      }
-    }
-    if (currentOp !== null && currentStr) {
-      result.push([currentOp, currentStr]);
-    }
-    return result.reverse();
-  }
-  function getDiffs(from, to) {
-    const n = from.length;
-    const m = to.length;
-    const max = n + m;
-    const v = Array(2 * max + 1).fill(0);
-    const trace = [];
-    for (let d = 0; d <= max; d++) {
-      trace.push([...v]);
-      for (let k = -d; k <= d; k += 2) {
-        let x;
-        if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
-          x = v[k + 1 + max];
-        } else {
-          x = v[k - 1 + max] + 1;
-        }
-        let y = x - k;
-        while (x < n && y < m && from[x] === to[y]) {
-          x++;
-          y++;
-        }
-        v[k + max] = x;
-        if (x >= n && y >= m) {
-          return backtrack(from, to, trace, d);
-        }
-      }
-    }
-    return [];
-  }
-  function compareStrings(from, to) {
-    const diffs = getDiffs(from, to);
-    let matches = 0;
-    let insertions = 0;
-    let deletions = 0;
-    for (const [op, str] of diffs) {
-      const len = str.length;
-      if (op === 0) {
-        matches += len;
-      } else if (op === 1) {
-        insertions += len;
-      } else {
-        deletions += len;
-      }
-    }
-    const totalOperations = matches + insertions + deletions;
-    return {
-      diffs,
-      // proportion of matching characters
-      matchRate: totalOperations > 0 ? matches / totalOperations : 1,
-      // similarity based on longer string
-      similarity: Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1,
-      // sørensen-dice similarity coefficient
-      diceSimilarity: from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1,
-      // jaccard similarity coefficient
-      jaccardSimilarity: from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1,
-      // levenshtein distance (edit distance)
-      distance: insertions + deletions,
-      // normalized edit distance (0 = identical, 1 = completely different)
-      normalizedDistance: Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0,
-      // detailed counts
-      matches,
-      insertions,
-      deletions
-    };
-  }
-
-  // src/modules/create-i18n.ts
-  function createI18n(obj, defaultLocale) {
-    return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
-  }
-
-  // src/modules/create-mulberry32.ts
-  function createMulberry32(initialSeed) {
-    let seed = initialSeed;
-    const next = () => {
-      seed = seed + 1831565813 | 0;
-      let t = Math.imul(seed ^ seed >>> 15, seed | 1);
-      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-      return ((t ^ t >>> 14) >>> 0) / 4294967296;
-    };
-    return {
-      float: (min, max) => next() * (max - min) + min,
-      int: (min, max) => Math.floor(next() * (max - min) + min)
-    };
-  }
-
-  // src/modules/create-queue.ts
-  function createQueue() {
-    let queue = Promise.resolve();
-    return (fn) => {
-      return new Promise((resolve, reject) => {
-        queue = queue.then(fn).then(resolve).catch(reject);
-      });
-    };
-  }
-
-  // src/modules/create-store.ts
-  function createStore(initial, handlers) {
-    return new Proxy(
-      { ...initial },
-      {
-        set(target, key, value) {
-          const typedKey = key;
-          const oldValue = target[typedKey];
-          if (oldValue !== value) {
-            target[typedKey] = value;
-            const handler = handlers[typedKey];
-            if (handler) {
-              handler(oldValue, value);
-            }
-          }
-          return true;
-        }
-      }
-    );
-  }
-
-  // src/modules/create-template.ts
-  function createTemplate(template) {
-    const parts = template.split(/\{([\w.]+)\}/).map((part, i) => i % 2 ? part.split(".") : part);
-    return (obj) => {
-      let result = "";
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        if (i % 2 === 0) {
-          result += part;
-          continue;
-        }
-        let curr = obj;
-        for (const key of part) {
-          if (curr == null) {
-            curr = "";
-            break;
-          }
-          curr = curr[key];
-        }
-        result += curr ?? "";
-      }
-      return result;
-    };
-  }
-
-  // src/modules/create-typing-delay.ts
-  function createTypingDelay() {
-    const rand = (min, max) => Math.random() * (max - min) + min;
-    let velocity = 0;
-    let drift = 0;
-    return (char, speed = 1) => {
-      const scale = (v) => v / speed;
-      let base;
-      if (/[.,!?]/.test(char)) {
-        base = rand(scale(300), scale(480));
-      } else if (char === " ") {
-        base = rand(scale(180), scale(300));
-      } else {
-        base = rand(scale(85), scale(130));
-      }
-      velocity += (Math.random() - 0.5) * scale(1.1);
-      velocity *= 0.8;
-      drift += (Math.random() - 0.5) * scale(0.3);
-      drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
-      const accel = velocity * scale(4.5) + drift;
-      base -= accel;
-      return Math.max(scale(45), Math.min(base, scale(520)));
-    };
-  }
-
-  // src/modules/extract-numbers.ts
-  function extractNumbers(str) {
-    return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
-  }
-  function extractFloats(str) {
-    return str.match(/[0-9]+\.[0-9]+/g)?.map((item) => parseFloat(item)) || [];
-  }
-  function extractInts(str) {
-    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
-  }
-
-  // src/modules/get-common-path.ts
-  function getCommonPath(args) {
-    if (args.length === 0) {
-      return "";
-    }
-    const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
-    const resolved = [];
-    let j = 0;
-    while (true) {
-      let seg = parts[0][j];
-      if (typeof seg !== "string") {
-        break;
-      }
-      for (let i = 1; i < parts.length; i++) {
-        if (seg !== parts[i][j]) {
-          seg = null;
-          break;
-        }
-      }
-      if (seg === null) {
-        break;
-      }
-      resolved.push(seg);
-      j++;
-    }
-    return resolved.join("/");
-  }
-
-  // src/modules/get-relative-path.ts
-  function getRelativePath(from, to) {
-    const normalize2 = (str) => {
-      str = str.replace(/\\/g, "/").replace(/\/$/, "");
-      if (str.charAt(0) === "/") {
-        throw new Error(`Invalid argument: ${str}`);
-      }
-      if (str === ".") {
-        return str;
-      }
-      if (str.charAt(0) === "." && str.charAt(1) === "/") {
-        return str;
-      }
-      return `./${str}`;
-    };
-    const a = normalize2(from).split("/").filter(Boolean);
-    const b = normalize2(to).split("/").filter(Boolean);
-    let i = 0;
-    while (i < a.length && i < b.length && a[i] === b[i]) {
-      i++;
-    }
-    const up = Array(a.length - i).fill("..").join("/");
-    const down = b.slice(i).join("/");
-    return up + (up && down ? "/" : "") + down;
-  }
-
-  // src/modules/group-by.ts
-  function groupBy(arr, fn) {
-    const result = {};
-    let i = 0;
-    for (const item of arr) {
-      const key = fn(item, i++);
-      if (!result[key]) {
-        result[key] = [item];
-      } else {
-        result[key].push(item);
-      }
-    }
-    return result;
-  }
-
-  // src/modules/math.ts
-  function mode(arr) {
-    const seen = /* @__PURE__ */ new Map();
-    let maxValue;
-    let maxCount = 0;
-    for (const v of arr) {
-      const c = (seen.get(v) || 0) + 1;
-      seen.set(v, c);
-      if (maxCount < c) {
-        maxCount = c;
-        maxValue = v;
-      }
-    }
-    return { count: maxCount, value: maxValue };
-  }
-  function clamp(num, min, max) {
-    return Math.min(max, Math.max(num, min));
-  }
-  function wrap(num, min, max) {
-    num -= min;
-    max -= min;
-    if (num < 0) {
-      num = num % max + max;
-    }
-    if (num >= max) {
-      num = num % max;
-    }
-    return num + min;
-  }
-  function lerp(a, b, t) {
-    return a + (b - a) * t;
-  }
-  function toRadians(degree) {
-    return degree * (Math.PI / 180);
-  }
-  function fromRadians(radians) {
-    return radians * (180 / Math.PI);
-  }
-
-  // src/modules/parse-date.ts
+  // src/date/parse-date.ts
   function parseDate(date) {
     let ensuredDate;
     if (date instanceof Date) {
@@ -1459,120 +1179,108 @@ var shitJs = (() => {
     };
   }
 
-  // src/modules/parse-path.ts
-  function parsePath(str) {
-    str = str.replace(/\\/g, "/").replace(/\/+$/, "");
-    let dirEnd = -1;
-    let extStart = -1;
-    for (let i = str.length - 1; i >= 0; i--) {
-      const c = str[i];
-      if (c === "/") {
-        dirEnd = i;
-        break;
-      }
-      if (extStart === -1 && c === "." && i > 0) {
-        extStart = i;
-      }
-    }
-    const dir = dirEnd >= 0 ? str.substring(0, dirEnd) : ".";
-    const dirs = dir.split("/").filter(Boolean);
-    const base = dirEnd >= 0 ? str.substring(dirEnd + 1) : str;
-    const ext = extStart > dirEnd ? str.substring(extStart) : "";
-    const name = ext ? base.substring(0, base.length - ext.length) : base;
-    return { dir, dirs, base, name, ext };
+  // src/factory/create-i18n.ts
+  function createI18n(obj, defaultLocale) {
+    return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
   }
 
-  // src/modules/pick-by.ts
-  function pickBy(obj, fn) {
-    const result = {};
-    for (const key in obj) {
-      if (fn(key, obj[key], obj)) {
-        result[key] = obj[key];
-      }
-    }
-    return result;
+  // src/factory/create-mulberry32.ts
+  function createMulberry32(initialSeed) {
+    let seed = initialSeed;
+    const next = () => {
+      seed = seed + 1831565813 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, seed | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+    return {
+      float: (min, max) => next() * (max - min) + min,
+      int: (min, max) => Math.floor(next() * (max - min) + min)
+    };
   }
 
-  // src/modules/product.ts
-  function product(...arrays) {
-    const filtered = arrays.filter((arr) => arr.length > 0);
-    if (filtered.length < 1) {
-      return [];
-    }
-    return filtered.reduce(
-      (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
-      [[]]
+  // src/factory/create-queue.ts
+  function createQueue() {
+    let queue = Promise.resolve();
+    return (fn) => {
+      return new Promise((resolve, reject) => {
+        queue = queue.then(fn).then(resolve).catch(reject);
+      });
+    };
+  }
+
+  // src/factory/create-store.ts
+  function createStore(initial, handlers) {
+    return new Proxy(
+      { ...initial },
+      {
+        set(target, key, value) {
+          const typedKey = key;
+          const oldValue = target[typedKey];
+          if (oldValue !== value) {
+            target[typedKey] = value;
+            const handler = handlers[typedKey];
+            if (handler) {
+              handler(oldValue, value);
+            }
+          }
+          return true;
+        }
+      }
     );
   }
 
-  // src/modules/random-float.ts
-  function randomFloat(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  // src/modules/random-int.ts
-  function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
-  }
-
-  // src/modules/random-string.ts
-  function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
-    const charsetSize = charset.length;
-    let result = "";
-    for (let i = 0; i < size; i++) {
-      result += charset.charAt(Math.floor(Math.random() * charsetSize));
-    }
-    return result;
-  }
-
-  // src/modules/resolve-path.ts
-  function resolvePath(...args) {
-    const isAbsolute = args[0]?.startsWith("/");
-    const parts = args.join("/").split(/[\\/]+/);
-    const resolved = [];
-    for (const part of parts) {
-      if (!part || part === ".") {
-        continue;
-      }
-      if (part === "..") {
-        if (!resolved[resolved.length - 1] || resolved[resolved.length - 1] === "..") {
-          if (!isAbsolute) {
-            resolved.push("..");
+  // src/factory/create-template.ts
+  function createTemplate(template) {
+    const parts = template.split(/\{([\w.]+)\}/).map((part, i) => i % 2 ? part.split(".") : part);
+    return (obj) => {
+      let result = "";
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (i % 2 === 0) {
+          result += part;
+          continue;
+        }
+        let curr = obj;
+        for (const key of part) {
+          if (curr == null) {
+            curr = "";
+            break;
           }
-        } else {
-          resolved.pop();
+          curr = curr[key];
         }
-        continue;
+        result += curr ?? "";
       }
-      resolved.push(part);
-    }
-    return (isAbsolute ? "/" : "") + resolved.join("/");
+      return result;
+    };
   }
 
-  // src/modules/retry.ts
-  async function retry(fn, options) {
-    const { count = 3, delay = 1e3, onRetry } = options ?? {};
-    let lastError;
-    for (let i = 0; i < count; i++) {
-      try {
-        return await fn();
-      } catch (err) {
-        lastError = err;
-        if (i < count - 1) {
-          await onRetry?.(err, i);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
+  // src/factory/create-typing-delay.ts
+  function createTypingDelay() {
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    let velocity = 0;
+    let drift = 0;
+    return (char, speed = 1) => {
+      const scale = (v) => v / speed;
+      let base;
+      if (/[.,!?]/.test(char)) {
+        base = rand(scale(300), scale(480));
+      } else if (char === " ") {
+        base = rand(scale(180), scale(300));
+      } else {
+        base = rand(scale(85), scale(130));
       }
-    }
-    throw lastError;
+      velocity += (Math.random() - 0.5) * scale(1.1);
+      velocity *= 0.8;
+      drift += (Math.random() - 0.5) * scale(0.3);
+      drift = Math.max(-scale(4.5), Math.min(drift, scale(4.5)));
+      const accel = velocity * scale(4.5) + drift;
+      base -= accel;
+      return Math.max(scale(45), Math.min(base, scale(520)));
+    };
   }
 
-  // src/modules/sanitize-filename.ts
-  function sanitizeFilename(str, replacement = "_") {
-    return str.replace(/[\\/:*?"<>|]+/g, replacement).replace(/[\u0000-\u001F\u007F]+/g, replacement).replace(/[. ]+$/, "") || replacement;
-  }
-
-  // src/modules/scale-to-contain.ts
+  // src/layout/scale-to-contain.ts
   function scaleToContain(srcWidth, srcHeight, dstWidth, dstHeight) {
     const srcAspectRatio = srcWidth / srcHeight;
     const dstAspectRatio = dstWidth / dstHeight;
@@ -1583,7 +1291,7 @@ var shitJs = (() => {
     }
   }
 
-  // src/modules/scale-to-cover.ts
+  // src/layout/scale-to-cover.ts
   function scaleToCover(srcWidth, srcHeight, dstWidth, dstHeight) {
     const srcAspectRatio = srcWidth / srcHeight;
     const dstAspectRatio = dstWidth / dstHeight;
@@ -1594,7 +1302,7 @@ var shitJs = (() => {
     }
   }
 
-  // src/modules/scale-to-fit.ts
+  // src/layout/scale-to-fit.ts
   function scaleToFit(srcWidth, srcHeight, maxWidth, maxHeight, minWidth, minHeight) {
     const aspectRatio = srcWidth / srcHeight;
     let w = srcWidth;
@@ -1618,38 +1326,53 @@ var shitJs = (() => {
     return [w, h];
   }
 
-  // src/modules/shuffle.ts
-  function shuffle(arr) {
-    let i = arr.length;
-    while (i > 0) {
-      const j = Math.floor(Math.random() * i);
-      i--;
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  // src/number/bytes.ts
+  function fromKb(kb) {
+    return kb * 1024;
+  }
+  function fromMb(mb) {
+    return mb * 1024 ** 2;
+  }
+  function fromGb(gb) {
+    return gb * 1024 ** 3;
+  }
+  function fromTb(tb) {
+    return tb * 1024 ** 4;
+  }
+  function toKb(bytes) {
+    return bytes / 1024;
+  }
+  function toMb(bytes) {
+    return bytes / 1024 ** 2;
+  }
+  function toGb(bytes) {
+    return bytes / 1024 ** 3;
+  }
+  function toTb(bytes) {
+    return bytes / 1024 ** 4;
   }
 
-  // src/modules/sleep.ts
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  // src/number/clamp.ts
+  function clamp(num, min, max) {
+    return Math.min(max, Math.max(num, min));
   }
 
-  // src/modules/to-fixed.ts
+  // src/number/lerp.ts
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  // src/number/to-degrees.ts
+  function toDegrees(radians) {
+    return radians * (180 / Math.PI);
+  }
+
+  // src/number/to-fixed.ts
   function toFixed(value, digits = 0) {
     return Number(Math.round(Number(`${value}e${digits}`)) + `e-${digits}`);
   }
 
-  // src/modules/to-full-width.ts
-  function toFullWidth(str) {
-    return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
-  }
-
-  // src/modules/to-half-width.ts
-  function toHalfWidth(str) {
-    return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/　/g, " ");
-  }
-
-  // src/modules/to-number.ts
+  // src/number/to-number.ts
   function toNumber(e) {
     if (typeof e === "number") {
       return e;
@@ -1670,20 +1393,451 @@ var shitJs = (() => {
     throw new Error(`Invalid argument type: ${typeof e}`);
   }
 
-  // src/modules/unique-by.ts
-  function uniqueBy(arr, fn) {
-    const map = /* @__PURE__ */ new Map();
-    for (let i = 0; i < arr.length; i++) {
-      const item = arr[i];
-      const key = fn(arr[i], i, arr);
-      if (!map.has(key)) {
-        map.set(key, item);
-      }
-    }
-    return Array.from(map.values());
+  // src/number/to-radians.ts
+  function toRadians(degree) {
+    return degree * (Math.PI / 180);
   }
 
-  // src/modules/xor.ts
+  // src/number/wrap.ts
+  function wrap(num, min, max) {
+    num -= min;
+    max -= min;
+    if (num < 0) {
+      num = num % max + max;
+    }
+    if (num >= max) {
+      num = num % max;
+    }
+    return num + min;
+  }
+
+  // src/object/clone.ts
+  function clone(obj) {
+    const cache = /* @__PURE__ */ new WeakMap();
+    const fn = (o) => {
+      if (o === null || typeof o !== "object") {
+        return o;
+      }
+      if (cache.has(o)) {
+        return cache.get(o);
+      }
+      if (o instanceof Date) {
+        return new Date(o.getTime());
+      }
+      if (o instanceof RegExp) {
+        return new RegExp(o.source, o.flags);
+      }
+      if (Array.isArray(o)) {
+        return o.map((item) => clone(item));
+      }
+      const result = Object.create(Object.getPrototypeOf(o));
+      cache.set(o, result);
+      for (const key of Object.keys(o)) {
+        result[key] = fn(o[key]);
+      }
+      return result;
+    };
+    return fn(obj);
+  }
+
+  // src/object/compare-objects.ts
+  function diffObjects(a, b) {
+    const diffs = [];
+    function fn(a2, b2, path) {
+      if (Object.is(a2, b2)) {
+        diffs.push([0, path]);
+        return;
+      }
+      if (isObject(a2) && isObject(b2)) {
+        const keys = /* @__PURE__ */ new Set([...Object.keys(a2), ...Object.keys(b2)]);
+        for (const key of keys) {
+          const nextPath = path ? `${path}.${key}` : key;
+          if (!(key in a2)) {
+            diffs.push([1, nextPath]);
+          } else if (!(key in b2)) {
+            diffs.push([-1, nextPath]);
+          } else {
+            fn(a2[key], b2[key], nextPath);
+          }
+        }
+        return;
+      }
+      diffs.push([-1, path]);
+      diffs.push([1, path]);
+    }
+    fn(a, b, "");
+    return diffs;
+  }
+  function compareObjects(a, b) {
+    const diffs = diffObjects(a, b);
+    let matches = 0;
+    let insertions = 0;
+    let deletions = 0;
+    for (const [op] of diffs) {
+      if (op === 0) {
+        matches++;
+      } else if (op === 1) {
+        insertions++;
+      } else if (op === -1) {
+        deletions++;
+      }
+    }
+    const total = matches + insertions + deletions;
+    const similarity = total === 0 ? 1 : matches / total;
+    const distance = insertions + deletions;
+    const normalizedDistance = total === 0 ? 0 : distance / total;
+    const diceSimilarity = total === 0 ? 1 : 2 * matches / (2 * matches + insertions + deletions);
+    const jaccardSimilarity = total === 0 ? 1 : matches / (matches + insertions + deletions);
+    return {
+      diffs,
+      matchRate: similarity,
+      similarity,
+      diceSimilarity,
+      jaccardSimilarity,
+      distance,
+      normalizedDistance,
+      matches,
+      insertions,
+      deletions
+    };
+  }
+  function isObject(arg) {
+    return arg !== null && typeof arg === "object" && !Array.isArray(arg);
+  }
+
+  // src/object/equal.ts
+  function equal(a, b) {
+    if (a === b) {
+      return true;
+    }
+    if (typeof a !== typeof b) {
+      return false;
+    }
+    if (typeof a !== "object" || a === null || b === null) {
+      return false;
+    }
+    if (Array.isArray(a)) {
+      if (!Array.isArray(b)) {
+        return false;
+      }
+      if (a.length !== b.length) {
+        return false;
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (!equal(a[i], b[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    const objA = a;
+    const objB = b;
+    const keysA = Object.keys(objA);
+    const keysB = Object.keys(objB);
+    if (keysA.length !== keysB.length) {
+      return false;
+    }
+    for (const key of keysA) {
+      if (!Object.hasOwn(objB, key)) {
+        return false;
+      }
+      if (!equal(objA[key], objB[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // src/object/pick-by.ts
+  function pickBy(obj, fn) {
+    const result = {};
+    for (const key in obj) {
+      if (fn(key, obj[key], obj)) {
+        result[key] = obj[key];
+      }
+    }
+    return result;
+  }
+
+  // src/path/get-common-path.ts
+  function getCommonPath(args) {
+    if (args.length === 0) {
+      return "";
+    }
+    const parts = args.map((arg) => arg.replace(/^\.\//, "").split(/[\\/]/));
+    const resolved = [];
+    let j = 0;
+    while (true) {
+      let seg = parts[0][j];
+      if (typeof seg !== "string") {
+        break;
+      }
+      for (let i = 1; i < parts.length; i++) {
+        if (seg !== parts[i][j]) {
+          seg = null;
+          break;
+        }
+      }
+      if (seg === null) {
+        break;
+      }
+      resolved.push(seg);
+      j++;
+    }
+    return resolved.join("/");
+  }
+
+  // src/path/get-relative-path.ts
+  function getRelativePath(from, to) {
+    const normalize2 = (str) => {
+      str = str.replace(/\\/g, "/").replace(/\/$/, "");
+      if (str.charAt(0) === "/") {
+        throw new Error(`Invalid argument: ${str}`);
+      }
+      if (str === ".") {
+        return str;
+      }
+      if (str.charAt(0) === "." && str.charAt(1) === "/") {
+        return str;
+      }
+      return `./${str}`;
+    };
+    const a = normalize2(from).split("/").filter(Boolean);
+    const b = normalize2(to).split("/").filter(Boolean);
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) {
+      i++;
+    }
+    const up = Array(a.length - i).fill("..").join("/");
+    const down = b.slice(i).join("/");
+    return up + (up && down ? "/" : "") + down;
+  }
+
+  // src/path/parse-path.ts
+  function parsePath(str) {
+    str = str.replace(/\\/g, "/").replace(/\/+$/, "");
+    let dirEnd = -1;
+    let extStart = -1;
+    for (let i = str.length - 1; i >= 0; i--) {
+      const c = str[i];
+      if (c === "/") {
+        dirEnd = i;
+        break;
+      }
+      if (extStart === -1 && c === "." && i > 0) {
+        extStart = i;
+      }
+    }
+    const dir = dirEnd >= 0 ? str.substring(0, dirEnd) : ".";
+    const dirs = dir.split("/").filter(Boolean);
+    const base = dirEnd >= 0 ? str.substring(dirEnd + 1) : str;
+    const ext = extStart > dirEnd ? str.substring(extStart) : "";
+    const name = ext ? base.substring(0, base.length - ext.length) : base;
+    return { dir, dirs, base, name, ext };
+  }
+
+  // src/path/resolve-path.ts
+  function resolvePath(...args) {
+    const isAbsolute = args[0]?.startsWith("/");
+    const parts = args.join("/").split(/[\\/]+/);
+    const resolved = [];
+    for (const part of parts) {
+      if (!part || part === ".") {
+        continue;
+      }
+      if (part === "..") {
+        if (!resolved[resolved.length - 1] || resolved[resolved.length - 1] === "..") {
+          if (!isAbsolute) {
+            resolved.push("..");
+          }
+        } else {
+          resolved.pop();
+        }
+        continue;
+      }
+      resolved.push(part);
+    }
+    return (isAbsolute ? "/" : "") + resolved.join("/");
+  }
+
+  // src/path/sanitize-filename.ts
+  function sanitizeFilename(str, replacement = "_") {
+    return str.replace(/[\\/:*?"<>|]+/g, replacement).replace(/[\u0000-\u001F\u007F]+/g, replacement).replace(/[. ]+$/, "") || replacement;
+  }
+
+  // src/random/random-float.ts
+  function randomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  // src/random/random-int.ts
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
+
+  // src/random/random-string.ts
+  function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
+    const charsetSize = charset.length;
+    let result = "";
+    for (let i = 0; i < size; i++) {
+      result += charset.charAt(Math.floor(Math.random() * charsetSize));
+    }
+    return result;
+  }
+
+  // src/string/compare-strings.ts
+  function diffStrings(from, to) {
+    const n = from.length;
+    const m = to.length;
+    const max = n + m;
+    const v = Array(2 * max + 1).fill(0);
+    const trace = [];
+    for (let d = 0; d <= max; d++) {
+      trace.push([...v]);
+      for (let k = -d; k <= d; k += 2) {
+        let x;
+        if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+          x = v[k + 1 + max];
+        } else {
+          x = v[k - 1 + max] + 1;
+        }
+        let y = x - k;
+        while (x < n && y < m && from[x] === to[y]) {
+          x++;
+          y++;
+        }
+        v[k + max] = x;
+        if (x >= n && y >= m) {
+          return backtrack(from, to, trace, d);
+        }
+      }
+    }
+    return [];
+  }
+  function compareStrings(from, to) {
+    const diffs = diffStrings(from, to);
+    let matches = 0;
+    let insertions = 0;
+    let deletions = 0;
+    for (const [op, str] of diffs) {
+      const len = str.length;
+      if (op === 0) {
+        matches += len;
+      } else if (op === 1) {
+        insertions += len;
+      } else {
+        deletions += len;
+      }
+    }
+    const totalOperations = matches + insertions + deletions;
+    const matchRate = totalOperations > 0 ? matches / totalOperations : 1;
+    const similarity = Math.max(from.length, to.length) > 0 ? matches / Math.max(from.length, to.length) : 1;
+    const diceSimilarity = from.length + to.length > 0 ? 2 * matches / (from.length + to.length) : 1;
+    const jaccardSimilarity = from.length + to.length - matches > 0 ? matches / (from.length + to.length - matches) : 1;
+    const distance = insertions + deletions;
+    const normalizedDistance = Math.max(from.length, to.length) > 0 ? (insertions + deletions) / Math.max(from.length, to.length) : 0;
+    return {
+      diffs,
+      matchRate,
+      similarity,
+      diceSimilarity,
+      jaccardSimilarity,
+      distance,
+      normalizedDistance,
+      matches,
+      insertions,
+      deletions
+    };
+  }
+  function backtrack(from, to, trace, depth) {
+    const result = [];
+    let x = from.length;
+    let y = to.length;
+    const max = from.length + to.length;
+    let currentOp = null;
+    let currentStr = "";
+    const push = (op, char) => {
+      if (currentOp === op) {
+        currentStr = char + currentStr;
+      } else {
+        if (currentOp !== null && currentStr) {
+          result.push([currentOp, currentStr]);
+        }
+        currentOp = op;
+        currentStr = char;
+      }
+    };
+    for (let d = depth; d >= 0; d--) {
+      const v = trace[d];
+      const k = x - y;
+      let prevK;
+      if (k === -d || k !== d && v[k - 1 + max] < v[k + 1 + max]) {
+        prevK = k + 1;
+      } else {
+        prevK = k - 1;
+      }
+      const prevX = v[prevK + max];
+      const prevY = prevX - prevK;
+      while (x > prevX && y > prevY) {
+        x--;
+        y--;
+        push(0, from[x]);
+      }
+      if (d === 0) break;
+      if (x === prevX) {
+        y--;
+        push(1, to[y]);
+      } else {
+        x--;
+        push(-1, from[x]);
+      }
+    }
+    if (currentOp !== null && currentStr) {
+      result.push([currentOp, currentStr]);
+    }
+    return result.reverse();
+  }
+
+  // src/string/extract-floats.ts
+  function extractFloats(str) {
+    return str.match(/[0-9]+\.[0-9]+/g)?.map((item) => parseFloat(item)) || [];
+  }
+
+  // src/string/extract-ints.ts
+  function extractInts(str) {
+    return str.match(/([0-9]+)/g)?.map((item) => parseInt(item, 10)) || [];
+  }
+
+  // src/string/extract-numbers.ts
+  function extractNumbers(str) {
+    return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
+  }
+
+  // src/string/to-full-width.ts
+  function toFullWidth(str) {
+    return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
+  }
+
+  // src/string/to-half-width.ts
+  function toHalfWidth(str) {
+    return str.replace(/[！-～]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 65248)).replace(/　/g, " ");
+  }
+
+  // src/string/to-regexp.ts
+  function toRegExp(str) {
+    if (str.startsWith("/")) {
+      const patternEnd = str.lastIndexOf("/");
+      if (patternEnd === -1) {
+        throw new Error("Invalid RegExp literal: missing '/'");
+      }
+      const pattern = str.substring(1, patternEnd);
+      const flags = str.substring(patternEnd + 1);
+      return new RegExp(pattern, flags);
+    }
+    return new RegExp(str);
+  }
+
+  // src/string/xor.ts
   function xor(str, salt) {
     const saltSize = salt.length;
     if (saltSize === 0) {

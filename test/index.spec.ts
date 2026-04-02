@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-test("isNumeric()", async ({ page }) => {
+test("toNumber()", async ({ page }) => {
   await page.goto("about:blank");
   await page.addScriptTag({ path: "./dist/shit.js" });
 

@@ -1,0 +1,1 @@
+{"version":3,"file":"create-mulberry32.d.ts","sourceRoot":"","sources":["../../../src/factory/create-mulberry32.ts"],"names":[],"mappings":"AAAA;;;;;;;;GAQG;AACH,wBAAgB,gBAAgB,CAAC,WAAW,EAAE,MAAM,GAAG;IACrD,uCAAuC;IACvC,KAAK,EAAE,CAAC,GAAG,EAAE,MAAM,EAAE,GAAG,EAAE,MAAM,KAAK,MAAM,CAAC;IAC5C,uCAAuC;IACvC,GAAG,EAAE,CAAC,GAAG,EAAE,MAAM,EAAE,GAAG,EAAE,MAAM,KAAK,MAAM,CAAC;CAC3C,CAcA"}
