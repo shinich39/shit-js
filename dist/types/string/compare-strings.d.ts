@@ -14,11 +14,7 @@ type CompareResult = {
 /**
  * Myers algorithm
  *
- * \-1: Number of deleted characters
- *
- * 0: Number of matched characters
- *
- * 1: Number of inserted characters
+ * -1 = deletion, 0 = match, 1 = insertion
  *
  * @example
  * diffStrings("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
@@ -26,9 +22,10 @@ type CompareResult = {
 export declare function diffStrings(from: string, to: string): Diff[];
 /**
  * @example
- * const a = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
- * const b = "sit amet, adipiscing";
- * compareStrings(a, b);
+ * compareStrings(
+ *   "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+ *   "sit amet, adipiscing"
+ * );
  * // {
  * //   diffs: [[-1, "L"], [0, "ore"], [-1, "m"], ...],
  * //   matchRate: 0.35714285714285715,

@@ -1,6 +1,7 @@
 /**
  * @example
- * chunk([1,2,3,4,5], 3); // [[1,2,3],[4,5]]
+ * chunkArray([1,2,3,4,5], 3);
+ * // [[1,2,3],[4,5]]
  */
 export function chunkArray<T>(arr: T[], size: number): T[][] {
   return arr.reduce<T[][]>((acc, curr) => {

@@ -1,6 +1,6 @@
 /**
  * @example
- * toRegExp("abc"); // /abc/
+ * toRegExp("abc");     // /abc/
  * toRegExp("/abc/gi"); // /abc/gi
  */
 export function toRegExp(str: string): RegExp {

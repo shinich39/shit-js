@@ -5,5 +5,5 @@ import { randomString } from "./random-string";
 
 test("randomString", () => {
   ok(typeof randomString() === "string");
-  eq(randomString(undefined, 10).length, 10);
+  eq(randomString(10).length, 10);
 });

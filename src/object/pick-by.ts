@@ -1,7 +1,10 @@
 /**
  * @example
- * pickBy({ a: 1, b: 2, c: 3 }, (value) => value > 1); // { b: 2, c: 3 }
- * pickBy({ a: 1, b: null, c: "x" }, (value) => value); // { a: 1, c: "x" }
+ * pickBy({ a: 1, b: 2, c: 3 }, (value) => value > 1);
+ * // { b: 2, c: 3 }
+ *
+ * pickBy({ a: 1, b: null, c: "x" }, (value) => value);
+ * // { a: 1, c: "x" }
  */
 export function pickBy<T>(
   obj: Record<string, T>,

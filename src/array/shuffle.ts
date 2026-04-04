@@ -2,7 +2,8 @@
  * Fisher-Yates shuffle
  *
  * @example
- * shuffle([1, 2, 3]); // [2, 1, 3]
+ * shuffle([1, 2, 3]);
+ * // [2, 1, 3]
  */
 export function shuffle<T>(arr: T[]): T[] {
   let i = arr.length;

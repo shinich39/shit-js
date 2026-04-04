@@ -1593,7 +1593,7 @@ function randomInt(min, max) {
 }
 
 // src/random/random-string.ts
-function randomString(charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-", size = 1) {
+function randomString(size = 1, charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz-") {
   const charsetSize = charset.length;
   let result = "";
   for (let i = 0; i < size; i++) {

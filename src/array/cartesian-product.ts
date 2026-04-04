@@ -2,8 +2,11 @@
  * Cartesian product
  *
  * @example
- * product(["a", "b", "c"], [1]); // [["a", 1],["b", 1],["c", 1]]
- * product(); // []
+ * cartesianProduct(["a", "b", "c"], [1]);
+ * // [["a", 1],["b", 1],["c", 1]]
+ *
+ * cartesianProduct();
+ * // []
  */
 export function cartesianProduct<T>(...arrays: T[][]): T[][] {
   const filtered = arrays.filter((arr) => arr.length > 0);

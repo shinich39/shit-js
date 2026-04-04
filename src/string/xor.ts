@@ -1,9 +1,9 @@
 /**
  * @param salt salt.length must be greater than 0
  * @example
- * const original = "text";
- * const encrypted = xor(original, "this is salt!");
- * const decrypted = xor(encrypted, "this is salt!"); // "text"
+ * const original = "Hello, world!";
+ * const encrypted = xor(original, "this is salt!");  // "OESW"
+ * const decrypted = xor(encrypted, "this is salt!"); // "Hello, world!"
  */
 export function xor(str: string, salt: string): string {
   const saltSize = salt.length;
