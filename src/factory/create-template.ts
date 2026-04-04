@@ -3,7 +3,9 @@
  *
  * @example
  * const template = createTemplate("Lorem ipsum dolor {a.b.c}");
- * template({ a: { b: { c: "sit amet" } } }); // "Lorem ipsum dolor sit amet"
+ *
+ * template({ a: { b: { c: "sit amet" } } });
+ * // "Lorem ipsum dolor sit amet"
  */
 export function createTemplate(template: string): (obj: Record<string, any>) => string {
   const parts = template.split(/\{([\w.]+)\}/).map((part, i) => (i % 2 ? part.split(".") : part));

@@ -1,11 +1,10 @@
 /**
  * @example
  * const rng = createMulberry32(39);
+ *
  * rng.int(10, 100); // 16
  * rng.int(10, 100); // 77
  * rng.int(10, 100); // 58
- * rng.int(10, 100); // 13
- * rng.int(10, 100); // 86
  */
 export function createMulberry32(initialSeed: number): {
   /** exclusive (e.g., min <= n < max) */

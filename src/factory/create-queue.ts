@@ -1,6 +1,7 @@
 /**
  * @example
  * const queue = createQueue();
+ *
  * queue(() => console.log("Task 0"));
  * queue(async () => { await fetch("/api/data"); });
  */
