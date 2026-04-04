@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { deepStrictEqual as eq, throws } from "node:assert";
 import { test } from "node:test";
 import { parseDate } from "./parse-date";

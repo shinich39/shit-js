@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
 import { toHalfWidth } from "./to-half-width";

@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { deepStrictEqual as eq, ok } from "node:assert";
 import { test } from "node:test";
 import { randomString } from "./random-string";

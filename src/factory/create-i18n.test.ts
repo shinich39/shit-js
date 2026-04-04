@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { deepStrictEqual as eq } from "node:assert";
 import { test } from "node:test";
 import { createI18n } from "./create-i18n";

@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { deepStrictEqual as eq } from "node:assert";
 import path from "node:path";
 import { test } from "node:test";
