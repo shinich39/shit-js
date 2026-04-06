@@ -964,7 +964,7 @@ export class Ast {
     return typeof this.attributes[key] !== "undefined";
   }
 
-  getValue(): string {
+  getText(): string {
     const values: string[] = [];
 
     this._walk((n) => {
@@ -976,7 +976,7 @@ export class Ast {
     return values.join("");
   }
 
-  getValues(): string[] {
+  getTexts(): string[] {
     const values: string[] = [];
 
     this._walk((n) => {
@@ -995,7 +995,15 @@ export class Ast {
   }
 
   getDepth(this: Ast): number {
-    return this.getAncestors().length;
+    let result: number = 0;
+    let parent = this.parent;
+
+    while (parent) {
+      result++;
+      parent = parent.parent;
+    }
+
+    return result;
   }
 
   append(...nodes: (string | AstNode | Ast)[]): void {

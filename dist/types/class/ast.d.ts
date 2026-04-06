@@ -88,8 +88,8 @@ export declare class Ast {
     getAttribute(key: string): string | boolean | undefined;
     setAttribute(key: string, value: string | boolean): void;
     hasAttribute(key: string): boolean;
-    getValue(): string;
-    getValues(): string[];
+    getText(): string;
+    getTexts(): string[];
     getRoot(this: Ast): Ast | undefined;
     getDepth(this: Ast): number;
     append(...nodes: (string | AstNode | Ast)[]): void;

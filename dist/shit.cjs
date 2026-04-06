@@ -894,7 +894,7 @@ var Ast = class _Ast {
   hasAttribute(key) {
     return typeof this.attributes[key] !== "undefined";
   }
-  getValue() {
+  getText() {
     const values = [];
     this._walk((n) => {
       if (n.type === "text") {
@@ -903,7 +903,7 @@ var Ast = class _Ast {
     });
     return values.join("");
   }
-  getValues() {
+  getTexts() {
     const values = [];
     this._walk((n) => {
       if (n.type === "text") {
@@ -918,7 +918,13 @@ var Ast = class _Ast {
     return root && root.type === "root" ? root : void 0;
   }
   getDepth() {
-    return this.getAncestors().length;
+    let result = 0;
+    let parent = this.parent;
+    while (parent) {
+      result++;
+      parent = parent.parent;
+    }
+    return result;
   }
   append(...nodes) {
     const newChildren = createChildren(this, nodes);

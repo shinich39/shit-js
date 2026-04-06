@@ -68,13 +68,13 @@ test("ast: parse", () => {
   eq(nav3?.getDepth(), 3);
 
   // value
-  eq(title?.getValue(), "Untitled");
-  eq(title?.getValues(), ["Untitled"]);
+  eq(title?.getText(), "Untitled");
+  eq(title?.getTexts(), ["Untitled"]);
 
-  eq(body?.getValue().trim(), "Heading\n  \n  \n    \n      Page 0");
+  eq(body?.getText().trim(), "Heading\n  \n  \n    \n      Page 0");
   eq(
     body
-      ?.getValues()
+      ?.getTexts()
       .map((str) => str.trim())
       .filter(Boolean),
     ["Heading", "Page 0"],
@@ -132,13 +132,13 @@ test("ast: append, before, after", () => {
   const append = h1?.find((n) => n.name === "span");
 
   eq(before?.name, "span");
-  eq(before?.getValue(), "BEFORE");
+  eq(before?.getText(), "BEFORE");
 
   eq(after?.name, "span");
-  eq(after?.getValue(), "AFTER");
+  eq(after?.getText(), "AFTER");
 
   eq(append?.name, "span");
-  eq(append?.getValue(), "APPEND");
+  eq(append?.getText(), "APPEND");
 });
 
 test("ast: remove", () => {
@@ -194,5 +194,5 @@ test("ast: void element", () => {
 
   eq(img?.toString(), `<img src="this/is/path" />`);
   eq(img?.getAttribute("src"), `this/is/path`);
-  eq(img?.getValue(), ``);
+  eq(img?.getText(), ``);
 });
