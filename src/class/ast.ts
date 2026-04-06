@@ -749,9 +749,13 @@ function createChildren(parent: Ast, nodes: (string | AstNode | Ast)[]): Ast[] {
         result.push(new Ast(child, parent));
       }
     } else if (node.type === "root") {
-      for (const child of node.children) {
-        result.push(new Ast(child, parent));
+      const children = createChildren(parent, node.children);
+      for (const child of children) {
+        result.push(child);
       }
+    } else if (node instanceof Ast) {
+      node.parent = parent;
+      result.push(node);
     } else {
       result.push(new Ast(node, parent));
     }
@@ -801,7 +805,7 @@ export class Ast {
     // parse string
     if (typeof src === "string") {
       const { root } = Ast.parse(src);
-      this.children = root.children.map((child) => new Ast(child, this));
+      this.children = createChildren(this, root.children);
       return;
     }
 
@@ -817,13 +821,13 @@ export class Ast {
     // set properties
     switch (src.type) {
       case "root":
-        this.children = src.children.map((child) => new Ast(child, this));
+        this.children = createChildren(this, src.children);
         break;
 
       case "element":
         this.name = src.name;
         this.attributes = { ...src.attributes };
-        this.children = src.children.map((child) => new Ast(child, this));
+        this.children = createChildren(this, src.children);
         break;
 
       case "pi":

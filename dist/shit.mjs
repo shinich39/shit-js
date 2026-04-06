@@ -636,9 +636,13 @@ function createChildren(parent, nodes) {
         result.push(new Ast(child, parent));
       }
     } else if (node.type === "root") {
-      for (const child of node.children) {
-        result.push(new Ast(child, parent));
+      const children = createChildren(parent, node.children);
+      for (const child of children) {
+        result.push(child);
       }
+    } else if (node instanceof Ast) {
+      node.parent = parent;
+      result.push(node);
     } else {
       result.push(new Ast(node, parent));
     }
@@ -672,7 +676,7 @@ var Ast = class _Ast {
   init(src, parent) {
     if (typeof src === "string") {
       const { root } = _Ast.parse(src);
-      this.children = root.children.map((child) => new _Ast(child, this));
+      this.children = createChildren(this, root.children);
       return;
     }
     this.parent = parent;
@@ -683,12 +687,12 @@ var Ast = class _Ast {
     this.children = [];
     switch (src.type) {
       case "root":
-        this.children = src.children.map((child) => new _Ast(child, this));
+        this.children = createChildren(this, src.children);
         break;
       case "element":
         this.name = src.name;
         this.attributes = { ...src.attributes };
-        this.children = src.children.map((child) => new _Ast(child, this));
+        this.children = createChildren(this, src.children);
         break;
       case "pi":
         this.name = src.name;
