@@ -4,7 +4,9 @@ export type AstNode = {
 } | {
     type: "text";
     value: string;
-} | {
+}
+/** If children is empty, it's a void element */
+ | {
     type: "element";
     name: string;
     attributes: AstAttributes;
@@ -57,6 +59,7 @@ export declare class Ast {
     isRoot(): boolean;
     isText(): boolean;
     isElement(): boolean;
+    isVoidElement(): boolean;
     isComment(): boolean;
     isDoctype(): boolean;
     isCdata(): boolean;

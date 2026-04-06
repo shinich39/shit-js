@@ -586,6 +586,14 @@ function parseStr(str) {
         const top2 = stack.pop();
         top2.isClosed = true;
         if (top2.name === token.name) {
+          if (top2.children.length === 0) {
+            top2.children.push({
+              type: "text",
+              isClosed: true,
+              isClosing: false,
+              value: ""
+            });
+          }
           break;
         }
       }
@@ -702,6 +710,9 @@ var Ast = class _Ast {
   }
   isElement() {
     return this.type === "element";
+  }
+  isVoidElement() {
+    return this.type === "element" && this.children.length === 0;
   }
   isComment() {
     return this.type === "comment";
@@ -959,9 +970,9 @@ var Ast = class _Ast {
     if (type === "pi") {
       return `<?${name} ${value}?>`;
     }
-    const isEmpty = this.children.length === 0;
+    const isVoidElement = this.children.length === 0;
     const attrs = stringifyAttrs(this.attributes);
-    if (isEmpty) {
+    if (isVoidElement) {
       return `<${name}${attrs} />`;
     }
     const joinedValue = this.children.map((node) => node.toString()).join("");

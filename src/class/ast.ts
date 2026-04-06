@@ -1,6 +1,7 @@
 export type AstNode =
   | { type: "root"; children: AstNode[] }
   | { type: "text"; value: string }
+  /** If children is empty, it's a void element */
   | { type: "element"; name: string; attributes: AstAttributes; children: AstNode[] }
   | { type: "comment"; value: string }
   | { type: "doctype"; value: string }
@@ -13,6 +14,11 @@ export type AstAttributes = Record<string, string | boolean>;
 type Token = AstNode & {
   isClosed: boolean;
   isClosing: boolean;
+  children?: (AstNode | Token)[];
+};
+
+type Stack = Token & {
+  type: "element";
 };
 
 function isWhitespace(char: string): boolean {
@@ -643,7 +649,7 @@ function parseStr(str: string): {
   const tokens: Token[] = tokenize(str);
 
   // opened element token
-  const stack: (Token & { name?: string; children: unknown[] })[] = [];
+  const stack: Stack[] = [];
 
   const root: AstNode = {
     type: "root",
@@ -671,10 +677,20 @@ function parseStr(str: string): {
         const top = stack.pop()!;
 
         /** @see https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags */
-        // void element or self-closing tag
+        // force close void element or self-closing tag
         top.isClosed = true;
 
         if (top.name === token.name) {
+          // if the element is closed but has no children,
+          // add empty text node as children to avoid void element (e.g., <img>) being treated as self-closing tag (e.g., <div />)
+          if (top.children.length === 0) {
+            top.children.push({
+              type: "text",
+              isClosed: true,
+              isClosing: false,
+              value: "",
+            });
+          }
           break;
         }
       }
@@ -832,6 +848,9 @@ export class Ast {
   }
   isElement(): boolean {
     return this.type === "element";
+  }
+  isVoidElement(): boolean {
+    return this.type === "element" && this.children.length === 0;
   }
   isComment(): boolean {
     return this.type === "comment";
@@ -1158,13 +1177,10 @@ export class Ast {
     }
 
     // type === "element"
-
-    // XML empty element
-    // HTML void element
-    const isEmpty = this.children.length === 0;
+    const isVoidElement = this.children.length === 0;
     const attrs = stringifyAttrs(this.attributes);
 
-    if (isEmpty) {
+    if (isVoidElement) {
       return `<${name}${attrs} />`;
     }
 

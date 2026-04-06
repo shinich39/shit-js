@@ -21,6 +21,7 @@ const raw = `<?xml version="1.0" encoding="UTF-8"?>
   <div>
     <img src="this/is/path" />
   </div>
+  <div id="empty"></div>
 </body>
 </html>`;
 
@@ -103,6 +104,13 @@ test("ast: append, before, after", () => {
     ],
   });
 
+  h1?.append({
+    type: "element",
+    name: "img",
+    attributes: { src: "this/is/path" },
+    children: [],
+  });
+
   h1?.before({
     type: "element",
     name: "span",
@@ -130,6 +138,7 @@ test("ast: append, before, after", () => {
   const before = h1?.getPrevSibling();
   const after = h1?.getNextSibling();
   const append = h1?.find((n) => n.name === "span");
+  const voidElement = h1?.find((n) => n.name === "img");
 
   eq(before?.name, "span");
   eq(before?.getText(), "BEFORE");
@@ -139,6 +148,10 @@ test("ast: append, before, after", () => {
 
   eq(append?.name, "span");
   eq(append?.getText(), "APPEND");
+
+  eq(voidElement?.name, "img");
+  eq(voidElement?.getAttribute("src"), "this/is/path");
+  eq(voidElement?.children.length, 0);
 });
 
 test("ast: remove", () => {
@@ -178,10 +191,10 @@ test("ast: descendants", () => {
 
   const descendants = body?.getDescendants().filter((n) => n.type === "element");
 
-  eq(descendants?.length, 7);
+  eq(descendants?.length, 8);
   eq(
     descendants?.map((n) => n.name),
-    ["h1", "nav", "ol", "li", "a", "div", "img"],
+    ["h1", "nav", "ol", "li", "a", "div", "img", "div"],
   );
 });
 
@@ -195,4 +208,14 @@ test("ast: void element", () => {
   eq(img?.toString(), `<img src="this/is/path" />`);
   eq(img?.getAttribute("src"), `this/is/path`);
   eq(img?.getText(), ``);
+  eq(img?.children.length, 0);
+  eq(img?.isVoidElement(), true);
+
+  const empty = root.find((n) => n.attributes.id === "empty");
+
+  ok(!!empty);
+  eq(empty?.toString(), `<div id="empty"></div>`);
+  eq(empty?.getText(), ``);
+  eq(empty?.children.length, 1);
+  eq(empty?.isVoidElement(), false);
 });
