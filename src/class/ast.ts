@@ -1123,7 +1123,11 @@ export class Ast {
   }
 
   remove(): void {
-    this.parent?.removeChild(this);
+    if (this.parent) {
+      this.parent.children = this.parent.children.filter((child) => child !== this);
+    }
+
+    delete this.parent;
   }
 
   removeChild(node: Ast): void {

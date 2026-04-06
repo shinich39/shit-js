@@ -928,7 +928,10 @@ var Ast = class _Ast {
     return acc;
   }
   remove() {
-    this.parent?.removeChild(this);
+    if (this.parent) {
+      this.parent.children = this.parent.children.filter((child) => child !== this);
+    }
+    delete this.parent;
   }
   removeChild(node) {
     this.children = this.children.filter((child) => {
