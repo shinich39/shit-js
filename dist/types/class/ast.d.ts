@@ -4,13 +4,36 @@ export type AstNode = {
 } | {
     type: "text";
     value: string;
-}
-/** If children is empty, it's a void element */
- | {
+} | {
     type: "element";
     name: string;
     attributes: AstAttributes;
     children: AstNode[];
+} | {
+    type: "comment";
+    value: string;
+} | {
+    type: "doctype";
+    value: string;
+} | {
+    type: "pi";
+    name: string;
+    value: string;
+} | {
+    type: "cdata";
+    value: string;
+};
+export type AstNodeLike = {
+    type: "root";
+    children: (Ast | AstNode | string)[];
+} | {
+    type: "text";
+    value: string;
+} | {
+    type: "element";
+    name: string;
+    attributes: AstAttributes;
+    children: (Ast | AstNode | string)[];
 } | {
     type: "comment";
     value: string;
@@ -33,7 +56,7 @@ declare function parseStr(str: string): {
     }>;
     nodes: AstNode[];
 };
-export declare function createAst(src: string | AstNode | Ast, parent?: Ast): Ast;
+declare function createAst(src: string | AstNode | Ast, parent?: Ast): Ast;
 /**
  * Abstract Syntax Tree (AST)
  *
@@ -50,12 +73,9 @@ export declare class Ast {
     value: string;
     attributes: AstAttributes;
     children: Ast[];
-    constructor(src?: string | AstNode | Ast, parent?: Ast);
+    constructor(src?: string | AstNodeLike | Ast, parent?: Ast);
     static parse: typeof parseStr;
-    /**
-     * If src is string, always type is root.
-     */
-    init(src: string | AstNode | Ast, parent?: Ast): void;
+    static create: typeof createAst;
     isRoot(): boolean;
     isText(): boolean;
     isElement(): boolean;
@@ -95,12 +115,14 @@ export declare class Ast {
     getTexts(): string[];
     getRoot(this: Ast): Ast | undefined;
     getDepth(this: Ast): number;
-    append(...nodes: (string | AstNode | Ast)[]): void;
-    prepend(...nodes: (string | AstNode | Ast)[]): void;
-    before(...nodes: (string | AstNode | Ast)[]): void;
-    after(...nodes: (string | AstNode | Ast)[]): void;
+    append(...nodes: (string | AstNodeLike | Ast)[]): void;
+    prepend(...nodes: (string | AstNodeLike | Ast)[]): void;
+    before(...nodes: (string | AstNodeLike | Ast)[]): void;
+    after(...nodes: (string | AstNodeLike | Ast)[]): void;
+    clear(): void;
     forEach(callback: (node: Ast, index: number, siblings: Ast[]) => void | "skip" | "break"): void;
     find(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): Ast | undefined;
+    some(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): boolean;
     filter(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): Ast[];
     map<T>(callback: (node: Ast, index: number, siblings: Ast[]) => T): T[];
     reduce<T>(callback: (previousValue: T, node: Ast, index: number, siblings: Ast[]) => T, initialValue: T): T;
@@ -108,13 +130,32 @@ export declare class Ast {
     removeChild(node: Ast): void;
     removeChildren(nodes: Ast[]): void;
     /**
-     * Convert ast to html string.
+     * @example
+     * const ast = new Ast(`<div>abc</div>`);
+     * ast.toString(); // "<div>abc</div>"
      */
     toString(): string;
     /**
-     * Get all nodes with self
+     * @example
+     * const root = new Ast(`<div>abc</div>`);
+     * root.toObject();
+     * // {
+     * //   type: "root",
+     * //   children: [
+     * //     {
+     * //       type: "element",
+     * //       name: "div",
+     * //       attributes: {},
+     * //       children: [
+     * //         {
+     * //           type: "text",
+     * //           value: "abc",
+     * //         }
+     * //       ]
+     * //     }
+     * //   ]
+     * // };
      */
-    toArray(): Ast[];
     toObject(): AstNode;
 }
 export {};

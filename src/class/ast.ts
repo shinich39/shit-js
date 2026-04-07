@@ -1,8 +1,21 @@
 export type AstNode =
   | { type: "root"; children: AstNode[] }
   | { type: "text"; value: string }
-  /** If children is empty, it's a void element */
   | { type: "element"; name: string; attributes: AstAttributes; children: AstNode[] }
+  | { type: "comment"; value: string }
+  | { type: "doctype"; value: string }
+  | { type: "pi"; name: string; value: string }
+  | { type: "cdata"; value: string };
+
+export type AstNodeLike =
+  | { type: "root"; children: (Ast | AstNode | string)[] }
+  | { type: "text"; value: string }
+  | {
+      type: "element";
+      name: string;
+      attributes: AstAttributes;
+      children: (Ast | AstNode | string)[];
+    }
   | { type: "comment"; value: string }
   | { type: "doctype"; value: string }
   | { type: "pi"; name: string; value: string }
@@ -739,7 +752,7 @@ function stringifyAttrs(attrs: AstAttributes): string {
   return result;
 }
 
-function createChildren(parent: Ast, nodes: (string | AstNode | Ast)[]): Ast[] {
+function createChildren(parent: Ast, nodes: (string | AstNodeLike | Ast)[]): Ast[] {
   const result: Ast[] = [];
 
   for (const node of nodes) {
@@ -748,23 +761,37 @@ function createChildren(parent: Ast, nodes: (string | AstNode | Ast)[]): Ast[] {
       for (const child of root.children) {
         result.push(new Ast(child, parent));
       }
-    } else if (node.type === "root") {
-      const children = createChildren(parent, node.children);
-      for (const child of children) {
-        result.push(child);
+    } // Ast
+    else if (node instanceof Ast) {
+      if (node.type === "root") {
+        const children = createChildren(parent, node.children);
+        for (const child of children) {
+          result.push(child);
+        }
+      } else {
+        if (node.parent && node.parent !== parent) {
+          node.remove();
+          node.parent = parent;
+        }
+        result.push(node);
       }
-    } else if (node instanceof Ast) {
-      node.parent = parent;
-      result.push(node);
-    } else {
-      result.push(new Ast(node, parent));
+    } // AstNode
+    else {
+      if (node.type === "root") {
+        const children = createChildren(parent, node.children);
+        for (const child of children) {
+          result.push(child);
+        }
+      } else {
+        result.push(new Ast(node, parent));
+      }
     }
   }
 
   return result;
 }
 
-export function createAst(src: string | AstNode | Ast, parent?: Ast): Ast {
+function createAst(src: string | AstNode | Ast, parent?: Ast): Ast {
   return new Ast(src, parent);
 }
 
@@ -785,64 +812,48 @@ export class Ast {
   attributes: AstAttributes;
   children: Ast[];
 
-  constructor(src?: string | AstNode | Ast, parent?: Ast) {
+  constructor(src?: string | AstNodeLike | Ast, parent?: Ast) {
+    this.parent = parent;
     this.type = "root";
     this.name = "";
     this.value = "";
     this.attributes = {};
     this.children = [];
-    if (src) {
-      this.init(src, parent);
-    }
-  }
 
-  static parse = parseStr as typeof parseStr;
-
-  /**
-   * If src is string, always type is root.
-   */
-  init(src: string | AstNode | Ast, parent?: Ast): void {
-    // parse string
     if (typeof src === "string") {
       const { root } = Ast.parse(src);
       this.children = createChildren(this, root.children);
       return;
     }
 
-    this.parent = parent;
-    this.type = src.type;
+    if (src) {
+      this.type = src.type;
 
-    // clear properties
-    this.name = "";
-    this.value = "";
-    this.attributes = {};
-    this.children = [];
-
-    // set properties
-    switch (src.type) {
-      case "root":
-        this.children = createChildren(this, src.children);
-        break;
-
-      case "element":
-        this.name = src.name;
-        this.attributes = { ...src.attributes };
-        this.children = createChildren(this, src.children);
-        break;
-
-      case "pi":
-        this.name = src.name;
-        this.value = src.value;
-        break;
-
-      case "doctype":
-      case "text":
-      case "comment":
-      case "cdata":
-        this.value = src.value;
-        break;
+      switch (src.type) {
+        case "root":
+          this.children = createChildren(this, src.children);
+          break;
+        case "element":
+          this.name = src.name;
+          this.attributes = { ...src.attributes };
+          this.children = createChildren(this, src.children);
+          break;
+        case "pi":
+          this.name = src.name;
+          this.value = src.value;
+          break;
+        case "doctype":
+        case "text":
+        case "comment":
+        case "cdata":
+          this.value = src.value;
+          break;
+      }
     }
   }
+
+  static parse = parseStr as typeof parseStr;
+  static create = createAst as typeof createAst;
 
   isRoot(): boolean {
     return this.type === "root";
@@ -988,27 +999,27 @@ export class Ast {
   }
 
   getText(): string {
-    const values: string[] = [];
+    let result = "";
 
     this._walk((n) => {
       if (n.type === "text") {
-        values.push(n.value);
+        result += n.value;
       }
     });
 
-    return values.join("");
+    return result;
   }
 
   getTexts(): string[] {
-    const values: string[] = [];
+    const result: string[] = [];
 
     this._walk((n) => {
       if (n.type === "text") {
-        values.push(n.value);
+        result.push(n.value);
       }
     });
 
-    return values;
+    return result;
   }
 
   getRoot(this: Ast): Ast | undefined {
@@ -1029,19 +1040,19 @@ export class Ast {
     return result;
   }
 
-  append(...nodes: (string | AstNode | Ast)[]): void {
+  append(...nodes: (string | AstNodeLike | Ast)[]): void {
     const newChildren = createChildren(this, nodes);
     for (const el of newChildren) {
       this.children.push(el);
     }
   }
 
-  prepend(...nodes: (string | AstNode | Ast)[]): void {
+  prepend(...nodes: (string | AstNodeLike | Ast)[]): void {
     const newChildren = createChildren(this, nodes);
     this.children.splice(0, 0, ...newChildren);
   }
 
-  before(...nodes: (string | AstNode | Ast)[]): void {
+  before(...nodes: (string | AstNodeLike | Ast)[]): void {
     if (!this.parent) {
       throw new Error("No parent.");
     }
@@ -1055,7 +1066,7 @@ export class Ast {
     this.parent.children.splice(index, 0, ...newSiblings);
   }
 
-  after(...nodes: (string | AstNode | Ast)[]): void {
+  after(...nodes: (string | AstNodeLike | Ast)[]): void {
     if (!this.parent) {
       throw new Error("No parent node.");
     }
@@ -1069,22 +1080,45 @@ export class Ast {
     this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
 
+  clear(): void {
+    const children = this.children;
+
+    this.children = [];
+
+    for (const child of children) {
+      delete child.parent;
+    }
+  }
+
   // biome-ignore lint: STFU
   forEach(callback: (node: Ast, index: number, siblings: Ast[]) => void | "skip" | "break"): void {
     this._walk(callback);
   }
 
   find(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): Ast | undefined {
-    let found: Ast | undefined;
+    let result: Ast | undefined;
 
     this._walk((node, index, siblings) => {
       if (callback(node, index, siblings)) {
-        found = node;
+        result = node;
         return "break";
       }
     });
 
-    return found;
+    return result;
+  }
+
+  some(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): boolean {
+    let result: boolean = false;
+
+    this._walk((node, index, siblings) => {
+      if (callback(node, index, siblings)) {
+        result = true;
+        return "break";
+      }
+    });
+
+    return result;
   }
 
   filter(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): Ast[] {
@@ -1155,7 +1189,9 @@ export class Ast {
   }
 
   /**
-   * Convert ast to html string.
+   * @example
+   * const ast = new Ast(`<div>abc</div>`);
+   * ast.toString(); // "<div>abc</div>"
    */
   toString(): string {
     const { type, name, value } = this;
@@ -1197,12 +1233,26 @@ export class Ast {
   }
 
   /**
-   * Get all nodes with self
+   * @example
+   * const root = new Ast(`<div>abc</div>`);
+   * root.toObject();
+   * // {
+   * //   type: "root",
+   * //   children: [
+   * //     {
+   * //       type: "element",
+   * //       name: "div",
+   * //       attributes: {},
+   * //       children: [
+   * //         {
+   * //           type: "text",
+   * //           value: "abc",
+   * //         }
+   * //       ]
+   * //     }
+   * //   ]
+   * // };
    */
-  toArray(): Ast[] {
-    return [this, ...this.getDescendants()];
-  }
-
   toObject(): AstNode {
     const fn = (ast: Ast): AstNode => {
       const { type, name, value, children, attributes } = ast;
@@ -1212,13 +1262,6 @@ export class Ast {
           type,
           children: children.map(fn),
         } as Extract<AstNode, { type: "root" }>;
-      }
-
-      if (type === "doctype") {
-        return {
-          type,
-          value,
-        } as Extract<AstNode, { type: "doctype" }>;
       }
 
       if (type === "text") {
@@ -1232,7 +1275,6 @@ export class Ast {
         return {
           type,
           name,
-          value,
           attributes: { ...attributes },
           children: children.map(fn),
         } as Extract<AstNode, { type: "element" }>;
@@ -1243,6 +1285,13 @@ export class Ast {
           type,
           value,
         } as Extract<AstNode, { type: "comment" }>;
+      }
+
+      if (type === "doctype") {
+        return {
+          type,
+          value,
+        } as Extract<AstNode, { type: "doctype" }>;
       }
 
       if (type === "cdata") {

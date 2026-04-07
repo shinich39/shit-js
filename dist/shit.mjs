@@ -635,16 +635,28 @@ function createChildren(parent, nodes) {
       for (const child of root.children) {
         result.push(new Ast(child, parent));
       }
-    } else if (node.type === "root") {
-      const children = createChildren(parent, node.children);
-      for (const child of children) {
-        result.push(child);
-      }
     } else if (node instanceof Ast) {
-      node.parent = parent;
-      result.push(node);
+      if (node.type === "root") {
+        const children = createChildren(parent, node.children);
+        for (const child of children) {
+          result.push(child);
+        }
+      } else {
+        if (node.parent && node.parent !== parent) {
+          node.remove();
+          node.parent = parent;
+        }
+        result.push(node);
+      }
     } else {
-      result.push(new Ast(node, parent));
+      if (node.type === "root") {
+        const children = createChildren(parent, node.children);
+        for (const child of children) {
+          result.push(child);
+        }
+      } else {
+        result.push(new Ast(node, parent));
+      }
     }
   }
   return result;
@@ -660,52 +672,43 @@ var Ast = class _Ast {
   attributes;
   children;
   constructor(src, parent) {
+    this.parent = parent;
     this.type = "root";
     this.name = "";
     this.value = "";
     this.attributes = {};
     this.children = [];
-    if (src) {
-      this.init(src, parent);
-    }
-  }
-  static parse = parseStr;
-  /**
-   * If src is string, always type is root.
-   */
-  init(src, parent) {
     if (typeof src === "string") {
       const { root } = _Ast.parse(src);
       this.children = createChildren(this, root.children);
       return;
     }
-    this.parent = parent;
-    this.type = src.type;
-    this.name = "";
-    this.value = "";
-    this.attributes = {};
-    this.children = [];
-    switch (src.type) {
-      case "root":
-        this.children = createChildren(this, src.children);
-        break;
-      case "element":
-        this.name = src.name;
-        this.attributes = { ...src.attributes };
-        this.children = createChildren(this, src.children);
-        break;
-      case "pi":
-        this.name = src.name;
-        this.value = src.value;
-        break;
-      case "doctype":
-      case "text":
-      case "comment":
-      case "cdata":
-        this.value = src.value;
-        break;
+    if (src) {
+      this.type = src.type;
+      switch (src.type) {
+        case "root":
+          this.children = createChildren(this, src.children);
+          break;
+        case "element":
+          this.name = src.name;
+          this.attributes = { ...src.attributes };
+          this.children = createChildren(this, src.children);
+          break;
+        case "pi":
+          this.name = src.name;
+          this.value = src.value;
+          break;
+        case "doctype":
+        case "text":
+        case "comment":
+        case "cdata":
+          this.value = src.value;
+          break;
+      }
     }
   }
+  static parse = parseStr;
+  static create = createAst;
   isRoot() {
     return this.type === "root";
   }
@@ -827,22 +830,22 @@ var Ast = class _Ast {
     return typeof this.attributes[key] !== "undefined";
   }
   getText() {
-    const values = [];
+    let result = "";
     this._walk((n) => {
       if (n.type === "text") {
-        values.push(n.value);
+        result += n.value;
       }
     });
-    return values.join("");
+    return result;
   }
   getTexts() {
-    const values = [];
+    const result = [];
     this._walk((n) => {
       if (n.type === "text") {
-        values.push(n.value);
+        result.push(n.value);
       }
     });
-    return values;
+    return result;
   }
   getRoot() {
     const parents = this.getAncestors();
@@ -890,19 +893,36 @@ var Ast = class _Ast {
     const newSiblings = createChildren(this.parent, nodes);
     this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
+  clear() {
+    const children = this.children;
+    this.children = [];
+    for (const child of children) {
+      delete child.parent;
+    }
+  }
   // biome-ignore lint: STFU
   forEach(callback) {
     this._walk(callback);
   }
   find(callback) {
-    let found;
+    let result;
     this._walk((node, index, siblings) => {
       if (callback(node, index, siblings)) {
-        found = node;
+        result = node;
         return "break";
       }
     });
-    return found;
+    return result;
+  }
+  some(callback) {
+    let result = false;
+    this._walk((node, index, siblings) => {
+      if (callback(node, index, siblings)) {
+        result = true;
+        return "break";
+      }
+    });
+    return result;
   }
   filter(callback) {
     const result = [];
@@ -955,7 +975,9 @@ var Ast = class _Ast {
     });
   }
   /**
-   * Convert ast to html string.
+   * @example
+   * const ast = new Ast(`<div>abc</div>`);
+   * ast.toString(); // "<div>abc</div>"
    */
   toString() {
     const { type, name, value } = this;
@@ -986,11 +1008,26 @@ var Ast = class _Ast {
     return `<${name}${attrs}>${joinedValue}</${name}>`;
   }
   /**
-   * Get all nodes with self
+   * @example
+   * const root = new Ast(`<div>abc</div>`);
+   * root.toObject();
+   * // {
+   * //   type: "root",
+   * //   children: [
+   * //     {
+   * //       type: "element",
+   * //       name: "div",
+   * //       attributes: {},
+   * //       children: [
+   * //         {
+   * //           type: "text",
+   * //           value: "abc",
+   * //         }
+   * //       ]
+   * //     }
+   * //   ]
+   * // };
    */
-  toArray() {
-    return [this, ...this.getDescendants()];
-  }
   toObject() {
     const fn = (ast) => {
       const { type, name, value, children, attributes } = ast;
@@ -998,12 +1035,6 @@ var Ast = class _Ast {
         return {
           type,
           children: children.map(fn)
-        };
-      }
-      if (type === "doctype") {
-        return {
-          type,
-          value
         };
       }
       if (type === "text") {
@@ -1016,12 +1047,17 @@ var Ast = class _Ast {
         return {
           type,
           name,
-          value,
           attributes: { ...attributes },
           children: children.map(fn)
         };
       }
       if (type === "comment") {
+        return {
+          type,
+          value
+        };
+      }
+      if (type === "doctype") {
         return {
           type,
           value
@@ -1798,7 +1834,6 @@ export {
   clone,
   compareObjects,
   compareStrings,
-  createAst,
   createI18n,
   createMulberry32,
   createQueue,

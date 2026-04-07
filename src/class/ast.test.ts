@@ -1,6 +1,6 @@
 import { deepStrictEqual as eq, ok } from "node:assert";
 import { test } from "node:test";
-import { Ast, createAst } from "./ast";
+import { Ast } from "./ast";
 
 const raw = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -86,7 +86,7 @@ test("ast: parse", () => {
   eq(h1?.toString(), `<h1 id="heading">\n    Heading\n  </h1>`);
 });
 
-test("ast: append, before, after", () => {
+test("ast: append", () => {
   const root = new Ast(raw);
 
   const body = root.find((n) => n.name === "body");
@@ -111,6 +111,42 @@ test("ast: append, before, after", () => {
     children: [],
   });
 
+  const append = h1?.find((n) => n.name === "span");
+  const voidElement = h1?.find((n) => n.name === "img");
+
+  eq(append?.name, "span");
+  eq(append?.getText(), "APPEND");
+
+  eq(voidElement?.name, "img");
+  eq(voidElement?.getAttribute("src"), "this/is/path");
+  eq(voidElement?.children.length, 0);
+
+  root.clear();
+
+  root.append(`<div>abc</div>`);
+  root.append("abc"); // append text
+  eq(root.toString(), "<div>abc</div>abc");
+});
+
+test("ast: append string children", () => {
+  const root = new Ast();
+
+  root.append({
+    type: "element",
+    name: "div",
+    attributes: {},
+    children: ["<span>ab</span>", "cd"],
+  });
+
+  eq(root.toString(), "<div><span>ab</span>cd</div>");
+});
+
+test("ast: before", () => {
+  const root = new Ast(raw);
+
+  const body = root.find((n) => n.name === "body");
+  const h1 = body?.find((n) => n.name === "h1");
+
   h1?.before({
     type: "element",
     name: "span",
@@ -122,6 +158,18 @@ test("ast: append, before, after", () => {
       },
     ],
   });
+
+  const before = h1?.getPrevSibling();
+
+  eq(before?.name, "span");
+  eq(before?.getText(), "BEFORE");
+});
+
+test("ast: after", () => {
+  const root = new Ast(raw);
+
+  const body = root.find((n) => n.name === "body");
+  const h1 = body?.find((n) => n.name === "h1");
 
   h1?.after({
     type: "element",
@@ -135,23 +183,10 @@ test("ast: append, before, after", () => {
     ],
   });
 
-  const before = h1?.getPrevSibling();
   const after = h1?.getNextSibling();
-  const append = h1?.find((n) => n.name === "span");
-  const voidElement = h1?.find((n) => n.name === "img");
-
-  eq(before?.name, "span");
-  eq(before?.getText(), "BEFORE");
 
   eq(after?.name, "span");
   eq(after?.getText(), "AFTER");
-
-  eq(append?.name, "span");
-  eq(append?.getText(), "APPEND");
-
-  eq(voidElement?.name, "img");
-  eq(voidElement?.getAttribute("src"), "this/is/path");
-  eq(voidElement?.children.length, 0);
 });
 
 test("ast: remove", () => {
@@ -167,6 +202,12 @@ test("ast: remove", () => {
   const removedH1 = body?.find((n) => n.name === "h1");
 
   ok(!removedH1);
+});
+
+test("ast: clear", () => {
+  const root = new Ast(raw);
+  root.clear();
+  eq(root.toString(), "");
 });
 
 test("ast: ancestors", () => {
@@ -218,4 +259,29 @@ test("ast: void element", () => {
   eq(empty?.getText(), ``);
   eq(empty?.children.length, 1);
   eq(empty?.isVoidElement(), false);
+});
+
+test("ast: toString", () => {
+  const root = new Ast(`<div>abc</div>`);
+  eq(root.toString(), "<div>abc</div>");
+});
+
+test("ast: toObject", () => {
+  const root = new Ast(`<div>abc</div>`);
+  eq(root.toObject(), {
+    type: "root",
+    children: [
+      {
+        type: "element",
+        name: "div",
+        attributes: {},
+        children: [
+          {
+            type: "text",
+            value: "abc",
+          },
+        ],
+      },
+    ],
+  });
 });
