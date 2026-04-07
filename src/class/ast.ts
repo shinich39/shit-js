@@ -752,39 +752,58 @@ function stringifyAttrs(attrs: AstAttributes): string {
   return result;
 }
 
-function createChildren(parent: Ast, nodes: (string | Ast | AstNodeLike)[]): Ast[] {
+function createChildren(parent: Ast, sources: (string | Ast | AstNodeLike)[]): Ast[] {
   const result: Ast[] = [];
 
-  for (const node of nodes) {
-    if (typeof node === "string") {
-      const { root } = Ast.parse(node);
+  for (const src of sources) {
+    if (typeof src === "string") {
+      const { root } = Ast.parse(src);
+
+      // if src is empty string, append a empty string AstNode
+      if (root.children.length === 0) {
+        result.push(
+          new Ast(
+            {
+              type: "text",
+              value: "",
+            },
+            parent,
+          ),
+        );
+        continue;
+      }
+
       for (const child of root.children) {
         result.push(new Ast(child, parent));
       }
     } // Ast
-    else if (node instanceof Ast) {
-      if (node.type === "root") {
-        const children = createChildren(parent, node.children);
+    else if (src instanceof Ast) {
+      // if src is root, append root.children
+      if (src.type === "root") {
+        const children = createChildren(parent, src.children);
         for (const child of children) {
           result.push(child);
         }
-      } else {
-        if (node.parent && node.parent !== parent) {
-          node.remove();
-          node.parent = parent;
-        }
-        result.push(node);
+        continue;
       }
+
+      if (src.parent && src.parent !== parent) {
+        src.remove();
+        src.parent = parent;
+      }
+      result.push(src);
     } // AstNode
     else {
-      if (node.type === "root") {
-        const children = createChildren(parent, node.children);
+      // if src is root, append root.children
+      if (src.type === "root") {
+        const children = createChildren(parent, src.children);
         for (const child of children) {
           result.push(child);
         }
-      } else {
-        result.push(new Ast(node, parent));
+        continue;
       }
+
+      result.push(new Ast(src, parent));
     }
   }
 

@@ -128,7 +128,7 @@ test("ast: append", () => {
   eq(root.toString(), "<div>abc</div>abc");
 });
 
-test("ast: append string children", () => {
+test("ast: append string", () => {
   const root = new Ast();
 
   root.append({
@@ -139,6 +139,13 @@ test("ast: append string children", () => {
   });
 
   eq(root.toString(), "<div><span>ab</span>cd</div>");
+});
+
+test("ast: append empty string", () => {
+  const root = new Ast();
+  root.append("");
+  eq(root.toString(), "");
+  eq(root.children.length, 1);
 });
 
 test("ast: before", () => {
