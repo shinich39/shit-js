@@ -743,9 +743,6 @@ var shitJs = (() => {
     }
     return result;
   }
-  function createAst(src, parent) {
-    return new Ast(src, parent);
-  }
   var Ast = class _Ast {
     parent;
     type;
@@ -790,7 +787,9 @@ var shitJs = (() => {
       }
     }
     static parse = parseStr;
-    static create = createAst;
+    static create = (src, parent) => {
+      return new _Ast(src, parent);
+    };
     isRoot() {
       return this.type === "root";
     }

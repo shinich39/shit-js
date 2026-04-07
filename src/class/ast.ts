@@ -8,13 +8,13 @@ export type AstNode =
   | { type: "cdata"; value: string };
 
 export type AstNodeLike =
-  | { type: "root"; children: (Ast | AstNode | string)[] }
+  | { type: "root"; children: (string | Ast | AstNodeLike)[] }
   | { type: "text"; value: string }
   | {
       type: "element";
       name: string;
       attributes: AstAttributes;
-      children: (Ast | AstNode | string)[];
+      children: (string | Ast | AstNodeLike)[];
     }
   | { type: "comment"; value: string }
   | { type: "doctype"; value: string }
@@ -752,7 +752,7 @@ function stringifyAttrs(attrs: AstAttributes): string {
   return result;
 }
 
-function createChildren(parent: Ast, nodes: (string | AstNodeLike | Ast)[]): Ast[] {
+function createChildren(parent: Ast, nodes: (string | Ast | AstNodeLike)[]): Ast[] {
   const result: Ast[] = [];
 
   for (const node of nodes) {
@@ -791,10 +791,6 @@ function createChildren(parent: Ast, nodes: (string | AstNodeLike | Ast)[]): Ast
   return result;
 }
 
-function createAst(src: string | AstNode | Ast, parent?: Ast): Ast {
-  return new Ast(src, parent);
-}
-
 /**
  * Abstract Syntax Tree (AST)
  *
@@ -812,7 +808,7 @@ export class Ast {
   attributes: AstAttributes;
   children: Ast[];
 
-  constructor(src?: string | AstNodeLike | Ast, parent?: Ast) {
+  constructor(src?: string | Ast | AstNodeLike, parent?: Ast) {
     this.parent = parent;
     this.type = "root";
     this.name = "";
@@ -853,7 +849,10 @@ export class Ast {
   }
 
   static parse = parseStr as typeof parseStr;
-  static create = createAst as typeof createAst;
+
+  static create = (src: string | Ast | AstNodeLike, parent?: Ast): Ast => {
+    return new Ast(src, parent);
+  };
 
   isRoot(): boolean {
     return this.type === "root";
@@ -1040,19 +1039,19 @@ export class Ast {
     return result;
   }
 
-  append(...nodes: (string | AstNodeLike | Ast)[]): void {
+  append(...nodes: (string | Ast | AstNodeLike)[]): void {
     const newChildren = createChildren(this, nodes);
     for (const el of newChildren) {
       this.children.push(el);
     }
   }
 
-  prepend(...nodes: (string | AstNodeLike | Ast)[]): void {
+  prepend(...nodes: (string | Ast | AstNodeLike)[]): void {
     const newChildren = createChildren(this, nodes);
     this.children.splice(0, 0, ...newChildren);
   }
 
-  before(...nodes: (string | AstNodeLike | Ast)[]): void {
+  before(...nodes: (string | Ast | AstNodeLike)[]): void {
     if (!this.parent) {
       throw new Error("No parent.");
     }
@@ -1066,7 +1065,7 @@ export class Ast {
     this.parent.children.splice(index, 0, ...newSiblings);
   }
 
-  after(...nodes: (string | AstNodeLike | Ast)[]): void {
+  after(...nodes: (string | Ast | AstNodeLike)[]): void {
     if (!this.parent) {
       throw new Error("No parent node.");
     }

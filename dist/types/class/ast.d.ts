@@ -25,7 +25,7 @@ export type AstNode = {
 };
 export type AstNodeLike = {
     type: "root";
-    children: (Ast | AstNode | string)[];
+    children: (string | Ast | AstNodeLike)[];
 } | {
     type: "text";
     value: string;
@@ -33,7 +33,7 @@ export type AstNodeLike = {
     type: "element";
     name: string;
     attributes: AstAttributes;
-    children: (Ast | AstNode | string)[];
+    children: (string | Ast | AstNodeLike)[];
 } | {
     type: "comment";
     value: string;
@@ -56,7 +56,6 @@ declare function parseStr(str: string): {
     }>;
     nodes: AstNode[];
 };
-declare function createAst(src: string | AstNode | Ast, parent?: Ast): Ast;
 /**
  * Abstract Syntax Tree (AST)
  *
@@ -73,9 +72,9 @@ export declare class Ast {
     value: string;
     attributes: AstAttributes;
     children: Ast[];
-    constructor(src?: string | AstNodeLike | Ast, parent?: Ast);
+    constructor(src?: string | Ast | AstNodeLike, parent?: Ast);
     static parse: typeof parseStr;
-    static create: typeof createAst;
+    static create: (src: string | Ast | AstNodeLike, parent?: Ast) => Ast;
     isRoot(): boolean;
     isText(): boolean;
     isElement(): boolean;
@@ -115,10 +114,10 @@ export declare class Ast {
     getTexts(): string[];
     getRoot(this: Ast): Ast | undefined;
     getDepth(this: Ast): number;
-    append(...nodes: (string | AstNodeLike | Ast)[]): void;
-    prepend(...nodes: (string | AstNodeLike | Ast)[]): void;
-    before(...nodes: (string | AstNodeLike | Ast)[]): void;
-    after(...nodes: (string | AstNodeLike | Ast)[]): void;
+    append(...nodes: (string | Ast | AstNodeLike)[]): void;
+    prepend(...nodes: (string | Ast | AstNodeLike)[]): void;
+    before(...nodes: (string | Ast | AstNodeLike)[]): void;
+    after(...nodes: (string | Ast | AstNodeLike)[]): void;
     clear(): void;
     forEach(callback: (node: Ast, index: number, siblings: Ast[]) => void | "skip" | "break"): void;
     find(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): Ast | undefined;

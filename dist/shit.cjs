@@ -743,9 +743,6 @@ function createChildren(parent, nodes) {
   }
   return result;
 }
-function createAst(src, parent) {
-  return new Ast(src, parent);
-}
 var Ast = class _Ast {
   parent;
   type;
@@ -790,7 +787,9 @@ var Ast = class _Ast {
     }
   }
   static parse = parseStr;
-  static create = createAst;
+  static create = (src, parent) => {
+    return new _Ast(src, parent);
+  };
   isRoot() {
     return this.type === "root";
   }
