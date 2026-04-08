@@ -876,30 +876,39 @@ export class Ast {
   isRoot(): boolean {
     return this.type === "root";
   }
+
   isText(): boolean {
     return this.type === "text";
   }
+
   isElement(): boolean {
     return this.type === "element";
   }
+
   isVoidElement(): boolean {
     return this.type === "element" && this.children.length === 0;
   }
+
   isComment(): boolean {
     return this.type === "comment";
   }
+
   isDoctype(): boolean {
     return this.type === "doctype";
   }
+
   isCdata(): boolean {
     return this.type === "cdata";
   }
+
   isPi(): boolean {
     return this.type === "pi";
   }
+
   isStyle(): boolean {
     return this.isElement() && this.name === "style";
   }
+
   isScript(): boolean {
     return this.isElement() && this.name === "script";
   }
@@ -907,6 +916,7 @@ export class Ast {
   getParent(): Ast | undefined {
     return this.parent;
   }
+
   hasParent(): boolean {
     return !!this.parent;
   }
@@ -992,16 +1002,19 @@ export class Ast {
   getSiblings(): Ast[] {
     return (this.parent?.children || []).filter((sibling) => sibling !== this);
   }
+
   getPrevSibling(): Ast | undefined {
     const parentChidlren = this.parent?.children || [];
     const i = parentChidlren.indexOf(this);
     return i === -1 ? undefined : parentChidlren[i - 1];
   }
+
   getNextSibling(): Ast | undefined {
     const parentChidlren = this.parent?.children || [];
     const i = parentChidlren.indexOf(this);
     return i === -1 ? undefined : parentChidlren[i + 1];
   }
+
   hasSibling(): boolean {
     return (this.parent?.children || []).length > 1;
   }
@@ -1009,11 +1022,19 @@ export class Ast {
   getAttribute(key: string): string | boolean | undefined {
     return this.attributes[key];
   }
+
   setAttribute(key: string, value: string | boolean): void {
     this.attributes[key] = value;
   }
+
+  setAttributes(attrs: AstAttributes): void {
+    for (const key in attrs) {
+      this.attributes[key] = attrs[key];
+    }
+  }
+
   hasAttribute(key: string): boolean {
-    return typeof this.attributes[key] !== "undefined";
+    return typeof this.attributes[key] === "string" || this.attributes[key] === true;
   }
 
   getText(): string {
@@ -1058,6 +1079,16 @@ export class Ast {
     return result;
   }
 
+  replace(...nodes: (string | Ast | AstNodeLike)[]): void {
+    const children = this.children;
+
+    for (const child of children) {
+      delete child.parent;
+    }
+
+    this.children = createChildren(this, nodes);
+  }
+
   append(...nodes: (string | Ast | AstNodeLike)[]): void {
     const newChildren = createChildren(this, nodes);
     for (const el of newChildren) {
@@ -1098,19 +1129,8 @@ export class Ast {
     this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
 
-  clear(): void {
-    const children = this.children;
-
-    this.children = [];
-
-    for (const child of children) {
-      delete child.parent;
-    }
-  }
-
-  // biome-ignore lint: STFU
-  forEach(callback: (node: Ast, index: number, siblings: Ast[]) => void | "skip" | "break"): void {
-    this._walk(callback);
+  forEach(callback: (node: Ast, index: number, siblings: Ast[]) => void): void {
+    this._walk((node, index, siblings) => callback(node, index, siblings));
   }
 
   find(callback: (node: Ast, index: number, siblings: Ast[]) => unknown): Ast | undefined {

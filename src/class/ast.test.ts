@@ -121,7 +121,7 @@ test("ast: append", () => {
   eq(voidElement?.getAttribute("src"), "this/is/path");
   eq(voidElement?.children.length, 0);
 
-  root.clear();
+  root.replace();
 
   root.append(`<div>abc</div>`);
   root.append("abc"); // append text
@@ -213,7 +213,7 @@ test("ast: remove", () => {
 
 test("ast: clear", () => {
   const root = new Ast(raw);
-  root.clear();
+  root.replace();
   eq(root.toString(), "");
 });
 

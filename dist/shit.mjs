@@ -837,8 +837,13 @@ var Ast = class _Ast {
   setAttribute(key, value) {
     this.attributes[key] = value;
   }
+  setAttributes(attrs) {
+    for (const key in attrs) {
+      this.attributes[key] = attrs[key];
+    }
+  }
   hasAttribute(key) {
-    return typeof this.attributes[key] !== "undefined";
+    return typeof this.attributes[key] === "string" || this.attributes[key] === true;
   }
   getText() {
     let result = "";
@@ -872,6 +877,13 @@ var Ast = class _Ast {
     }
     return result;
   }
+  replace(...nodes) {
+    const children = this.children;
+    for (const child of children) {
+      delete child.parent;
+    }
+    this.children = createChildren(this, nodes);
+  }
   append(...nodes) {
     const newChildren = createChildren(this, nodes);
     for (const el of newChildren) {
@@ -904,16 +916,8 @@ var Ast = class _Ast {
     const newSiblings = createChildren(this.parent, nodes);
     this.parent.children.splice(index + 1, 0, ...newSiblings);
   }
-  clear() {
-    const children = this.children;
-    this.children = [];
-    for (const child of children) {
-      delete child.parent;
-    }
-  }
-  // biome-ignore lint: STFU
   forEach(callback) {
-    this._walk(callback);
+    this._walk((node, index, siblings) => callback(node, index, siblings));
   }
   find(callback) {
     let result;
