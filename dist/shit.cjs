@@ -38,6 +38,7 @@ __export(index_exports, {
   extractFloats: () => extractFloats,
   extractInts: () => extractInts,
   extractNumbers: () => extractNumbers,
+  extractStrings: () => extractStrings,
   fromGb: () => fromGb,
   fromKb: () => fromKb,
   fromMb: () => fromMb,
@@ -53,6 +54,7 @@ __export(index_exports, {
   randomFloat: () => randomFloat,
   randomInt: () => randomInt,
   randomString: () => randomString,
+  removeQuotes: () => removeQuotes,
   resolvePath: () => resolvePath,
   retry: () => retry,
   sanitizeFilename: () => sanitizeFilename,
@@ -1820,6 +1822,54 @@ function extractNumbers(str) {
   return str.match(/[0-9]+(\.[0-9]+)?/g)?.map((item) => parseFloat(item)) || [];
 }
 
+// src/string/extract-strings.ts
+function extractStrings(str, pairs = {
+  '"': '"',
+  "'": "'"
+}) {
+  const headSet = new Set(Object.keys(pairs));
+  const result = [];
+  let tails = [], buffer = "", i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if (tails.length > 0 && ch === tails[tails.length - 1]) {
+      tails.pop();
+      if (tails.length > 0) {
+        buffer += ch;
+      } else {
+        result.push(buffer);
+        buffer = "";
+      }
+      i++;
+      continue;
+    }
+    if (headSet.has(ch)) {
+      tails.push(pairs[ch]);
+      if (tails.length > 1) {
+        buffer += ch;
+      }
+      i++;
+      continue;
+    }
+    if (tails.length > 0) {
+      buffer += ch;
+    }
+    i++;
+  }
+  return result;
+}
+
+// src/string/remove-quotes.ts
+function removeQuotes(str) {
+  const quotes = ['"', "'", "`"];
+  for (const q of quotes) {
+    if (str.startsWith(q) && str.endsWith(q) && str.length > 1) {
+      return str.slice(1, -1);
+    }
+  }
+  return str;
+}
+
 // src/string/to-full-width.ts
 function toFullWidth(str) {
   return str.replace(/[!-~]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) + 65248)).replace(/ /g, "\u3000");
@@ -1876,6 +1926,7 @@ function xor(str, salt) {
   extractFloats,
   extractInts,
   extractNumbers,
+  extractStrings,
   fromGb,
   fromKb,
   fromMb,
@@ -1891,6 +1942,7 @@ function xor(str, salt) {
   randomFloat,
   randomInt,
   randomString,
+  removeQuotes,
   resolvePath,
   retry,
   sanitizeFilename,
