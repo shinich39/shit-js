@@ -1432,71 +1432,6 @@ function clone(obj) {
   return fn(obj);
 }
 
-// src/object/compare-objects.ts
-function diffObjects(a, b) {
-  const diffs = [];
-  function fn(a2, b2, path) {
-    if (Object.is(a2, b2)) {
-      diffs.push([0, path]);
-      return;
-    }
-    if (isObject(a2) && isObject(b2)) {
-      const keys = /* @__PURE__ */ new Set([...Object.keys(a2), ...Object.keys(b2)]);
-      for (const key of keys) {
-        const nextPath = path ? `${path}.${key}` : key;
-        if (!(key in a2)) {
-          diffs.push([1, nextPath]);
-        } else if (!(key in b2)) {
-          diffs.push([-1, nextPath]);
-        } else {
-          fn(a2[key], b2[key], nextPath);
-        }
-      }
-      return;
-    }
-    diffs.push([-1, path]);
-    diffs.push([1, path]);
-  }
-  fn(a, b, "");
-  return diffs;
-}
-function compareObjects(a, b) {
-  const diffs = diffObjects(a, b);
-  let matches = 0;
-  let insertions = 0;
-  let deletions = 0;
-  for (const [op] of diffs) {
-    if (op === 0) {
-      matches++;
-    } else if (op === 1) {
-      insertions++;
-    } else if (op === -1) {
-      deletions++;
-    }
-  }
-  const total = matches + insertions + deletions;
-  const similarity = total === 0 ? 1 : matches / total;
-  const distance = insertions + deletions;
-  const normalizedDistance = total === 0 ? 0 : distance / total;
-  const diceSimilarity = total === 0 ? 1 : 2 * matches / (2 * matches + insertions + deletions);
-  const jaccardSimilarity = total === 0 ? 1 : matches / (matches + insertions + deletions);
-  return {
-    diffs,
-    matchRate: similarity,
-    similarity,
-    diceSimilarity,
-    jaccardSimilarity,
-    distance,
-    normalizedDistance,
-    matches,
-    insertions,
-    deletions
-  };
-}
-function isObject(arg) {
-  return arg !== null && typeof arg === "object" && !Array.isArray(arg);
-}
-
 // src/object/equal.ts
 function equal(a, b) {
   if (a === b) {
@@ -1847,7 +1782,6 @@ export {
   chunkArray,
   clamp,
   clone,
-  compareObjects,
   compareStrings,
   createI18n,
   createMulberry32,
@@ -1856,7 +1790,6 @@ export {
   createTemplate,
   createTypingDelay,
   debounce,
-  diffObjects,
   diffStrings,
   equal,
   extractFloats,
