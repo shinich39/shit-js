@@ -40,17 +40,20 @@ function groupBy(arr, fn) {
 // src/array/mode.ts
 function mode(arr) {
   const seen = /* @__PURE__ */ new Map();
-  let maxValue;
-  let maxCount = 0;
+  let value;
+  let count = 0;
   for (const v of arr) {
     const c = (seen.get(v) || 0) + 1;
     seen.set(v, c);
-    if (maxCount < c) {
-      maxCount = c;
-      maxValue = v;
+    if (count < c) {
+      count = c;
+      value = v;
     }
   }
-  return { count: maxCount, value: maxValue };
+  if (count > 0 && value !== void 0) {
+    return { count, value };
+  }
+  return void 0;
 }
 
 // src/array/shuffle.ts

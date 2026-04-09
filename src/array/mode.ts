@@ -6,22 +6,26 @@
  * mode(["a", "a", "b", "b", "b"]);
  * // { count: 3, value: "b" }
  */
-export function mode<T>(arr: T[]): { count: number; value: T | undefined } {
+export function mode<T>(arr: T[]): { count: number; value: T } | undefined {
   const seen = new Map<T, number>();
 
-  let maxValue: T | undefined;
-  let maxCount: number = 0;
+  let value: T | undefined;
+  let count: number = 0;
 
   for (const v of arr) {
     const c = (seen.get(v) || 0) + 1;
 
     seen.set(v, c);
 
-    if (maxCount < c) {
-      maxCount = c;
-      maxValue = v;
+    if (count < c) {
+      count = c;
+      value = v;
     }
   }
 
-  return { count: maxCount, value: maxValue };
+  if (count > 0 && value !== undefined) {
+    return { count, value };
+  }
+
+  return undefined;
 }

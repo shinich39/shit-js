@@ -8,6 +8,6 @@
  */
 export declare function mode<T>(arr: T[]): {
     count: number;
-    value: T | undefined;
-};
+    value: T;
+} | undefined;
 //# sourceMappingURL=mode.d.ts.map
