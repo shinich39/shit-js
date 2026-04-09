@@ -39,6 +39,7 @@ __export(index_exports, {
   extractInts: () => extractInts,
   extractNumbers: () => extractNumbers,
   extractStrings: () => extractStrings,
+  flattenArray: () => flattenArray,
   fromGb: () => fromGb,
   fromKb: () => fromKb,
   fromMb: () => fromMb,
@@ -102,6 +103,21 @@ function chunkArray(arr, size) {
     }
     return acc;
   }, []);
+}
+
+// src/array/flatten-array.ts
+function flattenArray(arr) {
+  const result = [];
+  for (const v of arr) {
+    if (Array.isArray(v)) {
+      for (const inner of v) {
+        result.push(inner);
+      }
+    } else {
+      result.push(v);
+    }
+  }
+  return result;
 }
 
 // src/array/group-by.ts
@@ -1930,6 +1946,7 @@ function xor(str, salt) {
   extractInts,
   extractNumbers,
   extractStrings,
+  flattenArray,
   fromGb,
   fromKb,
   fromMb,

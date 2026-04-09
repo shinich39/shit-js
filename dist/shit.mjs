@@ -22,6 +22,21 @@ function chunkArray(arr, size) {
   }, []);
 }
 
+// src/array/flatten-array.ts
+function flattenArray(arr) {
+  const result = [];
+  for (const v of arr) {
+    if (Array.isArray(v)) {
+      for (const inner of v) {
+        result.push(inner);
+      }
+    } else {
+      result.push(v);
+    }
+  }
+  return result;
+}
+
 // src/array/group-by.ts
 function groupBy(arr, fn) {
   const result = {};
@@ -1847,6 +1862,7 @@ export {
   extractInts,
   extractNumbers,
   extractStrings,
+  flattenArray,
   fromGb,
   fromKb,
   fromMb,
