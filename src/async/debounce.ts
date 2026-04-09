@@ -4,8 +4,8 @@
  *   console.log(arg);
  * }, 300);
  *
- * debounced("a"); // skip
- * debounced("ab"); // skip
+ * debounced("a");   // skip
+ * debounced("ab");  // skip
  * debounced("abc"); // only "abc" runs after 300ms
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
