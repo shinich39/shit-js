@@ -7,9 +7,17 @@
  * rng.int(10, 100); // 58
  */
 export function createMulberry32(initialSeed: number): {
-  /** exclusive (e.g., min <= n < max) */
+  /**
+   * exclusive
+   *
+   * @returns min <= n < max
+   */
   float: (min: number, max: number) => number;
-  /** exclusive (e.g., min <= n < max) */
+  /**
+   * exclusive
+   *
+   * @returns min <= n < max
+   */
   int: (min: number, max: number) => number;
 } {
   let seed = initialSeed;

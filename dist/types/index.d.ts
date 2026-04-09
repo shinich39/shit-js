@@ -1,7 +1,6 @@
 export * from "./array";
 export * from "./async";
 export * from "./class";
-export * from "./date";
 export * from "./factory";
 export * from "./layout";
 export * from "./number";

@@ -21,8 +21,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var index_exports = {};
 __export(index_exports, {
   Ast: () => Ast,
-  cartesianProduct: () => cartesianProduct,
-  chunkArray: () => chunkArray,
+  chunk: () => chunk,
   clamp: () => clamp,
   clone: () => clone,
   compareStrings: () => compareStrings,
@@ -39,7 +38,7 @@ __export(index_exports, {
   extractInts: () => extractInts,
   extractNumbers: () => extractNumbers,
   extractStrings: () => extractStrings,
-  flattenArray: () => flattenArray,
+  flatten: () => flatten,
   fromGb: () => fromGb,
   fromKb: () => fromKb,
   fromMb: () => fromMb,
@@ -48,8 +47,6 @@ __export(index_exports, {
   getRelativePath: () => getRelativePath,
   groupBy: () => groupBy,
   lerp: () => lerp,
-  mode: () => mode,
-  parseDate: () => parseDate,
   parsePath: () => parsePath,
   pickBy: () => pickBy,
   randomFloat: () => randomFloat,
@@ -64,6 +61,7 @@ __export(index_exports, {
   scaleToFit: () => scaleToFit,
   shuffle: () => shuffle,
   sleep: () => sleep,
+  tally: () => tally,
   toDegrees: () => toDegrees,
   toFixed: () => toFixed,
   toFullWidth: () => toFullWidth,
@@ -81,32 +79,17 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 
-// src/array/cartesian-product.ts
-function cartesianProduct(...arrays) {
-  const filtered = arrays.filter((arr) => arr.length > 0);
-  if (filtered.length < 1) {
-    return [];
+// src/array/chunk.ts
+function chunk(arr, size) {
+  const result = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
   }
-  return filtered.reduce(
-    (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
-    [[]]
-  );
+  return result;
 }
 
-// src/array/chunk-array.ts
-function chunkArray(arr, size) {
-  return arr.reduce((acc, curr) => {
-    if (!acc[acc.length - 1] || acc[acc.length - 1].length >= size) {
-      acc.push([curr]);
-    } else {
-      acc[acc.length - 1].push(curr);
-    }
-    return acc;
-  }, []);
-}
-
-// src/array/flatten-array.ts
-function flattenArray(arr) {
+// src/array/flatten.ts
+function flatten(arr) {
   const result = [];
   for (const v of arr) {
     if (Array.isArray(v)) {
@@ -135,25 +118,6 @@ function groupBy(arr, fn) {
   return result;
 }
 
-// src/array/mode.ts
-function mode(arr) {
-  const seen = /* @__PURE__ */ new Map();
-  let value;
-  let count = 0;
-  for (const v of arr) {
-    const c = (seen.get(v) || 0) + 1;
-    seen.set(v, c);
-    if (count < c) {
-      count = c;
-      value = v;
-    }
-  }
-  if (count > 0 && value !== void 0) {
-    return { count, value };
-  }
-  return void 0;
-}
-
 // src/array/shuffle.ts
 function shuffle(arr) {
   let i = arr.length;
@@ -163,6 +127,15 @@ function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// src/array/tally.ts
+function tally(arr) {
+  const seen = /* @__PURE__ */ new Map();
+  for (const v of arr) {
+    seen.set(v, (seen.get(v) || 0) + 1);
+  }
+  return Array.from(seen.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.count - b.count);
 }
 
 // src/array/unique-by.ts
@@ -1198,80 +1171,6 @@ var Ast = class _Ast {
   }
 };
 
-// src/date/parse-date.ts
-function parseDate(date) {
-  let ensuredDate;
-  if (date instanceof Date) {
-    ensuredDate = date;
-  } else {
-    ensuredDate = new Date(date);
-  }
-  if (Number.isNaN(ensuredDate.getTime())) {
-    throw new Error(`Invalid date: ${date}`);
-  }
-  const YYYY = String(ensuredDate.getFullYear());
-  const YY = YYYY.slice(-2);
-  const M = String(ensuredDate.getMonth() + 1);
-  const MM = M.padStart(2, "0");
-  const D = String(ensuredDate.getDate());
-  const DD = D.padStart(2, "0");
-  const d = String(ensuredDate.getDay());
-  const E = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][ensuredDate.getDay()];
-  const EEEE = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][ensuredDate.getDay()];
-  const H = String(ensuredDate.getHours());
-  const HH = H.padStart(2, "0");
-  const h = String(ensuredDate.getHours() % 12 || 12);
-  const hh = h.padStart(2, "0");
-  const m = String(ensuredDate.getMinutes());
-  const mm = m.padStart(2, "0");
-  const s = String(ensuredDate.getSeconds());
-  const ss = s.padStart(2, "0");
-  const SSS = String(ensuredDate.getMilliseconds()).padStart(3, "0");
-  const A = ensuredDate.getHours() < 12 ? "AM" : "PM";
-  const a = A.toLowerCase();
-  const Q = String(Math.floor((ensuredDate.getMonth() + 3) / 3));
-  const tzOffset = -ensuredDate.getTimezoneOffset();
-  const tzSign = tzOffset >= 0 ? "+" : "-";
-  const tzHour = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, "0");
-  const tzMin = String(Math.abs(tzOffset) % 60).padStart(2, "0");
-  const Z = `${tzSign}${tzHour}:${tzMin}`;
-  const ZZ = `${tzSign}${tzHour}${tzMin}`;
-  const startOfYear = new Date(ensuredDate.getFullYear(), 0, 1);
-  const dayOfWeek = startOfYear.getDay() || 7;
-  const diffMs = ensuredDate.getTime() - startOfYear.getTime();
-  const diffDays = Math.floor(diffMs / 864e5);
-  const week = Math.ceil((diffDays + dayOfWeek) / 7);
-  const W = String(week);
-  const WW = W.padStart(2, "0");
-  return {
-    YYYY,
-    YY,
-    M,
-    MM,
-    D,
-    DD,
-    d,
-    E,
-    EEEE,
-    H,
-    HH,
-    h,
-    hh,
-    m,
-    mm,
-    s,
-    ss,
-    SSS,
-    A,
-    a,
-    Q,
-    Z,
-    ZZ,
-    W,
-    WW
-  };
-}
-
 // src/factory/create-i18n.ts
 function createI18n(obj, defaultLocale) {
   return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
@@ -1928,8 +1827,7 @@ function xor(str, salt) {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Ast,
-  cartesianProduct,
-  chunkArray,
+  chunk,
   clamp,
   clone,
   compareStrings,
@@ -1946,7 +1844,7 @@ function xor(str, salt) {
   extractInts,
   extractNumbers,
   extractStrings,
-  flattenArray,
+  flatten,
   fromGb,
   fromKb,
   fromMb,
@@ -1955,8 +1853,6 @@ function xor(str, salt) {
   getRelativePath,
   groupBy,
   lerp,
-  mode,
-  parseDate,
   parsePath,
   pickBy,
   randomFloat,
@@ -1971,6 +1867,7 @@ function xor(str, salt) {
   scaleToFit,
   shuffle,
   sleep,
+  tally,
   toDegrees,
   toFixed,
   toFullWidth,

@@ -4,13 +4,13 @@
  * This function is a fallback for older environments.
  *
  * @example
- * flattenArray([1, [2, 3], 4]);
+ * flatten([1, [2, 3], 4]);
  * // [1, 2, 3, 4]
  *
- * flattenArray([[1, 2], [3, 4], [5, 6]]);
+ * flatten([[1, 2], [3, 4], [5, 6]]);
  * // [1, 2, 3, 4, 5, 6]
  */
-export function flattenArray<T>(arr: (T | T[])[]): T[] {
+export function flatten<T>(arr: (T | T[])[]): T[] {
   const result: T[] = [];
 
   for (const v of arr) {

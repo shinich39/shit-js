@@ -1,5 +1,5 @@
 /**
- * Internationalization(i18n)
+ * Internationalization (i18n)
  *
  * @example
  * const t = createI18n({

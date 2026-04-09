@@ -1,8 +1,7 @@
-export * from "./cartesian-product";
-export * from "./chunk-array";
-export * from "./flatten-array";
+export * from "./chunk";
+export * from "./flatten";
 export * from "./group-by";
-export * from "./mode";
 export * from "./shuffle";
+export * from "./tally";
 export * from "./unique-by";
 //# sourceMappingURL=index.d.ts.map

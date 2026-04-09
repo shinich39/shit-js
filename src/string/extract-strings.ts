@@ -51,6 +51,7 @@ export function extractStrings(
     if (tails.length > 0) {
       buffer += ch;
     }
+
     i++;
   }
 
