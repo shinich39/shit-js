@@ -1,0 +1,1 @@
+{"version":3,"file":"merge-intervals.d.ts","sourceRoot":"","sources":["../../../src/array/merge-intervals.ts"],"names":[],"mappings":"AAAA,KAAK,QAAQ,GAAG;IAAE,KAAK,EAAE,MAAM,CAAC;IAAC,GAAG,EAAE,MAAM,CAAA;CAAE,CAAC;AAE/C;;;;;;;;GAQG;AACH,wBAAgB,cAAc,CAAC,SAAS,EAAE,QAAQ,EAAE,GAAG,QAAQ,EAAE,CAwBhE"}
