@@ -22,6 +22,7 @@ var shitJs = (() => {
   var index_exports = {};
   __export(index_exports, {
     Ast: () => Ast,
+    batch: () => batch,
     chunk: () => chunk,
     clamp: () => clamp,
     clone: () => clone,
@@ -48,6 +49,9 @@ var shitJs = (() => {
     getRelativePath: () => getRelativePath,
     groupBy: () => groupBy,
     lerp: () => lerp,
+    maxBy: () => maxBy,
+    meanBy: () => meanBy,
+    minBy: () => minBy,
     parsePath: () => parsePath,
     pickBy: () => pickBy,
     randomFloat: () => randomFloat,
@@ -62,6 +66,7 @@ var shitJs = (() => {
     scaleToFit: () => scaleToFit,
     shuffle: () => shuffle,
     sleep: () => sleep,
+    sumBy: () => sumBy,
     tally: () => tally,
     toDegrees: () => toDegrees,
     toFixed: () => toFixed,
@@ -118,6 +123,45 @@ var shitJs = (() => {
     return result;
   }
 
+  // src/array/max-by.ts
+  function maxBy(arr, fn) {
+    let result;
+    let i = 0;
+    for (const item of arr) {
+      const value = fn(item, i++);
+      if (result === void 0 || value > result) {
+        result = value;
+      }
+    }
+    return result;
+  }
+
+  // src/array/mean-by.ts
+  function meanBy(arr, fn) {
+    let result = 0;
+    let i = 0;
+    for (const item of arr) {
+      result += fn(item, i++);
+    }
+    if (i === 0) {
+      return 0;
+    }
+    return result / i;
+  }
+
+  // src/array/min-by.ts
+  function minBy(arr, fn) {
+    let result;
+    let i = 0;
+    for (const item of arr) {
+      const value = fn(item, i++);
+      if (result === void 0 || value < result) {
+        result = value;
+      }
+    }
+    return result;
+  }
+
   // src/array/shuffle.ts
   function shuffle(arr) {
     let i = arr.length;
@@ -127,6 +171,16 @@ var shitJs = (() => {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }
+
+  // src/array/sum-by.ts
+  function sumBy(arr, fn) {
+    let result = 0;
+    let i = 0;
+    for (const item of arr) {
+      result += fn(item, i++);
+    }
+    return result;
   }
 
   // src/array/tally.ts
@@ -149,6 +203,20 @@ var shitJs = (() => {
       }
     }
     return Array.from(map.values());
+  }
+
+  // src/async/batch.ts
+  async function batch(tasks, limit = Infinity) {
+    const results = new Array(tasks.length);
+    let index = 0;
+    async function worker() {
+      while (index < tasks.length) {
+        const current = index++;
+        results[current] = await tasks[current]();
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+    return results;
   }
 
   // src/async/debounce.ts

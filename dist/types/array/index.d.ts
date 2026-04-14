@@ -1,7 +1,11 @@
 export * from "./chunk";
 export * from "./flatten";
 export * from "./group-by";
+export * from "./max-by";
+export * from "./mean-by";
+export * from "./min-by";
 export * from "./shuffle";
+export * from "./sum-by";
 export * from "./tally";
 export * from "./unique-by";
 //# sourceMappingURL=index.d.ts.map

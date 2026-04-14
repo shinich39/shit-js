@@ -37,6 +37,45 @@ function groupBy(arr, fn) {
   return result;
 }
 
+// src/array/max-by.ts
+function maxBy(arr, fn) {
+  let result;
+  let i = 0;
+  for (const item of arr) {
+    const value = fn(item, i++);
+    if (result === void 0 || value > result) {
+      result = value;
+    }
+  }
+  return result;
+}
+
+// src/array/mean-by.ts
+function meanBy(arr, fn) {
+  let result = 0;
+  let i = 0;
+  for (const item of arr) {
+    result += fn(item, i++);
+  }
+  if (i === 0) {
+    return 0;
+  }
+  return result / i;
+}
+
+// src/array/min-by.ts
+function minBy(arr, fn) {
+  let result;
+  let i = 0;
+  for (const item of arr) {
+    const value = fn(item, i++);
+    if (result === void 0 || value < result) {
+      result = value;
+    }
+  }
+  return result;
+}
+
 // src/array/shuffle.ts
 function shuffle(arr) {
   let i = arr.length;
@@ -46,6 +85,16 @@ function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// src/array/sum-by.ts
+function sumBy(arr, fn) {
+  let result = 0;
+  let i = 0;
+  for (const item of arr) {
+    result += fn(item, i++);
+  }
+  return result;
 }
 
 // src/array/tally.ts
@@ -68,6 +117,20 @@ function uniqueBy(arr, fn) {
     }
   }
   return Array.from(map.values());
+}
+
+// src/async/batch.ts
+async function batch(tasks, limit = Infinity) {
+  const results = new Array(tasks.length);
+  let index = 0;
+  async function worker() {
+    while (index < tasks.length) {
+      const current = index++;
+      results[current] = await tasks[current]();
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+  return results;
 }
 
 // src/async/debounce.ts
@@ -1745,6 +1808,7 @@ function xor(str, salt) {
 }
 export {
   Ast,
+  batch,
   chunk,
   clamp,
   clone,
@@ -1771,6 +1835,9 @@ export {
   getRelativePath,
   groupBy,
   lerp,
+  maxBy,
+  meanBy,
+  minBy,
   parsePath,
   pickBy,
   randomFloat,
@@ -1785,6 +1852,7 @@ export {
   scaleToFit,
   shuffle,
   sleep,
+  sumBy,
   tally,
   toDegrees,
   toFixed,
