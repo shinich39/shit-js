@@ -51,6 +51,7 @@ __export(index_exports, {
   maxBy: () => maxBy,
   meanBy: () => meanBy,
   minBy: () => minBy,
+  normalizePath: () => normalizePath,
   parsePath: () => parsePath,
   pickBy: () => pickBy,
   product: () => product,
@@ -1618,6 +1619,33 @@ function getRelativePath(from, to) {
   return up + (up && down ? "/" : "") + down;
 }
 
+// src/path/normalize-path.ts
+function normalizePath(str) {
+  let path = str.normalize("NFC");
+  path = path.replace(/\\/g, "/");
+  path = path.replace(/(?<!^)\/+/g, "/");
+  const isAbsolute = path.startsWith("/");
+  const segments = path.split("/").filter(Boolean);
+  const resolved = [];
+  for (const seg of segments) {
+    if (seg === ".") {
+    } else if (seg === "..") {
+      if (resolved.length > 0 && resolved[resolved.length - 1] !== "..") {
+        resolved.pop();
+      } else if (!isAbsolute) {
+        resolved.push("..");
+      }
+    } else {
+      resolved.push(seg);
+    }
+  }
+  let result = (isAbsolute ? "/" : "") + resolved.join("/");
+  if (result === "") {
+    result = ".";
+  }
+  return result;
+}
+
 // src/path/parse-path.ts
 function parsePath(str) {
   str = str.replace(/\\/g, "/").replace(/\/+$/, "");
@@ -1935,6 +1963,7 @@ function xor(str, salt) {
   maxBy,
   meanBy,
   minBy,
+  normalizePath,
   parsePath,
   pickBy,
   product,

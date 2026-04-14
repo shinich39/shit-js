@@ -1,10 +1,19 @@
 /**
  * @example
- * resolvePath("./project/", "abc", "./package.json"); // "project/abc/package.json"
- * resolvePath("/project/", "abc");       // "/project/abc"
- * resolvePath("/project/", "../abc");    // "/abc"
- * resolvePath("/project/", "..", "..");  // "/"
- * resolvePath("project/", "..");         // ""
+ * resolvePath("./project/", "abc", "./package.json");
+ * // "project/abc/package.json"
+ *
+ * resolvePath("/project/", "abc");
+ * // "/project/abc"
+ *
+ * resolvePath("/project/", "../abc");
+ * // "/abc"
+ *
+ * resolvePath("/project/", "..", "..");
+ * // "/"
+ *
+ * resolvePath("project/", "..");
+ * // ""
  */
 export function resolvePath(...args: string[]): string {
   const isAbsolute = args[0]?.startsWith("/");

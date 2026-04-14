@@ -1,7 +1,10 @@
 /**
  * @example
- * toFullWidth("Hello, world!"); // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
- * toFullWidth("1 2"); // "１　２"
+ * toFullWidth("Hello, world!");
+ * // "Ｈｅｌｌｏ，\u3000ｗｏｒｌｄ！"
+ *
+ * toFullWidth("1 2");
+ * // "１　２"
  */
 export function toFullWidth(str: string): string {
   return str

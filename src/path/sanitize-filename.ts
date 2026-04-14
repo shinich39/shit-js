@@ -1,9 +1,16 @@
 /**
  * @example
- * sanitizeFilename("hello/world");   // "hello_world"
- * sanitizeFilename("abc\u0000def");  // "abc_def"
- * sanitizeFilename("file.");         // "file"
- * sanitizeFilename("///", "-");      // "---"
+ * sanitizeFilename("hello/world");
+ * // "hello_world"
+ *
+ * sanitizeFilename("abc\u0000def");
+ * // "abc_def"
+ *
+ * sanitizeFilename("file.");
+ * // "file"
+ *
+ * sanitizeFilename("///", "-");
+ * // "---"
  */
 export function sanitizeFilename(str: string, replacement = "_"): string {
   return (

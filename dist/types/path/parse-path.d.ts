@@ -1,7 +1,13 @@
 /**
  * @example
  * parsePath("./project/abc/package.json");
- * // { dir: "./project/abc", dirs: [".", "project", "abc"], base: "package.json", name: "package", ext: ".json" }
+ * // {
+ * //   dir: "./project/abc",
+ * //   dirs: [".", "project", "abc"],
+ * //   base: "package.json",
+ * //   name: "package",
+ * //   ext: ".json"
+ * // }
  */
 export declare function parsePath(str: string): {
     dir: string;
