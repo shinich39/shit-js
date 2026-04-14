@@ -4,9 +4,9 @@ import { createMulberry32 } from "./create-mulberry32";
 
 test("createMulberry32", () => {
   const rng = createMulberry32(39);
-  eq(rng.int(10, 100), 16);
-  eq(rng.int(10, 100), 77);
-  eq(rng.int(10, 100), 58);
-  eq(rng.int(10, 100), 13);
-  eq(rng.int(10, 100), 86);
+  eq(rng(10, 100).toFixed(2), "16.74");
+  eq(rng(10, 100).toFixed(2), "77.77");
+  eq(rng(10, 100).toFixed(2), "58.69");
+  eq(rng(10, 100).toFixed(2), "13.36");
+  eq(rng(10, 100).toFixed(2), "86.47");
 });

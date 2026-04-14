@@ -19,7 +19,8 @@ type CompareResult = {
  * -1 = deletion, 0 = match, 1 = insertion
  *
  * @example
- * diffStrings("Lorem", "ore"); // [[-1, "L"], [0, "ore"], [-1, "m"]]
+ * diffStrings("Lorem", "ore");
+ * // [[-1, "L"], [0, "ore"], [-1, "m"]]
  */
 export function diffStrings(from: string, to: string): Diff[] {
   const n = from.length;

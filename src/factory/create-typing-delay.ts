@@ -4,6 +4,7 @@
  * @example
  * const td = createTypingDelay();
  * const str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+ *
  * for (cosnt char of str) {
  *   const delay = td(char, 1);
  *   process.stdout.write(char);

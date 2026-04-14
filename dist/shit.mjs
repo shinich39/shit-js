@@ -76,6 +76,18 @@ function minBy(arr, fn) {
   return result;
 }
 
+// src/array/product.ts
+function product(arrays) {
+  const filtered = arrays.filter((arr) => arr.length > 0);
+  if (filtered.length < 1) {
+    return [];
+  }
+  return filtered.reduce(
+    (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
+    [[]]
+  );
+}
+
 // src/array/shuffle.ts
 function shuffle(arr) {
   let i = arr.length;
@@ -1167,10 +1179,7 @@ function createMulberry32(initialSeed) {
     t ^= t + Math.imul(t ^ t >>> 7, t | 61);
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
-  return {
-    float: (min, max) => next() * (max - min) + min,
-    int: (min, max) => Math.floor(next() * (max - min) + min)
-  };
+  return (min, max) => next() * (max - min) + min;
 }
 
 // src/factory/create-queue.ts
@@ -1840,6 +1849,7 @@ export {
   minBy,
   parsePath,
   pickBy,
+  product,
   randomFloat,
   randomInt,
   randomString,

@@ -4,6 +4,7 @@ export * from "./group-by";
 export * from "./max-by";
 export * from "./mean-by";
 export * from "./min-by";
+export * from "./product";
 export * from "./shuffle";
 export * from "./sum-by";
 export * from "./tally";

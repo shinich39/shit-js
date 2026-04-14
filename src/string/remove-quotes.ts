@@ -1,8 +1,7 @@
 /**
  * @example
- * const str = `"Lorem ipsum dolor sit amet, consectetur adipiscing elit."`;
- * removeQuotes(str);
- * // `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`;
+ * removeQuotes("\"Lorem ipsum dolor sit amet, consectetur adipiscing elit.\"");
+ * // "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
  */
 export function removeQuotes(str: string): string {
   const quotes = ['"', "'", "`"];

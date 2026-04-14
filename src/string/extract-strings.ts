@@ -1,7 +1,7 @@
 /**
  * @example
- * const str = `Lorem "ipsum" dolor sit amet, 'consectetur' adipiscing elit.`;
- * extractStrings(str); // ["ipsum", "consectetur"];
+ * extractStrings(`Lorem "ipsum" dolor sit amet, 'consectetur' adipiscing elit.`);
+ * // ["ipsum", "consectetur"];
  */
 export function extractStrings(
   str: string,
