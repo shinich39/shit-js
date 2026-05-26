@@ -52,6 +52,7 @@ var shitJs = (() => {
     maxBy: () => maxBy,
     meanBy: () => meanBy,
     minBy: () => minBy,
+    modeBy: () => modeBy,
     normalizePath: () => normalizePath,
     parsePath: () => parsePath,
     pickBy: () => pickBy,
@@ -69,7 +70,6 @@ var shitJs = (() => {
     shuffle: () => shuffle,
     sleep: () => sleep,
     sumBy: () => sumBy,
-    tally: () => tally,
     toDegrees: () => toDegrees,
     toFixed: () => toFixed,
     toFullWidth: () => toFullWidth,
@@ -164,6 +164,15 @@ var shitJs = (() => {
     return result;
   }
 
+  // src/array/mode-by.ts
+  function modeBy(arr) {
+    const seen = /* @__PURE__ */ new Map();
+    for (const v of arr) {
+      seen.set(v, (seen.get(v) || 0) + 1);
+    }
+    return Array.from(seen.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.count - b.count);
+  }
+
   // src/array/product.ts
   function product(arrays) {
     const filtered = arrays.filter((arr) => arr.length > 0);
@@ -195,15 +204,6 @@ var shitJs = (() => {
       result += fn(item, i++);
     }
     return result;
-  }
-
-  // src/array/tally.ts
-  function tally(arr) {
-    const seen = /* @__PURE__ */ new Map();
-    for (const v of arr) {
-      seen.set(v, (seen.get(v) || 0) + 1);
-    }
-    return Array.from(seen.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.count - b.count);
   }
 
   // src/array/unique-by.ts

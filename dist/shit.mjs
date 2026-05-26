@@ -76,6 +76,15 @@ function minBy(arr, fn) {
   return result;
 }
 
+// src/array/mode-by.ts
+function modeBy(arr) {
+  const seen = /* @__PURE__ */ new Map();
+  for (const v of arr) {
+    seen.set(v, (seen.get(v) || 0) + 1);
+  }
+  return Array.from(seen.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.count - b.count);
+}
+
 // src/array/product.ts
 function product(arrays) {
   const filtered = arrays.filter((arr) => arr.length > 0);
@@ -107,15 +116,6 @@ function sumBy(arr, fn) {
     result += fn(item, i++);
   }
   return result;
-}
-
-// src/array/tally.ts
-function tally(arr) {
-  const seen = /* @__PURE__ */ new Map();
-  for (const v of arr) {
-    seen.set(v, (seen.get(v) || 0) + 1);
-  }
-  return Array.from(seen.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.count - b.count);
 }
 
 // src/array/unique-by.ts
@@ -1874,6 +1874,7 @@ export {
   maxBy,
   meanBy,
   minBy,
+  modeBy,
   normalizePath,
   parsePath,
   pickBy,
@@ -1891,7 +1892,6 @@ export {
   shuffle,
   sleep,
   sumBy,
-  tally,
   toDegrees,
   toFixed,
   toFullWidth,
