@@ -1,6 +1,6 @@
 /**
  * @example
- * minBy([{ start: 3 }, { start: 1 }, { start: 2 }], (r) => r.start);
+ * minBy([{ start: 3 }, { start: 1 }, { start: 2 }], (value) => value.start);
  * // 1
  */
 export function minBy<T>(

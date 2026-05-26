@@ -1,21 +1,30 @@
 /**
  * @example
- * modeBy([1, 3, 2, 3, 2, 3, 4]);
+ * modeBy([{ start: 3 }, { start: 3 }, { start: 2 }], (value) => value.start);
  * // [
- * //   { value: 1, count: 1 },
- * //   { value: 4, count: 1 },
- * //   { value: 2, count: 2 },
- * //   { value: 3, count: 3 },
+ * //   { value: 3, count: 2 },
+ * //   { value: 2, count: 1 },
  * // ]
  */
-export function modeBy<T>(arr: T[]): { count: number; value: T }[] {
-  const seen = new Map<T, number>();
+export function modeBy<T, U>(
+  arr: Iterable<T>,
+  fn: (value: T, index: number) => U,
+): { count: number; value: U }[] {
+  const seen = new Map<U, { count: number; value: U }>();
 
-  for (const v of arr) {
-    seen.set(v, (seen.get(v) || 0) + 1);
+  let i = 0;
+  for (const item of arr) {
+    const value = fn(item, i++);
+
+    const prev = seen.get(value);
+
+    if (prev) {
+      prev.count++;
+      continue;
+    }
+
+    seen.set(value, { value, count: 1 });
   }
 
-  return Array.from(seen.entries())
-    .map(([value, count]) => ({ value, count }))
-    .sort((a, b) => a.count - b.count);
+  return Array.from(seen.values()).sort((a, b) => a.count - b.count);
 }

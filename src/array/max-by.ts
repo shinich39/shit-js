@@ -1,6 +1,6 @@
 /**
  * @example
- * maxBy([{ end: 3 }, { end: 8 }, { end: 5 }], (r) => r.end);
+ * maxBy([{ end: 3 }, { end: 8 }, { end: 5 }], (value) => value.end);
  * // 8
  */
 export function maxBy<T>(

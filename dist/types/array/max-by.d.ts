@@ -1,6 +1,6 @@
 /**
  * @example
- * maxBy([{ end: 3 }, { end: 8 }, { end: 5 }], (r) => r.end);
+ * maxBy([{ end: 3 }, { end: 8 }, { end: 5 }], (value) => value.end);
  * // 8
  */
 export declare function maxBy<T>(arr: Iterable<T>, fn: (value: T, index: number) => number): number | undefined;

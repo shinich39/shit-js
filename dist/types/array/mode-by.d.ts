@@ -1,15 +1,13 @@
 /**
  * @example
- * modeBy([1, 3, 2, 3, 2, 3, 4]);
+ * modeBy([{ start: 3 }, { start: 3 }, { start: 2 }], (value) => value.start);
  * // [
- * //   { value: 1, count: 1 },
- * //   { value: 4, count: 1 },
- * //   { value: 2, count: 2 },
- * //   { value: 3, count: 3 },
+ * //   { value: 3, count: 2 },
+ * //   { value: 2, count: 1 },
  * // ]
  */
-export declare function modeBy<T>(arr: T[]): {
+export declare function modeBy<T, U>(arr: Iterable<T>, fn: (value: T, index: number) => U): {
     count: number;
-    value: T;
+    value: U;
 }[];
 //# sourceMappingURL=mode-by.d.ts.map

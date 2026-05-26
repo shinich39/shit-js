@@ -165,12 +165,19 @@ var shitJs = (() => {
   }
 
   // src/array/mode-by.ts
-  function modeBy(arr) {
+  function modeBy(arr, fn) {
     const seen = /* @__PURE__ */ new Map();
-    for (const v of arr) {
-      seen.set(v, (seen.get(v) || 0) + 1);
+    let i = 0;
+    for (const item of arr) {
+      const value = fn(item, i++);
+      const prev = seen.get(value);
+      if (prev) {
+        prev.count++;
+        continue;
+      }
+      seen.set(value, { value, count: 1 });
     }
-    return Array.from(seen.entries()).map(([value, count]) => ({ value, count })).sort((a, b) => a.count - b.count);
+    return Array.from(seen.values()).sort((a, b) => a.count - b.count);
   }
 
   // src/array/product.ts
