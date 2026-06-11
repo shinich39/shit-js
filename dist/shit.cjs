@@ -1262,7 +1262,9 @@ var Ast = class _Ast {
 
 // src/factory/create-i18n.ts
 function createI18n(obj, defaultLocale) {
-  return (key, locale) => obj[locale ?? ""]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
+  return (key, locale = defaultLocale) => {
+    return obj[locale]?.[key] ?? obj[defaultLocale]?.[key] ?? key;
+  };
 }
 
 // src/factory/create-mulberry32.ts
