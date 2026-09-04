@@ -9,6 +9,7 @@ export type AstNode = {
     name: string;
     attributes: AstAttributes;
     children: AstNode[];
+    isSelfClosing?: boolean;
 } | {
     type: "comment";
     value: string;
@@ -34,6 +35,7 @@ export type AstNodeLike = {
     name: string;
     attributes: AstAttributes;
     children: (string | Ast | AstNodeLike)[];
+    isSelfClosing?: boolean;
 } | {
     type: "comment";
     value: string;
@@ -70,6 +72,7 @@ export declare class Ast {
     type: AstType;
     name: string;
     value: string;
+    isSelfClosing: boolean;
     attributes: AstAttributes;
     children: Ast[];
     constructor(src?: string | Ast | AstNodeLike, parent?: Ast);
@@ -78,7 +81,8 @@ export declare class Ast {
     isRoot(): boolean;
     isText(): boolean;
     isElement(): boolean;
-    isVoidElement(): boolean;
+    isEmptyElement(): boolean;
+    isSelfClosingElement(): boolean;
     isComment(): boolean;
     isDoctype(): boolean;
     isCdata(): boolean;

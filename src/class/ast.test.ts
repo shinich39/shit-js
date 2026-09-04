@@ -257,20 +257,105 @@ test("ast: void element", () => {
   eq(img?.getAttribute("src"), `this/is/path`);
   eq(img?.getText(), ``);
   eq(img?.children.length, 0);
-  eq(img?.isVoidElement(), true);
+  eq(img?.isEmptyElement(), true);
 
   const empty = root.find((n) => n.attributes.id === "empty");
 
   ok(!!empty);
   eq(empty?.toString(), `<div id="empty"></div>`);
   eq(empty?.getText(), ``);
-  eq(empty?.children.length, 1);
-  eq(empty?.isVoidElement(), false);
+  eq(empty?.children.length, 0);
+  eq(empty?.isEmptyElement(), true);
+  eq(empty?.isSelfClosingElement(), false);
 });
 
 test("ast: toString", () => {
   const root = new Ast(`<div>abc</div>`);
   eq(root.toString(), "<div>abc</div>");
+});
+
+test("ast: parse attributes with spaces around equals", () => {
+  const root = new Ast(`<div a = "1" b= "2" c ='3' d e = '' />`);
+  const div = root.find((n) => n.name === "div");
+
+  ok(!!div);
+  eq(div?.toObject(), {
+    type: "element",
+    name: "div",
+    isSelfClosing: true,
+    attributes: {
+      a: "1",
+      b: "2",
+      c: "3",
+      d: true,
+      e: "",
+    },
+    children: [],
+  });
+});
+
+test("ast: parse self closing element without whitespace", () => {
+  const root = new Ast(`<root><img src="path/to/image"/></root>`);
+  const img = root.find((n) => n.name === "img");
+
+  ok(!!img);
+  eq(img?.getAttribute("src"), "path/to/image");
+  eq(img?.isSelfClosingElement(), true);
+  eq(img?.toString(), `<img src="path/to/image" />`);
+});
+
+test("ast: preserve empty element without self closing", () => {
+  const root = new Ast(`<root><div></div></root>`);
+  const div = root.find((n) => n.name === "div");
+
+  ok(!!div);
+  eq(div?.children.length, 0);
+  eq(div?.isEmptyElement(), true);
+  eq(div?.isSelfClosingElement(), false);
+  eq(div?.toString(), `<div></div>`);
+});
+
+test("ast: parse doctype declaration without attributes", () => {
+  const root = new Ast(`<!DOCTYPE html><root />`);
+  const doctype = root.find((n) => n.type === "doctype");
+  const element = root.find((n) => n.name === "root");
+
+  ok(!!doctype);
+  ok(!!element);
+  eq(doctype?.value, "html");
+  eq(doctype?.toString(), "<!DOCTYPE html>");
+  eq(element?.toString(), "<root />");
+});
+
+test("ast: parse raw text element", () => {
+  const root = new Ast(
+    `<root><script>if (a < b) c();</script><style>.a>b{color:red;}</style></root>`,
+  );
+  const script = root.find((n) => n.name === "script");
+  const style = root.find((n) => n.name === "style");
+
+  ok(!!script);
+  ok(!!style);
+  eq(script?.getText(), "if (a < b) c();");
+  eq(style?.getText(), ".a>b{color:red;}");
+  eq(script?.toString(), `<script>if (a < b) c();</script>`);
+  eq(style?.toString(), `<style>.a>b{color:red;}</style>`);
+});
+
+test("ast: raw text closing tag requires exact name", () => {
+  const root = new Ast(`<root><script>abc</scriptx></root>`);
+  const script = root.find((n) => n.name === "script");
+
+  ok(!!script);
+  eq(script?.getText(), "abc</scriptx></root>");
+  eq(script?.children.length, 1);
+});
+
+test("ast: invalid empty tag falls back to text", () => {
+  const root = new Ast(`<>`);
+  eq(root.toString(), "<>");
+  eq(root.children.length, 1);
+  eq(root.children[0]?.type, "text");
 });
 
 test("ast: toObject", () => {
@@ -281,6 +366,7 @@ test("ast: toObject", () => {
       {
         type: "element",
         name: "div",
+        isSelfClosing: false,
         attributes: {},
         children: [
           {

@@ -1,7 +1,13 @@
 export type AstNode =
   | { type: "root"; children: AstNode[] }
   | { type: "text"; value: string }
-  | { type: "element"; name: string; attributes: AstAttributes; children: AstNode[] }
+  | {
+      type: "element";
+      name: string;
+      attributes: AstAttributes;
+      children: AstNode[];
+      isSelfClosing?: boolean;
+    }
   | { type: "comment"; value: string }
   | { type: "doctype"; value: string }
   | { type: "pi"; name: string; value: string }
@@ -15,6 +21,7 @@ export type AstNodeLike =
       name: string;
       attributes: AstAttributes;
       children: (string | Ast | AstNodeLike)[];
+      isSelfClosing?: boolean;
     }
   | { type: "comment"; value: string }
   | { type: "doctype"; value: string }
@@ -129,6 +136,10 @@ function parseDoctype(
   let quotes: string | null = null,
     value = "",
     depth = 0;
+
+  while (i < str.length && isWhitespace(str[i])) {
+    i++;
+  }
 
   while (i < str.length) {
     const ch = str[i];
@@ -278,76 +289,226 @@ function parseAttributes(
 } {
   const attributes: AstAttributes = {};
 
-  let quotes: string | null = null,
-    buffer = "",
-    isClosed = false;
+  let isClosed = false;
+  let state:
+    | "beforeName"
+    | "inName"
+    | "afterName"
+    | "beforeValue"
+    | "inQuotedValue"
+    | "inUnquotedValue" = "beforeName";
+
+  let name = "";
+  let value = "";
+  let quote: '"' | "'" | null = null;
+  let hasEquals = false;
+
+  const reset = () => {
+    name = "";
+    value = "";
+    quote = null;
+    hasEquals = false;
+  };
 
   const flush = () => {
-    if (!buffer) {
+    if (!name) {
+      reset();
       return;
     }
 
-    const keyEnd = buffer.indexOf("=");
-
-    if (keyEnd === -1) {
-      attributes[buffer] = true;
-    } else {
-      attributes[buffer.substring(0, keyEnd)] = buffer.substring(keyEnd + 1);
-    }
-
-    buffer = "";
+    attributes[name] = hasEquals ? value : true;
+    reset();
   };
 
-  // get attributes
+  const findSelfClosingTagEnd = (index: number): number => {
+    let j = index + 1;
+
+    while (j < str.length && isWhitespace(str[j])) {
+      j++;
+    }
+
+    return str[j] === ">" ? j : -1;
+  };
+
   while (i < str.length) {
     const ch = str[i];
 
-    if (quotes) {
-      // escape
-      if (ch === "\\") {
-        buffer += str[i] + (str[i + 1] ?? "");
-        i += 2;
-        continue;
-      }
+    switch (state) {
+      case "beforeName": {
+        if (isWhitespace(ch)) {
+          i++;
+          continue;
+        }
 
-      if (ch === quotes) {
-        flush();
-        quotes = null;
+        if (ch === ">") {
+          i++;
+          return { attributes, isClosed, nextIndex: i };
+        }
+
+        if (ch === "/") {
+          const end = findSelfClosingTagEnd(i);
+          if (end !== -1) {
+            isClosed = true;
+            i = end + 1;
+            return { attributes, isClosed, nextIndex: i };
+          }
+        }
+
+        name = ch;
+        state = "inName";
         i++;
         continue;
       }
 
-      buffer += ch;
-      i++;
-      continue;
-    }
+      case "inName": {
+        if (isWhitespace(ch)) {
+          state = "afterName";
+          i++;
+          continue;
+        }
 
-    if (ch === `"` || ch === `'`) {
-      quotes = ch;
-      i++;
-      continue;
-    }
+        if (ch === "=") {
+          hasEquals = true;
+          state = "beforeValue";
+          i++;
+          continue;
+        }
 
-    if (ch === "/") {
-      isClosed = true;
-      i++;
-      continue;
-    }
+        if (ch === ">") {
+          flush();
+          i++;
+          return { attributes, isClosed, nextIndex: i };
+        }
 
-    if (ch === ">") {
-      i++;
-      break;
-    }
+        if (ch === "/") {
+          const end = findSelfClosingTagEnd(i);
+          if (end !== -1) {
+            flush();
+            isClosed = true;
+            i = end + 1;
+            return { attributes, isClosed, nextIndex: i };
+          }
+        }
 
-    if (isWhitespace(ch)) {
-      flush();
-      i++;
-      continue;
-    }
+        name += ch;
+        i++;
+        continue;
+      }
 
-    buffer += ch;
-    isClosed = false;
-    i++;
+      case "afterName": {
+        if (isWhitespace(ch)) {
+          i++;
+          continue;
+        }
+
+        if (ch === "=") {
+          hasEquals = true;
+          state = "beforeValue";
+          i++;
+          continue;
+        }
+
+        if (ch === ">") {
+          flush();
+          i++;
+          return { attributes, isClosed, nextIndex: i };
+        }
+
+        if (ch === "/") {
+          const end = findSelfClosingTagEnd(i);
+          if (end !== -1) {
+            flush();
+            isClosed = true;
+            i = end + 1;
+            return { attributes, isClosed, nextIndex: i };
+          }
+        }
+
+        flush();
+        name = ch;
+        state = "inName";
+        i++;
+        continue;
+      }
+
+      case "beforeValue": {
+        if (isWhitespace(ch)) {
+          i++;
+          continue;
+        }
+
+        if (ch === `"` || ch === `'`) {
+          quote = ch;
+          value = "";
+          state = "inQuotedValue";
+          i++;
+          continue;
+        }
+
+        if (ch === ">") {
+          flush();
+          i++;
+          return { attributes, isClosed, nextIndex: i };
+        }
+
+        if (ch === "/") {
+          const end = findSelfClosingTagEnd(i);
+          if (end !== -1) {
+            flush();
+            isClosed = true;
+            i = end + 1;
+            return { attributes, isClosed, nextIndex: i };
+          }
+        }
+
+        value = ch;
+        state = "inUnquotedValue";
+        i++;
+        continue;
+      }
+
+      case "inQuotedValue": {
+        if (ch === quote) {
+          flush();
+          state = "beforeName";
+          i++;
+          continue;
+        }
+
+        value += ch;
+        i++;
+        continue;
+      }
+
+      case "inUnquotedValue": {
+        if (isWhitespace(ch)) {
+          flush();
+          state = "beforeName";
+          i++;
+          continue;
+        }
+
+        if (ch === ">") {
+          flush();
+          i++;
+          return { attributes, isClosed, nextIndex: i };
+        }
+
+        if (ch === "/") {
+          const end = findSelfClosingTagEnd(i);
+          if (end !== -1) {
+            flush();
+            isClosed = true;
+            i = end + 1;
+            return { attributes, isClosed, nextIndex: i };
+          }
+        }
+
+        value += ch;
+        i++;
+        continue;
+      }
+    }
   }
 
   flush();
@@ -359,137 +520,120 @@ function parseAttributes(
   };
 }
 
-function parseScript(
+function parseRawTextElement(
   str: string,
   i: number,
+  startTag: Token & { type: "element" },
 ): {
   tokens: Token[];
   nextIndex: number;
 } {
-  // get attributes
-  const { attributes, nextIndex } = parseAttributes(str, i);
+  const findClosingStart = (from: number): number => {
+    const prefix = `</${startTag.name}`;
+    let index = from;
 
-  i = nextIndex;
+    while (index < str.length) {
+      index = str.indexOf(prefix, index);
+      if (index === -1) {
+        return -1;
+      }
 
-  // get value
-  let closingStart = str.indexOf("</script", i);
-  if (closingStart === -1) {
-    closingStart = str.length;
-  }
-  const value = str.substring(i, closingStart);
+      const next = str[index + prefix.length];
+      if (next === ">" || isWhitespace(next)) {
+        return index;
+      }
 
-  i = closingStart + 8;
-
-  // get next index
-  while (i < str.length) {
-    if (str[i] === ">") {
-      i++;
-      break;
+      index += prefix.length;
     }
-    i++;
+
+    return -1;
+  };
+
+  const findTagEnd = (from: number): number => {
+    let index = from;
+
+    while (index < str.length) {
+      if (str[index] === ">") {
+        return index;
+      }
+      index++;
+    }
+
+    return -1;
+  };
+
+  const rawTextStart = i;
+  const closingStart = findClosingStart(rawTextStart);
+
+  if (closingStart === -1) {
+    return {
+      tokens: [
+        startTag,
+        {
+          type: "text",
+          isClosed: true,
+          isClosing: false,
+          value: str.substring(rawTextStart),
+        },
+      ],
+      nextIndex: str.length,
+    };
+  }
+
+  const tagEnd = findTagEnd(closingStart + startTag.name.length + 2);
+
+  if (tagEnd === -1) {
+    return {
+      tokens: [
+        startTag,
+        {
+          type: "text",
+          isClosed: true,
+          isClosing: false,
+          value: str.substring(rawTextStart),
+        },
+      ],
+      nextIndex: str.length,
+    };
   }
 
   return {
     tokens: [
-      {
-        type: "element",
-        isClosed: false,
-        isClosing: false,
-        name: "script",
-        attributes,
-        children: [],
-      },
+      startTag,
       {
         type: "text",
         isClosed: true,
         isClosing: false,
-        value,
+        value: str.substring(rawTextStart, closingStart),
       },
       {
         type: "element",
         isClosed: true,
         isClosing: true,
-        name: "script",
-        attributes,
+        isSelfClosing: false,
+        name: startTag.name,
+        attributes: {},
         children: [],
       },
     ],
-    nextIndex: i,
+    nextIndex: tagEnd + 1,
   };
 }
 
-function parseStyle(
+function parseStartTag(
   str: string,
   i: number,
 ): {
-  tokens: Token[];
-  nextIndex: number;
-} {
-  // get attributes
-  const { attributes, nextIndex } = parseAttributes(str, i);
-
-  i = nextIndex;
-
-  // get value
-  let closingStart = str.indexOf("</style", i);
-  if (closingStart === -1) {
-    closingStart = str.length;
-  }
-  const value = str.substring(i, closingStart);
-
-  i = closingStart + 7;
-
-  // get next index
-  while (i < str.length) {
-    if (str[i] === ">") {
-      i++;
-      break;
-    }
-    i++;
-  }
-
-  return {
-    tokens: [
-      {
-        type: "element",
-        isClosed: false,
-        isClosing: false,
-        name: "style",
-        attributes,
-        children: [],
-      },
-      {
-        type: "text",
-        isClosed: true,
-        isClosing: false,
-        value,
-      },
-      {
-        type: "element",
-        isClosed: true,
-        isClosing: true,
-        name: "style",
-        attributes,
-        children: [],
-      },
-    ],
-    nextIndex: i,
-  };
-}
-
-function parseStartTag(buffer: string): {
   token: Token;
   nextIndex: number;
 } {
-  let i = 1, // skip opening barcket
-    name = "";
+  let name = "";
 
   // get name
-  while (i < buffer.length) {
-    const ch = buffer[i];
+  while (i < str.length) {
+    const ch = str[i];
 
-    if (isWhitespace(ch)) {
-      i++;
+    if (isWhitespace(ch) || ch === ">" || ch === "/") {
       break;
     }
 
@@ -498,7 +642,7 @@ function parseStartTag(buffer: string): {
   }
 
   // get attributes
-  const { attributes, isClosed, nextIndex } = parseAttributes(buffer, i);
+  const { attributes, isClosed, nextIndex } = parseAttributes(str, i);
 
   return {
     token: {
@@ -508,6 +652,7 @@ function parseStartTag(buffer: string): {
       name,
       attributes,
       children: [],
+      isSelfClosing: isClosed,
     },
     nextIndex,
   };
@@ -520,133 +665,121 @@ function normalize(str: string): string {
 function tokenize(input: string): Token[] {
   const result: Token[] = [];
 
-  let i = 0,
-    toggle = false,
-    buffer = "";
+  let i = 0;
+  let state: "text" | "markup" = "text";
+  let buffer = "";
 
-  while (i < input.length) {
-    const ch = input[i];
-
-    if (!toggle) {
-      if (ch !== "<") {
-        buffer += ch;
-        i++;
-        continue;
-      }
-
-      if (buffer) {
-        result.push({
-          type: "text",
-          isClosed: true,
-          isClosing: false,
-          value: buffer,
-        });
-
-        buffer = "";
-      }
-
-      toggle = true;
-      buffer = ch;
-      i++;
-      continue;
+  const flush = () => {
+    if (!buffer) {
+      return;
     }
 
-    if (buffer.length === 9) {
-      const upper = buffer.toUpperCase();
-
-      // doctype
-      if (upper === "<!DOCTYPE") {
-        const { token, nextIndex } = parseDoctype(input, i + 1);
-        result.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
-      }
-
-      // XML cdata
-      if (upper === "<![CDATA[") {
-        const { token, nextIndex } = parseCdata(input, i);
-        result.push(token);
-        i = nextIndex;
-        toggle = false;
-        buffer = "";
-        continue;
-      }
-    }
-
-    // HTML script
-    if (buffer === "<script") {
-      const { tokens, nextIndex } = parseScript(input, i);
-      result.push(...tokens);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // HTML style
-    if (buffer === "<style") {
-      const { tokens, nextIndex } = parseStyle(input, i);
-      result.push(...tokens);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // comment
-    if (buffer === "<!--") {
-      const { token, nextIndex } = parseComment(input, i);
-      result.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // end tag
-    if (buffer === "</") {
-      const { token, nextIndex } = parseEndTag(input, i);
-      result.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // XML PI (Processing Instruction)
-    if (buffer === "<?") {
-      const { token, nextIndex } = parsePi(input, i);
-      result.push(token);
-      i = nextIndex;
-      toggle = false;
-      buffer = "";
-      continue;
-    }
-
-    // start-tag
-    if (ch === ">") {
-      const { token } = parseStartTag(buffer);
-      result.push(token);
-      toggle = false;
-      buffer = "";
-      i++;
-      continue;
-    }
-
-    buffer += ch;
-    i++;
-  }
-
-  if (buffer) {
     result.push({
       type: "text",
       isClosed: true,
       isClosing: false,
       value: buffer,
     });
+
+    buffer = "";
+  };
+
+  while (i < input.length) {
+    const ch = input[i];
+
+    if (state === "text") {
+      if (ch !== "<") {
+        buffer += ch;
+        i++;
+        continue;
+      }
+
+      flush();
+      state = "markup";
+      i++;
+      continue;
+    }
+
+    if (i >= input.length) {
+      buffer += "<";
+      break;
+    }
+
+    if (input[i] === "!") {
+      if (input.startsWith("!--", i)) {
+        const { token, nextIndex } = parseComment(input, i + 3);
+        result.push(token);
+        i = nextIndex;
+        state = "text";
+        continue;
+      }
+
+      const prefix = input.substring(i, i + 8).toUpperCase();
+
+      if (prefix === "!DOCTYPE") {
+        const { token, nextIndex } = parseDoctype(input, i + 8);
+        result.push(token);
+        i = nextIndex;
+        state = "text";
+        continue;
+      }
+
+      if (prefix === "![CDATA[") {
+        const { token, nextIndex } = parseCdata(input, i + 8);
+        result.push(token);
+        i = nextIndex;
+        state = "text";
+        continue;
+      }
+
+      buffer += "<!";
+      state = "text";
+      i++;
+      continue;
+    }
+
+    if (input[i] === "/") {
+      const { token, nextIndex } = parseEndTag(input, i + 1);
+      result.push(token);
+      i = nextIndex;
+      state = "text";
+      continue;
+    }
+
+    if (input[i] === "?") {
+      const { token, nextIndex } = parsePi(input, i + 1);
+      result.push(token);
+      i = nextIndex;
+      state = "text";
+      continue;
+    }
+
+    const { token, nextIndex } = parseStartTag(input, i);
+
+    if (token.type === "element" && !token.isClosed) {
+      // empty tags: "<>", "< >", "< />" and more tags
+      if (!token.name) {
+        buffer += input.slice(i - 1, nextIndex);
+        i = nextIndex;
+        state = "text";
+        continue;
+      }
+
+      if (token.name === "script" || token.name === "style") {
+        const parsed = parseRawTextElement(input, nextIndex, token);
+        result.push(...parsed.tokens);
+        i = parsed.nextIndex;
+        state = "text";
+        continue;
+      }
+    }
+
+    result.push(token);
+    i = nextIndex;
+    state = "text";
   }
+
+  flush();
 
   return result;
 }
@@ -692,18 +825,9 @@ function parseStr(str: string): {
         /** @see https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags */
         // force close void element or self-closing tag
         top.isClosed = true;
+        top.isSelfClosing = false;
 
         if (top.name === token.name) {
-          // if the element is closed but has no children,
-          // add empty text node as children to avoid void element (e.g., <img>) being treated as self-closing tag (e.g., <div />)
-          if (top.children.length === 0) {
-            top.children.push({
-              type: "text",
-              isClosed: true,
-              isClosing: false,
-              value: "",
-            });
-          }
           break;
         }
       }
@@ -824,6 +948,7 @@ export class Ast {
   type: AstType;
   name: string;
   value: string;
+  isSelfClosing: boolean;
   attributes: AstAttributes;
   children: Ast[];
 
@@ -832,6 +957,7 @@ export class Ast {
     this.type = "root";
     this.name = "";
     this.value = "";
+    this.isSelfClosing = false;
     this.attributes = {};
     this.children = [];
 
@@ -850,6 +976,7 @@ export class Ast {
           break;
         case "element":
           this.name = src.name;
+          this.isSelfClosing = !!src.isSelfClosing;
           this.attributes = { ...src.attributes };
           this.children = createChildren(this, src.children);
           break;
@@ -885,8 +1012,12 @@ export class Ast {
     return this.type === "element";
   }
 
-  isVoidElement(): boolean {
+  isEmptyElement(): boolean {
     return this.type === "element" && this.children.length === 0;
+  }
+
+  isSelfClosingElement(): boolean {
+    return this.type === "element" && this.isSelfClosing;
   }
 
   isComment(): boolean {
@@ -996,7 +1127,7 @@ export class Ast {
   }
 
   hasChildren(): boolean {
-    return this.children.length > 1;
+    return this.children.length > 0;
   }
 
   getSiblings(): Ast[] {
@@ -1259,10 +1390,9 @@ export class Ast {
     }
 
     // type === "element"
-    const isVoidElement = this.children.length === 0;
     const attrs = stringifyAttrs(this.attributes);
 
-    if (isVoidElement) {
+    if (this.isSelfClosing) {
       return `<${name}${attrs} />`;
     }
 
@@ -1293,7 +1423,7 @@ export class Ast {
    */
   toObject(): AstNode {
     const fn = (ast: Ast): AstNode => {
-      const { type, name, value, children, attributes } = ast;
+      const { type, name, value, isSelfClosing, children, attributes } = ast;
 
       if (type === "root") {
         return {
@@ -1313,6 +1443,7 @@ export class Ast {
         return {
           type,
           name,
+          isSelfClosing,
           attributes: { ...attributes },
           children: children.map(fn),
         } as Extract<AstNode, { type: "element" }>;

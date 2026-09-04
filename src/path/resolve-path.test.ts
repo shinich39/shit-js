@@ -1,5 +1,5 @@
 import { deepStrictEqual as eq } from "node:assert";
-import path from "node:path";
+import path from "node:path/posix";
 import { test } from "node:test";
 import { resolvePath } from "./resolve-path";
 
