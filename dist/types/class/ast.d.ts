@@ -52,10 +52,6 @@ export type AstNodeLike = {
 };
 export type AstType = "root" | "text" | "element" | "comment" | "doctype" | "pi" | "cdata";
 export type AstAttributes = Record<string, string | boolean>;
-export type AstContentItem = {
-    type: "text" | "image" | "audio" | "video";
-    value: string;
-};
 declare function parseStr(str: string): {
     root: Extract<AstNode, {
         type: "root";
@@ -165,7 +161,6 @@ export declare class Ast {
      * // };
      */
     toObject(): AstNode;
-    toContentItems(): AstContentItem[];
 }
 export {};
 //# sourceMappingURL=ast.d.ts.map

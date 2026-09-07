@@ -1286,52 +1286,6 @@ var Ast = class _Ast {
     };
     return fn(this);
   }
-  toContentItems() {
-    const result = [];
-    const fn = (ast, mediaType) => {
-      const { type, name, value, attributes, children } = ast;
-      if (type === "text") {
-        result.push({
-          type,
-          value
-        });
-        return;
-      }
-      if (type === "element") {
-        const src = attributes.src;
-        const currentMediaType = name === "audio" || name === "video" ? name : mediaType;
-        if (typeof src === "string") {
-          if (name === "img") {
-            result.push({
-              type: "image",
-              value: src
-            });
-          }
-          if (name === "audio" || name === "video") {
-            result.push({
-              type: name,
-              value: src
-            });
-          }
-          if (name === "source" && currentMediaType) {
-            result.push({
-              type: currentMediaType,
-              value: src
-            });
-          }
-        }
-        for (const child of children) {
-          fn(child, currentMediaType);
-        }
-        return;
-      }
-      for (const child of children) {
-        fn(child, mediaType);
-      }
-    };
-    fn(this);
-    return result;
-  }
 };
 
 // src/factory/create-i18n.ts
