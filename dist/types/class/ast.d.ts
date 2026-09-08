@@ -52,6 +52,19 @@ export type AstNodeLike = {
 };
 export type AstType = "root" | "text" | "element" | "comment" | "doctype" | "pi" | "cdata";
 export type AstAttributes = Record<string, string | boolean>;
+export type AstBlock = {
+    type: "text";
+    value: string;
+} | {
+    type: "image" | "video" | "audio";
+    path: string;
+} | {
+    type: "list";
+    value: string[];
+} | {
+    type: "table";
+    value: string[][];
+};
 declare function parseStr(str: string): {
     root: Extract<AstNode, {
         type: "root";
@@ -161,6 +174,7 @@ export declare class Ast {
      * // };
      */
     toObject(): AstNode;
+    toBlocks(): AstBlock[];
 }
 export {};
 //# sourceMappingURL=ast.d.ts.map

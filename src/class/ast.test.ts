@@ -378,3 +378,82 @@ test("ast: toObject", () => {
     ],
   });
 });
+
+test("ast: toBlocks", () => {
+  const root = new Ast(`
+    <main>
+      Hello <span>inline</span> text
+      <p>Paragraph <strong>bold</strong> text</p>
+      <img src="image.png" />
+      <video src="video.mp4"></video>
+      <audio><source src="audio.mp3" /></audio>
+      <ul>
+        <li>first</li>
+        <li>second <strong>item</strong></li>
+      </ul>
+      <table>
+        <tr><th>Name</th><th>Type</th></tr>
+        <tr><td>Cover</td><td>Image</td></tr>
+      </table>
+    </main>
+  `);
+
+  eq(root.toBlocks(), [
+    {
+      type: "text",
+      value: "Hello inline text",
+    },
+    {
+      type: "text",
+      value: "Paragraph bold text",
+    },
+    {
+      type: "image",
+      path: "image.png",
+    },
+    {
+      type: "video",
+      path: "video.mp4",
+    },
+    {
+      type: "audio",
+      path: "audio.mp3",
+    },
+    {
+      type: "list",
+      value: ["first", "second item"],
+    },
+    {
+      type: "table",
+      value: [
+        ["Name", "Type"],
+        ["Cover", "Image"],
+      ],
+    },
+  ]);
+});
+
+test("ast: toBlocks separate text by block elements", () => {
+  const root = new Ast(
+    `<section>before <span>inline</span><div>inside div</div>after <b>inline</b><br />next</section>`,
+  );
+
+  eq(root.toBlocks(), [
+    {
+      type: "text",
+      value: "before inline",
+    },
+    {
+      type: "text",
+      value: "inside div",
+    },
+    {
+      type: "text",
+      value: "after inline",
+    },
+    {
+      type: "text",
+      value: "next",
+    },
+  ]);
+});

@@ -278,6 +278,47 @@ function sleep(ms) {
 }
 
 // src/class/ast.ts
+var BLOCK_ELEMENT_NAMES = /* @__PURE__ */ new Set([
+  "address",
+  "article",
+  "aside",
+  "blockquote",
+  "br",
+  "dd",
+  "details",
+  "dialog",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "header",
+  "hr",
+  "li",
+  "main",
+  "nav",
+  "ol",
+  "p",
+  "pre",
+  "section",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "tr",
+  "ul"
+]);
 function isWhitespace(char) {
   switch (char) {
     case " ":
@@ -1373,6 +1414,153 @@ var Ast = class _Ast {
       throw new Error(`Invalid ast type: ${type}`);
     };
     return fn(this);
+  }
+  toBlocks() {
+    const result = [];
+    let buffer = "";
+    const normalizeAstBlockText = (str) => {
+      return str.replace(/\s+/g, " ").trim();
+    };
+    const flushText = () => {
+      const value = normalizeAstBlockText(buffer);
+      if (value) {
+        result.push({
+          type: "text",
+          value
+        });
+      }
+      buffer = "";
+    };
+    const getSrc = (ast) => {
+      const src = ast.attributes.src;
+      return typeof src === "string" ? src : void 0;
+    };
+    const parseText = (ast) => {
+      if (ast.type !== "text") {
+        return false;
+      }
+      buffer += ast.value;
+      return true;
+    };
+    const parseImage = (ast) => {
+      const src = getSrc(ast);
+      if (ast.name !== "img" || !src) {
+        return false;
+      }
+      flushText();
+      result.push({
+        type: "image",
+        path: src
+      });
+      return true;
+    };
+    const parseVideo = (ast, ctx) => {
+      const src = getSrc(ast);
+      if (ast.name !== "video" && !(ast.name === "source" && ctx.mediaType === "video")) {
+        return false;
+      }
+      if (src) {
+        flushText();
+        result.push({
+          type: "video",
+          path: src
+        });
+        return true;
+      }
+      return false;
+    };
+    const parseAudio = (ast, ctx) => {
+      const src = getSrc(ast);
+      if (ast.name !== "audio" && !(ast.name === "source" && ctx.mediaType === "audio")) {
+        return false;
+      }
+      if (src) {
+        flushText();
+        result.push({
+          type: "audio",
+          path: src
+        });
+        return true;
+      }
+      return false;
+    };
+    const parseList = (ast) => {
+      if (ast.name !== "ul" && ast.name !== "ol") {
+        return false;
+      }
+      flushText();
+      result.push({
+        type: "list",
+        value: ast.children.filter((child) => child.name === "li").map((child) => normalizeAstBlockText(child.getText()))
+      });
+      return true;
+    };
+    const parseTable = (ast) => {
+      if (ast.name !== "table") {
+        return false;
+      }
+      const value = [];
+      ast._walk((node) => {
+        if (node.name !== "tr") {
+          return;
+        }
+        value.push(
+          node.children.filter((child) => child.name === "th" || child.name === "td").map((child) => normalizeAstBlockText(child.getText()))
+        );
+        return "skip";
+      });
+      flushText();
+      result.push({
+        type: "table",
+        value
+      });
+      return true;
+    };
+    const walkChildren = (ast, ctx) => {
+      for (const child of ast.children) {
+        fn(child, ctx);
+      }
+    };
+    const fn = (ast, ctx = {}) => {
+      if (parseText(ast)) {
+        return;
+      }
+      if (ast.type !== "element" && ast.type !== "root") {
+        return;
+      }
+      if (ast.type === "root") {
+        walkChildren(ast, ctx);
+        return;
+      }
+      if (parseImage(ast)) {
+        return;
+      }
+      if (parseVideo(ast, ctx)) {
+        return;
+      }
+      if (parseAudio(ast, ctx)) {
+        return;
+      }
+      if (parseList(ast)) {
+        return;
+      }
+      if (parseTable(ast)) {
+        return;
+      }
+      const isBlock = BLOCK_ELEMENT_NAMES.has(ast.name);
+      if (isBlock) {
+        flushText();
+      }
+      walkChildren(ast, {
+        mediaType: ast.name === "video" || ast.name === "audio" ? ast.name : ctx.mediaType
+      });
+      if (isBlock) {
+        flushText();
+      }
+    };
+    fn(this);
+    flushText();
+    return result;
   }
 };
 
